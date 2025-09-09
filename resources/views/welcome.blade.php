@@ -158,7 +158,7 @@
       </h2>
       <div class="flex flex-col lg:flex-row max-w-6xl mx-auto">
         <div class="flex-1 lg:min-w-96 mb-6 lg:mb-0">
-          <img src="img/tentangteh.jpg" alt="Tentang Kami" class="w-full h-60 sm:h-80 object-cover rounded-xl" />
+          <img src="/assets/img/tentangwe.jpg" alt="Tentang Kami" class="w-full h-60 sm:h-80 object-cover rounded-xl" />
         </div>
         <div class="flex-1 lg:min-w-96 px-0 lg:px-8">
           <h3 class="text-2xl sm:text-3xl mb-4 text-text-dark">Kenapa memilih teh kami?</h3>
