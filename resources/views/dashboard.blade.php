@@ -164,15 +164,15 @@
         <div class="flex-1 lg:min-w-96 px-0 lg:px-8">
           <h3 class="text-2xl sm:text-3xl mb-4 text-text-dark">Kenapa memilih teh kami?</h3>
           <p class="mb-4 text-base sm:text-lg md:text-xl font-medium leading-relaxed text-text-dark">
-            MestaKara adalah kedai teh yang didirikan dengan cinta dan
-            dedikasi untuk menghadirkan pengalaman teh terbaik. Kami percaya
-            bahwa setiap tegukan teh dapat menciptakan kenangan indah yang akan
-            diingat selamanya.
+            MestaKara adalah penyedia wahana yang didirikan dengan cinta dan
+            dedikasi untuk menghadirkan pengalaman wahana terbaik. Kami percaya
+            bahwa setiap tawa dapat menciptakan kenangan indah yang akan
+            diinget selamanya.
           </p>
           <p class="mb-4 text-base sm:text-lg md:text-xl font-medium leading-relaxed text-text-dark">
-            Daun teh kami dipilih langsung dari perkebunan terbaik dan diolah
-            dengan teknik tradisional yang sempurna. Setiap cangkir teh yang kami
-            sajikan adalah hasil dari perpaduan tradisi dan kualitas premium.
+            Wahana kami didirikan langsung ditengah perkebunan terbaik dan ditata
+            dengan presisi yang sempurna. Setiap wahana yang kami
+            sediakan adalah hasil dari perpaduan tradisi dan kualitas premium.
           </p>
         </div>
       </div>
@@ -184,7 +184,7 @@
         <span class="text-primary">Promo</span> Kami
       </h2>
       <p class="text-center max-w-lg mx-auto font-medium leading-relaxed text-text-dark mb-12 sm:mb-20 text-base sm:text-lg">
-        Nikmati berbagai pilihan teh dan makanan pendamping yang lezat
+         Nikmati berbagai pilihan wahana dan rekreasi yang menyenangkan
       </p>
       
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6 max-w-6xl mx-auto">
@@ -232,7 +232,7 @@
               Mesta<span class="text-white">Kara</span>.
             </h3>
             <p class="max-w-xs text-base sm:text-lg opacity-90">
-              Menyajikan teh berkualitas tinggi dengan cita rasa yang tak terlupakan.
+              Menyajikan wahana menyenangkan dengan keseruan yang tak terlupakan.
             </p>
           </div>
           
@@ -242,7 +242,7 @@
             <div class="flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-8">
               <a href="#home" class="hover:text-gray-200 transition-colors duration-300 text-base sm:text-lg touch-manipulation text-center md:text-left">Home</a>
               <a href="#about" class="hover:text-gray-200 transition-colors duration-300 text-base sm:text-lg touch-manipulation text-center md:text-left">Tentang Kami</a>
-              <a href="#menu" class="hover:text-gray-200 transition-colors duration-300 text-base sm:text-lg touch-manipulation text-center md:text-left">Menu</a>
+              <a href="#menu" class="hover:text-gray-200 transition-colors duration-300 text-base sm:text-lg touch-manipulation text-center md:text-left">Prpmo</a>
             </div>
           </div>
           
