@@ -141,12 +141,13 @@
            Berlibur Dengan<span class="text-primary">Wahana</span>
         </h1>
         <p class="text-lg sm:text-xl md:text-2xl mt-4 leading-relaxed font-medium text-white max-w-3xl">
-          Nikmati secangkir Teh spesial di tempat kami yang nyaman dan
-          bersahabat. Kami menyajikan berbagai varian Teh berkualitas tinggi
-          yang akan memanjakan lidah Anda.
+          Mari Berlibur dan Nikmati Berbagai Wahana Seru di Agrowisata Gunung Mas
+          Bersama Keluarga Tercinta
+          Dengan Harga Tiket Masuk yang Terjangkau
+          dan Dapatkan Berbagai Promo Menarik Setiap Bulannya
         </p>
         <a href="#" class="cta inline-block mt-6 sm:mt-8 px-8 sm:px-12 py-3 sm:py-4 text-lg sm:text-xl text-white bg-primary rounded-lg hover:bg-yellow-500 transition-colors duration-300 touch-manipulation">
-          Beli Sekarang
+          Dapatkan Promo
         </a>
       </main>
     </section>
