@@ -105,7 +105,7 @@
           <span class="absolute left-0 bottom-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
         </a>
         <a href="#menu" class="text-black inline-block text-xl ml-0 px-4 hover:text-primary transition-all duration-500 relative group">
-          Menu
+          Promo
           <span class="absolute left-0 bottom-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
         </a>
       </div>
@@ -120,7 +120,7 @@
         <div class="flex flex-col px-4">
           <a href="#home" class="block mx-2 sm:mx-6 my-6 sm:my-8 py-4 text-2xl sm:text-3xl text-white border-b border-gray-700 transition-all duration-300 hover:text-primary hover:pl-4 touch-manipulation">Home</a>
           <a href="#about" class="block mx-2 sm:mx-6 my-6 sm:my-8 py-4 text-2xl sm:text-3xl text-white border-b border-gray-700 transition-all duration-300 hover:text-primary hover:pl-4 touch-manipulation">Tentang Kami</a>
-          <a href="#menu" class="block mx-2 sm:mx-6 my-6 sm:my-8 py-4 text-2xl sm:text-3xl text-white border-b border-gray-700 transition-all duration-300 hover:text-primary hover:pl-4 touch-manipulation">Menu</a>
+          <a href="#menu" class="block mx-2 sm:mx-6 my-6 sm:my-8 py-4 text-2xl sm:text-3xl text-white border-b border-gray-700 transition-all duration-300 hover:text-primary hover:pl-4 touch-manipulation">Promo</a>
         </div>
       </div>
 
@@ -178,10 +178,10 @@
       </div>
     </section>
 
-    <!-- Menu Section -->
+    <!-- Promo Section -->
     <section id="menu" class="py-16 sm:py-24 md:py-32 px-4 sm:px-7">
       <h2 class="text-center text-3xl sm:text-4xl mb-4 text-text-dark">
-        <span class="text-primary">Menu</span> Kami
+        <span class="text-primary">Promo</span> Kami
       </h2>
       <p class="text-center max-w-lg mx-auto font-medium leading-relaxed text-text-dark mb-12 sm:mb-20 text-base sm:text-lg">
         Nikmati berbagai pilihan teh dan makanan pendamping yang lezat
