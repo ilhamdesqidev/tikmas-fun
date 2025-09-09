@@ -6,6 +6,8 @@
     <title>Tiketmas - Selamat Datang</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Tambahkan di bagian <head> website Anda -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,300;0,400;0,600;0,700;1,700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/feather-icons"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -177,7 +179,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
                     <div class="feature-card p-6 rounded-xl">
                         <div class="w-16 h-16 bg-primary bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <i data-feather="mountain" class="w-8 h-8 text-green-dark"></i>
+                            <i class="fa-solid fa-mountain-sun" class="w-8 h-8 text-green-dark"></i>
                             <span class="icon-fallback">⛰️</span>
                         </div>
                         <h3 class="text-lg font-semibold text-text-dark mb-2">Pemandangan Indah</h3>
