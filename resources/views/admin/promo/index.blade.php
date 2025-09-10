@@ -111,6 +111,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @foreach($promos as $promo)
         <div class="card rounded-xl overflow-hidden {{ $promo->status != 'active' ? 'opacity-75' : '' }}">
+        <a href="{{ route('admin.promo.show', $promo->id) }}" class="card rounded-xl overflow-hidden {{ $promo->status != 'active' ? 'opacity-75' : '' }} block transition-transform duration-200 hover:scale-105">
             <div class="h-48 bg-cover bg-center" style="background-image: url('{{ $promo->image_url }}')"></div>
             <div class="p-6">
                 <div class="flex items-center justify-between mb-4">
