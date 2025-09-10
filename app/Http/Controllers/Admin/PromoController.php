@@ -52,6 +52,7 @@ class PromoController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'description' => 'required|string|max:1000',
+            'terms_conditions' => 'required|string|max:2000', // Validasi untuk syarat dan ketentuan
             'original_price' => 'required|numeric|min:0',
             'promo_price' => 'required|numeric|min:0|lt:original_price',
             'start_date' => 'required|date|after_or_equal:today',
@@ -79,6 +80,7 @@ class PromoController extends Controller
                 'name' => $request->name,
                 'image' => $imagePath,
                 'description' => $request->description,
+                'terms_conditions' => $request->terms_conditions, // Simpan syarat dan ketentuan
                 'original_price' => $request->original_price,
                 'promo_price' => $request->promo_price,
                 'discount_percent' => round($discountPercent),
@@ -118,6 +120,7 @@ class PromoController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'description' => 'required|string|max:1000',
+            'terms_conditions' => 'required|string|max:2000', // Validasi untuk syarat dan ketentuan
             'original_price' => 'required|numeric|min:0',
             'promo_price' => 'required|numeric|min:0|lt:original_price',
             'start_date' => 'required|date',
@@ -153,6 +156,7 @@ class PromoController extends Controller
             $promo->update([
                 'name' => $request->name,
                 'description' => $request->description,
+                'terms_conditions' => $request->terms_conditions, // Update syarat dan ketentuan
                 'original_price' => $request->original_price,
                 'promo_price' => $request->promo_price,
                 'discount_percent' => round($discountPercent),

@@ -13,6 +13,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('image')->nullable();
             $table->text('description');
+            $table->text('terms_conditions')->nullable();
             $table->decimal('original_price', 12, 2);
             $table->decimal('promo_price', 12, 2);
             $table->integer('discount_percent')->nullable();

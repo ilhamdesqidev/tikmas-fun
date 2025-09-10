@@ -13,6 +13,7 @@ class Promo extends Model
         'name',
         'image',
         'description',
+        'terms_conditions',
         'original_price',
         'promo_price',
         'discount_percent',

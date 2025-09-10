@@ -22,14 +22,7 @@
             <div class="card rounded-xl p-6">
                 <h2 class="text-2xl font-bold text-gray-900 mb-4">Syarat dan Ketentuan</h2>
                 <div class="prose max-w-none text-gray-700">
-                    <ul class="list-disc pl-5 space-y-2">
-                        <li>Promo hanya berlaku untuk pembelian online melalui website resmi</li>
-                        <li>Promo tidak dapat digabungkan dengan penawaran lainnya</li>
-                        <li>Pembayaran harus dilakukan dalam waktu 24 jam setelah pemesanan</li>
-                        <li>Pembatalan pemesanan dikenakan biaya administrasi 10% dari total harga</li>
-                        <li>Promo dapat berubah sewaktu-waktu tanpa pemberitahuan sebelumnya</li>
-                        <li>Perusahaan berhak menolak pemesanan yang tidak memenuhi syarat dan ketentuan</li>
-                    </ul>
+                    {!! nl2br(e($promo->terms_conditions)) !!}
                 </div>
             </div>
         </div>

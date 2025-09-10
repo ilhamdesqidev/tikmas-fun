@@ -67,6 +67,12 @@
                 <textarea name="description" rows="3" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">{{ old('description') }}</textarea>
             </div>
 
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Syarat dan Ketentuan *</label>
+                <textarea name="terms_conditions" rows="4" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">{{ old('terms_conditions') }}</textarea>
+                <p class="text-xs text-gray-500 mt-1">Gunakan bullet points atau penomoran untuk setiap poin</p>
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Harga Normal *</label>
