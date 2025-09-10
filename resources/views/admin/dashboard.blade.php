@@ -158,7 +158,7 @@
                 <p class="text-xs">Admin@gmail.com</p>
               </div>
               <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">Profile</a>
-              <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">Settings</a>
+              <a href="{{ route('admin.settings.general') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">Settings</a>
               <div class="border-t border-gray-200 mt-1"></div>
               <form action="{{ route('admin.logout') }}" method="POST" class="w-full">
                 @csrf
