@@ -57,8 +57,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('/{id}', [PromoController::class, 'update'])->name('update');
             Route::delete('/{id}', [PromoController::class, 'destroy'])->name('destroy');
             Route::post('/{id}/toggle-status', [PromoController::class, 'toggleStatus'])->name('toggle-status');
-            Route::get('/export/data', [PromoController::class, 'export'])->name('export');
-            Route::get('/statistics/data', [PromoController::class, 'statistics'])->name('statistics');
         });
         
         // Settings Routes
@@ -109,21 +107,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/customers', function () {
                 return view('admin.reports.customers');
             })->name('customers');
-        });
-        
-        // Help & Support Routes
-        Route::prefix('help')->name('help.')->group(function () {
-            Route::get('/', function () {
-                return view('admin.help.index');
-            })->name('index');
-            
-            Route::get('/faq', function () {
-                return view('admin.help.faq');
-            })->name('faq');
-            
-            Route::get('/contact', function () {
-                return view('admin.help.contact');
-            })->name('contact');
         });
         
         // Logout
