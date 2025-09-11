@@ -256,7 +256,7 @@
             </div>
             
             <div class="block w-full bg-primary text-black text-center font-semibold py-2 rounded-lg hover:bg-yellow-500 transition-colors duration-300">
-              Lihat Detail
+              Dapatkan Promo
             </div>
           </div>
         </a>
