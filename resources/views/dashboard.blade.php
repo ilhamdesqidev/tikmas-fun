@@ -82,6 +82,40 @@
         transform: translateX(100%);
         transition: transform 300ms ease-in-out;
       }
+      
+      /* Promo card styles */
+      .promo-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+      
+      .promo-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      }
+      
+      .discount-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #CFD916;
+        color: #000;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-weight: bold;
+        font-size: 14px;
+      }
+      
+      .featured-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: #ff4757;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-weight: bold;
+        font-size: 12px;
+      }
     </style>
   </head>
   <body class="font-poppins bg-white text-text-dark">
@@ -146,7 +180,7 @@
           Dengan Harga Tiket Masuk yang Terjangkau
           dan Dapatkan Berbagai Promo Menarik Setiap Bulannya
         </p>
-        <a href="#" class="cta inline-block mt-6 sm:mt-8 px-8 sm:px-12 py-3 sm:py-4 text-lg sm:text-xl text-white bg-primary rounded-lg hover:bg-yellow-500 transition-colors duration-300 touch-manipulation">
+        <a href="#menu" class="cta inline-block mt-6 sm:mt-8 px-8 sm:px-12 py-3 sm:py-4 text-lg sm:text-xl text-white bg-primary rounded-lg hover:bg-yellow-500 transition-colors duration-300 touch-manipulation">
           Dapatkan Promo
         </a>
       </main>
@@ -187,38 +221,56 @@
          Nikmati berbagai pilihan wahana dan rekreasi yang menyenangkan
       </p>
       
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6 max-w-6xl mx-auto">
-        <div class="text-center pb-8 sm:pb-16">
-          <img src="img/espresso.jpg" alt="Teh Earl Grey" class="rounded-full w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 object-cover mx-auto mb-3 sm:mb-4 menu-card-img" />
-          <h3 class="mt-2 sm:mt-4 mb-1 sm:mb-2 text-text-dark text-sm sm:text-base">- Earl Grey -</h3>
-          <p class="text-primary font-bold text-sm sm:text-base">IDR 15K</p>
+      @if($promos->count() > 0)
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          @foreach($promos as $promo)
+            <div class="bg-white rounded-xl overflow-hidden shadow-md promo-card relative">
+              @if($promo->featured)
+                <span class="featured-badge">Unggulan</span>
+              @endif
+              <span class="discount-badge">Diskon {{ $promo->discount_percent }}%</span>
+              
+              <div class="h-48 overflow-hidden">
+                <img src="{{ asset('storage/' . $promo->image) }}" alt="{{ $promo->name }}" class="w-full h-full object-cover">
+              </div>
+              
+              <div class="p-6">
+                <h3 class="text-xl font-bold mb-2 text-text-dark">{{ $promo->name }}</h3>
+                <p class="text-gray-600 mb-4">{{ Str::limit($promo->description, 100) }}</p>
+                
+                <div class="flex items-center justify-between mb-4">
+                  <div>
+                    <span class="text-gray-400 line-through text-sm">Rp {{ number_format($promo->original_price, 0, ',', '.') }}</span>
+                    <span class="text-primary font-bold text-xl block">Rp {{ number_format($promo->promo_price, 0, ',', '.') }}</span>
+                  </div>
+                  <span class="bg-primary text-black text-sm font-semibold px-3 py-1 rounded-full">
+                    {{ $promo->category }}
+                  </span>
+                </div>
+                
+                <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                  <span>Berlaku hingga: {{ \Carbon\Carbon::parse($promo->end_date)->format('d M Y') }}</span>
+                  @if($promo->quota)
+                    <span>Kuota: {{ $promo->quota }}</span>
+                  @endif
+                </div>
+                
+                <a href="#" class="block w-full bg-primary text-black text-center font-semibold py-2 rounded-lg hover:bg-yellow-500 transition-colors duration-300">
+                  Pesan Sekarang
+                </a>
+              </div>
+            </div>
+          @endforeach
         </div>
-        <div class="text-center pb-8 sm:pb-16">
-          <img src="img/cappuccino.jpg" alt="Teh Jasmine" class="rounded-full w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 object-cover mx-auto mb-3 sm:mb-4 menu-card-img" />
-          <h3 class="mt-2 sm:mt-4 mb-1 sm:mb-2 text-text-dark text-sm sm:text-base">- Jasmine -</h3>
-          <p class="text-primary font-bold text-sm sm:text-base">IDR 25K</p>
+      @else
+        <div class="text-center py-12">
+          <div class="inline-block p-4 bg-gray-100 rounded-full mb-4">
+            <i data-feather="tag" class="w-12 h-12 text-gray-400"></i>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-600 mb-2">Tidak ada promo saat ini</h3>
+          <p class="text-gray-500">Silakan kembali lagi nanti untuk melihat promo terbaru</p>
         </div>
-        <div class="text-center pb-8 sm:pb-16">
-          <img src="img/latte.jpg" alt="Green Tea Latte" class="rounded-full w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 object-cover mx-auto mb-3 sm:mb-4 menu-card-img" />
-          <h3 class="mt-2 sm:mt-4 mb-1 sm:mb-2 text-text-dark text-sm sm:text-base">- Green Tea Latte -</h3>
-          <p class="text-primary font-bold text-sm sm:text-base">IDR 22K</p>
-        </div>
-        <div class="text-center pb-8 sm:pb-16">
-          <img src="img/americano.jpg" alt="Oolong" class="rounded-full w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 object-cover mx-auto mb-3 sm:mb-4 menu-card-img" />
-          <h3 class="mt-2 sm:mt-4 mb-1 sm:mb-2 text-text-dark text-sm sm:text-base">- Oolong -</h3>
-          <p class="text-primary font-bold text-sm sm:text-base">IDR 18K</p>
-        </div>
-        <div class="text-center pb-8 sm:pb-16">
-          <img src="img/mocha.jpg" alt="Thai Tea" class="rounded-full w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 object-cover mx-auto mb-3 sm:mb-4 menu-card-img" />
-          <h3 class="mt-2 sm:mt-4 mb-1 sm:mb-2 text-text-dark text-sm sm:text-base">- Thai Tea -</h3>
-          <p class="text-primary font-bold text-sm sm:text-base">IDR 28K</p>
-        </div>
-        <div class="text-center pb-8 sm:pb-16">
-          <img src="img/crossaint.jpg" alt="Scone" class="rounded-full w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 object-cover mx-auto mb-3 sm:mb-4 menu-card-img" />
-          <h3 class="mt-2 sm:mt-4 mb-1 sm:mb-2 text-text-dark text-sm sm:text-base">- Tea Scone -</h3>
-          <p class="text-primary font-bold text-sm sm:text-base">IDR 12K</p>
-        </div>
-      </div>
+      @endif
     </section>
 
     <!-- Footer -->
@@ -242,7 +294,7 @@
             <div class="flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-8">
               <a href="#home" class="hover:text-gray-200 transition-colors duration-300 text-base sm:text-lg touch-manipulation text-center md:text-left">Home</a>
               <a href="#about" class="hover:text-gray-200 transition-colors duration-300 text-base sm:text-lg touch-manipulation text-center md:text-left">Tentang Kami</a>
-              <a href="#menu" class="hover:text-gray-200 transition-colors duration-300 text-base sm:text-lg touch-manipulation text-center md:text-left">Prpmo</a>
+              <a href="#menu" class="hover:text-gray-200 transition-colors duration-300 text-base sm:text-lg touch-manipulation text-center md:text-left">Promo</a>
             </div>
           </div>
           

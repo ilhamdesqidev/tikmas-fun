@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Promo extends Model
@@ -33,6 +34,7 @@ class Promo extends Model
         'promo_price' => 'decimal:2',
         'featured' => 'boolean',
     ];
+    
 
     // Scope untuk promo aktif
     public function scopeActive($query)
