@@ -261,16 +261,11 @@
                 <input type="tel" id="whatsapp-number" name="whatsapp_number" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" placeholder="Contoh: 081234567890" required>
               </div>
               
-              <!-- Cabang -->
+              <!-- Cabang (Fixed Value) -->
               <div>
-                <label for="branch" class="block text-sm font-medium text-gray-700 mb-1">Cabang <span class="text-red-500">*</span></label>
-                <select id="branch" name="branch" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" required>
-                  <option value="">Pilih Cabang</option>
-                  <option value="Agrowisata Gunung Mas">Agrowisata Gunung Mas</option>
-                  <option value="Puncak Bogor">Puncak Bogor</option>
-                  <option value="Lembang Bandung">Lembang Bandung</option>
-                  <option value="Cisarua">Cisarua</option>
-                </select>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Unit <span class="text-red-500">*</span></label>
+                <input type="text" value="Agrowisata Gunung Mas" class="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg" readonly>
+                <input type="hidden" id="branch" name="branch" value="Agrowisata Gunung Mas">
               </div>
               
               <!-- Tanggal Kunjungan -->
@@ -375,7 +370,7 @@
       feather.replace();
 
       // Generate order number function dengan urutan
-      let orderCounter = localStorage.getItem('orderCounter') || 1;
+      let orderCounter = 1;
       
       function generateOrderNumber() {
         const now = new Date();
@@ -386,9 +381,8 @@
         // Format counter dengan 2 digit (01, 02, ...)
         const sequentialNum = orderCounter.toString().padStart(2, '0');
         
-        // Increment counter dan simpan ke localStorage
+        // Increment counter
         orderCounter++;
-        localStorage.setItem('orderCounter', orderCounter);
         
         return `MK${year}${month}${day}${sequentialNum}`;
       }
@@ -415,8 +409,9 @@
       
       // Set min and max date for visit date based on promo period
       function setVisitDateRange() {
-        const startDate = new Date('{{ $promo->start_date }}');
-        const endDate = new Date('{{ $promo->end_date }}');
+        // Example dates - replace with actual Laravel variables
+        const startDate = new Date('2025-01-01');
+        const endDate = new Date('2025-12-31');
         
         // Format dates to YYYY-MM-DD for input[type="date"]
         const formatDate = (date) => {
@@ -505,7 +500,7 @@
         });
         
         // Prepare WhatsApp message
-        const message = `Halo, saya ingin memesan tiket:\n\nNo. Pemesanan: ${orderNumber}\nNama: ${customerName}\nNo. WhatsApp: ${whatsappNumber}\nCabang: ${branch}\nTanggal Kunjungan: ${formattedVisitDate}\nJumlah Tiket: ${quantity}\nTotal Harga: ${formatRupiah(totalPrice)}\n\nPromo: {{ $promo->name }}`;
+        const message = `Halo, saya ingin memesan tiket:\n\nNo. Pemesanan: ${orderNumber}\nNama: ${customerName}\nNo. WhatsApp: ${whatsappNumber}\nCabang: ${branch}\nTanggal Kunjungan: ${formattedVisitDate}\nJumlah Tiket: ${quantity}\nTotal Harga: ${formatRupiah(totalPrice)}\n\nPromo: Sample Promo`;
         const encodedMessage = encodeURIComponent(message);
         const whatsappURL = `https://wa.me/62${whatsappNumber.replace(/\D/g, '').substring(1)}?text=${encodedMessage}`;
         
