@@ -125,8 +125,9 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @foreach($promos as $promo)
         <div class="card rounded-xl overflow-hidden {{ $promo->status != 'active' ? 'opacity-75' : '' }}">
-        <a href="{{ route('admin.promo.show', $promo->id) }}" class="card rounded-xl overflow-hidden {{ $promo->status != 'active' ? 'opacity-75' : '' }} block transition-transform duration-200 hover:scale-105">
-            <div class="h-48 bg-cover bg-center" style="background-image: url('{{ $promo->image_url }}')"></div>
+            <a href="{{ route('admin.promo.show', $promo->id) }}" class="block">
+                <div class="h-48 bg-cover bg-center" style="background-image: url('{{ $promo->image_url }}')"></div>
+            </a>
             <div class="p-6">
                 <div class="flex items-center justify-between mb-4">
                     <span class="bg-primary bg-opacity-20 text-primary px-3 py-1 rounded-full text-sm font-medium">
@@ -138,7 +139,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                             </svg>
                         </a>
-                        <form action="{{ route('admin.promo.destroy', $promo->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus promo ini?')">
+                        <form action="{{ route('admin.promo.destroy', $promo->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus promo ini?')" class="inline">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all">
@@ -149,7 +150,10 @@
                         </form>
                     </div>
                 </div>
-                <h3 class="text-xl font-bold text-gray-900 mb-2">{{ $promo->name }}</h3>
+                
+                <a href="{{ route('admin.promo.show', $promo->id) }}" class="block hover:text-primary transition-colors">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">{{ $promo->name }}</h3>
+                </a>
                 <p class="text-gray-600 text-sm mb-4">{{ Str::limit($promo->description, 80) }}</p>
                 
                 <div class="flex items-center justify-between mb-4">
@@ -212,18 +216,27 @@
                     @endif
                 </div>
             </div>
-        </a>
         </div>
         @endforeach
     </div>
-@endsection
 
+
+    
+@endsection
 @section('extra-js')
 <script>
+    // Pastikan Feather icons ter-render
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof feather !== 'undefined') {
+            feather.replace();
+        }
+    });
+
     function deletePromo(id) {
         if (confirm('Apakah Anda yakin ingin menghapus promo ini?')) {
             document.getElementById('delete-form-' + id).submit();
         }
     }
 </script>
-@endsection
+
+

@@ -53,11 +53,11 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Kategori</label>
                     <select name="category" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
-                        <option value="weekend" {{ old('category') == 'weekend' ? 'selected' : '' }}>Weekend Special</option>
-                        <option value="student" {{ old('category') == 'student' ? 'selected' : '' }}>Student Discount</option>
-                        <option value="premium" {{ old('category') == 'premium' ? 'selected' : '' }}>Premium Package</option>
-                        <option value="early_bird" {{ old('category') == 'early_bird' ? 'selected' : '' }}>Early Bird</option>
-                        <option value="group" {{ old('category') == 'group' ? 'selected' : '' }}>Group Package</option>
+                        <option value="bulanan" {{ old('category') == 'bulanan' ? 'selected' : '' }}>promo bulanan</option>
+                        <option value="holiday" {{ old('category') == 'holiday' ? 'selected' : '' }}>promo holiday</option>
+                        <option value="birthday" {{ old('category') == 'birthday' ? 'selected' : '' }}>promo Birthday</option>
+                        <option value="nasional" {{ old('category') == 'nasional' ? 'selected' : '' }}>promo hari nasional</option>
+                        <option value="student" {{ old('category') == 'student' ? 'selected' : '' }}>promo student discount</option>
                     </select>
                 </div>
             </div>
@@ -207,4 +207,3 @@
         }
     });
 </script>
-@endsection
