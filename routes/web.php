@@ -4,8 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\AdminDashboardController;
-use App\Http\Controllers\Admin\PromoController;
+use App\Http\Controllers\Admin\PromoController as AdminPromoController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\PromoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,6 +25,8 @@ Route::get('/', function () {
 });
 
 Route::get('/', [DashboardController::class, 'index'])->name('home');
+
+Route::get('/promo/{id}', [PromoController::class, 'show'])->name('promo.show');
 
 // Admin Routes
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -47,14 +50,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         
         // Promo Management Routes
         Route::prefix('promo')->name('promo.')->group(function () {
-            Route::get('/', [PromoController::class, 'index'])->name('index');
-            Route::get('/create', [PromoController::class, 'create'])->name('create');
-            Route::post('/store', [PromoController::class, 'store'])->name('store');
-            Route::get('/{id}', [PromoController::class, 'show'])->name('show');
-            Route::get('/{id}/edit', [PromoController::class, 'edit'])->name('edit');
-            Route::put('/{id}', [PromoController::class, 'update'])->name('update');
-            Route::delete('/{id}', [PromoController::class, 'destroy'])->name('destroy');
-            Route::post('/{id}/toggle-status', [PromoController::class, 'toggleStatus'])->name('toggle-status');
+            Route::get('/', [AdminPromoController::class, 'index'])->name('index');
+            Route::get('/create', [AdminPromoController::class, 'create'])->name('create');
+            Route::post('/store', [AdminPromoController::class, 'store'])->name('store');
+            Route::get('/{id}', [AdminPromoController::class, 'show'])->name('show');
+            Route::get('/{id}/edit', [AdminPromoController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [AdminPromoController::class, 'update'])->name('update');
+            Route::delete('/{id}', [AdminPromoController::class, 'destroy'])->name('destroy');
+            Route::post('/{id}/toggle-status', [AdminPromoController::class, 'toggleStatus'])->name('toggle-status');
         });
         
         // Settings Routes
@@ -115,6 +118,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
 // API Routes untuk AJAX requests (jika diperlukan)
 Route::prefix('api/admin')->name('api.admin.')->middleware('admin')->group(function () {
     Route::get('/dashboard/stats', [AdminDashboardController::class, 'getDashboardStats']);
-    Route::get('/promo/quick-stats', [PromoController::class, 'getQuickStats']);
-    Route::post('/promo/{id}/duplicate', [PromoController::class, 'duplicate'])->name('promo.duplicate');
+    Route::get('/promo/quick-stats', [AdminPromoController::class, 'getQuickStats']);
+    Route::post('/promo/{id}/duplicate', [AdminPromoController::class, 'duplicate'])->name('promo.duplicate');
 });

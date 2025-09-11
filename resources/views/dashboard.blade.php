@@ -213,65 +213,65 @@
     </section>
 
     <!-- Promo Section -->
-    <section id="menu" class="py-16 sm:py-24 md:py-32 px-4 sm:px-7">
-      <h2 class="text-center text-3xl sm:text-4xl mb-4 text-text-dark">
-        <span class="text-primary">Promo</span> Kami
-      </h2>
-      <p class="text-center max-w-lg mx-auto font-medium leading-relaxed text-text-dark mb-12 sm:mb-20 text-base sm:text-lg">
-         Nikmati berbagai pilihan wahana dan rekreasi yang menyenangkan
-      </p>
-      
-      @if($promos->count() > 0)
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          @foreach($promos as $promo)
-            <div class="bg-white rounded-xl overflow-hidden shadow-md promo-card relative">
-              @if($promo->featured)
-                <span class="featured-badge">Unggulan</span>
-              @endif
-              <span class="discount-badge">Diskon {{ $promo->discount_percent }}%</span>
-              
-              <div class="h-48 overflow-hidden">
-                <img src="{{ asset('storage/' . $promo->image) }}" alt="{{ $promo->name }}" class="w-full h-full object-cover">
-              </div>
-              
-              <div class="p-6">
-                <h3 class="text-xl font-bold mb-2 text-text-dark">{{ $promo->name }}</h3>
-                <p class="text-gray-600 mb-4">{{ Str::limit($promo->description, 100) }}</p>
-                
-                <div class="flex items-center justify-between mb-4">
-                  <div>
-                    <span class="text-gray-400 line-through text-sm">Rp {{ number_format($promo->original_price, 0, ',', '.') }}</span>
-                    <span class="text-primary font-bold text-xl block">Rp {{ number_format($promo->promo_price, 0, ',', '.') }}</span>
-                  </div>
-                  <span class="bg-primary text-black text-sm font-semibold px-3 py-1 rounded-full">
-                    {{ $promo->category }}
-                  </span>
-                </div>
-                
-                <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
-                  <span>Berlaku hingga: {{ \Carbon\Carbon::parse($promo->end_date)->format('d M Y') }}</span>
-                  @if($promo->quota)
-                    <span>Kuota: {{ $promo->quota }}</span>
-                  @endif
-                </div>
-                
-                <a href="#" class="block w-full bg-primary text-black text-center font-semibold py-2 rounded-lg hover:bg-yellow-500 transition-colors duration-300">
-                  Pesan Sekarang
-                </a>
-              </div>
-            </div>
-          @endforeach
-        </div>
-      @else
-        <div class="text-center py-12">
-          <div class="inline-block p-4 bg-gray-100 rounded-full mb-4">
-            <i data-feather="tag" class="w-12 h-12 text-gray-400"></i>
+<section id="menu" class="py-16 sm:py-24 md:py-32 px-4 sm:px-7">
+  <h2 class="text-center text-3xl sm:text-4xl mb-4 text-text-dark">
+    <span class="text-primary">Promo</span> Kami
+  </h2>
+  <p class="text-center max-w-lg mx-auto font-medium leading-relaxed text-text-dark mb-12 sm:mb-20 text-base sm:text-lg">
+     Nikmati berbagai pilihan wahana dan rekreasi yang menyenangkan
+  </p>
+  
+  @if($promos->count() > 0)
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+      @foreach($promos as $promo)
+        <a href="{{ route('promo.show', $promo->id) }}" class="block bg-white rounded-xl overflow-hidden shadow-md promo-card relative hover:no-underline hover:shadow-lg transition-shadow duration-300">
+          @if($promo->featured)
+            <span class="featured-badge">Unggulan</span>
+          @endif
+          <span class="discount-badge">Diskon {{ $promo->discount_percent }}%</span>
+          
+          <div class="h-48 overflow-hidden">
+            <img src="{{ asset('storage/' . $promo->image) }}" alt="{{ $promo->name }}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
           </div>
-          <h3 class="text-xl font-semibold text-gray-600 mb-2">Tidak ada promo saat ini</h3>
-          <p class="text-gray-500">Silakan kembali lagi nanti untuk melihat promo terbaru</p>
-        </div>
-      @endif
-    </section>
+          
+          <div class="p-6">
+            <h3 class="text-xl font-bold mb-2 text-text-dark">{{ $promo->name }}</h3>
+            <p class="text-gray-600 mb-4">{{ Str::limit($promo->description, 100) }}</p>
+            
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <span class="text-gray-400 line-through text-sm">Rp {{ number_format($promo->original_price, 0, ',', '.') }}</span>
+                <span class="text-primary font-bold text-xl block">Rp {{ number_format($promo->promo_price, 0, ',', '.') }}</span>
+              </div>
+              <span class="bg-primary text-black text-sm font-semibold px-3 py-1 rounded-full">
+                {{ $promo->category }}
+              </span>
+            </div>
+            
+            <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+              <span>Berlaku hingga: {{ \Carbon\Carbon::parse($promo->end_date)->format('d M Y') }}</span>
+              @if($promo->quota)
+                <span>Kuota: {{ $promo->quota }}</span>
+              @endif
+            </div>
+            
+            <div class="block w-full bg-primary text-black text-center font-semibold py-2 rounded-lg hover:bg-yellow-500 transition-colors duration-300">
+              Lihat Detail
+            </div>
+          </div>
+        </a>
+      @endforeach
+    </div>
+  @else
+    <div class="text-center py-12">
+      <div class="inline-block p-4 bg-gray-100 rounded-full mb-4">
+        <i data-feather="tag" class="w-12 h-12 text-gray-400"></i>
+      </div>
+      <h3 class="text-xl font-semibold text-gray-600 mb-2">Tidak ada promo saat ini</h3>
+      <p class="text-gray-500">Silakan kembali lagi nanti untuk melihat promo terbaru</p>
+    </div>
+  @endif
+</section>
 
     <!-- Footer -->
     <footer class="bg-black text-white pt-8 sm:pt-12 pb-6 sm:pb-8">
