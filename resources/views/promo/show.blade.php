@@ -62,6 +62,15 @@
         border-radius: 12px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
       }
+      
+      /* Modal styles */
+      .modal {
+        transition: opacity 0.25s ease;
+      }
+      .modal-active {
+        overflow-x: hidden;
+        overflow-y: visible !important;
+      }
     </style>
   </head>
   <body class="font-poppins bg-gray-50 text-text-dark">
@@ -212,14 +221,97 @@
                 </a>
               </div>
             </div>
-            
-       
-              </div>
-            </div>
           </div>
         </div>
       </div>
     </main>
+
+    <!-- Modal Form Checkout -->
+    <div id="checkout-modal" class="modal fixed inset-0 w-full h-full flex items-center justify-center z-50 opacity-0 invisible transition-opacity duration-300">
+      <div class="modal-overlay absolute inset-0 bg-black opacity-50"></div>
+      
+      <div class="modal-container bg-white w-11/12 md:max-w-2xl mx-auto rounded-xl shadow-lg z-50 overflow-y-auto max-h-screen">
+        <div class="modal-content py-4 px-6">
+          <!-- Modal Header -->
+          <div class="flex justify-between items-center pb-3 border-b">
+            <h3 class="text-2xl font-bold text-text-dark">Form Pemesanan Tiket</h3>
+            <button id="modal-close" class="text-gray-500 hover:text-gray-700">
+              <i data-feather="x" class="w-6 h-6"></i>
+            </button>
+          </div>
+          
+          <!-- Modal Body -->
+          <div class="my-4">
+            <form id="checkout-form" class="space-y-4">
+              <!-- No Pemesanan (Auto-generated) -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">No. Pemesanan</label>
+                <input type="text" id="order-number" class="w-full px-4 py-2 bg-gray-100 rounded-lg" readonly>
+              </div>
+              
+              <!-- Nama Pemesan -->
+              <div>
+                <label for="customer-name" class="block text-sm font-medium text-gray-700 mb-1">Nama Pemesan <span class="text-red-500">*</span></label>
+                <input type="text" id="customer-name" name="customer_name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" required>
+              </div>
+              
+              <!-- No WhatsApp -->
+              <div>
+                <label for="whatsapp-number" class="block text-sm font-medium text-gray-700 mb-1">No. WhatsApp <span class="text-red-500">*</span></label>
+                <input type="tel" id="whatsapp-number" name="whatsapp_number" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" placeholder="Contoh: 081234567890" required>
+              </div>
+              
+              <!-- Cabang -->
+              <div>
+                <label for="branch" class="block text-sm font-medium text-gray-700 mb-1">Cabang <span class="text-red-500">*</span></label>
+                <select id="branch" name="branch" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" required>
+                  <option value="">Pilih Cabang</option>
+                  <option value="Agrowisata Gunung Mas">Agrowisata Gunung Mas</option>
+                  <option value="Puncak Bogor">Puncak Bogor</option>
+                  <option value="Lembang Bandung">Lembang Bandung</option>
+                  <option value="Cisarua">Cisarua</option>
+                </select>
+              </div>
+              
+              <!-- Tanggal Kunjungan -->
+              <div>
+                <label for="visit-date" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Kunjungan <span class="text-red-500">*</span></label>
+                <input type="date" id="visit-date" name="visit_date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" required>
+                <p class="text-xs text-gray-500 mt-1">Pilih tanggal antara {{ \Carbon\Carbon::parse($promo->start_date)->format('d M Y') }} - {{ \Carbon\Carbon::parse($promo->end_date)->format('d M Y') }}</p>
+              </div>
+              
+              <!-- Jumlah Tiket -->
+              <div>
+                <label for="ticket-quantity" class="block text-sm font-medium text-gray-700 mb-1">Jumlah Tiket <span class="text-red-500">*</span></label>
+                <input type="number" id="ticket-quantity" name="ticket_quantity" min="1" value="1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" required>
+              </div>
+              
+              <!-- Informasi Harga -->
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <div class="flex justify-between mb-2">
+                  <span class="text-gray-600">Harga per tiket:</span>
+                  <span class="font-medium" id="price-per-ticket">Rp {{ number_format($promo->promo_price, 0, ',', '.') }}</span>
+                </div>
+                <div class="flex justify-between font-bold text-lg">
+                  <span>Total Harga:</span>
+                  <span class="text-primary" id="total-price">Rp {{ number_format($promo->promo_price, 0, ',', '.') }}</span>
+                </div>
+              </div>
+            </form>
+          </div>
+          
+          <!-- Modal Footer -->
+          <div class="flex justify-end space-x-3 pt-4 border-t">
+            <button id="cancel-btn" class="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors">
+              Batal
+            </button>
+            <button id="submit-order" class="px-6 py-2 bg-primary text-black rounded-lg hover:bg-yellow-500 transition-colors font-semibold">
+              Beli Sekarang
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Footer -->
     <footer class="bg-black text-white pt-8 sm:pt-12 pb-6 sm:pb-8">
@@ -282,11 +374,149 @@
       // Initialize Feather icons
       feather.replace();
 
-      // Checkout button functionality
-      document.getElementById('checkout-btn')?.addEventListener('click', function() {
-        // Simulasi proses checkout
-        alert('Fitur checkout akan segera tersedia!');
-        // Di sini bisa diarahkan ke halaman checkout atau modal checkout
+      // Generate order number function dengan urutan
+      let orderCounter = localStorage.getItem('orderCounter') || 1;
+      
+      function generateOrderNumber() {
+        const now = new Date();
+        const year = now.getFullYear().toString().substr(-2);
+        const month = (now.getMonth() + 1).toString().padStart(2, '0');
+        const day = now.getDate().toString().padStart(2, '0');
+        
+        // Format counter dengan 2 digit (01, 02, ...)
+        const sequentialNum = orderCounter.toString().padStart(2, '0');
+        
+        // Increment counter dan simpan ke localStorage
+        orderCounter++;
+        localStorage.setItem('orderCounter', orderCounter);
+        
+        return `MK${year}${month}${day}${sequentialNum}`;
+      }
+
+      // Modal functionality
+      const modal = document.getElementById('checkout-modal');
+      const checkoutBtn = document.getElementById('checkout-btn');
+      const closeModalBtn = document.getElementById('modal-close');
+      const cancelBtn = document.getElementById('cancel-btn');
+      const orderNumberField = document.getElementById('order-number');
+      const ticketQuantity = document.getElementById('ticket-quantity');
+      const totalPriceElement = document.getElementById('total-price');
+      const visitDateField = document.getElementById('visit-date');
+      const pricePerTicket = {{ $promo->promo_price }};
+      
+      // Format number to Rupiah
+      function formatRupiah(amount) {
+        return new Intl.NumberFormat('id-ID', { 
+          style: 'currency', 
+          currency: 'IDR',
+          minimumFractionDigits: 0 
+        }).format(amount);
+      }
+      
+      // Set min and max date for visit date based on promo period
+      function setVisitDateRange() {
+        const startDate = new Date('{{ $promo->start_date }}');
+        const endDate = new Date('{{ $promo->end_date }}');
+        
+        // Format dates to YYYY-MM-DD for input[type="date"]
+        const formatDate = (date) => {
+          const year = date.getFullYear();
+          const month = (date.getMonth() + 1).toString().padStart(2, '0');
+          const day = date.getDate().toString().padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        };
+        
+        visitDateField.min = formatDate(startDate);
+        visitDateField.max = formatDate(endDate);
+        
+        // Set default value to today if within range, otherwise set to start date
+        const today = new Date();
+        if (today >= startDate && today <= endDate) {
+          visitDateField.value = formatDate(today);
+        } else {
+          visitDateField.value = formatDate(startDate);
+        }
+      }
+      
+      // Calculate total price
+      function calculateTotalPrice() {
+        const quantity = parseInt(ticketQuantity.value) || 1;
+        const total = quantity * pricePerTicket;
+        totalPriceElement.textContent = formatRupiah(total);
+      }
+      
+      // Show modal
+      function showModal() {
+        orderNumberField.value = generateOrderNumber();
+        setVisitDateRange();
+        calculateTotalPrice();
+        modal.classList.remove('invisible');
+        setTimeout(() => {
+          modal.classList.add('opacity-100');
+          document.body.classList.add('modal-active');
+        }, 10);
+      }
+      
+      // Hide modal
+      function hideModal() {
+        modal.classList.remove('opacity-100');
+        setTimeout(() => {
+          modal.classList.add('invisible');
+          document.body.classList.remove('modal-active');
+        }, 300);
+      }
+      
+      // Event listeners
+      checkoutBtn?.addEventListener('click', showModal);
+      closeModalBtn.addEventListener('click', hideModal);
+      cancelBtn.addEventListener('click', hideModal);
+      
+      // Close modal when clicking outside
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) hideModal();
+      });
+      
+      // Update total price when quantity changes
+      ticketQuantity.addEventListener('input', calculateTotalPrice);
+      
+      // Form submission
+      document.getElementById('submit-order').addEventListener('click', function() {
+        const form = document.getElementById('checkout-form');
+        if (!form.checkValidity()) {
+          form.reportValidity();
+          return;
+        }
+        
+        // Get form values
+        const orderNumber = orderNumberField.value;
+        const customerName = document.getElementById('customer-name').value;
+        const whatsappNumber = document.getElementById('whatsapp-number').value;
+        const branch = document.getElementById('branch').value;
+        const visitDate = visitDateField.value;
+        const quantity = ticketQuantity.value;
+        const totalPrice = quantity * pricePerTicket;
+        
+        // Format visit date to readable format
+        const formattedVisitDate = new Date(visitDate).toLocaleDateString('id-ID', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+        
+        // Prepare WhatsApp message
+        const message = `Halo, saya ingin memesan tiket:\n\nNo. Pemesanan: ${orderNumber}\nNama: ${customerName}\nNo. WhatsApp: ${whatsappNumber}\nCabang: ${branch}\nTanggal Kunjungan: ${formattedVisitDate}\nJumlah Tiket: ${quantity}\nTotal Harga: ${formatRupiah(totalPrice)}\n\nPromo: {{ $promo->name }}`;
+        const encodedMessage = encodeURIComponent(message);
+        const whatsappURL = `https://wa.me/62${whatsappNumber.replace(/\D/g, '').substring(1)}?text=${encodedMessage}`;
+        
+        // Open WhatsApp
+        window.open(whatsappURL, '_blank');
+        
+        // Close modal
+        hideModal();
+        
+        // Show success message
+        alert('Pesanan berhasil dibuat! Silakan lanjutkan pembayaran melalui WhatsApp.');
       });
 
       // Smooth scrolling untuk anchor links
