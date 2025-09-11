@@ -95,7 +95,7 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="pt-20 pb-16 px-4 sm:px-7">
+    <main class="pt-24 pb-16 px-4 sm:px-7">
       <div class="max-w-6xl mx-auto">
         <!-- Breadcrumb -->
         <nav class="mb-6">
