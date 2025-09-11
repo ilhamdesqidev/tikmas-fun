@@ -196,7 +196,7 @@
           <img src="/assets/img/tentangwe.jpg" alt="Tentang Kami" class="w-full h-60 sm:h-80 object-cover rounded-xl" />
         </div>
         <div class="flex-1 lg:min-w-96 px-0 lg:px-8">
-          <h3 class="text-2xl sm:text-3xl mb-4 text-text-dark">Kenapa memilih teh kami?</h3>
+          <h3 class="text-2xl sm:text-3xl mb-4 text-text-dark">Kenapa memilih Wahana kami?</h3>
           <p class="mb-4 text-base sm:text-lg md:text-xl font-medium leading-relaxed text-text-dark">
             MestaKara adalah penyedia wahana yang didirikan dengan cinta dan
             dedikasi untuk menghadirkan pengalaman wahana terbaik. Kami percaya
