@@ -11,21 +11,21 @@ class Promo extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'name',
-        'image',
-        'description',
-        'terms_conditions',
-        'original_price',
-        'promo_price',
-        'discount_percent',
-        'start_date',
-        'end_date',
-        'status',
-        'quota',
-        'sold_count',
-        'category',
-        'featured'
-    ];
+    'name',
+    'image',
+    'description',
+    'terms_conditions',
+    'original_price',
+    'promo_price',
+    'discount_percent',
+    'start_date',
+    'end_date',
+    'status',
+    'quota',
+    'sold_count',
+    'category', // Pastikan ini ada
+    'featured'
+];
 
     protected $casts = [
         'start_date' => 'date',

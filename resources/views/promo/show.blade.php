@@ -71,6 +71,14 @@
         overflow-x: hidden;
         overflow-y: visible !important;
       }
+      
+      /* Error message style */
+      .error-message {
+        color: #e53e3e;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: none;
+      }
     </style>
   </head>
   <body class="font-poppins bg-gray-50 text-text-dark">
@@ -273,6 +281,7 @@
                 <label for="visit-date" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Kunjungan <span class="text-red-500">*</span></label>
                 <input type="date" id="visit-date" name="visit_date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" required>
                 <p class="text-xs text-gray-500 mt-1">Pilih tanggal antara {{ \Carbon\Carbon::parse($promo->start_date)->format('d M Y') }} - {{ \Carbon\Carbon::parse($promo->end_date)->format('d M Y') }}</p>
+                <p id="date-error" class="error-message">Tanggal yang dipilih harus dalam periode promo.</p>
               </div>
               
               <!-- Jumlah Tiket -->
@@ -396,6 +405,7 @@
       const ticketQuantity = document.getElementById('ticket-quantity');
       const totalPriceElement = document.getElementById('total-price');
       const visitDateField = document.getElementById('visit-date');
+      const dateError = document.getElementById('date-error');
       const pricePerTicket = {{ $promo->promo_price }};
       
       // Format number to Rupiah
@@ -409,9 +419,9 @@
       
       // Set min and max date for visit date based on promo period
       function setVisitDateRange() {
-        // Example dates - replace with actual Laravel variables
-        const startDate = new Date('2025-01-01');
-        const endDate = new Date('2025-12-31');
+        // Get promo dates from PHP variables
+        const startDate = new Date('{{ $promo->start_date }}');
+        const endDate = new Date('{{ $promo->end_date }}');
         
         // Format dates to YYYY-MM-DD for input[type="date"]
         const formatDate = (date) => {
@@ -421,6 +431,7 @@
           return `${year}-${month}-${day}`;
         };
         
+        // Set min and max attributes
         visitDateField.min = formatDate(startDate);
         visitDateField.max = formatDate(endDate);
         
@@ -430,6 +441,26 @@
           visitDateField.value = formatDate(today);
         } else {
           visitDateField.value = formatDate(startDate);
+        }
+      }
+      
+      // Validate selected date is within promo period
+      function validateVisitDate() {
+        const selectedDate = new Date(visitDateField.value);
+        const startDate = new Date('{{ $promo->start_date }}');
+        const endDate = new Date('{{ $promo->end_date }}');
+        
+        // Reset end of day for endDate to include the entire last day
+        endDate.setHours(23, 59, 59, 999);
+        
+        if (selectedDate < startDate || selectedDate > endDate) {
+          dateError.style.display = 'block';
+          visitDateField.classList.add('border-red-500');
+          return false;
+        } else {
+          dateError.style.display = 'none';
+          visitDateField.classList.remove('border-red-500');
+          return true;
         }
       }
       
@@ -474,9 +505,18 @@
       // Update total price when quantity changes
       ticketQuantity.addEventListener('input', calculateTotalPrice);
       
+      // Validate date when changed
+      visitDateField.addEventListener('change', validateVisitDate);
+      
       // Form submission
       document.getElementById('submit-order').addEventListener('click', function() {
         const form = document.getElementById('checkout-form');
+        
+        // Validate date first
+        if (!validateVisitDate()) {
+          return;
+        }
+        
         if (!form.checkValidity()) {
           form.reportValidity();
           return;
@@ -500,7 +540,7 @@
         });
         
         // Prepare WhatsApp message
-        const message = `Halo, saya ingin memesan tiket:\n\nNo. Pemesanan: ${orderNumber}\nNama: ${customerName}\nNo. WhatsApp: ${whatsappNumber}\nCabang: ${branch}\nTanggal Kunjungan: ${formattedVisitDate}\nJumlah Tiket: ${quantity}\nTotal Harga: ${formatRupiah(totalPrice)}\n\nPromo: Sample Promo`;
+        const message = `Halo, saya ingin memesan tiket:\n\nNo. Pemesanan: ${orderNumber}\nNama: ${customerName}\nNo. WhatsApp: ${whatsappNumber}\nCabang: ${branch}\nTanggal Kunjungan: ${formattedVisitDate}\nJumlah Tiket: ${quantity}\nTotal Harga: ${formatRupiah(totalPrice)}\n\nPromo: {{ $promo->name }}`;
         const encodedMessage = encodeURIComponent(message);
         const whatsappURL = `https://wa.me/62${whatsappNumber.replace(/\D/g, '').substring(1)}?text=${encodedMessage}`;
         

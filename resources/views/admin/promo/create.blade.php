@@ -40,7 +40,7 @@
                         <label for="imageInput" class="cursor-pointer px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200 text-sm">
                             Pilih Gambar
                         </label>
-                        <p class="text-xs text-gray-500 mt-2">Format: JPEG, PNG, JPG, GIF<br>Maksimal: 2MB</p>
+                        <p class="text-xs text-gray-500 mt-2">Format: JPEG, PNG, JPG, GIF<br>Maksimal: 10MB</p>
                     </div>
                 </div>
             </div>
@@ -51,15 +51,15 @@
                     <input type="text" name="name" value="{{ old('name') }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Kategori</label>
-                    <select name="category" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
-                        <option value="bulanan" {{ old('category') == 'bulanan' ? 'selected' : '' }}>promo bulanan</option>
-                        <option value="holiday" {{ old('category') == 'holiday' ? 'selected' : '' }}>promo holiday</option>
-                        <option value="birthday" {{ old('category') == 'birthday' ? 'selected' : '' }}>promo Birthday</option>
-                        <option value="nasional" {{ old('category') == 'nasional' ? 'selected' : '' }}>promo hari nasional</option>
-                        <option value="student" {{ old('category') == 'student' ? 'selected' : '' }}>promo student discount</option>
-                    </select>
-                </div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Kategori</label>
+                <select name="category" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <option value="bulanan" {{ old('category', $promo->category ?? '') == 'bulanan' ? 'selected' : '' }}>promo bulanan</option>
+                    <option value="holiday" {{ old('category', $promo->category ?? '') == 'holiday' ? 'selected' : '' }}>promo holiday</option>
+                    <option value="birthday" {{ old('category', $promo->category ?? '') == 'birthday' ? 'selected' : '' }}>promo Birthday</option>
+                    <option value="nasional" {{ old('category', $promo->category ?? '') == 'nasional' ? 'selected' : '' }}>promo hari nasional</option>
+                    <option value="student" {{ old('category', $promo->category ?? '') == 'student' ? 'selected' : '' }}>promo student discount</option>
+                </select>
+            </div>
             </div>
 
             <div>
