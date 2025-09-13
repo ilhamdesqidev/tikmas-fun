@@ -235,87 +235,102 @@
     </main>
 
     <!-- Modal Form Checkout -->
-    <div id="checkout-modal" class="modal fixed inset-0 w-full h-full flex items-center justify-center z-50 opacity-0 invisible transition-opacity duration-300">
-      <div class="modal-overlay absolute inset-0 bg-black opacity-50"></div>
+<div id="checkout-modal" class="modal fixed inset-0 w-full h-full flex items-center justify-center z-50 opacity-0 invisible transition-opacity duration-300">
+  <div class="modal-overlay absolute inset-0 bg-black opacity-50"></div>
+  
+  <div class="modal-container bg-white w-11/12 md:max-w-2xl mx-auto rounded-xl shadow-lg z-50 overflow-y-auto max-h-screen">
+    <div class="modal-content py-4 px-6">
+      <!-- Modal Header -->
+      <div class="flex justify-between items-center pb-3 border-b">
+        <h3 class="text-2xl font-bold text-text-dark">Form Pemesanan Tiket</h3>
+        <button id="modal-close" class="text-gray-500 hover:text-gray-700">
+          <i data-feather="x" class="w-6 h-6"></i>
+        </button>
+      </div>
       
-      <div class="modal-container bg-white w-11/12 md:max-w-2xl mx-auto rounded-xl shadow-lg z-50 overflow-y-auto max-h-screen">
-        <div class="modal-content py-4 px-6">
-          <!-- Modal Header -->
-          <div class="flex justify-between items-center pb-3 border-b">
-            <h3 class="text-2xl font-bold text-text-dark">Form Pemesanan Tiket</h3>
-            <button id="modal-close" class="text-gray-500 hover:text-gray-700">
-              <i data-feather="x" class="w-6 h-6"></i>
-            </button>
-          </div>
-          
-          <!-- Modal Body -->
-          <div class="my-4">
-            <form id="checkout-form" class="space-y-4">
+      <!-- Modal Body -->
+      <div class="my-4">
+        <!-- PERBAIKAN: Form memiliki action dan method -->
+          <form id="checkout-form" action="{{ route('checkout.process', $promo->id) }}" method="POST" class="space-y-4">
+              @csrf
+              <!-- ... field form lainnya ... -->
+              
               <!-- No Pemesanan (Auto-generated) -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">No. Pemesanan</label>
-                <input type="text" id="order-number" class="w-full px-4 py-2 bg-gray-100 rounded-lg" readonly>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">No. Pemesanan</label>
+                  <input type="text" id="order-number" class="w-full px-4 py-2 bg-gray-100 rounded-lg" readonly>
               </div>
               
               <!-- Nama Pemesan -->
               <div>
-                <label for="customer-name" class="block text-sm font-medium text-gray-700 mb-1">Nama Pemesan <span class="text-red-500">*</span></label>
-                <input type="text" id="customer-name" name="customer_name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" required>
+                  <label for="customer-name" class="block text-sm font-medium text-gray-700 mb-1">Nama Pemesan <span class="text-red-500">*</span></label>
+                  <input type="text" id="customer-name" name="customer_name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" required>
               </div>
               
               <!-- No WhatsApp -->
               <div>
-                <label for="whatsapp-number" class="block text-sm font-medium text-gray-700 mb-1">No. WhatsApp <span class="text-red-500">*</span></label>
-                <input type="tel" id="whatsapp-number" name="whatsapp_number" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" placeholder="Contoh: 081234567890" required>
+                  <label for="whatsapp-number" class="block text-sm font-medium text-gray-700 mb-1">No. WhatsApp <span class="text-red-500">*</span></label>
+                  <input type="tel" id="whatsapp-number" name="whatsapp_number" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" placeholder="Contoh: 081234567890" required>
               </div>
               
               <!-- Cabang (Fixed Value) -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Unit <span class="text-red-500">*</span></label>
-                <input type="text" value="Agrowisata Gunung Mas" class="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg" readonly>
-                <input type="hidden" id="branch" name="branch" value="Agrowisata Gunung Mas">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Unit <span class="text-red-500">*</span></label>
+                  <input type="text" value="Agrowisata Gunung Mas" class="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg" readonly>
+                  <input type="hidden" id="branch" name="branch" value="Agrowisata Gunung Mas">
               </div>
               
               <!-- Tanggal Kunjungan -->
               <div>
-                <label for="visit-date" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Kunjungan <span class="text-red-500">*</span></label>
-                <input type="date" id="visit-date" name="visit_date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" required>
-                <p class="text-xs text-gray-500 mt-1">Pilih tanggal antara {{ \Carbon\Carbon::parse($promo->start_date)->format('d M Y') }} - {{ \Carbon\Carbon::parse($promo->end_date)->format('d M Y') }}</p>
-                <p id="date-error" class="error-message">Tanggal yang dipilih harus dalam periode promo.</p>
+                  <label for="visit-date" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Kunjungan <span class="text-red-500">*</span></label>
+                  <input type="date" id="visit-date" name="visit_date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" required>
+                  <p class="text-xs text-gray-500 mt-1">Pilih tanggal antara {{ \Carbon\Carbon::parse($promo->start_date)->format('d M Y') }} - {{ \Carbon\Carbon::parse($promo->end_date)->format('d M Y') }}</p>
+                  <p id="date-error" class="error-message">Tanggal yang dipilih harus dalam periode promo.</p>
               </div>
               
               <!-- Jumlah Tiket -->
               <div>
-                <label for="ticket-quantity" class="block text-sm font-medium text-gray-700 mb-1">Jumlah Tiket <span class="text-red-500">*</span></label>
-                <input type="number" id="ticket-quantity" name="ticket_quantity" min="1" value="1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" required>
+                  <label for="ticket-quantity" class="block text-sm font-medium text-gray-700 mb-1">Jumlah Tiket <span class="text-red-500">*</span></label>
+                  <input type="number" id="ticket-quantity" name="ticket_quantity" min="1" value="1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" required>
               </div>
               
               <!-- Informasi Harga -->
               <div class="bg-gray-50 p-4 rounded-lg">
-                <div class="flex justify-between mb-2">
-                  <span class="text-gray-600">Harga per tiket:</span>
-                  <span class="font-medium" id="price-per-ticket">Rp {{ number_format($promo->promo_price, 0, ',', '.') }}</span>
-                </div>
-                <div class="flex justify-between font-bold text-lg">
-                  <span>Total Harga:</span>
-                  <span class="text-primary" id="total-price">Rp {{ number_format($promo->promo_price, 0, ',', '.') }}</span>
-                </div>
+                  <div class="flex justify-between mb-2">
+                      <span class="text-gray-600">Harga per tiket:</span>
+                      <span class="font-medium" id="price-per-ticket">Rp {{ number_format($promo->promo_price, 0, ',', '.') }}</span>
+                  </div>
+                  <div class="flex justify-between font-bold text-lg">
+                      <span>Total Harga:</span>
+                      <span class="text-primary" id="total-price">Rp {{ number_format($promo->promo_price, 0, ',', '.') }}</span>
+                  </div>
               </div>
-            </form>
-          </div>
-          
-          <!-- Modal Footer -->
-          <div class="flex justify-end space-x-3 pt-4 border-t">
-            <button id="cancel-btn" class="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors">
-              Batal
-            </button>
-            <button id="submit-order" class="px-6 py-2 bg-primary text-black rounded-lg hover:bg-yellow-500 transition-colors font-semibold">
-              Beli Sekarang
-            </button>
-          </div>
-        </div>
+              
+              <!-- Modal Footer -->
+              <div class="flex justify-end space-x-3 pt-4 border-t">
+                  <button id="cancel-btn" type="button" class="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors">
+                      Batal
+                  </button>
+                  <button type="submit" class="px-6 py-2 bg-primary text-black rounded-lg hover:bg-yellow-500 transition-colors font-semibold">
+                      Beli Sekarang
+                  </button>
+              </div>
+          </form>
+      </div>
+      
+      <!-- Modal Footer -->
+      <div class="flex justify-end space-x-3 pt-4 border-t">
+        <button id="cancel-btn" class="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors">
+          Batal
+        </button>
+        <!-- PERBAIKAN: Tombol submit form -->
+        <button type="submit" form="checkout-form" class="px-6 py-2 bg-primary text-black rounded-lg hover:bg-yellow-500 transition-colors font-semibold">
+    Beli Sekarang
+</button>
       </div>
     </div>
+  </div>
+</div>
 
     <!-- Footer -->
     <footer class="bg-black text-white pt-8 sm:pt-12 pb-6 sm:pb-8">
@@ -508,51 +523,16 @@
       // Validate date when changed
       visitDateField.addEventListener('change', validateVisitDate);
       
-      // Form submission
-      document.getElementById('submit-order').addEventListener('click', function() {
-        const form = document.getElementById('checkout-form');
-        
+      document.getElementById('checkout-form').addEventListener('submit', function(e) {
         // Validate date first
         if (!validateVisitDate()) {
-          return;
+            e.preventDefault();
+            alert('Tanggal kunjungan tidak valid. Silakan pilih tanggal dalam periode promo.');
+            return;
         }
         
-        if (!form.checkValidity()) {
-          form.reportValidity();
-          return;
-        }
-        
-        // Get form values
-        const orderNumber = orderNumberField.value;
-        const customerName = document.getElementById('customer-name').value;
-        const whatsappNumber = document.getElementById('whatsapp-number').value;
-        const branch = document.getElementById('branch').value;
-        const visitDate = visitDateField.value;
-        const quantity = ticketQuantity.value;
-        const totalPrice = quantity * pricePerTicket;
-        
-        // Format visit date to readable format
-        const formattedVisitDate = new Date(visitDate).toLocaleDateString('id-ID', {
-          weekday: 'long',
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        });
-        
-        // Prepare WhatsApp message
-        const message = `Halo, saya ingin memesan tiket:\n\nNo. Pemesanan: ${orderNumber}\nNama: ${customerName}\nNo. WhatsApp: ${whatsappNumber}\nCabang: ${branch}\nTanggal Kunjungan: ${formattedVisitDate}\nJumlah Tiket: ${quantity}\nTotal Harga: ${formatRupiah(totalPrice)}\n\nPromo: {{ $promo->name }}`;
-        const encodedMessage = encodeURIComponent(message);
-        const whatsappURL = `https://wa.me/62${whatsappNumber.replace(/\D/g, '').substring(1)}?text=${encodedMessage}`;
-        
-        // Open WhatsApp
-        window.open(whatsappURL, '_blank');
-        
-        // Close modal
-        hideModal();
-        
-        // Show success message
-        alert('Pesanan berhasil dibuat! Silakan lanjutkan pembayaran melalui WhatsApp.');
-      });
+        // Form akan di-submit secara normal ke action yang telah ditentukan
+    });
 
       // Smooth scrolling untuk anchor links
       document.querySelectorAll('a[href^="#"]').forEach(anchor => {
