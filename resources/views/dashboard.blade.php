@@ -82,39 +82,186 @@
         transform: translateX(100%);
         transition: transform 300ms ease-in-out;
       }
-      
-      /* Promo card styles */
+
+      /* PROMO SLIDER STYLES */
+      .promo-slider {
+        overflow: hidden;
+        position: relative;
+        padding: 2rem 0;
+      }
+
+      .promo-container {
+        display: flex;
+        transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        gap: 2rem;
+        padding: 0 50%;
+      }
+
       .promo-card {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        min-width: 350px;
+        max-width: 350px;
+        background: white;
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        transition: all 0.5s ease;
+        position: relative;
+        transform: scale(0.8);
+        filter: blur(3px);
+        opacity: 0.6;
+        cursor: pointer;
+        text-decoration: none;
+        color: inherit;
       }
-      
+
+      .promo-card.active {
+        transform: scale(1);
+        filter: blur(0px);
+        opacity: 1;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      }
+
       .promo-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        transform: scale(0.85);
+        text-decoration: none;
+        color: inherit;
       }
-      
+
+      .promo-card.active:hover {
+        transform: scale(1.02);
+      }
+
       .discount-badge {
         position: absolute;
-        top: 10px;
-        right: 10px;
+        top: 15px;
+        right: 15px;
         background: #CFD916;
         color: #000;
-        padding: 4px 8px;
-        border-radius: 4px;
+        padding: 6px 12px;
+        border-radius: 6px;
         font-weight: bold;
         font-size: 14px;
+        z-index: 10;
       }
-      
+
       .featured-badge {
         position: absolute;
-        top: 10px;
-        left: 10px;
+        top: 15px;
+        left: 15px;
         background: #ff4757;
         color: white;
-        padding: 4px 8px;
-        border-radius: 4px;
+        padding: 6px 12px;
+        border-radius: 6px;
         font-weight: bold;
         font-size: 12px;
+        z-index: 10;
+      }
+
+      .promo-image {
+        height: 250px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .promo-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+      }
+
+      .promo-card:hover .promo-image img {
+        transform: scale(1.05);
+      }
+
+      .nav-button {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255, 255, 255, 0.9);
+        border: 2px solid #CFD916;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        z-index: 20;
+        backdrop-filter: blur(10px);
+      }
+
+      .nav-button:hover {
+        background: #CFD916;
+        color: #000;
+        transform: translateY(-50%) scale(1.1);
+      }
+
+      .nav-button.prev {
+        left: 20px;
+      }
+
+      .nav-button.next {
+        right: 20px;
+      }
+
+      .nav-button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .nav-button:disabled:hover {
+        background: rgba(255, 255, 255, 0.9);
+        color: inherit;
+        transform: translateY(-50%) scale(1);
+      }
+
+      /* Dots indicator */
+      .dots-container {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 2rem;
+      }
+
+      .dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #ddd;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .dot.active {
+        background: #CFD916;
+        transform: scale(1.2);
+      }
+
+      /* Mobile responsive */
+      @media (max-width: 768px) {
+        .promo-card {
+          min-width: 280px;
+          max-width: 280px;
+        }
+
+        .nav-button {
+          width: 40px;
+          height: 40px;
+        }
+
+        .nav-button.prev {
+          left: 10px;
+        }
+
+        .nav-button.next {
+          right: 10px;
+        }
+
+        .promo-container {
+          padding: 0 40%;
+        }
       }
     </style>
   </head>
@@ -212,7 +359,7 @@
       </div>
     </section>
 
-    <!-- Promo Section -->
+    <!-- Promo Section dengan Slider -->
 <section id="menu" class="py-16 sm:py-24 md:py-32 px-4 sm:px-7">
   <h2 class="text-center text-3xl sm:text-4xl mb-4 text-text-dark">
     <span class="text-primary">Promo</span> Kami
@@ -222,45 +369,62 @@
   </p>
   
   @if($promos->count() > 0)
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-      @foreach($promos as $promo)
-        <a href="{{ route('promo.show', $promo->id) }}" class="block bg-white rounded-xl overflow-hidden shadow-md promo-card relative hover:no-underline hover:shadow-lg transition-shadow duration-300">
-          @if($promo->featured)
-            <span class="featured-badge">Unggulan</span>
-          @endif
-          <span class="discount-badge">Diskon {{ $promo->discount_percent }}%</span>
-          
-          <div class="h-48 overflow-hidden">
-            <img src="{{ asset('storage/' . $promo->image) }}" alt="{{ $promo->name }}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
-          </div>
-          
-          <div class="p-6">
-            <h3 class="text-xl font-bold mb-2 text-text-dark">{{ $promo->name }}</h3>
-            <p class="text-gray-600 mb-4">{{ Str::limit($promo->description, 100) }}</p>
+    <div class="relative promo-slider">
+      <!-- Navigation Buttons -->
+      <button class="nav-button prev" id="prevBtn">
+        <i data-feather="chevron-left" class="w-6 h-6"></i>
+      </button>
+      
+      <button class="nav-button next" id="nextBtn">
+        <i data-feather="chevron-right" class="w-6 h-6"></i>
+      </button>
+
+      <!-- Slider Container -->
+      <div class="promo-container" id="promoContainer">
+        @foreach($promos as $promo)
+          <a href="{{ route('promo.show', $promo->id) }}" class="promo-card block hover:no-underline">
+            @if($promo->featured)
+              <span class="featured-badge">Unggulan</span>
+            @endif
+            <span class="discount-badge">Diskon {{ $promo->discount_percent }}%</span>
             
-            <div class="flex items-center justify-between mb-4">
-              <div>
-                <span class="text-gray-400 line-through text-sm">Rp {{ number_format($promo->original_price, 0, ',', '.') }}</span>
-                <span class="text-primary font-bold text-xl block">Rp {{ number_format($promo->promo_price, 0, ',', '.') }}</span>
+            <div class="promo-image">
+              <img src="{{ asset('storage/' . $promo->image) }}" alt="{{ $promo->name }}" loading="lazy">
+            </div>
+            
+            <div class="p-6">
+              <h3 class="text-xl font-bold mb-2 text-text-dark">{{ $promo->name }}</h3>
+              <p class="text-gray-600 mb-4">{{ Str::limit($promo->description, 100) }}</p>
+              
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <span class="text-gray-400 line-through text-sm">Rp {{ number_format($promo->original_price, 0, ',', '.') }}</span>
+                  <span class="text-primary font-bold text-xl block">Rp {{ number_format($promo->promo_price, 0, ',', '.') }}</span>
+                </div>
+                <span class="bg-primary text-black text-sm font-semibold px-3 py-1 rounded-full">
+                  {{ $promo->category }}
+                </span>
               </div>
-              <span class="bg-primary text-black text-sm font-semibold px-3 py-1 rounded-full">
-                {{ $promo->category }}
-              </span>
+              
+              <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                <span>Berlaku hingga: {{ \Carbon\Carbon::parse($promo->end_date)->format('d M Y') }}</span>
+                @if($promo->quota)
+                  <span>Kuota: {{ $promo->quota }}</span>
+                @endif
+              </div>
+              
+              <div class="w-full bg-primary text-black text-center font-semibold py-3 rounded-lg hover:bg-yellow-500 transition-colors duration-300">
+                Dapatkan Promo
+              </div>
             </div>
-            
-            <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
-              <span>Berlaku hingga: {{ \Carbon\Carbon::parse($promo->end_date)->format('d M Y') }}</span>
-              @if($promo->quota)
-                <span>Kuota: {{ $promo->quota }}</span>
-              @endif
-            </div>
-            
-            <div class="block w-full bg-primary text-black text-center font-semibold py-2 rounded-lg hover:bg-yellow-500 transition-colors duration-300">
-              Dapatkan Promo
-            </div>
-          </div>
-        </a>
-      @endforeach
+          </a>
+        @endforeach
+      </div>
+
+      <!-- Dots Indicator -->
+      <div class="dots-container" id="dotsContainer">
+        <!-- Dots akan di-generate otomatis oleh JavaScript -->
+      </div>
     </div>
   @else
     <div class="text-center py-12">
@@ -368,13 +532,11 @@
         openMobileMenu();
       });
 
-      // Touch-friendly close button
       closeMenu.addEventListener('click', (e) => {
         e.stopPropagation();
         closeMobileMenu();
       });
 
-      // Touch event for close button
       closeMenu.addEventListener('touchend', (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -383,7 +545,6 @@
 
       overlay.addEventListener('click', closeMobileMenu);
 
-      // Close mobile menu when clicking outside
       document.addEventListener('click', (e) => {
         const isClickInsideNav = e.target.closest('#mobile-nav') !== null;
         const isClickOnMenuIcon = e.target.closest('#menu-icon') !== null;
@@ -393,7 +554,7 @@
         }
       });
 
-      // Improved smooth scrolling for navigation links with offset
+      // Smooth scrolling for navigation links with offset
       document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
           e.preventDefault();
@@ -401,14 +562,10 @@
           const target = document.querySelector(targetId);
 
           if (target) {
-            // Close mobile menu
             closeMobileMenu();
-
-            // Calculate offset based on navbar height
             const navbarHeight = document.querySelector('nav').offsetHeight;
             const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - navbarHeight;
 
-            // Smooth scroll to target position with offset
             window.scrollTo({
               top: targetPosition,
               behavior: 'smooth'
@@ -416,9 +573,7 @@
           }
         });
 
-        // Touch events for better mobile experience
         anchor.addEventListener('touchend', function (e) {
-          // Prevent double-tap zoom on mobile
           e.preventDefault();
           this.click();
         });
@@ -438,18 +593,13 @@
 
       // Handle orientation change
       window.addEventListener('orientationchange', function() {
-        // Close menu on orientation change to prevent layout issues
         setTimeout(() => {
           if (isMenuOpen) {
             closeMobileMenu();
           }
-          // Re-initialize icons after orientation change
           feather.replace();
         }, 100);
       });
-
-      // Re-initialize Feather icons after DOM manipulation
-      feather.replace();
 
       // Optimize scroll performance
       let ticking = false;
@@ -476,6 +626,162 @@
       }
 
       window.addEventListener('scroll', requestTick);
+
+      // PROMO SLIDER FUNCTIONALITY - DINAMIS BERDASARKAN DATA DATABASE
+      class PromoSlider {
+        constructor() {
+          this.container = document.getElementById('promoContainer');
+          this.cards = this.container.querySelectorAll('.promo-card');
+          this.prevBtn = document.getElementById('prevBtn');
+          this.nextBtn = document.getElementById('nextBtn');
+          this.dotsContainer = document.getElementById('dotsContainer');
+          
+          this.currentIndex = 0;
+          this.cardWidth = window.innerWidth < 768 ? 312 : 382; // card width + gap
+          this.totalCards = this.cards.length;
+          
+          // Jika tidak ada card promo, sembunyikan slider
+          if (this.totalCards === 0) {
+            document.querySelector('.promo-slider').style.display = 'none';
+            return;
+          }
+          
+          this.init();
+        }
+        
+        init() {
+          this.createDots();
+          this.updateSlider();
+          this.bindEvents();
+          this.autoPlay();
+          this.handleResize();
+        }
+        
+        createDots() {
+          this.dotsContainer.innerHTML = '';
+          for (let i = 0; i < this.totalCards; i++) {
+            const dot = document.createElement('div');
+            dot.className = `dot ${i === 0 ? 'active' : ''}`;
+            dot.setAttribute('data-slide', i);
+            dot.addEventListener('click', () => this.goToSlide(i));
+            this.dotsContainer.appendChild(dot);
+          }
+          this.dots = this.dotsContainer.querySelectorAll('.dot');
+        }
+        
+        bindEvents() {
+          this.prevBtn.addEventListener('click', () => this.prevSlide());
+          this.nextBtn.addEventListener('click', () => this.nextSlide());
+          
+          // Touch events for mobile swipe
+          let startX = 0;
+          let currentX = 0;
+          let isDragging = false;
+          
+          this.container.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            isDragging = true;
+            this.pauseAutoPlay();
+          });
+          
+          this.container.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            currentX = e.touches[0].clientX;
+          });
+          
+          this.container.addEventListener('touchend', () => {
+            if (!isDragging) return;
+            isDragging = false;
+            
+            const diffX = startX - currentX;
+            if (Math.abs(diffX) > 50) {
+              if (diffX > 0) {
+                this.nextSlide();
+              } else {
+                this.prevSlide();
+              }
+            }
+            this.resumeAutoPlay();
+          });
+          
+          // Pause autoplay on hover
+          this.container.addEventListener('mouseenter', () => this.pauseAutoPlay());
+          this.container.addEventListener('mouseleave', () => this.resumeAutoPlay());
+        }
+        
+        handleResize() {
+          window.addEventListener('resize', () => {
+            this.cardWidth = window.innerWidth < 768 ? 312 : 382;
+            this.updateSlider();
+          });
+        }
+        
+        updateSlider() {
+          const translateX = -this.currentIndex * this.cardWidth;
+          this.container.style.transform = `translateX(${translateX}px)`;
+          
+          // Update active card
+          this.cards.forEach((card, index) => {
+            card.classList.toggle('active', index === this.currentIndex);
+          });
+          
+          // Update dots
+          this.dots.forEach((dot, index) => {
+            dot.classList.toggle('active', index === this.currentIndex);
+          });
+          
+          // Update navigation buttons
+          this.prevBtn.disabled = this.currentIndex === 0;
+          this.nextBtn.disabled = this.currentIndex === this.totalCards - 1;
+        }
+        
+        nextSlide() {
+          if (this.currentIndex < this.totalCards - 1) {
+            this.currentIndex++;
+            this.updateSlider();
+          }
+        }
+        
+        prevSlide() {
+          if (this.currentIndex > 0) {
+            this.currentIndex--;
+            this.updateSlider();
+          }
+        }
+        
+        goToSlide(index) {
+          this.currentIndex = index;
+          this.updateSlider();
+        }
+        
+        autoPlay() {
+          if (this.totalCards <= 1) return; // Tidak perlu autoplay jika hanya 1 card
+          
+          this.autoPlayInterval = setInterval(() => {
+            if (this.currentIndex === this.totalCards - 1) {
+              this.currentIndex = 0;
+            } else {
+              this.currentIndex++;
+            }
+            this.updateSlider();
+          }, 4000);
+        }
+        
+        pauseAutoPlay() {
+          clearInterval(this.autoPlayInterval);
+        }
+        
+        resumeAutoPlay() {
+          this.pauseAutoPlay();
+          this.autoPlay();
+        }
+      }
+      
+      // Initialize slider when DOM is loaded
+      document.addEventListener('DOMContentLoaded', () => {
+        new PromoSlider();
+        feather.replace();
+      });
     </script>
   </body>
 </html>
