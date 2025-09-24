@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\PromoController as AdminPromoController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\PromoController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\Admin\FacilityController;
 
 /*
 |--------------------------------------------------------------------------
@@ -38,6 +39,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         ->middleware('redirect.admin');
     
     Route::post('/login', [AdminAuthController::class, 'login']);
+
+    Route::prefix('facilities')->name('facilities.')->group(function () {
+        Route::get('/', [FacilityController::class, 'index'])->name('index');
+        Route::get('/create', [FacilityController::class, 'create'])->name('create');
+        Route::post('/', [FacilityController::class, 'store'])->name('store');
+        Route::get('/{facility}/edit', [FacilityController::class, 'edit'])->name('edit');
+        Route::put('/{facility}', [FacilityController::class, 'update'])->name('update');
+        Route::delete('/{facility}', [FacilityController::class, 'destroy'])->name('destroy');
+    });
 
     // Protected routes (harus login sebagai admin)
     Route::middleware('admin')->group(function () {
