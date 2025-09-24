@@ -106,7 +106,7 @@
                 },
                 onPending: function(result){
                     console.log("pending", result);
-                    window.location.href = "{{ route('payment.finish') }}?order_id={{ $order->order_number }}";
+                    window.location.href = "{{ route('payment.unfinish') }}?order_id={{ $order->order_number }}";
                 },
                 onError: function(result){
                     console.log("error", result);
