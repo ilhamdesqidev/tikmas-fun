@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice #{{ $invoiceNumber }} - MestaKara</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <style>
+        .font-poppins {
+            font-family: 'Poppins', sans-serif;
+        }
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background: white !important;
+            }
+            .print-area {
+                box-shadow: none !important;
+                border: 1px solid #ddd !important;
+            }
+            .hidden-print {
+                display: none !important;
+            }
+        }
+        .barcode-container {
+            background: white;
+            padding: 20px;
+            border: 2px dashed #e5e7eb;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="font-poppins bg-gray-50">
+    <div class="min-h-screen py-8 px-4">
+        <div class="max-w-2xl mx-auto print-area bg-white rounded-xl shadow-md overflow-hidden">
+            <!-- Header -->
+            <div class="bg-primary py-6 px-8 text-center">
+                <h1 class="text-3xl font-bold text-black">MestaKara</h1>
+                <p class="text-black mt-1">Wisata dan Hiburan Keluarga</p>
+                <p class="text-black text-sm mt-2">E-Ticket & Invoice</p>
+            </div>
+            
+            <!-- Invoice Info -->
+            <div class="p-8 border-b">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <h3 class="font-semibold text-gray-600">INVOICE #</h3>
+                        <p class="text-lg font-bold">{{ $invoiceNumber }}</p>
+                    </div>
+                    <div class="text-right">
+                        <h3 class="font-semibold text-gray-600">TANGGAL</h3>
+                        <p class="text-lg">{{ \Carbon\Carbon::parse($order->created_at)->format('d M Y') }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Customer Info -->
+            <div class="p-8 border-b">
+                <h3 class="font-semibold text-lg mb-4">Informasi Pemesan</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-gray-600">Nama Lengkap</p>
+                        <p class="font-medium">{{ $order->customer_name }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600">WhatsApp</p>
+                        <p class="font-medium">{{ $order->whatsapp_number }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600">Cabang</p>
+                        <p class="font-medium">{{ $order->branch ?? 'Cabang Utama' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600">Tanggal Kunjungan</p>
+                        <p class="font-medium">{{ \Carbon\Carbon::parse($order->visit_date)->format('d M Y') }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Order Details -->
+            <div class="p-8 border-b">
+                <h3 class="font-semibold text-lg mb-4">Detail Pesanan</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="bg-gray-50">
+                                <th class="text-left p-3">Item</th>
+                                <th class="text-center p-3">Qty</th>
+                                <th class="text-right p-3">Harga</th>
+                                <th class="text-right p-3">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b">
+                                <td class="p-3">
+                                    <p class="font-medium">{{ $promo->name }}</p>
+                                    <p class="text-sm text-gray-600">Tiket masuk {{ $promo->name }}</p>
+                                </td>
+                                <td class="text-center p-3">{{ $order->ticket_quantity }}</td>
+                                <td class="text-right p-3">Rp {{ number_format($promo->promo_price, 0, ',', '.') }}</td>
+                                <td class="text-right p-3">Rp {{ number_format($order->total_price, 0, ',', '.') }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Total -->
+            <div class="p-8 border-b">
+                <div class="flex justify-between items-center">
+                    <span class="text-lg font-semibold">Total Pembayaran</span>
+                    <span class="text-2xl font-bold text-green-600">Rp {{ number_format($order->total_price, 0, ',', '.') }}</span>
+                </div>
+                <div class="mt-2 text-right">
+                    <span class="text-sm text-gray-600">Status: </span>
+                    <span class="text-sm font-medium text-green-600">LUNAS</span>
+                </div>
+            </div>
+            
+           <!-- Barcode Section -->
+            <div class="p-8 flex flex-col items-center justify-center text-center">
+                <h3 class="font-semibold text-lg mb-4">Barcode E-Ticket</h3>
+                <p class="text-gray-600 mb-4">Tunjukkan barcode ini saat check-in</p>
+                
+                <div class="barcode-container flex justify-center">
+                    <svg id="barcode"></svg>
+                </div>
+                
+                <div class="mt-6 bg-yellow-50 p-4 rounded-lg max-w-md w-full text-left">
+                    <h4 class="font-semibold text-yellow-800">📋 Instruksi Kunjungan:</h4>
+                    <ul class="text-sm text-yellow-700 mt-2 list-disc list-inside">
+                        <li>Tunjukkan barcode kepada petugas untuk di-scan</li>
+                        <li>E-ticket hanya dapat digunakan sekali</li>
+                        <li>Valid untuk tanggal {{ \Carbon\Carbon::parse($order->visit_date)->format('d M Y') }}</li>
+                        <li>Jumlah pengunjung: {{ $order->ticket_quantity }} orang</li>
+                        <li>Harap datang tepat waktu sesuai jadwal kunjungan</li>
+                    </ul>
+                </div>
+            </div>
+
+            
+            <!-- Footer -->
+            <div class="bg-gray-50 p-8 text-center">
+                <p class="text-gray-600">Terima kasih telah memilih MestaKara</p>
+                <p class="text-sm text-gray-500 mt-2">Untuk pertanyaan, hubungi WhatsApp: +62 812-3456-7890</p>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="max-w-2xl mx-auto mt-6 no-print">
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="window.print()" 
+                        class="bg-primary text-black font-semibold py-3 px-6 rounded-lg hover:bg-yellow-500 transition-colors">
+                    🖨️ Cetak E-Ticket
+                </button>
+                <a href="{{ route('home') }}" 
+                   class="bg-gray-200 text-gray-800 font-semibold py-3 px-6 rounded-lg hover:bg-gray-300 transition-colors text-center">
+                    🏠 Kembali ke Beranda
+                </a>
+                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $order->whatsapp_number) }}?text=Halo,%20berikut%20e-ticket%20MestaKara%20saya:%0A%0A📄%20Invoice:%20{{ $invoiceNumber }}%0A👤%20Nama:%20{{ $order->customer_name }}%0A📅%20Tanggal:%20{{ \Carbon\Carbon::parse($order->visit_date)->format('d M Y') }}%0A👥%20Jumlah:%20{{ $order->ticket_quantity }}%20orang%0A%0ATerima%20kasih" 
+                   target="_blank"
+                   class="bg-green-500 text-white font-semibold py-3 px-6 rounded-lg hover:bg-green-600 transition-colors text-center">
+                    📱 Share via WhatsApp
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Generate barcode dengan data order number
+        JsBarcode("#barcode", "{{ $order->order_number }}", {
+            format: "CODE128",
+            width: 2,
+            height: 100,
+            displayValue: false, // Sembunyikan teks di bawah barcode
+            fontSize: 16,
+            margin: 10,
+            background: "transparent"
+        });
+        
+        // Auto print option (optional)
+        @if(request()->has('autoprint'))
+        window.onload = function() {
+            window.print();
+        }
+        @endif
+        
+        // Simulasi tampilan saat di-scan (hanya untuk demo)
+        document.addEventListener('DOMContentLoaded', function() {
+            const barcode = document.getElementById('barcode');
+            const scanInfo = document.getElementById('scan-info');
+            
+            // Untuk demo, tampilkan info scan saat barcode di-click
+            barcode.addEventListener('click', function() {
+                scanInfo.classList.toggle('hidden-print');
+            });
+        });
+    </script>
+</body>
+</html>

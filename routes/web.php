@@ -141,3 +141,4 @@ Route::get('/payment/error', [PaymentController::class, 'paymentError'])->name('
 Route::get('/payment/check-status', [PaymentController::class, 'checkStatus'])->name('payment.check-status');
 Route::post('/checkout/{id}', [PaymentController::class, 'processCheckout'])->name('checkout.process');
 Route::get('/payment/checkout/{order_id}', [PaymentController::class, 'showCheckout'])->name('payment.checkout');
+Route::get('/payment/invoice/{order_id}', [PaymentController::class, 'showInvoice'])->name('payment.invoice');
