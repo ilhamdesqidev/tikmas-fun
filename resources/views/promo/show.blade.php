@@ -317,17 +317,6 @@
               </div>
           </form>
       </div>
-      
-      <!-- Modal Footer -->
-      <div class="flex justify-end space-x-3 pt-4 border-t">
-        <button id="cancel-btn" class="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors">
-          Batal
-        </button>
-        <!-- PERBAIKAN: Tombol submit form -->
-        <button type="submit" form="checkout-form" class="px-6 py-2 bg-primary text-black rounded-lg hover:bg-yellow-500 transition-colors font-semibold">
-    Beli Sekarang
-</button>
-      </div>
     </div>
   </div>
 </div>

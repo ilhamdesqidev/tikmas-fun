@@ -153,6 +153,7 @@ class PaymentController extends Controller
             return view('payment.waiting', compact('order'));
         }
 
+        // Jika sukses, tampilkan halaman finish dengan countdown
         return view('payment.finish', compact('order'));
     }
 
@@ -408,4 +409,24 @@ class PaymentController extends Controller
             'message' => $available ? 'Tiket tersedia' : 'Tiket tidak tersedia untuk tanggal tersebut'
         ]);
     }
+
+    // Tambahkan method ini di PaymentController
+    public function showInvoice($order_id)
+    {
+        $order = Order::where('order_number', $order_id)->firstOrFail();
+        $promo = Promo::findOrFail($order->promo_id);
+
+        // Jika belum ada invoice number, generate sekali lalu simpan
+        if (!$order->invoice_number) {
+            $order->invoice_number = 'INV/' . date('Ymd') . '/' . Str::upper(Str::random(6));
+            $order->save();
+        }
+
+        return view('payment.invoice', [
+            'order' => $order,
+            'promo' => $promo,
+            'invoiceNumber' => $order->invoice_number, // selalu ambil dari DB
+        ]);
+    }
+
 }

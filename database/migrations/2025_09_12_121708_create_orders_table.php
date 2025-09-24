@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('order_number')->unique();
             $table->foreignId('promo_id')->constrained()->onDelete('cascade');
+            $table->string('invoice_number')->nullable()->unique();
             $table->string('customer_name');
             $table->string('whatsapp_number');
             $table->string('branch');
