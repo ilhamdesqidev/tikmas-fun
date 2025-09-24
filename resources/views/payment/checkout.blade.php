@@ -94,34 +94,33 @@
 
     <!-- Script Midtrans -->
     <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ $clientKey }}"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            @if($snapToken)
-                window.snap.embed("{{ $snapToken }}", {
-    embedId: "snap-container",
-    onSuccess: function(result){
-        console.log("success", result);
-        // Arahkan user ke halaman "terima kasih" (status ditentukan dari webhook)
-        window.location.href = "{{ route('payment.finish') }}?order_id={{ $order->order_number }}";
-    },
-    onPending: function(result){
-        console.log("pending", result);
-        window.location.href = "{{ route('payment.unfinish') }}?order_id={{ $order->order_number }}";
-    },
-    onError: function(result){
-        console.log("error", result);
-        window.location.href = "{{ route('payment.error') }}?order_id={{ $order->order_number }}";
-    },
-    onClose: function(){
-        console.log("customer closed the popup without finishing the payment");
-        alert("Anda menutup pembayaran sebelum selesai. Silakan coba lagi.");
-        // Jangan redirect ke finish, cukup stay di halaman
-    }
-});
-
-            @endif
-        });
-    </script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        @if($snapToken)
+            window.snap.embed("{{ $snapToken }}", {
+                embedId: "snap-container",
+                onSuccess: function(result){
+                    console.log("success", result);
+                    // Langsung redirect ke finish
+                    window.location.href = "{{ route('payment.finish') }}?order_id={{ $order->order_number }}";
+                },
+                onPending: function(result){
+                    console.log("pending", result);
+                    window.location.href = "{{ route('payment.finish') }}?order_id={{ $order->order_number }}";
+                },
+                onError: function(result){
+                    console.log("error", result);
+                    window.location.href = "{{ route('payment.error') }}?order_id={{ $order->order_number }}";
+                },
+                onClose: function(){
+                    console.log("customer closed the popup without finishing the payment");
+                    // PASTIKAN redirect ke unfinish dengan order_id
+                    window.location.href = "{{ route('payment.unfinish') }}?order_id={{ $order->order_number }}";
+                }
+            });
+        @endif
+    });
+</script>
     
     <!-- Feather Icons -->
     <script src="https://unpkg.com/feather-icons"></script>

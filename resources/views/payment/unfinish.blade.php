@@ -3,105 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pembayaran Belum Selesai</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        
-        .container {
-            background: white;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            text-align: center;
-            max-width: 500px;
-            width: 90%;
-        }
-        
-        .status-icon {
-            font-size: 4rem;
-            color: #ffc107;
-            margin-bottom: 1rem;
-        }
-        
-        h1 {
-            color: #333;
-            margin-bottom: 1rem;
-        }
-        
-        p {
-            color: #666;
-            margin-bottom: 1.5rem;
-            line-height: 1.6;
-        }
-        
-        .order-info {
-            background: #f8f9fa;
-            padding: 1rem;
-            border-radius: 5px;
-            margin: 1rem 0;
-            text-align: left;
-        }
-        
-        .btn-group {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            margin-top: 1.5rem;
-        }
-        
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 5px;
-            text-decoration: none;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        
-        .btn-primary {
-            background-color: #007bff;
-            color: white;
-        }
-        
-        .btn-secondary {
-            background-color: #6c757d;
-            color: white;
-        }
-        
-        .btn:hover {
-            opacity: 0.9;
-        }
-    </style>
+    <title>Pembayaran Belum Selesai - MestaKara</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <div class="container">
-        <div class="status-icon">🕐</div>
-        <h1>Pembayaran Belum Selesai</h1>
-        <p>Pembayaran Anda belum selesai diproses. Silakan selesaikan pembayaran atau coba lagi.</p>
-        
-        <div class="order-info">
-            <strong>Detail Pesanan:</strong><br>
-            No. Order: {{ $order->order_number }}<br>
-            Nama: {{ $order->customer_name }}<br>
-            Jumlah Tiket: {{ $order->ticket_quantity }}<br>
-            Total: Rp {{ number_format($order->total_price, 0, ',', '.') }}
+<body class="bg-gray-50 min-h-screen flex items-center justify-center">
+    <div class="bg-white p-8 rounded-lg shadow-md max-w-md w-full text-center">
+        <div class="text-yellow-500 mx-auto mb-4">
+            <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+            </svg>
         </div>
         
-        <div class="btn-group">
-            <a href="{{ route('payment.checkout', ['order_id' => $order->order_number]) }}" class="btn btn-primary">
+        <h1 class="text-2xl font-bold text-gray-800 mb-2">
+            @if($order->status === 'canceled')
+                Pembayaran Dibatalkan
+            @elseif($order->status === 'expired')
+                Pembayaran Kadaluarsa
+            @else
+                Pembayaran Belum Selesai
+            @endif
+        </h1>
+        
+        <p class="text-gray-600 mb-4">
+            @if($order->status === 'canceled')
+                Anda telah membatalkan pembayaran.
+            @elseif($order->status === 'expired')
+                Waktu pembayaran telah habis.
+            @else
+                Pembayaran Anda belum selesai diproses. Silakan selesaikan pembayaran atau coba lagi.
+            @endif
+        </p>
+        
+        <div class="bg-gray-50 p-4 rounded-lg text-left mb-4">
+            <p class="text-sm"><strong>No. Order:</strong> {{ $order->order_number }}</p>
+            <p class="text-sm"><strong>Status:</strong> 
+                <span class="font-bold 
+                    @if($order->status === 'canceled') text-red-600
+                    @elseif($order->status === 'expired') text-orange-600
+                    @else text-yellow-600 @endif">
+                    {{ $order->status }}
+                </span>
+            </p>
+            <p class="text-sm"><strong>Total:</strong> Rp {{ number_format($order->total_price, 0, ',', '.') }}</p>
+        </div>
+        
+        <div class="flex flex-col gap-3">
+            <a href="{{ route('payment.checkout', ['order_id' => $order->order_number]) }}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-center">
                 Coba Lagi
             </a>
-            <a href="{{ url('/') }}" class="btn btn-secondary">
+            <a href="{{ url('/') }}" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 text-center">
                 Kembali ke Beranda
             </a>
         </div>

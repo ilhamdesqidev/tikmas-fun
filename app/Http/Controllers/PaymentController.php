@@ -8,6 +8,8 @@ use App\Models\Order;
 use Illuminate\Support\Str;
 use Midtrans\Config;
 use Midtrans\Snap;
+use Midtrans\Notification;
+use Midtrans\Transaction;
 
 class PaymentController extends Controller
 {
@@ -70,6 +72,11 @@ class PaymentController extends Controller
         $order = Order::where('order_number', $order_id)->firstOrFail();
         $promo = Promo::findOrFail($order->promo_id);
 
+        // Jika order sudah sukses, redirect ke halaman finish
+        if ($order->status === 'success') {
+            return redirect()->route('payment.finish', ['order_id' => $order->order_number]);
+        }
+
         // Jika sudah ada snap token, gunakan yang ada
         if ($order->snap_token) {
             $snapToken = $order->snap_token;
@@ -92,7 +99,7 @@ class PaymentController extends Controller
             $customerDetails = [
                 'first_name' => $order->customer_name,
                 'phone'      => $order->whatsapp_number,
-                'email'      => 'customer@example.com', // Tambahkan email
+                'email'      => 'customer@example.com',
             ];
 
             $transactionData = [
@@ -108,23 +115,18 @@ class PaymentController extends Controller
                 ],
                 'callbacks' => [
                     'finish' => route('payment.finish'),
-                    'unfinish' => route('payment.unfinish'), // Tambahkan ini
-                    'error' => route('payment.error'), // Tambahkan ini
+                    'unfinish' => route('payment.unfinish'),
+                    'error' => route('payment.error'),
                 ],
             ];
 
-            // Default snapToken null
             $snapToken = null;
 
             try {
-                // Dapatkan Snap Token dari Midtrans
                 $snapToken = Snap::getSnapToken($transactionData);
-
-                // Simpan snap token ke order
                 $order->snap_token = $snapToken;
                 $order->save();
             } catch (\Exception $e) {
-                // Catat error ke log supaya bisa dicek
                 \Log::error('Midtrans error: ' . $e->getMessage());
                 return back()->with('error', 'Terjadi kesalahan saat memproses pembayaran. Silakan coba lagi.');
             }
@@ -139,64 +141,271 @@ class PaymentController extends Controller
     }
 
     public function paymentFinish(Request $request)
-{
-    $orderId = $request->order_id;
-    $order   = Order::where('order_number', $orderId)->firstOrFail();
+    {
+        $orderId = $request->order_id;
+        $order = Order::where('order_number', $orderId)->firstOrFail();
 
-    // Status order ditentukan dari webhook, bukan dari sini
-    return view('payment.finish', compact('order'));
-}
+        // Cek status langsung dari Midtrans API untuk memastikan
+        $this->checkPaymentStatus($order);
 
-public function paymentUnfinish(Request $request)
-{
-    $orderId = $request->order_id;
-    $order = Order::where('order_number', $orderId)->firstOrFail();
-    return view('payment.unfinish', compact('order'));
-}
-
-public function paymentError(Request $request)
-{
-    $orderId = $request->order_id;
-    $order = Order::where('order_number', $orderId)->firstOrFail();
-    return view('payment.error', compact('order'));
-}
-
-
-public function notificationHandler(Request $request)
-{
-    $notif = new \Midtrans\Notification();
-
-    $orderId = $notif->order_id;
-    $transactionStatus = $notif->transaction_status;
-    $fraudStatus = $notif->fraud_status;
-
-    $order = Order::where('order_number', $orderId)->first();
-
-    if (!$order) {
-        return response()->json(['message' => 'Order not found'], 404);
-    }
-
-    if ($transactionStatus == 'capture') {
-        if ($fraudStatus == 'challenge') {
-            $order->status = 'challenge';
-        } else if ($fraudStatus == 'accept') {
-            $order->status = 'paid';
+        // Jika status masih pending, arahkan ke waiting page
+        if ($order->status === 'pending') {
+            return view('payment.waiting', compact('order'));
         }
-    } else if ($transactionStatus == 'settlement') {
-        $order->status = 'paid';
-    } else if ($transactionStatus == 'pending') {
-        $order->status = 'pending';
-    } else if ($transactionStatus == 'deny') {
-        $order->status = 'denied';
-    } else if ($transactionStatus == 'expire') {
-        $order->status = 'expired';
-    } else if ($transactionStatus == 'cancel') {
-        $order->status = 'canceled';
+
+        return view('payment.finish', compact('order'));
     }
 
-    $order->save();
+       public function paymentUnfinish(Request $request)
+    {
+        $orderId = $request->order_id;
+        $order = Order::where('order_number', $orderId)->firstOrFail();
+        
+        \Log::info('Payment Unfinish Accessed', ['order_id' => $orderId, 'current_status' => $order->status]);
 
-    return response()->json(['message' => 'Notification processed']);
-}
+        // Cek status terbaru dari Midtrans API
+        $this->checkPaymentStatus($order);
 
+        \Log::info('After API Check', ['order_id' => $orderId, 'new_status' => $order->status]);
+
+        // Jika status masih pending, update menjadi canceled
+        if ($order->status === 'pending') {
+            $order->status = 'canceled';
+            $order->save();
+            \Log::info('Status updated to canceled', ['order_id' => $orderId]);
+        }
+
+        return view('payment.unfinish', compact('order'));
+    }
+
+   public function paymentError(Request $request)
+    {
+        $orderId = $request->order_id;
+        $order = Order::where('order_number', $orderId)->firstOrFail();
+        
+        \Log::info('Payment Error Accessed', ['order_id' => $orderId, 'current_status' => $order->status]);
+
+        // Cek status terbaru dari Midtrans API
+        $this->checkPaymentStatus($order);
+
+        \Log::info('After API Check', ['order_id' => $orderId, 'new_status' => $order->status]);
+
+        // Jika status masih pending, update menjadi denied
+        if ($order->status === 'pending') {
+            $order->status = 'denied';
+            $order->save();
+            \Log::info('Status updated to denied', ['order_id' => $orderId]);
+        }
+
+        return view('payment.error', compact('order'));
+    }
+    /**
+     * Check payment status directly from Midtrans API
+     */
+        private function checkPaymentStatus(Order $order)
+    {
+        try {
+            $status = Transaction::status($order->order_number);
+            
+            $transactionStatus = $status->transaction_status;
+            $fraudStatus = $status->fraud_status;
+
+            \Log::info('Midtrans Status Check: ', [
+                'order_id' => $order->order_number,
+                'transaction_status' => $transactionStatus,
+                'fraud_status' => $fraudStatus
+            ]);
+
+            $oldStatus = $order->status;
+
+            // Update status berdasarkan response Midtrans
+            if ($transactionStatus == 'capture') {
+                if ($fraudStatus == 'challenge') {
+                    $order->status = 'challenge';
+                } else {
+                    $order->status = 'success';
+                }
+            } else if ($transactionStatus == 'settlement') {
+                $order->status = 'success';
+            } else if ($transactionStatus == 'pending') {
+                $order->status = 'pending';
+            } else if ($transactionStatus == 'deny') {
+                $order->status = 'denied';
+            } else if ($transactionStatus == 'expire') {
+                $order->status = 'expired';
+            } else if ($transactionStatus == 'cancel') {
+                $order->status = 'canceled';
+            }
+
+            // Hanya save jika status berubah
+            if ($oldStatus !== $order->status) {
+                $order->save();
+                \Log::info('Order status updated from API: ' . $order->status);
+            }
+
+        } catch (\Exception $e) {
+            \Log::error('Error checking payment status: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * API endpoint untuk check status payment
+     */
+    public function checkStatus(Request $request)
+    {
+        $orderId = $request->order_id;
+        $order = Order::where('order_number', $orderId)->firstOrFail();
+
+        $this->checkPaymentStatus($order);
+
+        return response()->json([
+            'status' => $order->status,
+            'order_number' => $order->order_number
+        ]);
+    }
+
+    public function notificationHandler(Request $request)
+    {
+        try {
+            $notif = new Notification();
+            
+            $orderId = $notif->order_id;
+            $transactionStatus = $notif->transaction_status;
+            $fraudStatus = $notif->fraud_status;
+
+            \Log::info('Midtrans Notification Received: ', [
+                'order_id' => $orderId,
+                'transaction_status' => $transactionStatus,
+                'fraud_status' => $fraudStatus
+            ]);
+
+            $order = Order::where('order_number', $orderId)->first();
+
+            if (!$order) {
+                \Log::error('Order not found: ' . $orderId);
+                return response()->json(['message' => 'Order not found'], 404);
+            }
+
+            // Update status berdasarkan notifikasi Midtrans
+            if ($transactionStatus == 'capture') {
+                if ($fraudStatus == 'challenge') {
+                    $order->status = 'challenge';
+                } else {
+                    $order->status = 'success';
+                }
+            } else if ($transactionStatus == 'settlement') {
+                $order->status = 'success';
+            } else if ($transactionStatus == 'pending') {
+                $order->status = 'pending';
+            } else if ($transactionStatus == 'deny') {
+                $order->status = 'denied';
+            } else if ($transactionStatus == 'expire') {
+                $order->status = 'expired';
+            } else if ($transactionStatus == 'cancel') {
+                $order->status = 'canceled';
+            }
+
+            $order->save();
+
+            \Log::info('Order status updated from notification: ' . $order->status);
+
+            return response()->json(['message' => 'Notification processed successfully']);
+
+        } catch (\Exception $e) {
+            \Log::error('Notification handler error: ' . $e->getMessage());
+            return response()->json(['message' => 'Error processing notification'], 500);
+        }
+    }
+
+    // Method untuk menangani hasil pembayaran sukses (jika ada route yang memanggil ini)
+    public function paymentSuccess(Request $request)
+    {
+        $orderId = $request->order_id;
+        $order = Order::where('order_number', $orderId)->firstOrFail();
+
+        return view('payment.success', compact('order'));
+    }
+
+    // Method untuk menangani processing checkout (jika ada route yang memanggil ini)
+    public function processPayment(Request $request)
+    {
+        // Logic untuk memproses pembayaran
+        return response()->json(['message' => 'Payment processed']);
+    }
+
+    // Method untuk menangani cancel payment (jika ada route yang memanggil ini)
+    public function paymentCancel(Request $request)
+    {
+        $orderId = $request->order_id;
+        $order = Order::where('order_number', $orderId)->firstOrFail();
+
+        $order->status = 'canceled';
+        $order->save();
+
+        return view('payment.cancel', compact('order'));
+    }
+
+    // Method untuk menampilkan history pembayaran (jika diperlukan)
+    public function paymentHistory()
+    {
+        $orders = Order::where('customer_name', auth()->user()->name ?? '')
+                     ->orderBy('created_at', 'desc')
+                     ->get();
+
+        return view('payment.history', compact('orders'));
+    }
+
+    // Method untuk menampilkan detail pembayaran (jika diperlukan)
+    public function paymentDetail($order_id)
+    {
+        $order = Order::where('order_number', $order_id)->firstOrFail();
+        $promo = Promo::findOrFail($order->promo_id);
+
+        return view('payment.detail', compact('order', 'promo'));
+    }
+
+    // Method untuk export invoice (jika diperlukan)
+    public function exportInvoice($order_id)
+    {
+        $order = Order::where('order_number', $order_id)->firstOrFail();
+        $promo = Promo::findOrFail($order->promo_id);
+
+        // Logic untuk export invoice PDF
+        // return PDF::loadView('payment.invoice', compact('order', 'promo'))->download('invoice-'.$order_id.'.pdf');
+        
+        return view('payment.invoice', compact('order', 'promo'));
+    }
+
+    // Method untuk refund payment (jika diperlukan)
+    public function requestRefund(Request $request, $order_id)
+    {
+        $order = Order::where('order_number', $order_id)->firstOrFail();
+
+        // Validasi request refund
+        $request->validate([
+            'refund_reason' => 'required|string|max:500'
+        ]);
+
+        // Logic untuk proses refund
+        $order->refund_reason = $request->refund_reason;
+        $order->refund_requested_at = now();
+        $order->save();
+
+        return response()->json(['message' => 'Refund request submitted']);
+    }
+
+    // Method untuk mengecek ketersediaan tiket (jika diperlukan)
+    public function checkAvailability(Request $request)
+    {
+        $visitDate = $request->visit_date;
+        $quantity = $request->ticket_quantity;
+
+        // Logic untuk cek ketersediaan tiket
+        $available = true; // Ganti dengan logic sebenarnya
+
+        return response()->json([
+            'available' => $available,
+            'message' => $available ? 'Tiket tersedia' : 'Tiket tidak tersedia untuk tanggal tersebut'
+        ]);
+    }
 }

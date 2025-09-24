@@ -134,11 +134,10 @@ Route::prefix('api/admin')->name('api.admin.')->middleware('admin')->group(funct
 });
 
 // Payment routes
-//Route::post('/promo/{id}/checkout', [PaymentController::class, 'checkout'])->name('payment.checkout');
-Route::post('/payment/notification', [PaymentController::class, 'notificationHandler'])->name('payment.notification');// Route untuk menangani notifikasi dari Midtrans
-Route::get('/payment/finish', [PaymentController::class, 'paymentFinish'])->name('payment.finish');// Route untuk menangani hasil pembayaran sukses
-Route::get('/payment/unfinish', [PaymentController::class, 'paymentUnfinish'])->name('payment.unfinish');// Route untuk menangani hasil pembayaran belum selesai
-Route::get('/payment/error', [PaymentController::class, 'paymentError'])->name('payment.error');// Route untuk menangani hasil pembayaran error
-// Tambahkan route untuk processing checkout
-Route::post('/checkout/{id}', [PaymentController::class, 'processCheckout'])->name('checkout.process');// Route untuk menampilkan halaman checkout
-Route::get('/payment/checkout/{order_id}', [PaymentController::class, 'showCheckout'])->name('payment.checkout');// Route untuk menampilkan form checkout
+Route::post('/payment/notification', [PaymentController::class, 'notificationHandler'])->name('payment.notification');
+Route::get('/payment/finish', [PaymentController::class, 'paymentFinish'])->name('payment.finish');
+Route::get('/payment/unfinish', [PaymentController::class, 'paymentUnfinish'])->name('payment.unfinish');
+Route::get('/payment/error', [PaymentController::class, 'paymentError'])->name('payment.error');
+Route::get('/payment/check-status', [PaymentController::class, 'checkStatus'])->name('payment.check-status');
+Route::post('/checkout/{id}', [PaymentController::class, 'processCheckout'])->name('checkout.process');
+Route::get('/payment/checkout/{order_id}', [PaymentController::class, 'showCheckout'])->name('payment.checkout');
