@@ -95,7 +95,6 @@ class PaymentController extends Controller
                 'email'      => 'customer@example.com', // Tambahkan email
             ];
 
-            // PERBAIKAN: Tambahkan lebih banyak payment method
             $transactionData = [
                 'transaction_details' => $transactionDetails,
                 'item_details'        => $itemDetails,
@@ -109,6 +108,8 @@ class PaymentController extends Controller
                 ],
                 'callbacks' => [
                     'finish' => route('payment.finish'),
+                    'unfinish' => route('payment.unfinish'), // Tambahkan ini
+                    'error' => route('payment.error'), // Tambahkan ini
                 ],
             ];
 
@@ -138,10 +139,64 @@ class PaymentController extends Controller
     }
 
     public function paymentFinish(Request $request)
-    {
-        $orderId = $request->order_id;
-        $order   = Order::where('order_number', $orderId)->firstOrFail();
+{
+    $orderId = $request->order_id;
+    $order   = Order::where('order_number', $orderId)->firstOrFail();
 
-        return view('payment.finish', compact('order'));
+    // Status order ditentukan dari webhook, bukan dari sini
+    return view('payment.finish', compact('order'));
+}
+
+public function paymentUnfinish(Request $request)
+{
+    $orderId = $request->order_id;
+    $order = Order::where('order_number', $orderId)->firstOrFail();
+    return view('payment.unfinish', compact('order'));
+}
+
+public function paymentError(Request $request)
+{
+    $orderId = $request->order_id;
+    $order = Order::where('order_number', $orderId)->firstOrFail();
+    return view('payment.error', compact('order'));
+}
+
+
+public function notificationHandler(Request $request)
+{
+    $notif = new \Midtrans\Notification();
+
+    $orderId = $notif->order_id;
+    $transactionStatus = $notif->transaction_status;
+    $fraudStatus = $notif->fraud_status;
+
+    $order = Order::where('order_number', $orderId)->first();
+
+    if (!$order) {
+        return response()->json(['message' => 'Order not found'], 404);
     }
+
+    if ($transactionStatus == 'capture') {
+        if ($fraudStatus == 'challenge') {
+            $order->status = 'challenge';
+        } else if ($fraudStatus == 'accept') {
+            $order->status = 'paid';
+        }
+    } else if ($transactionStatus == 'settlement') {
+        $order->status = 'paid';
+    } else if ($transactionStatus == 'pending') {
+        $order->status = 'pending';
+    } else if ($transactionStatus == 'deny') {
+        $order->status = 'denied';
+    } else if ($transactionStatus == 'expire') {
+        $order->status = 'expired';
+    } else if ($transactionStatus == 'cancel') {
+        $order->status = 'canceled';
+    }
+
+    $order->save();
+
+    return response()->json(['message' => 'Notification processed']);
+}
+
 }

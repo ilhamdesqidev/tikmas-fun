@@ -15,7 +15,7 @@
     <!-- Navbar -->
     <nav class="w-full py-3 sm:py-5 px-4 sm:px-7 flex items-center justify-between bg-white border-b border-gray-400 fixed top-0 left-0 right-0 z-50" style="border-bottom: 1px solid #597336;">
       <a href="/" class="text-2xl sm:text-3xl font-bold text-black italic">
-        Mesta<span class="text-primary">Kara</span>.
+        Mesta<span class="text-primary text-yellow-200">Kara</span>.
       </a>
     </nav>
 
@@ -98,23 +98,27 @@
         document.addEventListener("DOMContentLoaded", function() {
             @if($snapToken)
                 window.snap.embed("{{ $snapToken }}", {
-                    embedId: "snap-container",
-                    onSuccess: function(result){
-                        console.log("success", result);
-                        window.location.href = "{{ route('payment.finish') }}?order_id={{ $order->order_number }}";
-                    },
-                    onPending: function(result){
-                        console.log("pending", result);
-                        window.location.href = "{{ route('payment.finish') }}?order_id={{ $order->order_number }}";
-                    },
-                    onError: function(result){
-                        console.log("error", result);
-                        window.location.href = "{{ route('payment.finish') }}?order_id={{ $order->order_number }}&status=error";
-                    },
-                    onClose: function(){
-                        console.log("customer closed the popup without finishing the payment");
-                    }
-                });
+    embedId: "snap-container",
+    onSuccess: function(result){
+        console.log("success", result);
+        // Arahkan user ke halaman "terima kasih" (status ditentukan dari webhook)
+        window.location.href = "{{ route('payment.finish') }}?order_id={{ $order->order_number }}";
+    },
+    onPending: function(result){
+        console.log("pending", result);
+        window.location.href = "{{ route('payment.unfinish') }}?order_id={{ $order->order_number }}";
+    },
+    onError: function(result){
+        console.log("error", result);
+        window.location.href = "{{ route('payment.error') }}?order_id={{ $order->order_number }}";
+    },
+    onClose: function(){
+        console.log("customer closed the popup without finishing the payment");
+        alert("Anda menutup pembayaran sebelum selesai. Silakan coba lagi.");
+        // Jangan redirect ke finish, cukup stay di halaman
+    }
+});
+
             @endif
         });
     </script>
