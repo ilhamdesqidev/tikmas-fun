@@ -269,9 +269,17 @@
               
               <!-- No WhatsApp -->
               <div>
-                  <label for="whatsapp-number" class="block text-sm font-medium text-gray-700 mb-1">No. WhatsApp <span class="text-red-500">*</span></label>
-                  <input type="tel" id="whatsapp-number" name="whatsapp_number" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" placeholder="Contoh: 081234567890" required>
+                <label for="whatsapp-number" class="block text-sm font-medium text-gray-700 mb-1">
+                  No. WhatsApp <span class="text-red-500">*</span>
+                </label>
+                <div class="flex">
+                  <!-- Input angka saja -->
+                  <input type="text" id="whatsapp-number" name="whatsapp_number"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-r-lg focus:ring-primary focus:border-primary"
+                    placeholder="081234567890" pattern="[0-9]+" inputmode="numeric" required>
+                </div>
               </div>
+
               
               <!-- Cabang (Fixed Value) -->
               <div>
@@ -288,11 +296,33 @@
                   <p id="date-error" class="error-message">Tanggal yang dipilih harus dalam periode promo.</p>
               </div>
               
-              <!-- Jumlah Tiket -->
-              <div>
-                  <label for="ticket-quantity" class="block text-sm font-medium text-gray-700 mb-1">Jumlah Tiket <span class="text-red-500">*</span></label>
-                  <input type="number" id="ticket-quantity" name="ticket_quantity" min="1" value="1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" required>
+              <div class="mb-3 flex items-center justify-between">
+                <!-- Label di kiri -->
+                <label for="ticket-quantity" class="text-sm font-medium text-gray-700">
+                  Jumlah Tiket <span class="text-red-500">*</span>
+                </label>
+
+                <!-- Counter di kanan -->
+                <div class="flex items-center gap-2">
+                  <button type="button" id="decrement" 
+                    class="w-9 h-9 flex items-center justify-center rounded-md bg-gray-200 hover:bg-gray-300 font-bold">-</button>
+
+                  <input 
+                    type="number" 
+                    id="ticket-quantity" 
+                    name="ticket_quantity" 
+                    min="1" 
+                    value="1" 
+                    class="w-14 text-center border rounded-md"
+                    required
+                  >
+
+                  <button type="button" id="increment" 
+                    class="w-9 h-9 flex items-center justify-center rounded-md bg-gray-200 hover:bg-gray-300 font-bold">+</button>
+                </div>
               </div>
+
+
               
               <!-- Informasi Harga -->
               <div class="bg-gray-50 p-4 rounded-lg">
@@ -541,6 +571,22 @@
             });
           }
         });
+      });
+
+      const incrementBtn = document.getElementById('increment');
+      const decrementBtn = document.getElementById('decrement');
+
+      incrementBtn.addEventListener('click', () => {
+        ticketQuantity.value = parseInt(ticketQuantity.value) + 1;
+        calculateTotalPrice();
+      });
+
+      decrementBtn.addEventListener('click', () => {
+        let current = parseInt(ticketQuantity.value);
+        if (current > 1) {
+          ticketQuantity.value = current - 1;
+          calculateTotalPrice();
+        }
       });
     </script>
   </body>

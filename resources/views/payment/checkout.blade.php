@@ -43,6 +43,10 @@
                                     <span class="font-medium">{{ $order->customer_name }}</span>
                                 </div>
                                 <div class="flex justify-between">
+                                    <span class="text-gray-600">No WhatsApp:</span>
+                                    <span class="font-medium">{{ $order->whatsapp_number }}</span>
+                                </div>
+                                <div class="flex justify-between">
                                     <span class="text-gray-600">Promo:</span>
                                     <span class="font-medium">{{ $promo->name }}</span>
                                 </div>
