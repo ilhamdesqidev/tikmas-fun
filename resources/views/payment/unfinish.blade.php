@@ -30,25 +30,27 @@
             <div class="space-y-2">
                 <p class="text-sm text-gray-700">
                     <span class="font-medium">No. Order:</span> 
-                    <span class="font-mono text-gray-900">MSK-2024-001234</span>
+                    <span class="font-mono text-gray-900">{{ $order->order_number }}</span>
                 </p>
                 <p class="text-sm text-gray-700">
                     <span class="font-medium">Status:</span> 
-                    <span id="order-status" class="font-semibold text-red-600 capitalize">Canceled</span>
+                    <span id="order-status" class="font-semibold text-red-600 capitalize">{{ $order->status }}</span>
                 </p>
                 <p class="text-sm text-gray-700">
                     <span class="font-medium">Total:</span> 
-                    <span class="font-semibold text-gray-900">Rp 150.000</span>
+                    <span class="font-semibold text-gray-900">Rp {{ number_format($order->total_price, 0, ',', '.') }}</span>
                 </p>
                 <p class="text-sm text-gray-700">
                     <span class="font-medium">Tanggal:</span> 
-                    <span class="text-gray-900">24 Sep 2025, 14:30</span>
+                    <span class="text-gray-900">
+                        {{ \Carbon\Carbon::parse($order->created_at)->timezone('Asia/Jakarta')->translatedFormat('d M Y, H:i') }}
+                    </span>
                 </p>
             </div>
         </div>
         
         <div class="flex flex-col gap-3">
-            <button onclick="window.location.href='/'" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors duration-200">
+            <button onclick="window.location.href='/dashboard'" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors duration-200">
                 Batalkan Pembayaran
             </button>
         </div>
@@ -99,6 +101,12 @@
                     icon.classList.add('text-yellow-600');
             }
         }
+
+        // Auto update status berdasarkan data dari database
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentStatus = '{{ $order->status }}';
+            changeStatus(currentStatus);
+        });
     </script>
 </body>
 </html>

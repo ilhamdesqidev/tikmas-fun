@@ -12,12 +12,12 @@ class AdminSeeder extends Seeder
     {
         Admin::create([
             'name' => 'Administrator',
-            'username' => 'Admin',
-            'password' => Hash::make('password123'), // Ganti dengan password yang diinginkan
+            'username' => 'admin',
+            'password' => Hash::make('admin'), // Ganti dengan password yang diinginkan
         ]);
 
         $this->command->info('Admin user created successfully!');
         $this->command->info('Username: admin');
-        $this->command->info('Password: password123');
+        $this->command->info('Password: admin');
     }
 }

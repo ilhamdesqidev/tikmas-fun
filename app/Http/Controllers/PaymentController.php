@@ -157,27 +157,28 @@ class PaymentController extends Controller
         return view('payment.finish', compact('order'));
     }
 
-       public function paymentUnfinish(Request $request)
-    {
-        $orderId = $request->order_id;
-        $order = Order::where('order_number', $orderId)->firstOrFail();
-        
-        \Log::info('Payment Unfinish Accessed', ['order_id' => $orderId, 'current_status' => $order->status]);
+      public function paymentUnfinish(Request $request)
+{
+    $orderId = $request->order_id;
+    $order = Order::where('order_number', $orderId)->firstOrFail();
+    
+    \Log::info('Payment Unfinish Accessed', ['order_id' => $orderId, 'current_status' => $order->status]);
 
-        // Cek status terbaru dari Midtrans API
-        $this->checkPaymentStatus($order);
+    // Cek status terbaru dari Midtrans API
+    $this->checkPaymentStatus($order);
 
-        \Log::info('After API Check', ['order_id' => $orderId, 'new_status' => $order->status]);
+    \Log::info('After API Check', ['order_id' => $orderId, 'new_status' => $order->status]);
 
-        // Jika status masih pending, update menjadi canceled
-        if ($order->status === 'pending') {
-            $order->status = 'canceled';
-            $order->save();
-            \Log::info('Status updated to canceled', ['order_id' => $orderId]);
-        }
-
-        return view('payment.unfinish', compact('order'));
+    // Jika status masih pending, update menjadi canceled
+    if ($order->status === 'pending') {
+        $order->status = 'canceled';
+        $order->save();
+        \Log::info('Status updated to canceled', ['order_id' => $orderId]);
     }
+
+    // Kirim data order ke view
+    return view('payment.unfinish', compact('order'));
+}
 
    public function paymentError(Request $request)
     {

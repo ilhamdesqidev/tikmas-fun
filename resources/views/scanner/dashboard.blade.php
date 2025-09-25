@@ -278,7 +278,7 @@
                             <td class="p-3 text-sm">{{ $scan->customer_name }}</td>
                             <td class="p-3 text-sm">{{ $scan->promo->name }}</td>
                             <td class="p-3 text-sm">{{ $scan->ticket_quantity }}</td>
-                            <td class="p-3 text-sm">{{ \Carbon\Carbon::parse($scan->used_at)->format('H:i') }}</td>
+                            <td class="p-3 text-sm">{{ \Carbon\Carbon::parse($scan->created_at)->timezone('Asia/Jakarta')->translatedFormat('d M Y, H:i') }}</td>
                         </tr>
                         @endforeach
                     </tbody>
