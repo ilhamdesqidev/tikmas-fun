@@ -32,6 +32,16 @@ Route::get('dashboard', [DashboardController::class, 'index'])->name('home');
 
 Route::get('/promo/{id}', [PromoController::class, 'show'])->name('promo.show');
 
+// Payment routes (public)
+Route::post('/payment/notification', [PaymentController::class, 'notificationHandler'])->name('payment.notification');
+Route::get('/payment/finish', [PaymentController::class, 'paymentFinish'])->name('payment.finish');
+Route::get('/payment/unfinish', [PaymentController::class, 'paymentUnfinish'])->name('payment.unfinish');
+Route::get('/payment/error', [PaymentController::class, 'paymentError'])->name('payment.error');
+Route::get('/payment/check-status', [PaymentController::class, 'checkStatus'])->name('payment.check-status');
+Route::post('/checkout/{id}', [PaymentController::class, 'processCheckout'])->name('checkout.process');
+Route::get('/payment/checkout/{order_id}', [PaymentController::class, 'showCheckout'])->name('payment.checkout');
+Route::get('/payment/invoice/{order_id}', [PaymentController::class, 'showInvoice'])->name('payment.invoice');
+
 // Admin Routes
 Route::prefix('admin')->name('admin.')->group(function () {
     
@@ -41,15 +51,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         ->middleware('redirect.admin');
     
     Route::post('/login', [AdminAuthController::class, 'login']);
-
-    Route::prefix('facilities')->name('facilities.')->group(function () {
-        Route::get('/', [FacilityController::class, 'index'])->name('index');
-        Route::get('/create', [FacilityController::class, 'create'])->name('create');
-        Route::post('/', [FacilityController::class, 'store'])->name('store');
-        Route::get('/{facility}/edit', [FacilityController::class, 'edit'])->name('edit');
-        Route::put('/{facility}', [FacilityController::class, 'update'])->name('update');
-        Route::delete('/{facility}', [FacilityController::class, 'destroy'])->name('destroy');
-    });
 
     // Protected routes (harus login sebagai admin)
     Route::middleware('admin')->group(function () {
@@ -73,6 +74,25 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/{id}/toggle-status', [AdminPromoController::class, 'toggleStatus'])->name('toggle-status');
         });
         
+        // Facility Management Routes
+        Route::prefix('facilities')->name('facilities.')->group(function () {
+            Route::get('/', [FacilityController::class, 'index'])->name('index');
+            Route::get('/create', [FacilityController::class, 'create'])->name('create');
+            Route::post('/', [FacilityController::class, 'store'])->name('store');
+            Route::get('/{facility}/edit', [FacilityController::class, 'edit'])->name('edit');
+            Route::put('/{facility}', [FacilityController::class, 'update'])->name('update');
+            Route::delete('/{facility}', [FacilityController::class, 'destroy'])->name('destroy');
+        });
+
+        // Tickets Management Routes (FIXED - menggunakan controller yang benar)
+        Route::prefix('tickets')->name('tickets.')->group(function () {
+            Route::get('/', [TicketController::class, 'index'])->name('index');
+            Route::get('/{order_id}', [TicketController::class, 'show'])->name('show');
+            Route::post('/{order_id}/status', [TicketController::class, 'updateStatus'])->name('update-status');
+            Route::delete('/{order_id}', [TicketController::class, 'destroy'])->name('destroy');
+            Route::get('/export/export', [TicketController::class, 'export'])->name('export');
+        });
+        
         // Settings Routes
         Route::prefix('settings')->name('settings.')->group(function () {
             Route::get('/general', [SettingsController::class, 'general'])->name('general');
@@ -80,21 +100,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/profile', [SettingsController::class, 'updateProfile'])->name('profile.update');
             Route::post('/security', [SettingsController::class, 'updateSecurity'])->name('security.update');
             Route::post('/website', [SettingsController::class, 'updateWebsite'])->name('website.update');
-        });
-        
-        // Tickets Routes (placeholder untuk pengembangan selanjutnya)
-        Route::prefix('tickets')->name('tickets.')->group(function () {
-            Route::get('/', function () {
-                return view('admin.tickets.index');
-            })->name('index');
-            
-            Route::get('/create', function () {
-                return view('admin.tickets.create');
-            })->name('create');
-            
-            Route::get('/{id}', function ($id) {
-                return view('admin.tickets.show', compact('id'));
-            })->name('show');
         });
         
         // Customers Routes (placeholder untuk pengembangan selanjutnya)
