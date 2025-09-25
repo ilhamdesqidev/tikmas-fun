@@ -26,7 +26,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/', [DashboardController::class, 'index'])->name('home');
+Route::get('dashboard', [DashboardController::class, 'index'])->name('home');
 
 Route::get('/promo/{id}', [PromoController::class, 'show'])->name('promo.show');
 

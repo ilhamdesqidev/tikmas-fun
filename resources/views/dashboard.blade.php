@@ -83,6 +83,93 @@
         transition: transform 300ms ease-in-out;
       }
 
+      /* WAHANA CAROUSEL STYLES */
+      .wahana-carousel {
+        position: relative;
+        overflow: hidden;
+        border-radius: 1rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      }
+
+      .wahana-images {
+        display: flex;
+        transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        width: 500%; /* 5 gambar x 100% = 500% */
+      }
+
+      .wahana-slide {
+        flex: 0 0 20%; /* Setiap slide mengambil 20% dari container (100% / 5 gambar) */
+        position: relative;
+      }
+
+      .wahana-image {
+        width: 100%;
+        height: 350px;
+        object-fit: cover;
+        display: block;
+      }
+
+      .wahana-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+        padding: 2rem 1.5rem 1rem;
+        color: white;
+      }
+
+      .wahana-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+      }
+
+      .wahana-description {
+        font-size: 1rem;
+        opacity: 0.9;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+      }
+
+      .carousel-indicators {
+        position: absolute;
+        bottom: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 8px;
+        z-index: 10;
+      }
+
+      .indicator {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.5);
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .indicator.active {
+        background: #CFD916;
+        transform: scale(1.3);
+      }
+
+      @media (max-width: 768px) {
+        .wahana-image {
+          height: 280px;
+        }
+        
+        .wahana-title {
+          font-size: 1.25rem;
+        }
+        
+        .wahana-description {
+          font-size: 0.9rem;
+        }
+      }
+
       /* PROMO SLIDER STYLES */
       .promo-slider {
         overflow: hidden;
@@ -91,6 +178,7 @@
       }
 
       .promo-container {
+        margin-left: -15%;
         display: flex;
         transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         gap: 2rem;
@@ -339,21 +427,82 @@
         <span class="text-primary">Tentang</span> Kami
       </h2>
       <div class="flex flex-col lg:flex-row max-w-6xl mx-auto">
+        <!-- Wahana Carousel -->
         <div class="flex-1 lg:min-w-96 mb-6 lg:mb-0">
-          <img src="/assets/img/tentangwe.jpg" alt="Tentang Kami" class="w-full h-60 sm:h-80 object-cover rounded-xl" />
+        <div class="wahana-carousel" id="wahanaCarousel">
+          <div class="wahana-images" id="wahanaImages">
+            <div class="wahana-slide">
+              <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="Roller Coaster" class="wahana-image" />
+              <div class="wahana-overlay">
+                <div class="wahana-title">Roller Coaster</div>
+                <div class="wahana-description">Rasakan sensasi kecepatan tinggi dengan pemandangan menakjubkan</div>
+              </div>
+            </div>
+            
+            <div class="wahana-slide">
+              <img src="https://images.unsplash.com/photo-1517457373958-b7bdd4587205?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="Ferris Wheel" class="wahana-image" />
+              <div class="wahana-overlay">
+                <div class="wahana-title">Bianglala</div>
+                <div class="wahana-description">Nikmati view 360° dari ketinggian bersama orang tercinta</div>
+              </div>
+            </div>
+            
+            <div class="wahana-slide">
+              <img src="https://images.unsplash.com/photo-1544197150-b99a580bb7a8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="Bumper Cars" class="wahana-image" />
+              <div class="wahana-overlay">
+                <div class="wahana-title">Bumper Car</div>
+                <div class="wahana-description">Keseruan menabrak dan tertawa bersama keluarga</div>
+              </div>
+            </div>
+            
+            <div class="wahana-slide">
+              <img src="https://images.unsplash.com/photo-1570197788417-0e82375c9371?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="Carousel" class="wahana-image" />
+              <div class="wahana-overlay">
+                <div class="wahana-title">Komidi Putar</div>
+                <div class="wahana-description">Wahana klasik yang cocok untuk segala usia</div>
+              </div>
+            </div>
+            
+            <div class="wahana-slide">
+              <img src="https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="Water Ride" class="wahana-image" />
+              <div class="wahana-overlay">
+                <div class="wahana-title">Arung Jeram Mini</div>
+                <div class="wahana-description">Bermain air yang menyegarkan dan menyenangkan</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="carousel-indicators" id="carouselIndicators">
+            <!-- Indicators akan di-generate otomatis -->
+          </div>
         </div>
+          
+          <!-- Tombol Lihat Lebih Banyak -->
+          <div class="text-center mt-6">
+            <button class="inline-flex items-center px-6 py-3 bg-primary text-black font-semibold rounded-lg hover:bg-yellow-500 transition-colors duration-300 group">
+              Lihat Lebih Banyak
+              <i data-feather="chevron-down" class="w-5 h-5 ml-2 group-hover:transform group-hover:translate-y-1 transition-transform duration-300"></i>
+            </button>
+          </div>
+        </div>
+        
         <div class="flex-1 lg:min-w-96 px-0 lg:px-8">
           <h3 class="text-2xl sm:text-3xl mb-4 text-text-dark">Kenapa memilih Wahana kami?</h3>
           <p class="mb-4 text-base sm:text-lg md:text-xl font-medium leading-relaxed text-text-dark">
             MestaKara adalah penyedia wahana yang didirikan dengan cinta dan
             dedikasi untuk menghadirkan pengalaman wahana terbaik. Kami percaya
             bahwa setiap tawa dapat menciptakan kenangan indah yang akan
-            diinget selamanya.
+            diingat selamanya.
           </p>
           <p class="mb-4 text-base sm:text-lg md:text-xl font-medium leading-relaxed text-text-dark">
-            Wahana kami didirikan langsung ditengah perkebunan terbaik dan ditata
+            Wahana kami didirikan langsung di tengah perkebunan terbaik dan ditata
             dengan presisi yang sempurna. Setiap wahana yang kami
             sediakan adalah hasil dari perpaduan tradisi dan kualitas premium.
+          </p>
+          <p class="text-base sm:text-lg md:text-xl font-medium leading-relaxed text-text-dark">
+            Dengan lebih dari 20 wahana menarik, fasilitas lengkap, dan staff
+            berpengalaman, kami siap memberikan pengalaman liburan yang tak terlupakan
+            untuk seluruh keluarga.
           </p>
         </div>
       </div>
@@ -495,293 +644,329 @@
     </footer>
 
     <script>
-      // Initialize Feather icons
-      feather.replace();
+// Initialize Feather icons
+feather.replace();
 
-      // Mobile menu toggle
-      const navbarNav = document.getElementById('mobile-nav');
-      const menuIcon = document.getElementById('menu-icon');
-      const closeMenu = document.getElementById('close-menu');
-      const overlay = document.getElementById('overlay');
-      let isMenuOpen = false;
+// Mobile menu toggle
+const navbarNav = document.getElementById('mobile-nav');
+const menuIcon = document.getElementById('menu-icon');
+const closeMenu = document.getElementById('close-menu');
+const overlay = document.getElementById('overlay');
+let isMenuOpen = false;
 
-      function openMobileMenu() {
-        if (!isMenuOpen) {
-          navbarNav.classList.remove('-right-full');
-          navbarNav.classList.add('right-0');
-          overlay.classList.remove('hidden');
-          overlay.classList.add('block');
-          document.body.style.overflow = 'hidden';
-          isMenuOpen = true;
-        }
-      }
+function openMobileMenu() {
+  if (!isMenuOpen) {
+    navbarNav.style.right = '0';
+    overlay.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    isMenuOpen = true;
+  }
+}
 
-      function closeMobileMenu() {
-        if (isMenuOpen) {
-          navbarNav.classList.add('-right-full');
-          navbarNav.classList.remove('right-0');
-          overlay.classList.add('hidden');
-          overlay.classList.remove('block');
-          document.body.style.overflow = 'auto';
-          isMenuOpen = false;
-        }
-      }
+function closeMobileMenu() {
+  if (isMenuOpen) {
+    navbarNav.style.right = '-100%';
+    overlay.classList.add('hidden');
+    document.body.style.overflow = '';
+    isMenuOpen = false;
+  }
+}
 
-      menuIcon.addEventListener('click', (e) => {
-        e.stopPropagation();
-        openMobileMenu();
+menuIcon.addEventListener('click', (e) => {
+  e.stopPropagation();
+  openMobileMenu();
+});
+
+closeMenu.addEventListener('click', (e) => {
+  e.stopPropagation();
+  closeMobileMenu();
+});
+
+closeMenu.addEventListener('touchend', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  closeMobileMenu();
+});
+
+overlay.addEventListener('click', closeMobileMenu);
+
+document.addEventListener('click', (e) => {
+  const isClickInsideNav = e.target.closest('#mobile-nav') !== null;
+  const isClickOnMenuIcon = e.target.closest('#menu-icon') !== null;
+  if (!isClickInsideNav && !isClickOnMenuIcon && isMenuOpen) {
+    closeMobileMenu();
+  }
+});
+
+// Smooth scrolling for navigation links with offset
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function (e) {
+    e.preventDefault();
+    const targetId = this.getAttribute('href');
+    if (targetId === '#') return;
+    const target = document.querySelector(targetId);
+    if (target) {
+      const navbarHeight = document.querySelector('nav').offsetHeight;
+      const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - navbarHeight;
+      window.scrollTo({
+        top: targetPosition,
+        behavior: 'smooth'
       });
+    }
+    closeMobileMenu();
+  });
 
-      closeMenu.addEventListener('click', (e) => {
-        e.stopPropagation();
-        closeMobileMenu();
-      });
+  anchor.addEventListener('touchend', function (e) {
+    this.click();
+  });
+});
 
-      closeMenu.addEventListener('touchend', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        closeMobileMenu();
-      });
+// Prevent scrolling when mobile menu is open
+let touchStartY = 0;
+document.addEventListener('touchstart', e => {
+  touchStartY = e.touches[0].clientY;
+});
+document.addEventListener('touchmove', e => {
+  if (isMenuOpen && !e.target.closest('#mobile-nav')) {
+    e.preventDefault();
+  }
+}, { passive: false });
 
-      overlay.addEventListener('click', closeMobileMenu);
+// Handle orientation change
+window.addEventListener('orientationchange', function() {
+  setTimeout(() => {
+    feather.replace();
+  }, 100);
+});
 
-      document.addEventListener('click', (e) => {
-        const isClickInsideNav = e.target.closest('#mobile-nav') !== null;
-        const isClickOnMenuIcon = e.target.closest('#menu-icon') !== null;
+// Optimize scroll performance
+let ticking = false;
+function updateNavbar() {
+  const navbar = document.querySelector('nav');
+  const scrollTop = window.pageYOffset;
+  if (scrollTop > 100) {
+    navbar.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
+  } else {
+    navbar.style.backgroundColor = '';
+  }
+  ticking = false;
+}
+function requestTick() {
+  if (!ticking) {
+    window.requestAnimationFrame(updateNavbar);
+    ticking = true;
+  }
+}
+window.addEventListener('scroll', requestTick);
 
-        if (!isClickInsideNav && !isClickOnMenuIcon && isMenuOpen) {
-          closeMobileMenu();
-        }
-      });
+// WAHANA CAROUSEL FUNCTIONALITY
+class WahanaCarousel {
+  constructor() {
+    this.container = document.getElementById('wahanaImages');
+    if (!this.container) return;
+    this.slides = this.container.querySelectorAll('.wahana-slide');
+    this.totalSlides = this.slides.length;
+    this.indicators = document.getElementById('carouselIndicators');
+    this.currentIndex = 0;
+    this.init();
+  }
 
-      // Smooth scrolling for navigation links with offset
-      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-          e.preventDefault();
-          const targetId = this.getAttribute('href');
-          const target = document.querySelector(targetId);
+  init() {
+    this.createIndicators();
+    this.startAutoPlay();
+    this.bindEvents();
+    this.updateSlide();
+  }
 
-          if (target) {
-            closeMobileMenu();
-            const navbarHeight = document.querySelector('nav').offsetHeight;
-            const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - navbarHeight;
+  createIndicators() {
+    if (!this.indicators) return;
+    this.indicators.innerHTML = '';
+    for (let i = 0; i < this.totalSlides; i++) {
+      const indicator = document.createElement('div');
+      indicator.className = `indicator ${i === 0 ? 'active' : ''}`;
+      indicator.addEventListener('click', () => this.goToSlide(i));
+      this.indicators.appendChild(indicator);
+    }
+    this.indicatorElements = this.indicators.querySelectorAll('.indicator');
+  }
 
-            window.scrollTo({
-              top: targetPosition,
-              behavior: 'smooth'
-            });
-          }
-        });
+  bindEvents() {
+    const carousel = document.getElementById('wahanaCarousel');
+    if (!carousel) return;
+    carousel.addEventListener('mouseenter', () => this.pauseAutoPlay());
+    carousel.addEventListener('mouseleave', () => this.resumeAutoPlay());
 
-        anchor.addEventListener('touchend', function (e) {
-          e.preventDefault();
-          this.click();
-        });
-      });
+    // Touch events for mobile swipe
+    let startX = 0;
+    let currentX = 0;
+    let isDragging = false;
 
-      // Prevent scrolling when mobile menu is open
-      let touchStartY = 0;
-      document.addEventListener('touchstart', e => {
-        touchStartY = e.touches[0].clientY;
-      });
+    this.container.addEventListener('touchstart', (e) => {
+      startX = e.touches[0].clientX;
+      isDragging = true;
+      this.pauseAutoPlay();
+    });
 
-      document.addEventListener('touchmove', e => {
-        if (isMenuOpen && !e.target.closest('#mobile-nav')) {
-          e.preventDefault();
-        }
-      }, { passive: false });
+    this.container.addEventListener('touchmove', (e) => {
+      if (!isDragging) return;
+      currentX = e.touches[0].clientX;
+    });
 
-      // Handle orientation change
-      window.addEventListener('orientationchange', function() {
-        setTimeout(() => {
-          if (isMenuOpen) {
-            closeMobileMenu();
-          }
-          feather.replace();
-        }, 100);
-      });
-
-      // Optimize scroll performance
-      let ticking = false;
-      function updateNavbar() {
-        const navbar = document.querySelector('nav');
-        const scrollTop = window.pageYOffset;
-        
-        if (scrollTop > 100) {
-          navbar.style.backdropFilter = 'blur(10px)';
-          navbar.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
+    this.container.addEventListener('touchend', () => {
+      if (!isDragging) return;
+      isDragging = false;
+      const diffX = startX - currentX;
+      if (Math.abs(diffX) > 50) {
+        if (diffX > 0) {
+          this.nextSlide();
         } else {
-          navbar.style.backdropFilter = 'none';
-          navbar.style.backgroundColor = 'rgba(255, 255, 255, 1)';
-        }
-        
-        ticking = false;
-      }
-
-      function requestTick() {
-        if (!ticking) {
-          requestAnimationFrame(updateNavbar);
-          ticking = true;
+          this.prevSlide();
         }
       }
+      this.resumeAutoPlay();
+    });
+  }
 
-      window.addEventListener('scroll', requestTick);
-
-      // PROMO SLIDER FUNCTIONALITY - DINAMIS BERDASARKAN DATA DATABASE
-      class PromoSlider {
-        constructor() {
-          this.container = document.getElementById('promoContainer');
-          this.cards = this.container.querySelectorAll('.promo-card');
-          this.prevBtn = document.getElementById('prevBtn');
-          this.nextBtn = document.getElementById('nextBtn');
-          this.dotsContainer = document.getElementById('dotsContainer');
-          
-          this.currentIndex = 0;
-          this.cardWidth = window.innerWidth < 768 ? 312 : 382; // card width + gap
-          this.totalCards = this.cards.length;
-          
-          // Jika tidak ada card promo, sembunyikan slider
-          if (this.totalCards === 0) {
-            document.querySelector('.promo-slider').style.display = 'none';
-            return;
-          }
-          
-          this.init();
-        }
-        
-        init() {
-          this.createDots();
-          this.updateSlider();
-          this.bindEvents();
-          this.autoPlay();
-          this.handleResize();
-        }
-        
-        createDots() {
-          this.dotsContainer.innerHTML = '';
-          for (let i = 0; i < this.totalCards; i++) {
-            const dot = document.createElement('div');
-            dot.className = `dot ${i === 0 ? 'active' : ''}`;
-            dot.setAttribute('data-slide', i);
-            dot.addEventListener('click', () => this.goToSlide(i));
-            this.dotsContainer.appendChild(dot);
-          }
-          this.dots = this.dotsContainer.querySelectorAll('.dot');
-        }
-        
-        bindEvents() {
-          this.prevBtn.addEventListener('click', () => this.prevSlide());
-          this.nextBtn.addEventListener('click', () => this.nextSlide());
-          
-          // Touch events for mobile swipe
-          let startX = 0;
-          let currentX = 0;
-          let isDragging = false;
-          
-          this.container.addEventListener('touchstart', (e) => {
-            startX = e.touches[0].clientX;
-            isDragging = true;
-            this.pauseAutoPlay();
-          });
-          
-          this.container.addEventListener('touchmove', (e) => {
-            if (!isDragging) return;
-            currentX = e.touches[0].clientX;
-          });
-          
-          this.container.addEventListener('touchend', () => {
-            if (!isDragging) return;
-            isDragging = false;
-            
-            const diffX = startX - currentX;
-            if (Math.abs(diffX) > 50) {
-              if (diffX > 0) {
-                this.nextSlide();
-              } else {
-                this.prevSlide();
-              }
-            }
-            this.resumeAutoPlay();
-          });
-          
-          // Pause autoplay on hover
-          this.container.addEventListener('mouseenter', () => this.pauseAutoPlay());
-          this.container.addEventListener('mouseleave', () => this.resumeAutoPlay());
-        }
-        
-        handleResize() {
-          window.addEventListener('resize', () => {
-            this.cardWidth = window.innerWidth < 768 ? 312 : 382;
-            this.updateSlider();
-          });
-        }
-        
-        updateSlider() {
-          const translateX = -this.currentIndex * this.cardWidth;
-          this.container.style.transform = `translateX(${translateX}px)`;
-          
-          // Update active card
-          this.cards.forEach((card, index) => {
-            card.classList.toggle('active', index === this.currentIndex);
-          });
-          
-          // Update dots
-          this.dots.forEach((dot, index) => {
-            dot.classList.toggle('active', index === this.currentIndex);
-          });
-          
-          // Update navigation buttons
-          this.prevBtn.disabled = this.currentIndex === 0;
-          this.nextBtn.disabled = this.currentIndex === this.totalCards - 1;
-        }
-        
-        nextSlide() {
-          if (this.currentIndex < this.totalCards - 1) {
-            this.currentIndex++;
-            this.updateSlider();
-          }
-        }
-        
-        prevSlide() {
-          if (this.currentIndex > 0) {
-            this.currentIndex--;
-            this.updateSlider();
-          }
-        }
-        
-        goToSlide(index) {
-          this.currentIndex = index;
-          this.updateSlider();
-        }
-        
-        autoPlay() {
-          if (this.totalCards <= 1) return; // Tidak perlu autoplay jika hanya 1 card
-          
-          this.autoPlayInterval = setInterval(() => {
-            if (this.currentIndex === this.totalCards - 1) {
-              this.currentIndex = 0;
-            } else {
-              this.currentIndex++;
-            }
-            this.updateSlider();
-          }, 4000);
-        }
-        
-        pauseAutoPlay() {
-          clearInterval(this.autoPlayInterval);
-        }
-        
-        resumeAutoPlay() {
-          this.pauseAutoPlay();
-          this.autoPlay();
-        }
-      }
-      
-      // Initialize slider when DOM is loaded
-      document.addEventListener('DOMContentLoaded', () => {
-        new PromoSlider();
-        feather.replace();
+  updateSlide() {
+    if (!this.container) return;
+    const translateX = -this.currentIndex * (100 / this.totalSlides);
+    this.container.style.transform = `translateX(${translateX}%)`;
+    if (this.indicatorElements) {
+      this.indicatorElements.forEach((indicator, index) => {
+        indicator.classList.toggle('active', index === this.currentIndex);
       });
+    }
+  }
+
+  nextSlide() {
+    this.currentIndex = (this.currentIndex + 1) % this.totalSlides;
+    this.updateSlide();
+  }
+
+  prevSlide() {
+    this.currentIndex = this.currentIndex === 0 ? this.totalSlides - 1 : this.currentIndex - 1;
+    this.updateSlide();
+  }
+
+  goToSlide(index) {
+    this.currentIndex = index;
+    this.updateSlide();
+  }
+
+  startAutoPlay() {
+    this.autoPlayInterval = setInterval(() => {
+      this.nextSlide();
+    }, 3000);
+  }
+
+  pauseAutoPlay() {
+    clearInterval(this.autoPlayInterval);
+  }
+
+  resumeAutoPlay() {
+    this.pauseAutoPlay();
+    this.startAutoPlay();
+  }
+}
+
+// PROMO SLIDER FUNCTIONALITY - DINAMIS BERDASARKAN DATA DATABASE
+class PromoSlider {
+  constructor() {
+    this.container = document.getElementById('promoContainer');
+    this.cards = this.container ? this.container.querySelectorAll('.promo-card') : [];
+    this.totalCards = this.cards.length;
+    this.dotsContainer = document.getElementById('dotsContainer');
+    this.currentIndex = 0;
+    this.prevBtn = document.getElementById('prevBtn');
+    this.nextBtn = document.getElementById('nextBtn');
+    this.init();
+  }
+
+  init() {
+    if (!this.container || this.totalCards === 0) return;
+    this.createDots();
+    this.bindEvents();
+    this.updateSlider();
+    this.autoPlay();
+  }
+
+  createDots() {
+    if (!this.dotsContainer) return;
+    this.dotsContainer.innerHTML = '';
+    for (let i = 0; i < this.totalCards; i++) {
+      const dot = document.createElement('div');
+      dot.className = `dot ${i === 0 ? 'active' : ''}`;
+      dot.addEventListener('click', () => this.goToSlide(i));
+      this.dotsContainer.appendChild(dot);
+    }
+    this.dotElements = this.dotsContainer.querySelectorAll('.dot');
+  }
+
+  bindEvents() {
+    if (this.prevBtn) {
+      this.prevBtn.addEventListener('click', () => this.prevSlide());
+    }
+    if (this.nextBtn) {
+      this.nextBtn.addEventListener('click', () => this.nextSlide());
+    }
+    window.addEventListener('resize', () => this.handleResize());
+  }
+
+  handleResize() {
+    this.updateSlider();
+  }
+
+  updateSlider() {
+    if (!this.container) return;
+    this.cards.forEach((card, idx) => {
+      card.classList.toggle('active', idx === this.currentIndex);
+    });
+    if (this.dotElements) {
+      this.dotElements.forEach((dot, idx) => {
+        dot.classList.toggle('active', idx === this.currentIndex);
+      });
+    }
+    const offset = -this.currentIndex * (this.cards[0]?.offsetWidth + 32 || 350);
+    this.container.style.transform = `translateX(${offset}px)`;
+  }
+
+  nextSlide() {
+    this.currentIndex = (this.currentIndex + 1) % this.totalCards;
+    this.updateSlider();
+  }
+
+  prevSlide() {
+    this.currentIndex = this.currentIndex === 0 ? this.totalCards - 1 : this.currentIndex - 1;
+    this.updateSlider();
+  }
+
+  goToSlide(index) {
+    this.currentIndex = index;
+    this.updateSlider();
+  }
+
+  autoPlay() {
+    this.autoPlayInterval = setInterval(() => {
+      this.nextSlide();
+    }, 1989);
+  }
+
+  pauseAutoPlay() {
+    clearInterval(this.autoPlayInterval);
+  }
+
+  resumeAutoPlay() {
+    this.pauseAutoPlay();
+    this.autoPlay();
+  }
+}
+
+// Initialize sliders when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  new WahanaCarousel();
+  new PromoSlider();
+  feather.replace();
+});
     </script>
   </body>
 </html>
