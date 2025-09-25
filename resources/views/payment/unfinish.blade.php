@@ -34,7 +34,7 @@
                 </p>
                 <p class="text-sm text-gray-700">
                     <span class="font-medium">Status:</span> 
-                    <span id="order-status" class="font-semibold text-yellow-600 capitalize">pending</span>
+                    <span id="order-status" class="font-semibold text-red-600 capitalize">Canceled</span>
                 </p>
                 <p class="text-sm text-gray-700">
                     <span class="font-medium">Total:</span> 
@@ -49,25 +49,11 @@
         
         <div class="flex flex-col gap-3">
             <button onclick="window.location.href='/'" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors duration-200">
-                Kembali ke Beranda
+                Batalkan Pembayaran
             </button>
         </div>
 
-        <!-- Demo: Button untuk mengubah status -->
-        <div class="mt-8 pt-6 border-t border-gray-200">
-            <p class="text-xs text-gray-500 mb-3">Demo - Ubah Status:</p>
-            <div class="flex gap-2 justify-center">
-                <button onclick="changeStatus('pending')" class="text-xs px-2 py-1 bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200">
-                    Pending
-                </button>
-                <button onclick="changeStatus('canceled')" class="text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200">
-                    Canceled
-                </button>
-                <button onclick="changeStatus('expired')" class="text-xs px-2 py-1 bg-orange-100 text-orange-700 rounded hover:bg-orange-200">
-                    Expired
-                </button>
-            </div>
-        </div>
+       
     </div>
 
     <script>
