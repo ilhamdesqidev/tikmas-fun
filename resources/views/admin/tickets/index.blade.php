@@ -145,7 +145,6 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Qty</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
@@ -189,35 +188,6 @@
                                 <span class="px-2 py-1 text-xs rounded-full {{ $statusColors[$order->status] ?? 'text-gray-700 bg-gray-50' }}">
                                     {{ ucfirst($order->status) }}
                                 </span>
-                            </td>
-                            <td class="px-6 py-4 text-center">
-                                <div class="flex items-center justify-center gap-1">
-                                    <a href="{{ route('admin.tickets.show', $order->order_number) }}" 
-                                       class="p-1.5 text-blue-600 hover:bg-blue-50 rounded" title="Detail">
-                                        <i class="fas fa-eye text-sm"></i>
-                                    </a>
-                                    <a href="{{ route('payment.invoice', $order->order_number) }}" 
-                                       target="_blank"
-                                       class="p-1.5 text-green-600 hover:bg-green-50 rounded" title="Invoice">
-                                        <i class="fas fa-file-invoice text-sm"></i>
-                                    </a>
-                                    <button type="button" 
-                                            class="p-1.5 text-yellow-600 hover:bg-yellow-50 rounded" 
-                                            onclick="openStatusModal('{{ $order->order_number }}', '{{ $order->status }}', {{ $order->id }})"
-                                            title="Edit Status">
-                                        <i class="fas fa-edit text-sm"></i>
-                                    </button>
-                                    <form action="{{ route('admin.tickets.destroy', $order->order_number) }}" method="POST" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" 
-                                                class="p-1.5 text-red-600 hover:bg-red-50 rounded" 
-                                                onclick="return confirm('Hapus tiket ini?')" 
-                                                title="Hapus">
-                                            <i class="fas fa-trash text-sm"></i>
-                                        </button>
-                                    </form>
-                                </div>
                             </td>
                         </tr>
                         @empty

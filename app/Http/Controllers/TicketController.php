@@ -82,17 +82,6 @@ class TicketController extends Controller
     }
     
     /**
-     * Hapus tiket
-     */
-    public function destroy($order_id)
-    {
-        $order = Order::where('order_number', $order_id)->firstOrFail();
-        $order->delete();
-        
-        return redirect()->route('admin.tickets.index')->with('success', 'Tiket berhasil dihapus.');
-    }
-    
-    /**
      * Get stats for API
      */
     public function getStats()

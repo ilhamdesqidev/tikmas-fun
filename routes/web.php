@@ -9,6 +9,8 @@ use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\PromoController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\Admin\FacilityController;
+use App\Http\Controllers\TicketController;
+use App\Http\Controllers\ScannerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -131,14 +133,31 @@ Route::prefix('api/admin')->name('api.admin.')->middleware('admin')->group(funct
     Route::get('/dashboard/stats', [AdminDashboardController::class, 'getDashboardStats']);
     Route::get('/promo/quick-stats', [AdminPromoController::class, 'getQuickStats']);
     Route::post('/promo/{id}/duplicate', [AdminPromoController::class, 'duplicate'])->name('promo.duplicate');
+    
+    // API untuk tickets
+    Route::get('/tickets/stats', [TicketController::class, 'getStats']);
 });
 
-// Payment routes
-Route::post('/payment/notification', [PaymentController::class, 'notificationHandler'])->name('payment.notification');
-Route::get('/payment/finish', [PaymentController::class, 'paymentFinish'])->name('payment.finish');
-Route::get('/payment/unfinish', [PaymentController::class, 'paymentUnfinish'])->name('payment.unfinish');
-Route::get('/payment/error', [PaymentController::class, 'paymentError'])->name('payment.error');
-Route::get('/payment/check-status', [PaymentController::class, 'checkStatus'])->name('payment.check-status');
-Route::post('/checkout/{id}', [PaymentController::class, 'processCheckout'])->name('checkout.process');
-Route::get('/payment/checkout/{order_id}', [PaymentController::class, 'showCheckout'])->name('payment.checkout');
-Route::get('/payment/invoice/{order_id}', [PaymentController::class, 'showInvoice'])->name('payment.invoice');
+// Routes untuk Scanner System (Staff Only)
+Route::prefix('scanner')->name('scanner.')->group(function () {
+    
+    // Halaman verifikasi petugas
+    Route::get('/verification', [ScannerController::class, 'showVerificationForm'])->name('verification');
+    Route::post('/verify', [ScannerController::class, 'verifyStaff'])->name('verify');
+    
+    // Dashboard scanner (memerlukan verifikasi)
+    Route::get('/dashboard', [ScannerController::class, 'dashboard'])->name('dashboard');
+    
+    // API untuk scan barcode
+    Route::post('/scan', [ScannerController::class, 'scanBarcode'])->name('scan');
+    
+    // API untuk menggunakan tiket
+    Route::post('/use', [ScannerController::class, 'useTicket'])->name('use');
+    
+    // Logout petugas
+    Route::post('/logout', [ScannerController::class, 'logout'])->name('logout');
+    Route::get('/logout', [ScannerController::class, 'logout']);
+    
+    // API untuk mobile app (opsional)
+    Route::post('/api/check', [ScannerController::class, 'checkTicket'])->name('api.check');
+});
