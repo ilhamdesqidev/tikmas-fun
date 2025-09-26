@@ -37,11 +37,20 @@ Route::post('/payment/notification', [PaymentController::class, 'notificationHan
 Route::get('/payment/finish', [PaymentController::class, 'paymentFinish'])->name('payment.finish');
 Route::get('/payment/unfinish', [PaymentController::class, 'paymentUnfinish'])->name('payment.unfinish');
 Route::get('/payment/error', [PaymentController::class, 'paymentError'])->name('payment.error');
-Route::get('/payment/check-status', [PaymentController::class, 'checkStatus'])->name('payment.check-status');
-Route::post('/checkout/{id}', [PaymentController::class, 'processCheckout'])->name('checkout.process');
-Route::get('/payment/checkout/{order_id}', [PaymentController::class, 'showCheckout'])->name('payment.checkout');
-Route::get('/payment/invoice/{order_id}', [PaymentController::class, 'showInvoice'])->name('payment.invoice');
 
+// PERBAIKAN: Route check-status yang benar
+Route::get('/payment/check-status/{order_id}', [PaymentController::class, 'checkStatus'])->name('payment.check-status');
+
+// PERBAIKAN: Pisahkan route checkout form dan proses
+Route::get('/checkout/{id}', [PaymentController::class, 'showCheckoutForm'])->name('checkout.form'); // Form checkout
+Route::post('/checkout/{id}', [PaymentController::class, 'processCheckout'])->name('checkout.process'); // Proses checkout
+
+Route::get('/payment/checkout/{order_id}', [PaymentController::class, 'showCheckout'])->name('payment.checkout');
+
+// Invoice routes
+Route::get('/invoice/{order_id}', [PaymentController::class, 'showInvoice'])->name('payment.invoice');
+Route::get('/invoice/{order_id}/download', [PaymentController::class, 'showInvoice'])->name('payment.invoice.download');
+Route::get('/invoice/{order_id}/autodownload', [PaymentController::class, 'autoDownloadInvoice'])->name('payment.invoice.autodownload');
 // Admin Routes
 Route::prefix('admin')->name('admin.')->group(function () {
     

@@ -31,10 +31,27 @@
             border: 2px dashed #e5e7eb;
             border-radius: 10px;
         }
+        .auto-download-message {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
     </style>
 </head>
 <body class="font-poppins bg-gray-50">
     <div class="min-h-screen py-8 px-4">
+        
+        <!-- Auto Download Message -->
+        @if(isset($autoDownload) && $autoDownload)
+        <div class="max-w-2xl mx-auto auto-download-message">
+            <p>✅ Pembayaran berhasil! Invoice akan otomatis terdownload dalam <span id="countdown">5</span> detik...</p>
+        </div>
+        @endif
+
         <div class="max-w-2xl mx-auto print-area bg-white rounded-xl shadow-md overflow-hidden">
             <!-- Header -->
             <div class="bg-primary py-6 px-8 text-center">
@@ -150,12 +167,16 @@
         </div>
         
         <!-- Action Buttons -->
-        <div class="max-w-2xl mx-auto mt-6 no-print">
+        <div class="max-w-2mx-auto mt-6 no-print">
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
                 <button onclick="window.print()" 
                         class="bg-primary text-black font-semibold py-3 px-6 rounded-lg hover:bg-yellow-500 transition-colors">
                     🖨️ Cetak E-Ticket
                 </button>
+                <a href="{{ route('payment.invoice.download', ['order_id' => $order->order_number]) }}" 
+                   class="bg-blue-500 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-600 transition-colors text-center">
+                    📥 Download PDF
+                </a>
                 <a href="{{ route('home') }}" 
                    class="bg-gray-200 text-gray-800 font-semibold py-3 px-6 rounded-lg hover:bg-gray-300 transition-colors text-center">
                     🏠 Kembali ke Beranda
@@ -175,29 +196,31 @@
             format: "CODE128",
             width: 2,
             height: 100,
-            displayValue: false, // Sembunyikan teks di bawah barcode
+            displayValue: false,
             fontSize: 16,
             margin: 10,
             background: "transparent"
         });
         
-        // Auto print option (optional)
-        @if(request()->has('autoprint'))
-        window.onload = function() {
-            window.print();
-        }
-        @endif
-        
-        // Simulasi tampilan saat di-scan (hanya untuk demo)
-        document.addEventListener('DOMContentLoaded', function() {
-            const barcode = document.getElementById('barcode');
-            const scanInfo = document.getElementById('scan-info');
+        // Auto download script
+        @if(isset($autoDownload) && $autoDownload)
+        let countdown = 5;
+        const countdownElement = document.getElementById('countdown');
+        const countdownInterval = setInterval(function() {
+            countdown--;
+            countdownElement.textContent = countdown;
             
-            // Untuk demo, tampilkan info scan saat barcode di-click
-            barcode.addEventListener('click', function() {
-                scanInfo.classList.toggle('hidden-print');
-            });
-        });
+            if (countdown <= 0) {
+                clearInterval(countdownInterval);
+                window.location.href = "{{ route('payment.invoice.autodownload', ['order_id' => $order->order_number]) }}";
+            }
+        }, 1000);
+
+        // Optional: Skip countdown and download immediately
+        setTimeout(function() {
+            window.location.href = "{{ route('payment.invoice.autodownload', ['order_id' => $order->order_number]) }}";
+        }, 5000);
+        @endif
     </script>
 </body>
 </html>

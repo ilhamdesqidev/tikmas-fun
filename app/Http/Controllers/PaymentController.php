@@ -10,6 +10,9 @@ use Midtrans\Config;
 use Midtrans\Snap;
 use Midtrans\Notification;
 use Midtrans\Transaction;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Picqer\Barcode\BarcodeGeneratorHTML;
+use Picqer\Barcode\BarcodeGeneratorPNG;
 
 class PaymentController extends Controller
 {
@@ -27,7 +30,7 @@ class PaymentController extends Controller
     public function showCheckoutForm(Request $request, $id)
     {
         $promo = Promo::findOrFail($id);
-        return view('promo.checkout-form', compact('promo'));
+        return view('payment.checkout-form', compact('promo'));
     }
 
     // Method untuk memproses checkout dan mengarahkan ke halaman pembayaran
@@ -140,7 +143,7 @@ class PaymentController extends Controller
         ]);
     }
 
-    public function paymentFinish(Request $request)
+     public function paymentFinish(Request $request)
     {
         $orderId = $request->order_id;
         $order = Order::where('order_number', $orderId)->firstOrFail();
@@ -148,39 +151,52 @@ class PaymentController extends Controller
         // Cek status langsung dari Midtrans API untuk memastikan
         $this->checkPaymentStatus($order);
 
-        // Jika status masih pending, arahkan ke waiting page
-        if ($order->status === 'pending') {
-            return view('payment.waiting', compact('order'));
+        // Generate invoice number jika belum ada
+        if (!$order->invoice_number) {
+            $order->invoice_number = 'INV' . date('Ymd') . Str::upper(Str::random(6));
+            $order->save();
         }
 
-        // Jika sukses, tampilkan halaman finish dengan countdown
-        return view('payment.finish', compact('order'));
+        // Jika status sukses, tampilkan halaman invoice dengan auto download script
+        if ($order->status === 'success') {
+            $promo = Promo::findOrFail($order->promo_id);
+            
+            return view('payment.invoice', [
+                'order' => $order,
+                'promo' => $promo,
+                'invoiceNumber' => $order->invoice_number,
+                'autoDownload' => true // Flag untuk auto download
+            ]);
+        }
+
+        // Jika masih pending, tampilkan waiting page
+        return view('payment.waiting', compact('order'));
     }
 
-      public function paymentUnfinish(Request $request)
-{
-    $orderId = $request->order_id;
-    $order = Order::where('order_number', $orderId)->firstOrFail();
-    
-    \Log::info('Payment Unfinish Accessed', ['order_id' => $orderId, 'current_status' => $order->status]);
+    public function paymentUnfinish(Request $request)
+    {
+        $orderId = $request->order_id;
+        $order = Order::where('order_number', $orderId)->firstOrFail();
+        
+        \Log::info('Payment Unfinish Accessed', ['order_id' => $orderId, 'current_status' => $order->status]);
 
-    // Cek status terbaru dari Midtrans API
-    $this->checkPaymentStatus($order);
+        // Cek status terbaru dari Midtrans API
+        $this->checkPaymentStatus($order);
 
-    \Log::info('After API Check', ['order_id' => $orderId, 'new_status' => $order->status]);
+        \Log::info('After API Check', ['order_id' => $orderId, 'new_status' => $order->status]);
 
-    // Jika status masih pending, update menjadi canceled
-    if ($order->status === 'pending') {
-        $order->status = 'canceled';
-        $order->save();
-        \Log::info('Status updated to canceled', ['order_id' => $orderId]);
+        // Jika status masih pending, update menjadi canceled
+        if ($order->status === 'pending') {
+            $order->status = 'canceled';
+            $order->save();
+            \Log::info('Status updated to canceled', ['order_id' => $orderId]);
+        }
+
+        // Kirim data order ke view
+        return view('payment.unfinish', compact('order'));
     }
 
-    // Kirim data order ke view
-    return view('payment.unfinish', compact('order'));
-}
-
-   public function paymentError(Request $request)
+    public function paymentError(Request $request)
     {
         $orderId = $request->order_id;
         $order = Order::where('order_number', $orderId)->firstOrFail();
@@ -201,10 +217,11 @@ class PaymentController extends Controller
 
         return view('payment.error', compact('order'));
     }
+
     /**
      * Check payment status directly from Midtrans API
      */
-        private function checkPaymentStatus(Order $order)
+    private function checkPaymentStatus(Order $order)
     {
         try {
             $status = Transaction::status($order->order_number);
@@ -319,7 +336,7 @@ class PaymentController extends Controller
         }
     }
 
-    // Method untuk menangani hasil pembayaran sukses (jika ada route yang memanggil ini)
+    // Method untuk menangani hasil pembayaran sukses
     public function paymentSuccess(Request $request)
     {
         $orderId = $request->order_id;
@@ -328,14 +345,14 @@ class PaymentController extends Controller
         return view('payment.success', compact('order'));
     }
 
-    // Method untuk menangani processing checkout (jika ada route yang memanggil ini)
+    // Method untuk menangani processing checkout
     public function processPayment(Request $request)
     {
         // Logic untuk memproses pembayaran
         return response()->json(['message' => 'Payment processed']);
     }
 
-    // Method untuk menangani cancel payment (jika ada route yang memanggil ini)
+    // Method untuk menangani cancel payment
     public function paymentCancel(Request $request)
     {
         $orderId = $request->order_id;
@@ -347,7 +364,7 @@ class PaymentController extends Controller
         return view('payment.cancel', compact('order'));
     }
 
-    // Method untuk menampilkan history pembayaran (jika diperlukan)
+    // Method untuk menampilkan history pembayaran
     public function paymentHistory()
     {
         $orders = Order::where('customer_name', auth()->user()->name ?? '')
@@ -357,7 +374,7 @@ class PaymentController extends Controller
         return view('payment.history', compact('orders'));
     }
 
-    // Method untuk menampilkan detail pembayaran (jika diperlukan)
+    // Method untuk menampilkan detail pembayaran
     public function paymentDetail($order_id)
     {
         $order = Order::where('order_number', $order_id)->firstOrFail();
@@ -366,19 +383,167 @@ class PaymentController extends Controller
         return view('payment.detail', compact('order', 'promo'));
     }
 
-    // Method untuk export invoice (jika diperlukan)
+    /**
+     * Method untuk menampilkan invoice dan auto download
+     */
+     public function showInvoice($order_id)
+    {
+        $order = Order::where('order_number', $order_id)->firstOrFail();
+        $promo = Promo::findOrFail($order->promo_id);
+
+        // Jika belum ada invoice number, generate sekali lalu simpan
+        if (!$order->invoice_number) {
+            $order->invoice_number = 'INV' . date('Ymd') . Str::upper(Str::random(6));
+            $order->save();
+        }
+
+        // Cek jika request ingin download PDF
+        if (request()->has('download')) {
+            return $this->downloadInvoice($order, $promo);
+        }
+
+        return view('payment.invoice', [
+            'order' => $order,
+            'promo' => $promo,
+            'invoiceNumber' => $order->invoice_number,
+            'autoDownload' => request()->has('autodownload') // Flag untuk auto download
+        ]);
+    }
+
+    /**
+     * Generate barcode patterns untuk PDF
+     */
+    private function generateBarcodePattern($text)
+    {
+        // Simplified Code128 pattern generator for PDF
+        $patterns = [
+            '0' => '11011001100', '1' => '11001101100', '2' => '11001100110', 
+            '3' => '10010011000', '4' => '10010001100', '5' => '10001001100',
+            '6' => '10011001000', '7' => '10011000100', '8' => '10001100100',
+            '9' => '11001001000', 'A' => '11001000100', 'B' => '11000100100',
+            'C' => '10110011100', 'D' => '10011011100', 'E' => '10011001110',
+            'F' => '10111001000', 'G' => '10011101000', 'H' => '10011100100',
+            'I' => '11001110010', 'J' => '11001011100', 'K' => '11001001110',
+            'L' => '11011100100', 'M' => '11001110100', 'N' => '11101101110',
+            'O' => '11101001100', 'P' => '11100101100', 'Q' => '11100100110',
+            'R' => '11101100100', 'S' => '11100110100', 'T' => '11100110010',
+            'U' => '11011011000', 'V' => '11011000110', 'W' => '11000110110',
+            'X' => '10100011000', 'Y' => '10001011000', 'Z' => '10001000110',
+        ];
+        
+        $result = '11010010000'; // Start Code B
+        
+        for ($i = 0; $i < strlen($text); $i++) {
+            $char = strtoupper($text[$i]);
+            if (isset($patterns[$char])) {
+                $result .= $patterns[$char];
+            }
+        }
+        
+        $result .= '1100011101011'; // Stop pattern
+        
+        return $result;
+    }
+
+    private function generateAsciiBarcode($text)
+{
+    $barcode = '';
+    $chars = str_split($text);
+    
+    foreach ($chars as $char) {
+        // Convert character to binary-like pattern
+        $ascii = ord($char);
+        $binary = decbin($ascii);
+        
+        // Convert binary to barcode pattern
+        for ($i = 0; $i < strlen($binary); $i++) {
+            if ($binary[$i] === '1') {
+                $barcode .= '█';
+            } else {
+                $barcode .= '▒';
+            }
+        }
+        $barcode .= '░'; // Separator
+    }
+    
+    return $barcode;
+}
+
+    /**
+     * Convert binary pattern to barcode bars for HTML/CSS
+     */
+    private function patternToBars($pattern, $height = 60)
+    {
+        $bars = '';
+        $barWidth = 2;
+        
+        for ($i = 0; $i < strlen($pattern); $i++) {
+            $color = ($pattern[$i] === '1') ? 'black' : 'white';
+            $bars .= "<div style='display:inline-block; width:{$barWidth}px; height:{$height}px; background-color:{$color};'></div>";
+        }
+        
+        return $bars;
+    }
+
+    /**
+     * Method untuk download invoice PDF - FIXED VERSION dengan Barcode
+     */
+     public function downloadInvoice($order, $promo)
+    {
+        $invoiceNumber = $order->invoice_number;
+        
+        // Generate REAL barcode menggunakan library
+        $generator = new BarcodeGeneratorHTML();
+        $barcodeHTML = $generator->getBarcode($order->order_number, $generator::TYPE_CODE_128, 3, 60);
+        
+        // Alternative: Generate base64 image barcode
+        $generatorPNG = new BarcodeGeneratorPNG();
+        $barcodePNG = base64_encode($generatorPNG->getBarcode($order->order_number, $generatorPNG::TYPE_CODE_128, 3, 60));
+        $barcodeImage = 'data:image/png;base64,' . $barcodePNG;
+        
+        $pdf = Pdf::loadView('payment.invoice-pdf', [
+            'order' => $order,
+            'promo' => $promo,
+            'invoiceNumber' => $invoiceNumber,
+            'barcodeHTML' => $barcodeHTML,
+            'barcodeImage' => $barcodeImage,
+        ]);
+
+        // Set options untuk PDF
+        $pdf->setPaper('A4', 'portrait');
+        $pdf->setOption('dpi', 150);
+        $pdf->setOption('defaultFont', 'sans-serif');
+        $pdf->setOption('isHtml5ParserEnabled', true);
+        $pdf->setOption('isPhpEnabled', true);
+
+        // Bersihkan nama file dari karakter yang tidak diizinkan
+        $cleanInvoiceNumber = str_replace(['/', '\\', ':', '*', '?', '"', '<', '>', '|'], '-', $invoiceNumber);
+        $filename = "Invoice_{$cleanInvoiceNumber}_MestaKara.pdf";
+
+        return $pdf->download($filename);
+    }
+
+    /**
+     * Method khusus untuk auto download setelah pembayaran sukses
+     */
+   public function autoDownloadInvoice($order_id)
+    {
+        $order = Order::where('order_number', $order_id)->firstOrFail();
+        $promo = Promo::findOrFail($order->promo_id);
+
+        return $this->downloadInvoice($order, $promo);
+    }
+
+    // Method untuk export invoice
     public function exportInvoice($order_id)
     {
         $order = Order::where('order_number', $order_id)->firstOrFail();
         $promo = Promo::findOrFail($order->promo_id);
 
-        // Logic untuk export invoice PDF
-        // return PDF::loadView('payment.invoice', compact('order', 'promo'))->download('invoice-'.$order_id.'.pdf');
-        
         return view('payment.invoice', compact('order', 'promo'));
     }
 
-    // Method untuk refund payment (jika diperlukan)
+    // Method untuk refund payment
     public function requestRefund(Request $request, $order_id)
     {
         $order = Order::where('order_number', $order_id)->firstOrFail();
@@ -396,7 +561,7 @@ class PaymentController extends Controller
         return response()->json(['message' => 'Refund request submitted']);
     }
 
-    // Method untuk mengecek ketersediaan tiket (jika diperlukan)
+    // Method untuk mengecek ketersediaan tiket
     public function checkAvailability(Request $request)
     {
         $visitDate = $request->visit_date;
@@ -411,23 +576,64 @@ class PaymentController extends Controller
         ]);
     }
 
-    // Tambahkan method ini di PaymentController
-    public function showInvoice($order_id)
+    /**
+     * Method untuk menampilkan waiting page
+     */
+    public function showWaiting($order_id)
     {
         $order = Order::where('order_number', $order_id)->firstOrFail();
-        $promo = Promo::findOrFail($order->promo_id);
-
-        // Jika belum ada invoice number, generate sekali lalu simpan
-        if (!$order->invoice_number) {
-            $order->invoice_number = 'INV/' . date('Ymd') . '/' . Str::upper(Str::random(6));
-            $order->save();
-        }
-
-        return view('payment.invoice', [
-            'order' => $order,
-            'promo' => $promo,
-            'invoiceNumber' => $order->invoice_number, // selalu ambil dari DB
-        ]);
+        return view('payment.waiting', compact('order'));
     }
 
+    public function generateBarcodeFile($orderNumber)
+    {
+        $generator = new BarcodeGeneratorPNG();
+        $barcode = $generator->getBarcode($orderNumber, $generator::TYPE_CODE_128, 3, 60);
+        
+        // Save barcode ke storage/app/public/barcodes/
+        $filename = 'barcode_' . $orderNumber . '.png';
+        $path = storage_path('app/public/barcodes/' . $filename);
+        
+        // Pastikan folder ada
+        if (!file_exists(dirname($path))) {
+            mkdir(dirname($path), 0755, true);
+        }
+        
+        file_put_contents($path, $barcode);
+        
+        return $filename;
+    }
+
+        public function downloadInvoiceWithBarcodeFile($order, $promo)
+    {
+        $invoiceNumber = $order->invoice_number;
+        
+        // Generate dan save barcode file
+        $barcodeFilename = $this->generateBarcodeFile($order->order_number);
+        $barcodeUrl = asset('storage/barcodes/' . $barcodeFilename);
+        
+        // Convert image to base64 for PDF
+        $barcodePath = storage_path('app/public/barcodes/' . $barcodeFilename);
+        if (file_exists($barcodePath)) {
+            $barcodeBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($barcodePath));
+        } else {
+            $barcodeBase64 = null;
+        }
+        
+        $pdf = Pdf::loadView('payment.invoice-pdf', [
+            'order' => $order,
+            'promo' => $promo,
+            'invoiceNumber' => $invoiceNumber,
+            'barcodeImage' => $barcodeBase64,
+        ]);
+
+        $pdf->setPaper('A4', 'portrait');
+        $pdf->setOption('dpi', 150);
+        $pdf->setOption('defaultFont', 'sans-serif');
+
+        $cleanInvoiceNumber = str_replace(['/', '\\', ':', '*', '?', '"', '<', '>', '|'], '-', $invoiceNumber);
+        $filename = "Invoice_{$cleanInvoiceNumber}_MestaKara.pdf";
+
+        return $pdf->download($filename);
+    }
 }
