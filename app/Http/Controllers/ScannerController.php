@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 class ScannerController extends Controller
 {
     // Kode verifikasi petugas
-    private $verificationCode = '123456';
+    private $verificationCode = '250925';
 
     /**
      * Tampilkan halaman verifikasi petugas
