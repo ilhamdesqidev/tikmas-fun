@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scanner Dashboard - MestaKara</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Library untuk berbagai jenis barcode -->
-    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+    <!-- Library untuk barcode linear -->
     <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
@@ -31,24 +30,11 @@
             justify-content: center;
             flex-direction: column;
         }
-        .scanner-box {
-            width: 200px;
-            height: 200px;
-            border: 3px solid #00ff00;
-            border-radius: 12px;
-            animation: pulse 2s infinite;
-            margin-bottom: 10px;
-        }
         .scanner-line {
             width: 200px;
             height: 3px;
             background: #00ff00;
             animation: scan 2s infinite;
-        }
-        @keyframes pulse {
-            0% { border-color: #00ff00; }
-            50% { border-color: #00aa00; }
-            100% { border-color: #00ff00; }
         }
         @keyframes scan {
             0% { transform: translateY(-100px); }
@@ -167,45 +153,24 @@
             <!-- Scanner Section -->
             <div class="bg-white rounded-xl shadow-lg p-6">
                 <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-xl font-bold text-gray-900">Multi-Format Scanner</h2>
+                    <h2 class="text-xl font-bold text-gray-900">Barcode Scanner</h2>
                     <div class="flex items-center space-x-2">
                         <div class="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
                         <span class="text-sm text-green-600 font-medium">Ready</span>
                     </div>
                 </div>
 
-                <!-- Scanner Mode Selection -->
-                <div class="scanning-mode mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Mode Scanner
-                    </label>
-                    <div class="flex space-x-2">
-                        <button id="mode-qr" onclick="setScannerMode('qr')" 
-                                class="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg font-medium">
-                            📷 QR Code
-                        </button>
-                        <button id="mode-barcode" onclick="setScannerMode('barcode')" 
-                                class="flex-1 px-3 py-2 bg-gray-300 text-gray-700 rounded-lg font-medium">
-                            📊 Barcode Linear
-                        </button>
-                        <button id="mode-auto" onclick="setScannerMode('auto')" 
-                                class="flex-1 px-3 py-2 bg-gray-300 text-gray-700 rounded-lg font-medium">
-                            🔄 Auto Detect
-                        </button>
-                    </div>
-                </div>
-
                 <!-- Manual Input -->
                 <div class="mb-6">
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Input Manual Barcode/QR
+                        Input Manual Barcode
                     </label>
                     <div class="flex space-x-2">
                         <input 
                             type="text" 
                             id="manual-barcode"
                             class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Ketik, paste, atau scan barcode/QR code"
+                            placeholder="Ketik, paste, atau scan barcode"
                             autocomplete="off"
                         >
                         <button 
@@ -241,21 +206,18 @@
                     
                     <div class="scanner-container aspect-video" id="scanner-container" style="display: none;">
                         <video id="camera" autoplay playsinline class="w-full h-full object-cover"></video>
-                        <canvas id="canvas" style="display: none;"></canvas>
                         <div id="quagga-overlay"></div>
                         
                         <div class="scanner-overlay">
-                            <div class="scanner-box" id="qr-overlay"></div>
-                            <div class="scanner-line" id="barcode-overlay" style="display: none;"></div>
+                            <div class="scanner-line" id="barcode-overlay"></div>
                         </div>
                         
                         <div class="barcode-type-indicator" id="barcode-type">
-                            Mode: QR Code
+                            Mode: Barcode Linear
                         </div>
                     </div>
                     
                     <p class="text-xs text-gray-500 mt-2">
-                        <strong>QR Code:</strong> Arahkan kamera ke QR code (kotak) |
                         <strong>Barcode:</strong> Arahkan kamera ke barcode linear (garis-garis)
                     </p>
                 </div>
@@ -399,7 +361,6 @@
         let camera = null;
         let scanning = false;
         let currentOrderNumber = null;
-        let currentScannerMode = 'qr'; // Default mode
         let quaggaInitialized = false;
 
         // Update current time
@@ -410,61 +371,11 @@
         setInterval(updateCurrentTime, 1000);
         updateCurrentTime();
 
-        // Set scanner mode
-        function setScannerMode(mode) {
-            currentScannerMode = mode;
-            
-            // Update UI buttons
-            document.getElementById('mode-qr').className = 
-                mode === 'qr' ? 'flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg font-medium' 
-                             : 'flex-1 px-3 py-2 bg-gray-300 text-gray-700 rounded-lg font-medium';
-            
-            document.getElementById('mode-barcode').className = 
-                mode === 'barcode' ? 'flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg font-medium' 
-                                  : 'flex-1 px-3 py-2 bg-gray-300 text-gray-700 rounded-lg font-medium';
-            
-            document.getElementById('mode-auto').className = 
-                mode === 'auto' ? 'flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg font-medium' 
-                               : 'flex-1 px-3 py-2 bg-gray-300 text-gray-700 rounded-lg font-medium';
-            
-            // Update overlay
-            const qrOverlay = document.getElementById('qr-overlay');
-            const barcodeOverlay = document.getElementById('barcode-overlay');
-            const typeIndicator = document.getElementById('barcode-type');
-            
-            if (mode === 'qr') {
-                qrOverlay.style.display = 'block';
-                barcodeOverlay.style.display = 'none';
-                typeIndicator.textContent = 'Mode: QR Code';
-            } else if (mode === 'barcode') {
-                qrOverlay.style.display = 'none';
-                barcodeOverlay.style.display = 'block';
-                typeIndicator.textContent = 'Mode: Barcode Linear';
-            } else {
-                qrOverlay.style.display = 'block';
-                barcodeOverlay.style.display = 'block';
-                typeIndicator.textContent = 'Mode: Auto Detect';
-            }
-            
-            // Restart scanner jika sedang aktif
-            if (camera) {
-                restartScanner();
-            }
-        }
-
-        // Restart scanner dengan mode baru
-        function restartScanner() {
-            if (camera) {
-                toggleCamera(); // Stop
-                setTimeout(() => toggleCamera(), 500); // Start lagi
-            }
-        }
-
         // Manual barcode scan
         function scanManualBarcode() {
             const barcode = document.getElementById('manual-barcode').value.trim();
             if (!barcode) {
-                showScanStatus('Mohon masukkan barcode atau QR code!', 'error');
+                showScanStatus('Mohon masukkan barcode!', 'error');
                 return;
             }
             processBarcode(barcode);
@@ -520,7 +431,7 @@
                     const constraints = {
                         video: { 
                             deviceId: cameraId ? { exact: cameraId } : undefined,
-                            facingMode: currentScannerMode === 'qr' ? 'environment' : { ideal: 'environment' },
+                            facingMode: { ideal: 'environment' },
                             width: { ideal: 1280 },
                             height: { ideal: 720 }
                         }
@@ -580,48 +491,11 @@
             }
         }
 
-        // Start scanner berdasarkan mode
+        // Start scanner barcode linear
         function startScanner() {
             if (!scanning || !camera) return;
             
-            switch(currentScannerMode) {
-                case 'qr':
-                    scanQRCode();
-                    break;
-                case 'barcode':
-                    scanBarcodeLinear();
-                    break;
-                case 'auto':
-                    scanAuto();
-                    break;
-            }
-        }
-
-        // Scan QR Code
-        function scanQRCode() {
-            if (!scanning || !camera) return;
-            
-            const video = document.getElementById('camera');
-            const canvas = document.getElementById('canvas');
-            const context = canvas.getContext('2d');
-            
-            if (video.readyState === video.HAVE_ENOUGH_DATA) {
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                
-                const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-                const code = jsQR(imageData.data, imageData.width, imageData.height);
-                
-                if (code) {
-                    processBarcode(code.data);
-                    return;
-                }
-            }
-            
-            if (scanning) {
-                setTimeout(scanQRCode, 100);
-            }
+            scanBarcodeLinear();
         }
 
         // Scan Barcode Linear
@@ -655,8 +529,7 @@
                 }, function(err) {
                     if (err) {
                         console.error('Quagga init error:', err);
-                        showScanStatus('Gagal inisialisasi scanner barcode. Beralih ke mode QR.', 'error');
-                        setScannerMode('qr');
+                        showScanStatus('Gagal inisialisasi scanner barcode.', 'error');
                         return;
                     }
                     quaggaInitialized = true;
@@ -670,12 +543,6 @@
                     });
                 });
             }
-        }
-
-        // Auto detect mode
-        function scanAuto() {
-            // Prioritize QR code dulu
-            scanQRCode();
         }
 
         // Process barcode
