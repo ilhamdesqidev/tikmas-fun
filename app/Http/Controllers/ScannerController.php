@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 class ScannerController extends Controller
 {
     // Kode verifikasi petugas
-    private $verificationCode = '123456';
+    private $verificationCode = '250925';
 
     /**
      * Tampilkan halaman verifikasi petugas
@@ -123,7 +123,16 @@ class ScannerController extends Controller
         ]);
 
         try {
-            $order = Order::where('order_number', $request->barcode)->first();
+            // Normalize barcode - hapus spasi dan karakter khusus
+            $barcode = trim($request->barcode);
+            $barcode = preg_replace('/\s+/', '', $barcode);
+            
+            // Cari order dengan berbagai kemungkinan field
+            $order = Order::where(function($query) use ($barcode) {
+                        $query->where('order_number', $barcode)
+                              ->orWhere('order_number', 'like', '%' . $barcode . '%');
+                    })
+                    ->first();
 
             if (!$order) {
                 return response()->json([
