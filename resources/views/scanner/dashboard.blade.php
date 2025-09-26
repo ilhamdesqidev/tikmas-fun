@@ -1,11 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scanner Dashboard - MestaKara</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Library untuk berbagai jenis barcode -->
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         .gradient-bg {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -26,6 +29,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-direction: column;
         }
         .scanner-box {
             width: 200px;
@@ -33,11 +37,39 @@
             border: 3px solid #00ff00;
             border-radius: 12px;
             animation: pulse 2s infinite;
+            margin-bottom: 10px;
+        }
+        .scanner-line {
+            width: 200px;
+            height: 3px;
+            background: #00ff00;
+            animation: scan 2s infinite;
         }
         @keyframes pulse {
             0% { border-color: #00ff00; }
             50% { border-color: #00aa00; }
             100% { border-color: #00ff00; }
+        }
+        @keyframes scan {
+            0% { transform: translateY(-100px); }
+            50% { transform: translateY(100px); }
+            100% { transform: translateY(-100px); }
+        }
+        .barcode-type-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+        .scanning-mode {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 10px;
+            margin: 10px 0;
         }
         .shake {
             animation: shake 0.5s;
@@ -46,6 +78,14 @@
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-5px); }
             75% { transform: translateX(5px); }
+        }
+        #quagga-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
         }
     </style>
 </head>
@@ -127,24 +167,45 @@
             <!-- Scanner Section -->
             <div class="bg-white rounded-xl shadow-lg p-6">
                 <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-xl font-bold text-gray-900">Scanner Barcode</h2>
+                    <h2 class="text-xl font-bold text-gray-900">Multi-Format Scanner</h2>
                     <div class="flex items-center space-x-2">
                         <div class="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
                         <span class="text-sm text-green-600 font-medium">Ready</span>
                     </div>
                 </div>
 
+                <!-- Scanner Mode Selection -->
+                <div class="scanning-mode mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Mode Scanner
+                    </label>
+                    <div class="flex space-x-2">
+                        <button id="mode-qr" onclick="setScannerMode('qr')" 
+                                class="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg font-medium">
+                            📷 QR Code
+                        </button>
+                        <button id="mode-barcode" onclick="setScannerMode('barcode')" 
+                                class="flex-1 px-3 py-2 bg-gray-300 text-gray-700 rounded-lg font-medium">
+                            📊 Barcode Linear
+                        </button>
+                        <button id="mode-auto" onclick="setScannerMode('auto')" 
+                                class="flex-1 px-3 py-2 bg-gray-300 text-gray-700 rounded-lg font-medium">
+                            🔄 Auto Detect
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Manual Input -->
                 <div class="mb-6">
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Input Manual Barcode
+                        Input Manual Barcode/QR
                     </label>
                     <div class="flex space-x-2">
                         <input 
                             type="text" 
                             id="manual-barcode"
                             class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Ketik atau scan barcode di sini"
+                            placeholder="Ketik, paste, atau scan barcode/QR code"
                             autocomplete="off"
                         >
                         <button 
@@ -164,25 +225,38 @@
                         <label class="block text-sm font-medium text-gray-700">
                             Scanner Kamera
                         </label>
-                        <button 
-                            id="toggle-camera"
-                            onclick="toggleCamera()"
-                            class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm font-medium transition-colors"
-                        >
-                            Start Camera
-                        </button>
+                        <div class="flex space-x-2">
+                            <select id="camera-select" class="border rounded px-2 py-1 text-sm hidden">
+                                <option value="">Pilih Kamera</option>
+                            </select>
+                            <button 
+                                id="toggle-camera"
+                                onclick="toggleCamera()"
+                                class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm font-medium transition-colors"
+                            >
+                                Start Camera
+                            </button>
+                        </div>
                     </div>
                     
                     <div class="scanner-container aspect-video" id="scanner-container" style="display: none;">
                         <video id="camera" autoplay playsinline class="w-full h-full object-cover"></video>
                         <canvas id="canvas" style="display: none;"></canvas>
+                        <div id="quagga-overlay"></div>
+                        
                         <div class="scanner-overlay">
-                            <div class="scanner-box"></div>
+                            <div class="scanner-box" id="qr-overlay"></div>
+                            <div class="scanner-line" id="barcode-overlay" style="display: none;"></div>
+                        </div>
+                        
+                        <div class="barcode-type-indicator" id="barcode-type">
+                            Mode: QR Code
                         </div>
                     </div>
                     
                     <p class="text-xs text-gray-500 mt-2">
-                        Arahkan kamera ke barcode untuk scan otomatis
+                        <strong>QR Code:</strong> Arahkan kamera ke QR code (kotak) |
+                        <strong>Barcode:</strong> Arahkan kamera ke barcode linear (garis-garis)
                     </p>
                 </div>
 
@@ -276,9 +350,15 @@
                         <tr class="border-b">
                             <td class="p-3 text-sm">{{ $scan->order_number }}</td>
                             <td class="p-3 text-sm">{{ $scan->customer_name }}</td>
-                            <td class="p-3 text-sm">{{ $scan->promo->name }}</td>
+                            <td class="p-3 text-sm">{{ $scan->promo ? $scan->promo->name : 'Unknown' }}</td>
                             <td class="p-3 text-sm">{{ $scan->ticket_quantity }}</td>
-                            <td class="p-3 text-sm">{{ \Carbon\Carbon::parse($scan->created_at)->timezone('Asia/Jakarta')->translatedFormat('d M Y, H:i') }}</td>
+                            <td class="p-3 text-sm">
+                                @if(isset($scan->used_at))
+                                    {{ \Carbon\Carbon::parse($scan->used_at)->timezone('Asia/Jakarta')->translatedFormat('d M Y, H:i') }}
+                                @else
+                                    {{ \Carbon\Carbon::parse($scan->updated_at)->timezone('Asia/Jakarta')->translatedFormat('d M Y, H:i') }}
+                                @endif
+                            </td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -319,6 +399,8 @@
         let camera = null;
         let scanning = false;
         let currentOrderNumber = null;
+        let currentScannerMode = 'qr'; // Default mode
+        let quaggaInitialized = false;
 
         // Update current time
         function updateCurrentTime() {
@@ -328,11 +410,61 @@
         setInterval(updateCurrentTime, 1000);
         updateCurrentTime();
 
+        // Set scanner mode
+        function setScannerMode(mode) {
+            currentScannerMode = mode;
+            
+            // Update UI buttons
+            document.getElementById('mode-qr').className = 
+                mode === 'qr' ? 'flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg font-medium' 
+                             : 'flex-1 px-3 py-2 bg-gray-300 text-gray-700 rounded-lg font-medium';
+            
+            document.getElementById('mode-barcode').className = 
+                mode === 'barcode' ? 'flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg font-medium' 
+                                  : 'flex-1 px-3 py-2 bg-gray-300 text-gray-700 rounded-lg font-medium';
+            
+            document.getElementById('mode-auto').className = 
+                mode === 'auto' ? 'flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg font-medium' 
+                               : 'flex-1 px-3 py-2 bg-gray-300 text-gray-700 rounded-lg font-medium';
+            
+            // Update overlay
+            const qrOverlay = document.getElementById('qr-overlay');
+            const barcodeOverlay = document.getElementById('barcode-overlay');
+            const typeIndicator = document.getElementById('barcode-type');
+            
+            if (mode === 'qr') {
+                qrOverlay.style.display = 'block';
+                barcodeOverlay.style.display = 'none';
+                typeIndicator.textContent = 'Mode: QR Code';
+            } else if (mode === 'barcode') {
+                qrOverlay.style.display = 'none';
+                barcodeOverlay.style.display = 'block';
+                typeIndicator.textContent = 'Mode: Barcode Linear';
+            } else {
+                qrOverlay.style.display = 'block';
+                barcodeOverlay.style.display = 'block';
+                typeIndicator.textContent = 'Mode: Auto Detect';
+            }
+            
+            // Restart scanner jika sedang aktif
+            if (camera) {
+                restartScanner();
+            }
+        }
+
+        // Restart scanner dengan mode baru
+        function restartScanner() {
+            if (camera) {
+                toggleCamera(); // Stop
+                setTimeout(() => toggleCamera(), 500); // Start lagi
+            }
+        }
+
         // Manual barcode scan
         function scanManualBarcode() {
             const barcode = document.getElementById('manual-barcode').value.trim();
             if (!barcode) {
-                showScanStatus('Mohon masukkan barcode!', 'error');
+                showScanStatus('Mohon masukkan barcode atau QR code!', 'error');
                 return;
             }
             processBarcode(barcode);
@@ -345,6 +477,28 @@
             }
         });
 
+        // Get available cameras
+        async function getCameras() {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                
+                const select = document.getElementById('camera-select');
+                select.innerHTML = '<option value="">Pilih Kamera</option>';
+                
+                videoDevices.forEach((device, index) => {
+                    const option = document.createElement('option');
+                    option.value = device.deviceId;
+                    option.text = device.label || `Kamera ${index + 1}`;
+                    select.appendChild(option);
+                });
+                
+                select.classList.remove('hidden');
+            } catch (error) {
+                console.error('Error getting cameras:', error);
+            }
+        }
+
         // Toggle camera
         async function toggleCamera() {
             const button = document.getElementById('toggle-camera');
@@ -352,22 +506,27 @@
             
             if (camera) {
                 // Stop camera
-                camera.getTracks().forEach(track => track.stop());
-                camera = null;
-                scanning = false;
+                stopAllScanners();
                 button.textContent = 'Start Camera';
                 button.className = 'bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm font-medium transition-colors';
                 container.style.display = 'none';
             } else {
                 // Start camera
                 try {
-                    camera = await navigator.mediaDevices.getUserMedia({
+                    await getCameras();
+                    const select = document.getElementById('camera-select');
+                    const cameraId = select.value || null;
+                    
+                    const constraints = {
                         video: { 
-                            facingMode: 'environment',
-                            width: { ideal: 640 },
-                            height: { ideal: 480 }
+                            deviceId: cameraId ? { exact: cameraId } : undefined,
+                            facingMode: currentScannerMode === 'qr' ? 'environment' : { ideal: 'environment' },
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 }
                         }
-                    });
+                    };
+                    
+                    camera = await navigator.mediaDevices.getUserMedia(constraints);
                     
                     const video = document.getElementById('camera');
                     video.srcObject = camera;
@@ -377,16 +536,69 @@
                     container.style.display = 'block';
                     
                     scanning = true;
-                    scanFromCamera();
+                    startScanner();
                 } catch (error) {
                     console.error('Camera access error:', error);
-                    showScanStatus('Tidak dapat mengakses kamera. Gunakan input manual.', 'error');
+                    showScanStatus('Tidak dapat mengakses kamera. Pastikan izin kamera diberikan.', 'error');
+                    
+                    // Fallback: coba tanpa constraints spesifik
+                    try {
+                        camera = await navigator.mediaDevices.getUserMedia({ video: true });
+                        const video = document.getElementById('camera');
+                        video.srcObject = camera;
+                        
+                        button.textContent = 'Stop Camera';
+                        button.className = 'bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm font-medium transition-colors';
+                        container.style.display = 'block';
+                        
+                        scanning = true;
+                        startScanner();
+                    } catch (fallbackError) {
+                        console.error('Fallback camera error:', fallbackError);
+                        showScanStatus('Gagal mengakses kamera. Gunakan input manual.', 'error');
+                    }
                 }
             }
         }
 
-        // Scan from camera
-        function scanFromCamera() {
+        // Stop semua scanner
+        function stopAllScanners() {
+            scanning = false;
+            
+            if (camera) {
+                camera.getTracks().forEach(track => track.stop());
+                camera = null;
+            }
+            
+            if (quaggaInitialized) {
+                try {
+                    Quagga.stop();
+                } catch (e) {
+                    console.log('Quagga already stopped');
+                }
+                quaggaInitialized = false;
+            }
+        }
+
+        // Start scanner berdasarkan mode
+        function startScanner() {
+            if (!scanning || !camera) return;
+            
+            switch(currentScannerMode) {
+                case 'qr':
+                    scanQRCode();
+                    break;
+                case 'barcode':
+                    scanBarcodeLinear();
+                    break;
+                case 'auto':
+                    scanAuto();
+                    break;
+            }
+        }
+
+        // Scan QR Code
+        function scanQRCode() {
             if (!scanning || !camera) return;
             
             const video = document.getElementById('camera');
@@ -403,15 +615,79 @@
                 
                 if (code) {
                     processBarcode(code.data);
-                    return; // Stop scanning after successful read
+                    return;
                 }
             }
             
-            setTimeout(scanFromCamera, 100);
+            if (scanning) {
+                setTimeout(scanQRCode, 100);
+            }
+        }
+
+        // Scan Barcode Linear
+        function scanBarcodeLinear() {
+            if (!scanning) return;
+            
+            if (!quaggaInitialized) {
+                Quagga.init({
+                    inputStream: {
+                        name: "Live",
+                        type: "LiveStream",
+                        target: document.querySelector('#camera'),
+                        constraints: {
+                            width: 640,
+                            height: 480,
+                            facingMode: "environment"
+                        }
+                    },
+                    decoder: {
+                        readers: [
+                            "code_128_reader",
+                            "ean_reader",
+                            "ean_8_reader",
+                            "code_39_reader",
+                            "upc_reader",
+                            "upc_e_reader"
+                        ]
+                    },
+                    locate: true,
+                    debug: false
+                }, function(err) {
+                    if (err) {
+                        console.error('Quagga init error:', err);
+                        showScanStatus('Gagal inisialisasi scanner barcode. Beralih ke mode QR.', 'error');
+                        setScannerMode('qr');
+                        return;
+                    }
+                    quaggaInitialized = true;
+                    Quagga.start();
+                    
+                    Quagga.onDetected(function(result) {
+                        if (result && result.codeResult && result.codeResult.code) {
+                            const barcode = result.codeResult.code;
+                            processBarcode(barcode);
+                        }
+                    });
+                });
+            }
+        }
+
+        // Auto detect mode
+        function scanAuto() {
+            // Prioritize QR code dulu
+            scanQRCode();
         }
 
         // Process barcode
         async function processBarcode(barcode) {
+            // Normalize barcode
+            barcode = barcode.trim().replace(/\s+/g, '');
+            
+            // Skip jika barcode terlalu pendek
+            if (barcode.length < 3) {
+                return;
+            }
+            
             document.getElementById('manual-barcode').value = barcode;
             showScanStatus('Memproses barcode...', 'loading');
             
@@ -420,7 +696,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     },
                     body: JSON.stringify({ barcode: barcode })
                 });
@@ -429,18 +705,38 @@
                 
                 if (result.success && result.order) {
                     showTicketDetail(result.order);
-                    showScanStatus(result.message, 'success');
+                    showScanStatus('✅ ' + result.message, 'success');
                     currentOrderNumber = result.order.order_number;
+                    
+                    // Berhenti scan sebentar setelah berhasil
+                    setTimeout(() => {
+                        if (scanning) {
+                            startScanner(); // Lanjutkan scanning
+                        }
+                    }, 2000);
                 } else {
-                    showScanStatus(result.message, 'error');
+                    showScanStatus('❌ ' + result.message, 'error');
                     hideTicketDetail();
                     currentOrderNumber = null;
+                    
+                    // Lanjutkan scanning setelah error
+                    setTimeout(() => {
+                        if (scanning) {
+                            startScanner();
+                        }
+                    }, 1000);
                 }
             } catch (error) {
                 console.error('Scan error:', error);
-                showScanStatus('Terjadi kesalahan saat memproses barcode', 'error');
+                showScanStatus('❌ Terjadi kesalahan saat memproses barcode', 'error');
                 hideTicketDetail();
                 currentOrderNumber = null;
+                
+                setTimeout(() => {
+                    if (scanning) {
+                        startScanner();
+                    }
+                }, 1000);
             }
         }
 
@@ -453,19 +749,14 @@
                 statusDiv.className += ' bg-green-50 text-green-800 border border-green-200';
             } else if (type === 'error') {
                 statusDiv.className += ' bg-red-50 text-red-800 border border-red-200';
+                statusDiv.classList.add('shake');
+                setTimeout(() => statusDiv.classList.remove('shake'), 500);
             } else if (type === 'loading') {
                 statusDiv.className += ' bg-blue-50 text-blue-800 border border-blue-200';
             }
             
-            statusDiv.textContent = message;
+            statusDiv.innerHTML = message;
             statusDiv.classList.remove('hidden');
-            
-            // Auto hide after 5 seconds for success/error
-            if (type !== 'loading') {
-                setTimeout(() => {
-                    statusDiv.classList.add('hidden');
-                }, 5000);
-            }
         }
 
         // Show ticket detail
@@ -479,7 +770,7 @@
             document.getElementById('detail-visit-date').textContent = order.visit_date;
             document.getElementById('detail-quantity').textContent = order.ticket_quantity;
             document.getElementById('detail-promo-name').textContent = order.promo_name;
-            document.getElementById('detail-total-price').textContent = 'Rp ' + order.total_price.toLocaleString('id-ID');
+            document.getElementById('detail-total-price').textContent = 'Rp ' + parseInt(order.total_price).toLocaleString('id-ID');
             
             const statusElement = document.getElementById('detail-status');
             const useButton = document.getElementById('use-ticket-btn');
@@ -489,7 +780,7 @@
                 statusElement.className = 'font-medium text-green-600';
                 useButton.disabled = false;
                 useButton.className = 'w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition-colors';
-            } else if (order.status === 'used') {
+            } else if (order.status === 'used' || order.status === 'expired') {
                 statusElement.textContent = 'Sudah Digunakan';
                 statusElement.className = 'font-medium text-red-600';
                 useButton.disabled = true;
@@ -500,6 +791,7 @@
                 statusElement.className = 'font-medium text-red-600';
                 useButton.disabled = true;
                 useButton.className = 'w-full bg-gray-400 cursor-not-allowed text-white font-bold py-3 px-4 rounded-lg';
+                useButton.textContent = '❌ Tiket Tidak Valid';
             }
         }
 
@@ -524,7 +816,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     },
                     body: JSON.stringify({ order_number: currentOrderNumber })
                 });
@@ -570,7 +862,10 @@
         function addToRecentScans(order) {
             const tbody = document.getElementById('recent-scans-body');
             const now = new Date();
-            const timeStr = now.toTimeString().substring(0, 5);
+            const timeStr = now.toLocaleTimeString('id-ID', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
             
             const row = document.createElement('tr');
             row.className = 'border-b bg-green-50';
@@ -603,6 +898,18 @@
 
         // Auto-focus manual input
         document.getElementById('manual-barcode').focus();
+
+        // Cleanup saat page unload
+        window.addEventListener('beforeunload', function() {
+            stopAllScanners();
+        });
+
+        // Handle page visibility change
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                stopAllScanners();
+            }
+        });
     </script>
 </body>
 </html>
