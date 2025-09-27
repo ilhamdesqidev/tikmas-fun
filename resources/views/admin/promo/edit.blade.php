@@ -27,7 +27,7 @@
             @csrf
             @method('PUT')
             
-            <!-- Field Upload Gambar -->
+            <!-- Field Upload Gambar Promo -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Gambar Promo</label>
                 <div class="mt-1 flex items-center">
@@ -54,6 +54,38 @@
                 </div>
             </div>
 
+            <!-- Field Upload Desain Gelang -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Desain Gelang</label>
+                <div class="mt-1 flex items-center">
+                    <div class="relative rounded-lg overflow-hidden w-40 h-40 bg-gray-100 flex items-center justify-center border-2 border-dashed border-gray-300">
+                        @if($promo->bracelet_design)
+                            <img id="braceletPreview" src="{{ $promo->bracelet_design_url }}" alt="Preview Desain Gelang" class="w-full h-full object-cover">
+                            <span id="braceletPlaceholder" class="text-gray-400 text-sm hidden">No image</span>
+                        @else
+                            <img id="braceletPreview" src="" alt="Preview Desain Gelang" class="hidden w-full h-full object-cover">
+                            <span id="braceletPlaceholder" class="text-gray-400 text-sm">No image</span>
+                        @endif
+                    </div>
+                    <div class="ml-4">
+                        <input type="file" name="bracelet_design" id="braceletInput" accept="image/*" 
+                               class="hidden" onchange="previewBracelet(this)">
+                        <label for="braceletInput" class="cursor-pointer px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200 text-sm">
+                            @if($promo->bracelet_design) Ganti Desain Gelang @else Pilih Desain Gelang @endif
+                        </label>
+                        <p class="text-xs text-gray-500 mt-2">Format: JPEG, PNG, JPG, GIF, SVG<br>Maksimal: 10MB</p>
+                        @if($promo->bracelet_design)
+                        <div class="mt-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" name="remove_bracelet_design" value="1" class="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary">
+                                <span class="ml-2 text-sm text-gray-700">Hapus desain gelang saat ini</span>
+                            </label>
+                        </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Nama Promo *</label>
@@ -62,11 +94,11 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Kategori</label>
                     <select name="category" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
-                        <option value="bulanan" {{ old('category', $promo->category ?? '') == 'bulanan' ? 'selected' : '' }}>promo bulanan</option>
-                        <option value="holiday" {{ old('category', $promo->category ?? '') == 'holiday' ? 'selected' : '' }}>promo holiday</option>
-                        <option value="birthday" {{ old('category', $promo->category ?? '') == 'birthday' ? 'selected' : '' }}>promo Birthday</option>
-                        <option value="nasional" {{ old('category', $promo->category ?? '') == 'nasional' ? 'selected' : '' }}>promo hari nasional</option>
-                        <option value="student" {{ old('category', $promo->category ?? '') == 'student' ? 'selected' : '' }}>promo student discount</option>
+                        <option value="bulanan" {{ old('category', $promo->category) == 'bulanan' ? 'selected' : '' }}>Promo Bulanan</option>
+                        <option value="holiday" {{ old('category', $promo->category) == 'holiday' ? 'selected' : '' }}>Promo Holiday</option>
+                        <option value="birthday" {{ old('category', $promo->category) == 'birthday' ? 'selected' : '' }}>Promo Birthday</option>
+                        <option value="nasional" {{ old('category', $promo->category) == 'nasional' ? 'selected' : '' }}>Promo Hari Nasional</option>
+                        <option value="student" {{ old('category', $promo->category) == 'student' ? 'selected' : '' }}>Promo Student Discount</option>
                     </select>
                 </div>
             </div>
@@ -150,10 +182,28 @@
 
 @section('extra-js')
 <script>
-    // Preview gambar
+    // Preview gambar promo
     function previewImage(input) {
         const preview = document.getElementById('imagePreview');
         const placeholder = document.getElementById('placeholderText');
+        
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            }
+            
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // Preview desain gelang
+    function previewBracelet(input) {
+        const preview = document.getElementById('braceletPreview');
+        const placeholder = document.getElementById('braceletPlaceholder');
         
         if (input.files && input.files[0]) {
             const reader = new FileReader();
@@ -199,6 +249,19 @@
         
         // Hitung diskon awal
         calculateDiscount();
+
+        // Inisialisasi preview untuk edit page
+        const braceletInput = document.getElementById('braceletInput');
+        if (braceletInput) {
+            const braceletPreview = document.getElementById('braceletPreview');
+            const braceletPlaceholder = document.getElementById('braceletPlaceholder');
+            
+            // Jika sudah ada gambar, pastikan preview ditampilkan
+            if (braceletPreview.src && braceletPreview.src !== window.location.href) {
+                braceletPreview.classList.remove('hidden');
+                braceletPlaceholder.classList.add('hidden');
+            }
+        }
     });
 
     // Validasi form

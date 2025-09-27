@@ -18,6 +18,23 @@
                     {!! nl2br(e($promo->description)) !!}
                 </div>
             </div>
+
+            <!-- Bagian Kiri: Tambahkan setelah deskripsi promo -->
+            <div class="card rounded-xl p-6 mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">Desain Gelang</h2>
+                @if($promo->hasBraceletDesign)
+                    <div class="text-center">
+                        <img src="{{ $promo->bracelet_design_url }}" alt="Desain Gelang {{ $promo->name }}" 
+                            class="max-w-full h-auto mx-auto rounded-lg shadow-lg max-h-96">
+                        <p class="text-sm text-gray-500 mt-2">Desain gelang yang akan digunakan untuk promo ini</p>
+                    </div>
+                @else
+                    <div class="text-center py-8 bg-gray-50 rounded-lg">
+                        <i data-feather="image" class="w-16 h-16 text-gray-300 mx-auto mb-4"></i>
+                        <p class="text-gray-500">Belum ada desain gelang yang diupload</p>
+                    </div>
+                @endif
+            </div>
             
             <div class="card rounded-xl p-6">
                 <h2 class="text-2xl font-bold text-gray-900 mb-4">Syarat dan Ketentuan</h2>

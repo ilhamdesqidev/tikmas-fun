@@ -11,21 +11,22 @@ class Promo extends Model
     use SoftDeletes;
 
     protected $fillable = [
-    'name',
-    'image',
-    'description',
-    'terms_conditions',
-    'original_price',
-    'promo_price',
-    'discount_percent',
-    'start_date',
-    'end_date',
-    'status',
-    'quota',
-    'sold_count',
-    'category', // Pastikan ini ada
-    'featured'
-];
+        'name',
+        'image',
+        'bracelet_design', // Tambahkan ke fillable
+        'description',
+        'terms_conditions',
+        'original_price',
+        'promo_price',
+        'discount_percent',
+        'start_date',
+        'end_date',
+        'status',
+        'quota',
+        'sold_count',
+        'category',
+        'featured'
+    ];
 
     protected $casts = [
         'start_date' => 'date',
@@ -34,7 +35,6 @@ class Promo extends Model
         'promo_price' => 'decimal:2',
         'featured' => 'boolean',
     ];
-    
 
     // Scope untuk promo aktif
     public function scopeActive($query)
@@ -47,7 +47,6 @@ class Promo extends Model
     }
 
     // Hitung diskon otomatis
-    // Perbaiki method calculateDiscountPercent untuk menghindari division by zero
     public function calculateDiscountPercent()
     {
         if ($this->original_price > 0) {
@@ -82,5 +81,20 @@ class Promo extends Model
             return asset('storage/' . $this->image);
         }
         return asset('images/default-promo.jpg');
+    }
+
+    // URL desain gelang lengkap
+    public function getBraceletDesignUrlAttribute()
+    {
+        if ($this->bracelet_design) {
+            return asset('storage/' . $this->bracelet_design);
+        }
+        return asset('images/default-bracelet.jpg');
+    }
+
+    // Cek apakah memiliki desain gelang
+    public function getHasBraceletDesignAttribute()
+    {
+        return !empty($this->bracelet_design);
     }
 }
