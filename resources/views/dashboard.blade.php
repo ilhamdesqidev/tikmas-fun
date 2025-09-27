@@ -377,6 +377,10 @@
           Promo
           <span class="absolute left-0 bottom-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
         </a>
+         <a href="{{route ('wahana.index') }}" class="text-black inline-block text-xl ml-0 px-4 hover:text-primary transition-all duration-500 relative group">
+          Wahana
+          <span class="absolute left-0 bottom-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+        </a>
       </div>
 
       <!-- Mobile Navigation -->
@@ -390,6 +394,7 @@
           <a href="#home" class="block mx-2 sm:mx-6 my-6 sm:my-8 py-4 text-2xl sm:text-3xl text-white border-b border-gray-700 transition-all duration-300 hover:text-primary hover:pl-4 touch-manipulation">Home</a>
           <a href="#about" class="block mx-2 sm:mx-6 my-6 sm:my-8 py-4 text-2xl sm:text-3xl text-white border-b border-gray-700 transition-all duration-300 hover:text-primary hover:pl-4 touch-manipulation">Tentang Kami</a>
           <a href="#menu" class="block mx-2 sm:mx-6 my-6 sm:my-8 py-4 text-2xl sm:text-3xl text-white border-b border-gray-700 transition-all duration-300 hover:text-primary hover:pl-4 touch-manipulation">Promo</a>
+          <a href="#" class="block mx-2 sm:mx-6 my-6 sm:my-8 py-4 text-2xl sm:text-3xl text-white border-b border-gray-700 transition-all duration-300 hover:text-primary hover:pl-4 touch-manipulation">Wahana</a>
         </div>
       </div>
 
@@ -477,11 +482,13 @@
           </div>
         </div>
           
-          <!-- Tombol Lihat Lebih Banyak -->
+        <!-- Tombol Lihat Lebih Banyak -->
           <div class="text-center mt-6">
-            <button class="inline-flex items-center px-6 py-3 bg-primary text-black font-semibold rounded-lg hover:bg-yellow-500 transition-colors duration-300 group">
+            <button onclick="window.location='{{ route('wahana.index') }}'"
+                    class="inline-flex items-center px-6 py-3 bg-primary text-black font-semibold rounded-lg hover:bg-yellow-500 transition-colors duration-300 group">
               Lihat Lebih Banyak
-              <i data-feather="chevron-down" class="w-5 h-5 ml-2 group-hover:transform group-hover:translate-y-1 transition-transform duration-300"></i>
+              <i data-feather="chevron-down"
+                class="w-5 h-5 ml-2 group-hover:transform group-hover:translate-y-1 transition-transform duration-300"></i>
             </button>
           </div>
         </div>

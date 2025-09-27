@@ -11,6 +11,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\Admin\FacilityController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\ScannerController;
+use App\Http\Controllers\WahanaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,6 +32,11 @@ Route::get('/', function () {
 Route::get('dashboard', [DashboardController::class, 'index'])->name('home');
 
 Route::get('/promo/{id}', [PromoController::class, 'show'])->name('promo.show');
+
+Route::controller(WahanaController::class)->group(function () {
+    Route::get('/wahana', 'index')->name('wahana.index');
+    Route::get('/wahana/{id}', 'show')->name('wahana.show');
+});
 
 // Payment routes (public)
 Route::post('/payment/notification', [PaymentController::class, 'notificationHandler'])->name('payment.notification');

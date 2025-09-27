@@ -12,7 +12,15 @@ class Facility extends Model
     protected $fillable = [
         'name',
         'description',
-        'image'
+        'image',
+        'duration',
+        'age_range',
+        'gallery_images',
+        'category'
+    ];
+
+    protected $casts = [
+        'gallery_images' => 'array'
     ];
 
     /**
@@ -21,5 +29,19 @@ class Facility extends Model
     public function getImageUrlAttribute()
     {
         return $this->image ? asset('storage/' . $this->image) : asset('images/default-facility.jpg');
+    }
+
+    /**
+     * Get gallery images URLs
+     */
+    public function getGalleryUrlsAttribute()
+    {
+        if (!$this->gallery_images) {
+            return [];
+        }
+
+        return array_map(function($image) {
+            return asset('storage/' . $image);
+        }, $this->gallery_images);
     }
 }

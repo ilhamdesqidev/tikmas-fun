@@ -34,16 +34,32 @@ class FacilityController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'duration' => 'required|string|max:100',
+            'age_range' => 'required|string|max:100',
+            'category' => 'required|string|max:50',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
+            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240'
         ]);
 
-        // Upload gambar
+        // Upload gambar utama
         $imagePath = $request->file('image')->store('facilities', 'public');
+
+        // Upload gallery images
+        $galleryPaths = [];
+        if ($request->hasFile('gallery_images')) {
+            foreach ($request->file('gallery_images') as $galleryImage) {
+                $galleryPaths[] = $galleryImage->store('facilities/gallery', 'public');
+            }
+        }
 
         Facility::create([
             'name' => $request->name,
             'description' => $request->description,
-            'image' => $imagePath
+            'duration' => $request->duration,
+            'age_range' => $request->age_range,
+            'category' => $request->category,
+            'image' => $imagePath,
+            'gallery_images' => !empty($galleryPaths) ? $galleryPaths : null
         ]);
 
         return redirect()->route('admin.facilities.index')
@@ -74,23 +90,46 @@ class FacilityController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'duration' => 'required|string|max:100',
+            'age_range' => 'required|string|max:100',
+            'category' => 'required|string|max:50',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240',
+            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240'
         ]);
 
         $data = [
             'name' => $request->name,
-            'description' => $request->description
+            'description' => $request->description,
+            'duration' => $request->duration,
+            'age_range' => $request->age_range,
+            'category' => $request->category
         ];
 
-        // Jika ada gambar baru, upload dan hapus yang lama
+        // Jika ada gambar utama baru
         if ($request->hasFile('image')) {
             // Hapus gambar lama
             if ($facility->image) {
                 Storage::disk('public')->delete($facility->image);
             }
-            
             // Upload gambar baru
             $data['image'] = $request->file('image')->store('facilities', 'public');
+        }
+
+        // Jika ada gallery images baru
+        if ($request->hasFile('gallery_images')) {
+            // Hapus gallery images lama
+            if ($facility->gallery_images) {
+                foreach ($facility->gallery_images as $oldGalleryImage) {
+                    Storage::disk('public')->delete($oldGalleryImage);
+                }
+            }
+            
+            // Upload gallery images baru
+            $galleryPaths = [];
+            foreach ($request->file('gallery_images') as $galleryImage) {
+                $galleryPaths[] = $galleryImage->store('facilities/gallery', 'public');
+            }
+            $data['gallery_images'] = $galleryPaths;
         }
 
         $facility->update($data);
@@ -104,9 +143,16 @@ class FacilityController extends Controller
      */
     public function destroy(Facility $facility)
     {
-        // Hapus gambar
+        // Hapus gambar utama
         if ($facility->image) {
             Storage::disk('public')->delete($facility->image);
+        }
+
+        // Hapus gallery images
+        if ($facility->gallery_images) {
+            foreach ($facility->gallery_images as $galleryImage) {
+                Storage::disk('public')->delete($galleryImage);
+            }
         }
 
         $facility->delete();
