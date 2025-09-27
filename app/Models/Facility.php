@@ -23,6 +23,10 @@ class Facility extends Model
         'gallery_images' => 'array'
     ];
 
+    protected $attributes = [
+        'category' => 'wisata'
+    ];
+
     /**
      * Get the image URL.
      */

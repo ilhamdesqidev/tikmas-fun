@@ -54,19 +54,16 @@
                     @enderror
                 </div>
 
-                <!-- Kategori -->
+                <!-- Kategori (Hidden - Default Wisata) -->
+                <input type="hidden" name="category" value="wisata">
+                
+                <!-- Display Kategori (Read-only) -->
                 <div>
-                    <label for="category" class="block text-sm font-medium text-gray-700">Kategori *</label>
-                    <select name="category" id="category" required
-                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
-                        <option value="wahana" {{ old('category', $facility->category) == 'wahana' ? 'selected' : '' }}>Wahana</option>
-                        <option value="fasilitas" {{ old('category', $facility->category) == 'fasilitas' ? 'selected' : '' }}>Fasilitas</option>
-                        <option value="restoran" {{ old('category', $facility->category) == 'restoran' ? 'selected' : '' }}>Restoran</option>
-                        <option value="toko" {{ old('category', $facility->category) == 'toko' ? 'selected' : '' }}>Toko</option>
-                    </select>
-                    @error('category')
-                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
+                    <label class="block text-sm font-medium text-gray-700">Kategori</label>
+                    <div class="mt-1 p-3 bg-gray-100 rounded-md border border-gray-300">
+                        <span class="text-gray-700 font-medium">Wisata</span>
+                        <p class="text-xs text-gray-500 mt-1">Kategori default untuk semua fasilitas</p>
+                    </div>
                 </div>
             </div>
 

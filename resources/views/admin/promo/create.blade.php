@@ -1,3 +1,27 @@
+@if (session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+@endif
+
+{{-- Tampilkan pesan error --}}
+@if (session('error'))
+    <div class="alert alert-danger">
+        {{ session('error') }}
+    </div>
+@endif
+
+{{-- Tampilkan error validasi --}}
+@if ($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
 @extends('layouts.app')
 
 @section('title', 'Tambah Paket Promo')
@@ -23,7 +47,7 @@
             </div>
         @endif
         
-        <form action="{{ route('admin.promo.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+        <form action="{{ route('admin.promo.store') }}" method="POST" enctype="multipart/form-data" id="promoForm" class="space-y-6">
             @csrf
             
             <!-- Field Upload Gambar Promo -->
@@ -43,6 +67,9 @@
                         <p class="text-xs text-gray-500 mt-2">Format: JPEG, PNG, JPG, GIF<br>Maksimal: 10MB</p>
                     </div>
                 </div>
+                @error('image')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
             </div>
 
             <!-- Field Upload Desain Gelang -->
@@ -62,12 +89,19 @@
                         <p class="text-xs text-gray-500 mt-2">Format: JPEG, PNG, JPG, GIF, SVG<br>Maksimal: 10MB</p>
                     </div>
                 </div>
+                @error('bracelet_design')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Nama Promo *</label>
-                    <input type="text" name="name" value="{{ old('name') }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <input type="text" name="name" value="{{ old('name') }}" required 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    @error('name')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Kategori</label>
@@ -78,50 +112,82 @@
                         <option value="nasional" {{ old('category') == 'nasional' ? 'selected' : '' }}>Promo Hari Nasional</option>
                         <option value="student" {{ old('category') == 'student' ? 'selected' : '' }}>Promo Student Discount</option>
                     </select>
+                    @error('category')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
             </div>
 
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi *</label>
-                <textarea name="description" rows="3" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">{{ old('description') }}</textarea>
+                <textarea name="description" rows="3" required 
+                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">{{ old('description') }}</textarea>
+                @error('description')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
             </div>
 
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Syarat dan Ketentuan *</label>
-                <textarea name="terms_conditions" rows="4" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">{{ old('terms_conditions') }}</textarea>
+                <textarea name="terms_conditions" rows="4" required 
+                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">{{ old('terms_conditions') }}</textarea>
                 <p class="text-xs text-gray-500 mt-1">Gunakan bullet points atau penomoran untuk setiap poin</p>
+                @error('terms_conditions')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Harga Normal *</label>
-                    <input type="number" name="original_price" value="{{ old('original_price') }}" min="0" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <input type="number" name="original_price" value="{{ old('original_price') }}" min="1" required 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    @error('original_price')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Harga Promo *</label>
-                    <input type="number" name="promo_price" value="{{ old('promo_price') }}" min="0" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <input type="number" name="promo_price" value="{{ old('promo_price') }}" min="1" required 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    @error('promo_price')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Diskon (%)</label>
-                    <input type="number" id="discount_percent" readonly class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50">
+                    <input type="number" id="discount_percent" readonly 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50">
                 </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Mulai *</label>
-                    <input type="date" name="start_date" value="{{ old('start_date') }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <input type="date" name="start_date" value="{{ old('start_date') }}" required 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    @error('start_date')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Berakhir</label>
-                    <input type="date" name="end_date" value="{{ old('end_date') }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <input type="date" name="end_date" value="{{ old('end_date') }}" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    @error('end_date')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Kuota (opsional)</label>
-                    <input type="number" name="quota" value="{{ old('quota') }}" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <input type="number" name="quota" value="{{ old('quota') }}" min="1" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    @error('quota')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Status *</label>
@@ -129,11 +195,15 @@
                         <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Aktif</option>
                         <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>Tidak Aktif</option>
                     </select>
+                    @error('status')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
             </div>
 
             <div class="flex items-center">
-                <input type="checkbox" id="featured" name="featured" value="1" {{ old('featured') ? 'checked' : '' }} class="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary">
+                <input type="checkbox" id="featured" name="featured" value="1" {{ old('featured') ? 'checked' : '' }} 
+                       class="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary">
                 <label for="featured" class="ml-2 text-sm font-medium text-gray-700">Tampilkan sebagai promo unggulan</label>
             </div>
 
@@ -151,7 +221,8 @@
 
 @section('extra-js')
 <script>
-    // Preview gambar promo
+document.addEventListener('DOMContentLoaded', function() {
+    // Simple image preview functions
     function previewImage(input) {
         const preview = document.getElementById('imagePreview');
         const placeholder = document.getElementById('placeholderText');
@@ -166,10 +237,13 @@
             }
             
             reader.readAsDataURL(input.files[0]);
+        } else {
+            preview.classList.add('hidden');
+            placeholder.classList.remove('hidden');
+            preview.src = '';
         }
     }
 
-    // Preview desain gelang
     function previewBracelet(input) {
         const preview = document.getElementById('braceletPreview');
         const placeholder = document.getElementById('braceletPlaceholder');
@@ -184,62 +258,33 @@
             }
             
             reader.readAsDataURL(input.files[0]);
+        } else {
+            preview.classList.add('hidden');
+            placeholder.classList.remove('hidden');
+            preview.src = '';
         }
     }
 
-    // Auto calculate discount percentage
-    document.addEventListener('DOMContentLoaded', function() {
-        const originalPrice = document.querySelector('input[name="original_price"]');
-        const promoPrice = document.querySelector('input[name="promo_price"]');
+    // Auto calculate discount
+    function calculateDiscount() {
+        const originalPrice = parseFloat(document.querySelector('input[name="original_price"]').value) || 0;
+        const promoPrice = parseFloat(document.querySelector('input[name="promo_price"]').value) || 0;
         const discountPercent = document.getElementById('discount_percent');
-
-        function calculateDiscount() {
-            if (originalPrice.value && promoPrice.value) {
-                const original = parseFloat(originalPrice.value);
-                const promo = parseFloat(promoPrice.value);
-                
-                // Cegah division by zero
-                if (original <= 0) {
-                    discountPercent.value = '0';
-                    return;
-                }
-                
-                if (promo >= original) {
-                    discountPercent.value = '0';
-                    return;
-                }
-                
-                const discount = ((original - promo) / original * 100).toFixed(0);
-                discountPercent.value = discount;
-            }
-        }
-
-        originalPrice?.addEventListener('input', calculateDiscount);
-        promoPrice?.addEventListener('input', calculateDiscount);
         
-        // Hitung diskon awal jika ada nilai dari old input
-        calculateDiscount();
-    });
+        if (originalPrice > 0 && promoPrice > 0 && promoPrice < originalPrice) {
+            const discount = Math.round(((originalPrice - promoPrice) / originalPrice) * 100);
+            discountPercent.value = discount;
+        } else {
+            discountPercent.value = 0;
+        }
+    }
 
-    // Validasi form
-    document.querySelector('form').addEventListener('submit', function(e) {
-        const imageInput = document.getElementById('imageInput');
-        const originalPrice = parseFloat(document.querySelector('input[name="original_price"]').value);
-        const promoPrice = parseFloat(document.querySelector('input[name="promo_price"]').value);
-        
-        // Validasi harga promo harus lebih kecil dari harga normal
-        if (promoPrice >= originalPrice) {
-            e.preventDefault();
-            alert('Harga promo harus lebih kecil dari harga normal');
-            return false;
-        }
-        
-        // Validasi file gambar promo
-        if (!imageInput.files.length) {
-            e.preventDefault();
-            alert('Silakan pilih gambar promo');
-            return false;
-        }
-    });
+    // Attach event listeners
+    document.querySelector('input[name="original_price"]').addEventListener('input', calculateDiscount);
+    document.querySelector('input[name="promo_price"]').addEventListener('input', calculateDiscount);
+    
+    // Initial calculation
+    calculateDiscount();
+});
 </script>
 @endsection

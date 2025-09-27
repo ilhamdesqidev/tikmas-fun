@@ -30,41 +30,40 @@ class FacilityController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'required|string',
-            'duration' => 'required|string|max:100',
-            'age_range' => 'required|string|max:100',
-            'category' => 'required|string|max:50',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
-            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240'
-        ]);
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'description' => 'required|string',
+        'duration' => 'required|string|max:100',
+        'age_range' => 'required|string|max:100',
+        'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
+        'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240'
+    ]);
 
-        // Upload gambar utama
-        $imagePath = $request->file('image')->store('facilities', 'public');
+    // Upload gambar utama
+    $imagePath = $request->file('image')->store('facilities', 'public');
 
-        // Upload gallery images
-        $galleryPaths = [];
-        if ($request->hasFile('gallery_images')) {
-            foreach ($request->file('gallery_images') as $galleryImage) {
-                $galleryPaths[] = $galleryImage->store('facilities/gallery', 'public');
-            }
+    // Upload gallery images
+    $galleryPaths = [];
+    if ($request->hasFile('gallery_images')) {
+        foreach ($request->file('gallery_images') as $galleryImage) {
+            $galleryPaths[] = $galleryImage->store('facilities/gallery', 'public');
         }
-
-        Facility::create([
-            'name' => $request->name,
-            'description' => $request->description,
-            'duration' => $request->duration,
-            'age_range' => $request->age_range,
-            'category' => $request->category,
-            'image' => $imagePath,
-            'gallery_images' => !empty($galleryPaths) ? $galleryPaths : null
-        ]);
-
-        return redirect()->route('admin.facilities.index')
-            ->with('success', 'Fasilitas berhasil ditambahkan.');
     }
+
+    Facility::create([
+        'name' => $request->name,
+        'description' => $request->description,
+        'duration' => $request->duration,
+        'age_range' => $request->age_range,
+        'category' => 'wisata', // Default value
+        'image' => $imagePath,
+        'gallery_images' => !empty($galleryPaths) ? $galleryPaths : null
+    ]);
+
+    return redirect()->route('admin.facilities.index')
+        ->with('success', 'Fasilitas berhasil ditambahkan.');
+}
 
     /**
      * Display the specified resource.

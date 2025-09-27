@@ -515,7 +515,7 @@
       </div>
     </section>
 
-    <!-- Promo Section dengan Slider -->
+<!-- Promo Section dengan Slider -->
 <section id="menu" class="py-16 sm:py-24 md:py-32 px-4 sm:px-7">
   <h2 class="text-center text-3xl sm:text-4xl mb-4 text-text-dark">
     <span class="text-primary">Promo</span> Kami
@@ -538,14 +538,48 @@
       <!-- Slider Container -->
       <div class="promo-container" id="promoContainer">
         @foreach($promos as $promo)
-          <a href="{{ route('promo.show', $promo->id) }}" class="promo-card block hover:no-underline">
-            @if($promo->featured)
+          @php
+            $isExpired = $promo->is_expired;
+            $isNotStarted = $promo->is_not_started;
+            $isSoldOut = $promo->quota && $promo->sold_count >= $promo->quota;
+            $isClickable = $promo->is_active && !$isExpired && !$isSoldOut;
+          @endphp
+          
+          <div class="promo-card block hover:no-underline {{ !$isClickable ? 'promo-disabled' : '' }}" 
+               @if($isClickable) onclick="window.location.href='{{ route('promo.show', $promo->id) }}'" @endif>
+               
+            @if($promo->featured && $isClickable)
               <span class="featured-badge">Unggulan</span>
             @endif
-            <span class="discount-badge">Diskon {{ $promo->discount_percent }}%</span>
+            
+            @if($isExpired)
+              <span class="expired-badge">Kadaluarsa</span>
+            @elseif($isNotStarted)
+              <span class="coming-soon-badge">Segera Hadir</span>
+            @elseif($isSoldOut)
+              <span class="sold-out-badge">Habis</span>
+            @else
+              <span class="discount-badge">Diskon {{ $promo->discount_percent }}%</span>
+            @endif
             
             <div class="promo-image">
               <img src="{{ asset('storage/' . $promo->image) }}" alt="{{ $promo->name }}" loading="lazy">
+              @if(!$isClickable)
+                <div class="promo-overlay-disabled">
+                  <div class="overlay-content">
+                    @if($isExpired)
+                      <i data-feather="clock" class="w-8 h-8 mb-2"></i>
+                      <span class="text-sm font-medium">Promo Berakhir</span>
+                    @elseif($isNotStarted)
+                      <i data-feather="calendar" class="w-8 h-8 mb-2"></i>
+                      <span class="text-sm font-medium">Mulai {{ $promo->start_date->format('d M Y') }}</span>
+                    @elseif($isSoldOut)
+                      <i data-feather="x-circle" class="w-8 h-8 mb-2"></i>
+                      <span class="text-sm font-medium">Kuota Habis</span>
+                    @endif
+                  </div>
+                </div>
+              @endif
             </div>
             
             <div class="p-6">
@@ -563,17 +597,39 @@
               </div>
               
               <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
-                <span>Berlaku hingga: {{ \Carbon\Carbon::parse($promo->end_date)->format('d M Y') }}</span>
+                <span>
+                  @if($isExpired)
+                    Berakhir: {{ \Carbon\Carbon::parse($promo->end_date)->format('d M Y') }}
+                  @elseif($isNotStarted)
+                    Mulai: {{ \Carbon\Carbon::parse($promo->start_date)->format('d M Y') }}
+                  @else
+                    Berlaku hingga: {{ $promo->end_date ? \Carbon\Carbon::parse($promo->end_date)->format('d M Y') : 'Tidak terbatas' }}
+                  @endif
+                </span>
                 @if($promo->quota)
-                  <span>Kuota: {{ $promo->quota }}</span>
+                  <span>Kuota: {{ $promo->quota - $promo->sold_count }}</span>
                 @endif
               </div>
               
-              <div class="w-full bg-primary text-black text-center font-semibold py-3 rounded-lg hover:bg-yellow-500 transition-colors duration-300">
-                Dapatkan Promo
-              </div>
+              @if($isClickable)
+                <div class="w-full bg-primary text-black text-center font-semibold py-3 rounded-lg hover:bg-yellow-500 transition-colors duration-300 cursor-pointer">
+                  Dapatkan Promo
+                </div>
+              @else
+                <div class="w-full bg-gray-300 text-gray-500 text-center font-semibold py-3 rounded-lg cursor-not-allowed">
+                  @if($isExpired)
+                    Promo Berakhir
+                  @elseif($isNotStarted)
+                    Segera Hadir
+                  @elseif($isSoldOut)
+                    Kuota Habis
+                  @else
+                    Tidak Tersedia
+                  @endif
+                </div>
+              @endif
             </div>
-          </a>
+          </div>
         @endforeach
       </div>
 

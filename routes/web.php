@@ -87,6 +87,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('/{id}', [AdminPromoController::class, 'update'])->name('update');
             Route::delete('/{id}', [AdminPromoController::class, 'destroy'])->name('destroy');
             Route::post('/{id}/toggle-status', [AdminPromoController::class, 'toggleStatus'])->name('toggle-status');
+            Route::post('/admin/promo/bulk-action', [PromoController::class, 'bulkAction'])->name('admin.promo.bulk-action');
+Route::post('/admin/promo/update-expired', [PromoController::class, 'updateExpiredPromos'])->name('admin.promo.update-expired');
+Route::get('/admin/promo/stats', [PromoController::class, 'getPromoStats'])->name('admin.promo.stats');
+Route::post('/admin/promo/{id}/toggle-status', [PromoController::class, 'toggleStatus'])->name('admin.promo.toggle-status');
         });
         
         // Facility Management Routes
