@@ -158,34 +158,18 @@
                 </div>
             </div>
 
-            
-            <!-- Footer -->
+            <!-- Footer with integrated button -->
             <div class="bg-gray-50 p-8 text-center">
                 <p class="text-gray-600">Terima kasih telah memilih MestaKara</p>
                 <p class="text-sm text-gray-500 mt-2">Untuk pertanyaan, hubungi WhatsApp: +62 812-3456-7890</p>
-            </div>
-        </div>
-        
-        <!-- Action Buttons -->
-        <div class="max-w-2mx-auto mt-6 no-print">
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <button onclick="window.print()" 
-                        class="bg-primary text-black font-semibold py-3 px-6 rounded-lg hover:bg-yellow-500 transition-colors">
-                    🖨️ Cetak E-Ticket
-                </button>
-                <a href="{{ route('payment.invoice.download', ['order_id' => $order->order_number]) }}" 
-                   class="bg-blue-500 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-600 transition-colors text-center">
-                    📥 Download PDF
-                </a>
-                <a href="{{ route('home') }}" 
-                   class="bg-gray-200 text-gray-800 font-semibold py-3 px-6 rounded-lg hover:bg-gray-300 transition-colors text-center">
-                    🏠 Kembali ke Beranda
-                </a>
-                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $order->whatsapp_number) }}?text=Halo,%20berikut%20e-ticket%20MestaKara%20saya:%0A%0A📄%20Invoice:%20{{ $invoiceNumber }}%0A👤%20Nama:%20{{ $order->customer_name }}%0A📅%20Tanggal:%20{{ \Carbon\Carbon::parse($order->visit_date)->format('d M Y') }}%0A👥%20Jumlah:%20{{ $order->ticket_quantity }}%20orang%0A%0ATerima%20kasih" 
-                   target="_blank"
-                   class="bg-green-500 text-white font-semibold py-3 px-6 rounded-lg hover:bg-green-600 transition-colors text-center">
-                    📱 Share via WhatsApp
-                </a>
+                
+                <!-- Integrated Back to Home Button -->
+                <div class="mt-6 no-print">
+                    <a href="{{ route('home') }}" 
+                       class="inline-block bg-gray-200 text-gray-800 font-semibold py-3 px-6 rounded-lg hover:bg-gray-300 transition-colors text-center">
+                        🏠 Kembali ke Beranda
+                    </a>
+                </div>
             </div>
         </div>
     </div>
