@@ -16,7 +16,7 @@
                 </div>
                 <div class="text-right">
                     <p class="text-sm text-gray-500">Total Orders</p>
-                    <p class="text-xl font-semibold text-gray-900">142</p>
+                    <p class="text-xl font-semibold text-gray-900">{{ $totalOrders }}</p>
                 </div>
             </div>
         </div>
@@ -78,7 +78,7 @@
                                 <div class="flex items-center justify-between">
                                     <span>Semua Status</span>
                                     <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                                        {{ \App\Models\Order::count() }}
+                                        {{ $totalOrders }}
                                     </span>
                                 </div>
                             </a>
@@ -106,7 +106,7 @@
                                             <span>{{ $config['label'] }}</span>
                                         </div>
                                         <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                                            {{ \App\Models\Order::where('status', $status)->count() }}
+                                            {{ $statusCounts[$status] ?? 0 }}
                                         </span>
                                     </div>
                                 </a>
@@ -158,34 +158,44 @@
                                 @if($order->invoice_number)
                                     <div class="text-xs text-blue-600">{{ $order->invoice_number }}</div>
                                 @endif
+                                <div class="text-xs text-gray-500">
+                                    {{ $order->created_at->format('d M Y H:i') }}
+                                </div>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm font-medium text-gray-900">{{ $order->customer_name }}</div>
                             </td>
                             <td class="px-6 py-4">
-                                <a href="https://wa.me/{{ $order->whatsapp_number }}" target="_blank" 
-                                   class="text-sm text-green-600 hover:text-green-800">
+                                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $order->whatsapp_number) }}" target="_blank" 
+                                   class="text-sm text-green-600 hover:text-green-800 flex items-center gap-1">
+                                    <i class="fab fa-whatsapp"></i>
                                     {{ $order->whatsapp_number }}
                                 </a>
                             </td>
-                            <td class="px-6 py-4 text-sm text-gray-900">{{ $order->branch }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-900">{{ $order->visit_date->format('d M Y') }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-900">{{ $order->ticket_quantity }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-900">
+                                {{ $order->branch ?? 'Cabang Utama' }}
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-900">
+                                {{ \Carbon\Carbon::parse($order->visit_date)->format('d M Y') }}
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-900 text-center">
+                                {{ $order->ticket_quantity }}
+                            </td>
                             <td class="px-6 py-4 text-sm font-medium text-gray-900">
                                 Rp {{ number_format($order->total_price, 0, ',', '.') }}
                             </td>
                             <td class="px-6 py-4">
                                 @php
                                     $statusColors = [
-                                        'success' => 'text-green-700 bg-green-50',
-                                        'pending' => 'text-yellow-700 bg-yellow-50',
-                                        'canceled' => 'text-red-700 bg-red-50',
-                                        'challenge' => 'text-orange-700 bg-orange-50',
-                                        'denied' => 'text-red-700 bg-red-50',
-                                        'expired' => 'text-gray-700 bg-gray-50'
+                                        'success' => 'text-green-700 bg-green-50 border border-green-200',
+                                        'pending' => 'text-yellow-700 bg-yellow-50 border border-yellow-200',
+                                        'canceled' => 'text-red-700 bg-red-50 border border-red-200',
+                                        'challenge' => 'text-orange-700 bg-orange-50 border border-orange-200',
+                                        'denied' => 'text-red-700 bg-red-50 border border-red-200',
+                                        'expired' => 'text-gray-700 bg-gray-50 border border-gray-200'
                                     ];
                                 @endphp
-                                <span class="px-2 py-1 text-xs rounded-full {{ $statusColors[$order->status] ?? 'text-gray-700 bg-gray-50' }}">
+                                <span class="px-3 py-1 text-xs rounded-full font-medium {{ $statusColors[$order->status] ?? 'text-gray-700 bg-gray-50 border border-gray-200' }}">
                                     {{ ucfirst($order->status) }}
                                 </span>
                             </td>
@@ -196,6 +206,12 @@
                                 <div class="text-gray-500">
                                     <i class="fas fa-inbox text-2xl mb-2"></i>
                                     <p>Tidak ada data tiket</p>
+                                    @if(request('search') || request('status'))
+                                        <a href="{{ route('admin.tickets.index') }}" 
+                                           class="text-blue-600 hover:text-blue-800 text-sm mt-2 inline-block">
+                                            Tampilkan semua tiket
+                                        </a>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -208,56 +224,11 @@
         <!-- Pagination -->
         <div class="flex items-center justify-between mt-6 text-sm text-gray-700">
             <div>
-                Menampilkan 1 sampai 10 dari 142 hasil
+                Menampilkan {{ $orders->firstItem() ?? 0 }} sampai {{ $orders->lastItem() ?? 0 }} dari {{ $orders->total() }} hasil
             </div>
             <div>
                 {{ $orders->appends(request()->query())->links() }}
             </div>
-        </div>
-    </div>
-</div>
-
-<!-- Status Change Modal -->
-<div id="statusModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
-    <div class="flex items-center justify-center min-h-screen p-4">
-        <div class="bg-white rounded-lg shadow-lg max-w-md w-full">
-            <div class="p-6 border-b">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-lg font-medium">Ubah Status</h3>
-                    <button onclick="closeStatusModal()" class="text-gray-400 hover:text-gray-600">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            </div>
-            <form action="" method="POST" id="statusForm" class="p-6">
-                @csrf
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Status Saat Ini</label>
-                    <div id="currentStatusDisplay" class="text-sm text-gray-600">Success</div>
-                </div>
-                <div class="mb-6">
-                    <label for="newStatus" class="block text-sm font-medium text-gray-700 mb-2">Status Baru</label>
-                    <select name="status" id="newStatus" required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500">
-                        <option value="pending">Pending</option>
-                        <option value="success">Success</option>
-                        <option value="challenge">Challenge</option>
-                        <option value="denied">Denied</option>
-                        <option value="expired">Expired</option>
-                        <option value="canceled">Canceled</option>
-                    </select>
-                </div>
-                <div class="flex justify-end gap-3">
-                    <button type="button" onclick="closeStatusModal()" 
-                            class="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50">
-                        Batal
-                    </button>
-                    <button type="submit" 
-                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                        Update
-                    </button>
-                </div>
-            </form>
         </div>
     </div>
 </div>
@@ -284,14 +255,19 @@
     });
 
     // Status modal functionality
-    function openStatusModal(orderNumber, currentStatus, orderId) {
+    function openStatusModal(orderNumber, currentStatus) {
         const modal = document.getElementById('statusModal');
         const form = document.getElementById('statusForm');
         const currentStatusDisplay = document.getElementById('currentStatusDisplay');
         const newStatusSelect = document.getElementById('newStatus');
         
+        // Set form action
         form.action = `/admin/tickets/${orderNumber}/update-status`;
+        
+        // Display current status
         currentStatusDisplay.textContent = currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1);
+        
+        // Set current status as value in select
         newStatusSelect.value = currentStatus;
         
         modal.classList.remove('hidden');

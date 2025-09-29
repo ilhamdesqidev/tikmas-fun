@@ -37,7 +37,19 @@ class TicketController extends Controller
         
         $orders = $query->paginate(20);
         
-        return view('admin.tickets.index', compact('orders', 'status', 'search'));
+        // Get counts for each status
+        $statusCounts = [
+            'pending' => Order::where('status', 'pending')->count(),
+            'success' => Order::where('status', 'success')->count(),
+            'challenge' => Order::where('status', 'challenge')->count(),
+            'denied' => Order::where('status', 'denied')->count(),
+            'expired' => Order::where('status', 'expired')->count(),
+            'canceled' => Order::where('status', 'canceled')->count(),
+        ];
+        
+        $totalOrders = Order::count();
+        
+        return view('admin.tickets.index', compact('orders', 'status', 'search', 'statusCounts', 'totalOrders'));
     }
     
     /**

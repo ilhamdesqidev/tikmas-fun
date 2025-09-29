@@ -280,7 +280,7 @@
                   <!-- Input angka saja -->
                   <input type="text" id="whatsapp-number" name="whatsapp_number"
                     class="w-full px-4 py-2 border border-gray-300 rounded-r-lg focus:ring-primary focus:border-primary"
-                    placeholder="081234567890" pattern="[0-9]+" inputmode="numeric" required>
+                    placeholder="81234567890" pattern="[0-9]+" inputmode="numeric" required>
                 </div>
               </div>
 
