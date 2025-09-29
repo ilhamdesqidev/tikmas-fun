@@ -183,6 +183,97 @@ public function store(Request $request)
         }
     }
 
+    public function edit($id)
+    {
+        try {
+            $promo = Promo::findOrFail($id);
+            return view('admin.promo.edit', compact('promo'));
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    public function update(Request $request, $id)
+    {
+        try {
+            $promo = Promo::findOrFail($id);
+
+            // Validasi sederhana
+            $request->validate([
+                'name' => 'required|string|max:255|unique:promos,name,' . $promo->id,
+                'description' => 'required|string',
+                'terms_conditions' => 'required|string',
+                'original_price' => 'required|numeric|min:1',
+                'promo_price' => 'required|numeric|min:1|lt:original_price',
+                'start_date' => 'required|date',
+                'end_date' => 'nullable|date|after:start_date',
+                'quota' => 'nullable|integer|min:1',
+                'status' => 'required|in:active,inactive',
+                'category' => 'required|in:bulanan,holiday,birthday,nasional,student',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240',
+                'bracelet_design' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10240',
+            ]);
+
+            // Upload gambar baru jika ada
+            if ($request->hasFile('image')) {
+                // Hapus gambar lama
+                if ($promo->image) {
+                    Storage::disk('public')->delete($promo->image);
+                }
+                $imagePath = $request->file('image')->store('promos', 'public');
+                $promo->image = $imagePath;
+            }
+
+            // Upload desain gelang baru jika ada
+            if ($request->hasFile('bracelet_design')) {
+                // Hapus desain gelang lama
+                if ($promo->bracelet_design) {
+                    Storage::disk('public')->delete($promo->bracelet_design);
+                }
+                $braceletDesignPath = $request->file('bracelet_design')->store('bracelet-designs', 'public');
+                $promo->bracelet_design = $braceletDesignPath;
+            }
+
+            // Hitung diskon
+            $originalPrice = (float) $request->original_price;
+            $promoPrice = (float) $request->promo_price;
+            $discountPercent = round((($originalPrice - $promoPrice) / $originalPrice) * 100);
+
+            // Update data promo
+            $promo->name = $request->name;
+            $promo->description = $request->description;
+            $promo->terms_conditions = $request->terms_conditions;
+            $promo->original_price = $originalPrice;
+            $promo->promo_price = $promoPrice;
+            $promo->discount_percent = $discountPercent;
+            $promo->start_date = $request->start_date;
+            $promo->end_date = $request->end_date;
+            $promo->quota = $request->quota;
+            $promo->status = $request->status;
+            $promo->category = $request->category;
+            $promo->featured = $request->has('featured');
+            $promo->save();
+            return redirect()->route('admin.promo.index')
+                ->with('success', 'Promo "' . $promo->name . '" berhasil diperbarui!');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    public function show($id)
+    {
+        try {
+            $promo = Promo::findOrFail($id);
+            return view('admin.promo.show', compact('promo'));
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
     // Method untuk automatic update status promo yang expired
     public function updateExpiredPromos()
     {
