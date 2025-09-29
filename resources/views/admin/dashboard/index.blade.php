@@ -219,6 +219,7 @@
 @endsection
 
 @section('extra-js')
+<script>
 // Revenue Chart
 const ctx = document.getElementById('revenueChart').getContext('2d');
 const revenueChart = new Chart(ctx, {
@@ -283,4 +284,5 @@ setInterval(function() {
     // In a real application, you would fetch new data here
     console.log('Refreshing dashboard data...');
 }, 30000);
+</script>
 @endsection

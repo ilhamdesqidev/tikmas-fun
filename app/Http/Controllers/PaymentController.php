@@ -43,7 +43,7 @@ class PaymentController extends Controller
             'customer_name'   => 'required|string|max:255',
             'whatsapp_number' => 'required|string|max:15',
             'visit_date'      => 'required|date',
-            'ticket_quantity' => 'required|integer|min:1|max:10',
+            'ticket_quantity' => 'required|integer|min:1',
         ]);
 
         // Generate order number

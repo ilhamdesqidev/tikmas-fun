@@ -12,7 +12,7 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        // In a real application, you would fetch data from database
+        // Data statistik
         $stats = [
             'total_tickets_sold' => 1234,
             'total_revenue' => 45200000,
@@ -24,6 +24,7 @@ class DashboardController extends Controller
             'customers_change' => '+15.7',
         ];
 
+        // Pesanan terbaru
         $recentOrders = [
             [
                 'id' => 'TKT-001',
@@ -67,6 +68,7 @@ class DashboardController extends Controller
             ],
         ];
 
+        // Paket populer
         $popularPackages = [
             [
                 'name' => 'Family Weekend Package',
@@ -94,6 +96,7 @@ class DashboardController extends Controller
             ],
         ];
 
+        // Revenue bulanan
         $monthlyRevenue = [
             ['month' => 'Jan', 'revenue' => 35000000],
             ['month' => 'Feb', 'revenue' => 42000000],

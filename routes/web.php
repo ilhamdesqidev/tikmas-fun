@@ -72,6 +72,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         
         // Dashboard
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+         // Tambahkan route lainnya
+    Route::get('/promo', function () { return 'Promo Page'; })->name('promo.index');
+    Route::get('/tickets', function () { return 'Tickets Page'; })->name('tickets.index');
+    Route::get('/customers', function () { return 'Customers Page'; })->name('customers.index');
+    Route::get('/reports', function () { return 'Reports Page'; })->name('reports.index');
         
         // Profile
         Route::get('/profile', [AdminDashboardController::class, 'profile'])->name('profile');

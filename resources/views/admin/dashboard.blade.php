@@ -1,494 +1,376 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tiketmas</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,300;0,400;0,700;1,700&display=swap"
-      rel="stylesheet"
-    />
-    <!-- feather icon -->
-    <script src="https://unpkg.com/feather-icons"></script>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              primary: '#CFD916',
-              'text-dark': '#333333',
+@extends('layouts.app')
+
+@section('title', 'Dashboard')
+@section('page-title', 'Dashboard')
+@section('page-description', 'Welcome back! Here\'s what\'s happening with your business.')
+
+@section('content')
+    @php
+        // Fallback data jika variabel tidak tersedia
+        $fallbackStats = [
+            'total_tickets_sold' => 1250,
+            'total_revenue' => 1250000000,
+            'active_promos' => 8,
+            'total_customers' => 850,
+            'tickets_sold_change' => 12,
+            'revenue_change' => 18,
+            'promos_change' => 2,
+            'customers_change' => 8,
+        ];
+        
+        $fallbackRecentOrders = [
+            ['id' => 'ORD-001', 'customer_name' => 'Ahmad Rizki', 'package' => 'Paket Keluarga', 'amount' => 450000, 'status' => 'completed', 'date' => '2024-01-15 14:30'],
+            ['id' => 'ORD-002', 'customer_name' => 'Sari Dewi', 'package' => 'Paket Wisata', 'amount' => 320000, 'status' => 'pending', 'date' => '2024-01-15 12:15'],
+            ['id' => 'ORD-003', 'customer_name' => 'Budi Santoso', 'package' => 'Paket Premium', 'amount' => 650000, 'status' => 'processing', 'date' => '2024-01-14 16:45'],
+            ['id' => 'ORD-004', 'customer_name' => 'Maya Sari', 'package' => 'Paket Keluarga', 'amount' => 450000, 'status' => 'completed', 'date' => '2024-01-14 11:20'],
+            ['id' => 'ORD-005', 'customer_name' => 'Rizki Pratama', 'package' => 'Paket Wisata', 'amount' => 320000, 'status' => 'completed', 'date' => '2024-01-13 09:30'],
+        ];
+        
+        $fallbackPopularPackages = [
+            ['name' => 'Paket Keluarga', 'sold' => 450, 'revenue' => 202500000, 'growth' => '+15%'],
+            ['name' => 'Paket Premium', 'sold' => 320, 'revenue' => 208000000, 'growth' => '+22%'],
+            ['name' => 'Paket Wisata', 'sold' => 280, 'revenue' => 89600000, 'growth' => '+8%'],
+            ['name' => 'Paket Hemat', 'sold' => 200, 'revenue' => 60000000, 'growth' => '+5%'],
+        ];
+        
+        $fallbackMonthlyRevenue = [
+            ['month' => 'Jan', 'revenue' => 120000000],
+            ['month' => 'Feb', 'revenue' => 150000000],
+            ['month' => 'Mar', 'revenue' => 180000000],
+            ['month' => 'Apr', 'revenue' => 220000000],
+            ['month' => 'May', 'revenue' => 250000000],
+            ['month' => 'Jun', 'revenue' => 280000000],
+            ['month' => 'Jul', 'revenue' => 320000000],
+            ['month' => 'Aug', 'revenue' => 350000000],
+            ['month' => 'Sep', 'revenue' => 380000000],
+            ['month' => 'Oct', 'revenue' => 410000000],
+            ['month' => 'Nov', 'revenue' => 450000000],
+            ['month' => 'Dec', 'revenue' => 500000000],
+        ];
+
+        $stats = $stats ?? $fallbackStats;
+        $recentOrders = $recentOrders ?? $fallbackRecentOrders;
+        $popularPackages = $popularPackages ?? $fallbackPopularPackages;
+        $monthlyRevenue = $monthlyRevenue ?? $fallbackMonthlyRevenue;
+    @endphp
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="card rounded-xl p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Total Tiket Terjual</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['total_tickets_sold']) }}</p>
+                </div>
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="mt-4">
+                <span class="text-green-600 text-sm font-medium">{{ $stats['tickets_sold_change'] }}% dari bulan lalu</span>
+            </div>
+        </div>
+
+        <div class="card rounded-xl p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Total Revenue</p>
+                    <p class="text-2xl font-bold text-gray-900">Rp {{ number_format($stats['total_revenue'] / 1000000, 1) }}M</p>
+                </div>
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="mt-4">
+                <span class="text-green-600 text-sm font-medium">{{ $stats['revenue_change'] }}% dari bulan lalu</span>
+            </div>
+        </div>
+
+        <div class="card rounded-xl p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Promo Aktif</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $stats['active_promos'] }}</p>
+                </div>
+                <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="mt-4">
+                <span class="text-green-600 text-sm font-medium">{{ $stats['promos_change'] }} promo baru</span>
+            </div>
+        </div>
+
+        <div class="card rounded-xl p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Total Customers</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['total_customers']) }}</p>
+                </div>
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="mt-4">
+                <span class="text-green-600 text-sm font-medium">{{ $stats['customers_change'] }}% dari bulan lalu</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts and Tables Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+        <!-- Revenue Chart -->
+        <div class="lg:col-span-2 card rounded-xl p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-semibold text-gray-900">Revenue Bulanan</h3>
+                <select class="text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <option value="2024">2024</option>
+                    <option value="2023">2023</option>
+                </select>
+            </div>
+            <div class="h-80">
+                <canvas id="revenueChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Popular Packages -->
+        <div class="card rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-6">Paket Populer</h3>
+            <div class="space-y-4">
+                @forelse($popularPackages as $package)
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div class="flex-1">
+                        <h4 class="text-sm font-medium text-gray-900">{{ $package['name'] }}</h4>
+                        <p class="text-xs text-gray-600">{{ $package['sold'] }} terjual</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm font-semibold text-gray-900">Rp {{ number_format($package['revenue'] / 1000000, 1) }}M</p>
+                        <p class="text-xs text-green-600">{{ $package['growth'] }}</p>
+                    </div>
+                </div>
+                @empty
+                <div class="text-center py-4 text-gray-500">
+                    <p>Tidak ada data paket populer</p>
+                </div>
+                @endforelse
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Orders -->
+    <div class="card rounded-xl">
+        <div class="flex items-center justify-between p-6 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900">Pesanan Terbaru</h3>
+            <a href="{{ route('admin.tickets.index') }}" class="text-primary hover:text-yellow-600 text-sm font-medium">
+                Lihat Semua
+            </a>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID Pesanan</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paket</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @forelse($recentOrders as $order)
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="text-sm font-medium text-gray-900">{{ $order['id'] }}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center mr-3">
+                                    <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                    </svg>
+                                </div>
+                                <span class="text-sm text-gray-900">{{ $order['customer_name'] }}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="text-sm text-gray-900">{{ $order['package'] }}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="text-sm font-medium text-gray-900">Rp {{ number_format($order['amount']) }}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            @if($order['status'] === 'completed')
+                                <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Selesai</span>
+                            @elseif($order['status'] === 'pending')
+                                <span class="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">Pending</span>
+                            @else
+                                <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">Diproses</span>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ date('d/m/Y H:i', strtotime($order['date'])) }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <div class="flex space-x-2">
+                                <button class="text-blue-600 hover:text-blue-800">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                </button>
+                                <button class="text-green-600 hover:text-green-800">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                    </svg>
+                                </button>
+                                <button class="text-red-600 hover:text-red-800">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="7" class="px-6 py-4 text-center text-gray-500">
+                            Tidak ada pesanan terbaru
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="mt-8 grid grid-cols-1 md:grid-cols-4 gap-4">
+        <a href="{{ route('admin.promo.index') }}" class="flex items-center p-4 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl text-white hover:from-blue-600 hover:to-blue-700 transition-all duration-200">
+            <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path>
+            </svg>
+            <div>
+                <p class="font-medium">Kelola Promo</p>
+                <p class="text-xs text-blue-100">Buat & edit promo</p>
+            </div>
+        </a>
+        
+        <a href="{{ route('admin.tickets.index') }}" class="flex items-center p-4 bg-gradient-to-r from-green-500 to-green-600 rounded-xl text-white hover:from-green-600 hover:to-green-700 transition-all duration-200">
+            <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path>
+            </svg>
+            <div>
+                <p class="font-medium">Tiket</p>
+                <p class="text-xs text-green-100">Kelola tiket</p>
+            </div>
+        </a>
+        
+        <a href="{{ route('admin.customers.index') }}" class="flex items-center p-4 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl text-white hover:from-purple-600 hover:to-purple-700 transition-all duration-200">
+            <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+            </svg>
+            <div>
+                <p class="font-medium">Customers</p>
+                <p class="text-xs text-purple-100">Data customer</p>
+            </div>
+        </a>
+        
+        <a href="{{ route('admin.reports.index') }}" class="flex items-center p-4 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-xl text-white hover:from-yellow-600 hover:to-yellow-700 transition-all duration-200">
+            <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+            <div>
+                <p class="font-medium">Laporan</p>
+                <p class="text-xs text-yellow-100">Analytics & laporan</p>
+            </div>
+        </a>
+    </div>
+@endsection
+
+@section('extra-css')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+@endsection
+
+@section('extra-js')
+<script>
+// Revenue Chart
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('revenueChart');
+    if (ctx) {
+        const revenueChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: @json(array_column($monthlyRevenue, 'month')),
+                datasets: [{
+                    label: 'Revenue (Rp)',
+                    data: @json(array_column($monthlyRevenue, 'revenue')),
+                    borderColor: '#CFD916',
+                    backgroundColor: 'rgba(207, 217, 22, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#CFD916',
+                    pointBorderColor: '#CFD916',
+                    pointHoverBackgroundColor: '#CFD916',
+                    pointHoverBorderColor: '#CFD916',
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                }]
             },
-            fontFamily: {
-              'poppins': ['Poppins', 'sans-serif'],
-            },
-          }
-        }
-      }
-    </script>
-    <style>
-      html {
-        scroll-behavior: smooth;
-      }
-      
-      .hero-bg {
-        background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("/assets/img/mainimg.jpg");
-        background-size: cover;
-        background-position: center;
-        background-attachment: fixed;
-      }
-      
-      /* Mobile optimization for hero background */
-      @media (max-width: 768px) {
-        .hero-bg {
-          background-attachment: scroll;
-        }
-      }
-      
-      .hero h1 {
-        text-shadow: 1px 1px 3px rgba(1, 1, 3, 0.5);
-      }
-      
-      .hero p {
-        text-shadow: 1px 1px 3px rgba(1, 1, 3, 0.5);
-      }
-      
-      .hero .cta {
-        box-shadow: 1px 1px 3px rgba(1, 1, 3, 0.5);
-      }
-      
-      .menu-card-img {
-        background: linear-gradient(45deg, #78b65b, #a8e086);
-      }
-      
-      /* Improved mobile menu animations */
-      .mobile-nav-enter {
-        transform: translateX(100%);
-      }
-      
-      .mobile-nav-enter-active {
-        transform: translateX(0);
-        transition: transform 300ms ease-in-out;
-      }
-      
-      .mobile-nav-exit {
-        transform: translateX(0);
-      }
-      
-      .mobile-nav-exit-active {
-        transform: translateX(100%);
-        transition: transform 300ms ease-in-out;
-      }
-
-      /* User dropdown styles */
-      .user-dropdown {
-        opacity: 0;
-        transform: translateY(-10px);
-        transition: all 0.2s ease-in-out;
-        pointer-events: none;
-        visibility: hidden;
-      }
-      
-      .user-dropdown.show {
-        opacity: 1;
-        transform: translateY(0);
-        pointer-events: all;
-        visibility: visible;
-      }
-    </style>
-  </head>
-  <body class="font-poppins bg-white text-text-dark">
-    <!-- Overlay -->
-    <div id="overlay" class="hidden fixed top-0 left-0 w-full h-screen bg-black bg-opacity-50 z-40 transition-opacity duration-300"></div>
-
-    <!-- Navbar -->
-    <nav class="w-full py-3 sm:py-5 px-4 sm:px-7 flex items-center justify-between bg-white border-b border-gray-400 fixed top-0 left-0 right-0 z-50" style="border-bottom: 1px solid #597336;">
-      <a href="#" class="text-2xl sm:text-3xl font-bold text-black italic">
-        Mesta<span class="text-primary">Kara</span>.
-      </a>
-      
-      <!-- Desktop Navigation -->
-      <div id="navbar-nav" class="hidden md:flex">
-        <a href="#home" class="text-black inline-block text-xl ml-0 px-4 hover:text-primary transition-all duration-500 relative group">
-          Home
-          <span class="absolute left-0 bottom-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
-        </a>
-        <a href="#about" class="text-black inline-block text-xl ml-0 px-4 hover:text-primary transition-all duration-500 relative group">
-          Tentang Kami
-          <span class="absolute left-0 bottom-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
-        </a>
-        <a href="#menu" class="text-black inline-block text-xl ml-0 px-4 hover:text-primary transition-all duration-500 relative group">
-          Promo
-          <span class="absolute left-0 bottom-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
-        </a>
-      </div>
-
-      <!-- Mobile Navigation -->
-      <div id="mobile-nav" class="fixed top-0 -right-full w-full sm:w-80 h-screen bg-black transition-all duration-300 z-50 pt-16" style="box-shadow: -5px 0 15px rgba(0, 0, 0, 0.5);">
-        <!-- Close button -->
-        <div id="close-menu" class="absolute top-4 sm:top-6 right-4 sm:right-6 text-white cursor-pointer text-3xl sm:text-4xl touch-manipulation">
-          <i data-feather="x"></i>
-        </div>
-        
-        <div class="flex flex-col px-4">
-          <a href="#home" class="block mx-2 sm:mx-6 my-6 sm:my-8 py-4 text-2xl sm:text-3xl text-white border-b border-gray-700 transition-all duration-300 hover:text-primary hover:pl-4 touch-manipulation">Home</a>
-          <a href="#about" class="block mx-2 sm:mx-6 my-6 sm:my-8 py-4 text-2xl sm:text-3xl text-white border-b border-gray-700 transition-all duration-300 hover:text-primary hover:pl-4 touch-manipulation">Tentang Kami</a>
-          <a href="#menu" class="block mx-2 sm:mx-6 my-6 sm:my-8 py-4 text-2xl sm:text-3xl text-white border-b border-gray-700 transition-all duration-300 hover:text-primary hover:pl-4 touch-manipulation">Promo</a>
-        </div>
-      </div>
-
-      <!-- Navbar Extra -->
-      <div class="flex items-center">
-        <a href="#" class="text-black mx-1 sm:mx-2 hover:text-primary transition-all duration-500 p-2 touch-manipulation"><i data-feather="search" class="w-5 h-5 sm:w-6 sm:h-6"></i></a>
-        
-        <!-- User Dropdown -->
-        <div class="relative mx-1 sm:mx-2">
-          <button id="user-btn" class="text-black hover:text-primary transition-all duration-500 p-2 touch-manipulation flex items-center">
-            <i data-feather="user" class="w-5 h-5 sm:w-6 sm:h-6"></i>
-          </button>
-          
-          <!-- Dropdown Menu -->
-          <div id="user-dropdown" class="user-dropdown absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-60">
-            <div class="py-2">
-              <div class="px-4 py-2 text-sm text-gray-500 border-b border-gray-200">
-                <p class="font-semibold">Admin</p>
-                <p class="text-xs">Admin@gmail.com</p>
-              </div>
-              <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">Profile</a>
-              <a href="{{ route('admin.settings.general') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">Settings</a>
-              <div class="border-t border-gray-200 mt-1"></div>
-              <form action="{{ route('admin.logout') }}" method="POST" class="w-full">
-                @csrf
-                <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200">
-                    <i data-feather="log-out" class="w-4 h-4 inline mr-2"></i>
-                    Logout
-                </button>
-            </form>
-            </div>
-          </div>
-        </div>
-        
-        <a href="#" class="text-black mx-1 sm:mx-2 hover:text-primary transition-all duration-500 p-2 touch-manipulation"><i data-feather="shopping-cart" class="w-5 h-5 sm:w-6 sm:h-6"></i></a>
-        <a href="#" id="menu-icon" class="text-black mx-1 sm:mx-2 hover:text-primary transition-all duration-500 md:hidden cursor-pointer text-xl p-2 touch-manipulation">
-          <i data-feather="menu" class="w-5 h-5 sm:w-6 sm:h-6"></i>
-        </a>
-      </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <section id="home" class="hero min-h-screen flex items-center hero-bg relative px-4 sm:px-7 text-white">
-      <main class="max-w-4xl w-full">
-        <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl text-white leading-tight mb-4 sm:mb-6">
-           Berlibur Dengan<span class="text-primary">Wahana</span>
-        </h1>
-        <p class="text-lg sm:text-xl md:text-2xl mt-4 leading-relaxed font-medium text-white max-w-3xl">
-          Mari Berlibur dan Nikmati Berbagai Wahana Seru di Agrowisata Gunung Mas
-          Bersama Keluarga Tercinta
-          Dengan Harga Tiket Masuk yang Terjangkau
-          dan Dapatkan Berbagai Promo Menarik Setiap Bulannya
-        </p>
-        <a href="#" class="cta inline-block mt-6 sm:mt-8 px-8 sm:px-12 py-3 sm:py-4 text-lg sm:text-xl text-white bg-primary rounded-lg hover:bg-yellow-500 transition-colors duration-300 touch-manipulation">
-          Dapatkan Promo
-        </a>
-      </main>
-    </section>
-
-    <!-- About Section -->
-    <section id="about" class="py-16 sm:py-24 md:py-32 px-4 sm:px-7">
-      <h2 class="text-center text-3xl sm:text-4xl mb-8 sm:mb-12 text-text-dark">
-        <span class="text-primary">Tentang</span> Kami
-      </h2>
-      <div class="flex flex-col lg:flex-row max-w-6xl mx-auto">
-        <div class="flex-1 lg:min-w-96 mb-6 lg:mb-0">
-          <img src="/assets/img/tentangwe.jpg" alt="Tentang Kami" class="w-full h-60 sm:h-80 object-cover rounded-xl" />
-        </div>
-        <div class="flex-1 lg:min-w-96 px-0 lg:px-8">
-          <h3 class="text-2xl sm:text-3xl mb-4 text-text-dark">Kenapa memilih wahana kami?</h3>
-          <p class="mb-4 text-base sm:text-lg md:text-xl font-medium leading-relaxed text-text-dark">
-            MestaKara adalah penyedia wahana yang didirikan dengan cinta dan
-            dedikasi untuk menghadirkan pengalaman wahana terbaik. Kami percaya
-            bahwa setiap tawa dapat menciptakan kenangan indah yang akan
-            diinget selamanya.
-          </p>
-          <p class="mb-4 text-base sm:text-lg md:text-xl font-medium leading-relaxed text-text-dark">
-            Wahana kami didirikan langsung ditengah perkebunan terbaik dan ditata
-            dengan presisi yang sempurna. Setiap wahana yang kami
-            sediakan adalah hasil dari perpaduan tradisi dan kualitas premium.
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Promo Section -->
-    <section id="menu" class="py-16 sm:py-24 md:py-32 px-4 sm:px-7">
-      <h2 class="text-center text-3xl sm:text-4xl mb-4 text-text-dark">
-        <span class="text-primary">Promo</span> Kami
-      </h2>
-      <p class="text-center max-w-lg mx-auto font-medium leading-relaxed text-text-dark mb-12 sm:mb-20 text-base sm:text-lg">
-        Nikmati berbagai pilihan wahana dan rekreasi yang menyenangkan
-      </p>
-      
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6 max-w-6xl mx-auto">
-        <div class="text-center pb-8 sm:pb-16">
-          <img src="img/espresso.jpg" alt="Teh Earl Grey" class="rounded-full w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 object-cover mx-auto mb-3 sm:mb-4 menu-card-img" />
-          <h3 class="mt-2 sm:mt-4 mb-1 sm:mb-2 text-text-dark text-sm sm:text-base">- Earl Grey -</h3>
-          <p class="text-primary font-bold text-sm sm:text-base">IDR 15K</p>
-        </div>
-        <div class="text-center pb-8 sm:pb-16">
-          <img src="img/cappuccino.jpg" alt="Teh Jasmine" class="rounded-full w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 object-cover mx-auto mb-3 sm:mb-4 menu-card-img" />
-          <h3 class="mt-2 sm:mt-4 mb-1 sm:mb-2 text-text-dark text-sm sm:text-base">- Jasmine -</h3>
-          <p class="text-primary font-bold text-sm sm:text-base">IDR 25K</p>
-        </div>
-        <div class="text-center pb-8 sm:pb-16">
-          <img src="img/latte.jpg" alt="Green Tea Latte" class="rounded-full w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 object-cover mx-auto mb-3 sm:mb-4 menu-card-img" />
-          <h3 class="mt-2 sm:mt-4 mb-1 sm:mb-2 text-text-dark text-sm sm:text-base">- Green Tea Latte -</h3>
-          <p class="text-primary font-bold text-sm sm:text-base">IDR 22K</p>
-        </div>
-        <div class="text-center pb-8 sm:pb-16">
-          <img src="img/americano.jpg" alt="Oolong" class="rounded-full w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 object-cover mx-auto mb-3 sm:mb-4 menu-card-img" />
-          <h3 class="mt-2 sm:mt-4 mb-1 sm:mb-2 text-text-dark text-sm sm:text-base">- Oolong -</h3>
-          <p class="text-primary font-bold text-sm sm:text-base">IDR 18K</p>
-        </div>
-        <div class="text-center pb-8 sm:pb-16">
-          <img src="img/mocha.jpg" alt="Thai Tea" class="rounded-full w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 object-cover mx-auto mb-3 sm:mb-4 menu-card-img" />
-          <h3 class="mt-2 sm:mt-4 mb-1 sm:mb-2 text-text-dark text-sm sm:text-base">- Thai Tea -</h3>
-          <p class="text-primary font-bold text-sm sm:text-base">IDR 28K</p>
-        </div>
-        <div class="text-center pb-8 sm:pb-16">
-          <img src="img/crossaint.jpg" alt="Scone" class="rounded-full w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 object-cover mx-auto mb-3 sm:mb-4 menu-card-img" />
-          <h3 class="mt-2 sm:mt-4 mb-1 sm:mb-2 text-text-dark text-sm sm:text-base">- Tea Scone -</h3>
-          <p class="text-primary font-bold text-sm sm:text-base">IDR 12K</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="bg-black text-white pt-8 sm:pt-12 pb-6 sm:pb-8">
-      <div class="container mx-auto px-4 sm:px-6">
-        <!-- Footer Content -->
-        <div class="flex flex-col md:flex-row justify-between items-center mb-8 sm:mb-12">
-          <!-- Brand -->
-          <div class="mb-6 sm:mb-8 md:mb-0 text-center md:text-left">
-            <h3 class="text-2xl sm:text-3xl font-bold italic mb-3 sm:mb-4">
-              Mesta<span class="text-white">Kara</span>.
-            </h3>
-            <p class="max-w-xs text-base sm:text-lg opacity-90">
-              Menyajikan wahana menyenangkan dengan keseruan yang tak terlupakan.
-            </p>
-          </div>
-          
-          <!-- Quick Links -->
-          <div class="mb-6 sm:mb-8 md:mb-0">
-            <h4 class="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-center md:text-left">Tautan Cepat</h4>
-            <div class="flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-8">
-              <a href="#home" class="hover:text-gray-200 transition-colors duration-300 text-base sm:text-lg touch-manipulation text-center md:text-left">Home</a>
-              <a href="#about" class="hover:text-gray-200 transition-colors duration-300 text-base sm:text-lg touch-manipulation text-center md:text-left">Tentang Kami</a>
-              <a href="#menu" class="hover:text-gray-200 transition-colors duration-300 text-base sm:text-lg touch-manipulation text-center md:text-left">Promo</a>
-            </div>
-          </div>
-          
-          <!-- Social Media -->
-          <div>
-            <h4 class="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-center md:text-left">Ikuti Kami</h4>
-            <div class="flex justify-center md:justify-start space-x-4 sm:space-x-6">
-              <a href="https://www.instagram.com/wisataagro8/?hl=id" class="bg-white bg-opacity-20 p-2 sm:p-3 rounded-full hover:bg-opacity-30 transition-all duration-300 touch-manipulation">
-                <i data-feather="instagram" class="w-5 h-5 sm:w-6 sm:h-6"></i>
-              </a>
-              <a href="https://twitter.com/agrowisata_n8" class="bg-white bg-opacity-20 p-2 sm:p-3 rounded-full hover:bg-opacity-30 transition-all duration-300 touch-manipulation">
-                <i data-feather="twitter" class="w-5 h-5 sm:w-6 sm:h-6"></i>
-              </a>
-              <a href="https://www.facebook.com/AgrowisataN8/" class="bg-white bg-opacity-20 p-2 sm:p-3 rounded-full hover:bg-opacity-30 transition-all duration-300 touch-manipulation">
-                <i data-feather="facebook" class="w-5 h-5 sm:w-6 sm:h-6"></i>
-              </a>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Divider -->
-        <div class="border-t border-white border-opacity-30 my-6 sm:my-8"></div>
-        
-        <!-- Copyright -->
-        <div class="flex flex-col md:flex-row justify-between items-center text-center md:text-left">
-          <p class="text-xs sm:text-sm md:text-base opacity-80 mb-3 md:mb-0">
-            &copy; 2025 Tiketmas. All rights reserved.
-          </p>
-          <p class="text-xs sm:text-sm md:text-base opacity-80">
-            Created by <a href="#" class="font-bold hover:underline">Mestakara</a>
-          </p>
-        </div>
-      </div>
-    </footer>
-
-    <script>
-      // Initialize Feather icons
-      feather.replace();
-
-      // User dropdown functionality
-      const userBtn = document.getElementById('user-btn');
-      const userDropdown = document.getElementById('user-dropdown');
-      let isUserDropdownOpen = false;
-
-      function openUserDropdown() {
-        userDropdown.classList.add('show');
-        isUserDropdownOpen = true;
-        // Close mobile menu if open
-        if (isMenuOpen) {
-          closeMobileMenu();
-        }
-      }
-
-      function closeUserDropdown() {
-        userDropdown.classList.remove('show');
-        isUserDropdownOpen = false;
-      }
-
-      userBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (isUserDropdownOpen) {
-          closeUserDropdown();
-        } else {
-          openUserDropdown();
-        }
-      });
-
-      // Mobile menu toggle
-      const navbarNav = document.getElementById('mobile-nav');
-      const menuIcon = document.getElementById('menu-icon');
-      const closeMenu = document.getElementById('close-menu');
-      const overlay = document.getElementById('overlay');
-      let isMenuOpen = false;
-
-      function openMobileMenu() {
-        if (!isMenuOpen) {
-          navbarNav.classList.remove('-right-full');
-          navbarNav.classList.add('right-0');
-          overlay.classList.remove('hidden');
-          overlay.classList.add('block');
-          document.body.style.overflow = 'hidden';
-          isMenuOpen = true;
-          // Close user dropdown if open
-          if (isUserDropdownOpen) {
-            closeUserDropdown();
-          }
-        }
-      }
-
-      function closeMobileMenu() {
-        if (isMenuOpen) {
-          navbarNav.classList.add('-right-full');
-          navbarNav.classList.remove('right-0');
-          overlay.classList.add('hidden');
-          overlay.classList.remove('block');
-          document.body.style.overflow = 'auto';
-          isMenuOpen = false;
-        }
-      }
-
-      menuIcon.addEventListener('click', (e) => {
-        e.stopPropagation();
-        openMobileMenu();
-      });
-
-      // Touch-friendly close button
-      closeMenu.addEventListener('click', (e) => {
-        e.stopPropagation();
-        closeMobileMenu();
-      });
-
-      overlay.addEventListener('click', () => {
-        closeMobileMenu();
-        if (isUserDropdownOpen) {
-          closeUserDropdown();
-        }
-      });
-
-      // Close dropdown when clicking outside
-      document.addEventListener('click', (e) => {
-        const isClickInsideDropdown = e.target.closest('#user-dropdown') !== null;
-        const isClickOnUserBtn = e.target.closest('#user-btn') !== null;
-        const isClickInsideNav = e.target.closest('#mobile-nav') !== null;
-        const isClickOnMenuIcon = e.target.closest('#menu-icon') !== null;
-
-        if (!isClickInsideDropdown && !isClickOnUserBtn && isUserDropdownOpen) {
-          closeUserDropdown();
-        }
-
-        if (!isClickInsideNav && !isClickOnMenuIcon && isMenuOpen) {
-          closeMobileMenu();
-        }
-      });
-
-      // Improved smooth scrolling for navigation links with offset
-      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-          e.preventDefault();
-          const targetId = this.getAttribute('href');
-          const target = document.querySelector(targetId);
-
-          if (target) {
-            // Close mobile menu and user dropdown
-            closeMobileMenu();
-            closeUserDropdown();
-
-            // Calculate offset based on navbar height
-            const navbarHeight = document.querySelector('nav').offsetHeight;
-            const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - navbarHeight;
-
-            // Smooth scroll to target position with offset
-            window.scrollTo({
-              top: targetPosition,
-              behavior: 'smooth'
-            });
-          }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#6B7280'
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: '#F3F4F6'
+                        },
+                        ticks: {
+                            color: '#6B7280',
+                            callback: function(value) {
+                                return 'Rp ' + (value / 1000000).toFixed(0) + 'M';
+                            }
+                        }
+                    }
+                },
+                elements: {
+                    point: {
+                        hoverRadius: 8
+                    }
+                }
+            }
         });
-      });
+    }
 
-      // Handle orientation change
-      window.addEventListener('orientationchange', function() {
-        // Close menu on orientation change to prevent layout issues
-        setTimeout(() => {
-          if (isMenuOpen) {
-            closeMobileMenu();
-          }
-          if (isUserDropdownOpen) {
-            closeUserDropdown();
-          }
-          // Re-initialize icons after orientation change
-          feather.replace();
-        }, 100);
-      });
-
-      // Re-initialize Feather icons after DOM manipulation
-      feather.replace();
-
-      // Optimize scroll performance
-      let ticking = false;
-      function updateNavbar() {
-        const navbar = document.querySelector('nav');
-        const scrollTop = window.pageYOffset;
-        
-        if (scrollTop > 100) {
-          navbar.style.backdropFilter = 'blur(10px)';
-          navbar.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
-        } else {
-          navbar.style.backdropFilter = 'none';
-          navbar.style.backgroundColor = 'rgba(255, 255, 255, 1)';
-        }
-        
-        ticking = false;
-      }
-
-      function requestTick() {
-        if (!ticking) {
-          requestAnimationFrame(updateNavbar);
-          ticking = true;
-        }
-      }
-
-      window.addEventListener('scroll', requestTick);
-    </script>
-  </body>
-</html>
+    // Auto refresh every 30 seconds for real-time data
+    setInterval(function() {
+        // In a real application, you would fetch new data here
+        console.log('Refreshing dashboard data...');
+    }, 30000);
+});
+</script>
+@endsection
