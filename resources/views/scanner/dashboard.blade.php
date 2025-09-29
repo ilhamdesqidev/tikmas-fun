@@ -349,8 +349,8 @@
                     </svg>
                 </div>
                 <h3 class="text-xl font-bold text-gray-900 mb-2">Tiket Berhasil Digunakan!</h3>
-                <p class="text-gray-600 mb-4" id="success-message">Selamat datang!</p>
-                <button onclick="closeSuccessModal()" class="bg-green-600 text-white px-6 py-2 rounded-lg font-medium">
+                <div id="success-message">Selamat datang!</div>
+                <button onclick="closeSuccessModal()" class="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg font-medium">
                     Tutup
                 </button>
             </div>
@@ -491,7 +491,7 @@
             }
         }
 
-        // Start scanner barcode linear
+        // Start scanner
         function startScanner() {
             if (!scanning || !camera) return;
             
@@ -668,7 +668,7 @@
             document.getElementById('no-ticket').classList.remove('hidden');
         }
 
-        // Use ticket
+        // Use ticket - UPDATED VERSION WITH PRINT SUPPORT
         async function useTicket() {
             if (!currentOrderNumber) return;
             
@@ -697,10 +697,8 @@
                     button.textContent = '❌ Tiket Sudah Digunakan';
                     button.className = 'w-full bg-gray-400 cursor-not-allowed text-white font-bold py-3 px-4 rounded-lg';
                     
-                    // Show success modal
-                    document.getElementById('success-message').textContent = result.message;
-                    document.getElementById('success-modal').classList.remove('hidden');
-                    document.getElementById('success-modal').classList.add('flex');
+                    // Show success modal with print option
+                    showSuccessWithPrint(result);
                     
                     // Update stats
                     const todayUsedElement = document.getElementById('today-used');
@@ -723,6 +721,57 @@
                 button.disabled = false;
                 button.textContent = originalText;
             }
+        }
+
+        // Show success modal with print option
+        function showSuccessWithPrint(result) {
+            const modal = document.getElementById('success-modal');
+            const messageElement = document.getElementById('success-message');
+            
+            messageElement.innerHTML = `
+                <div class="text-center">
+                    <p class="mb-4">${result.message}</p>
+                    ${result.print_url ? `
+                        <div class="bg-blue-50 p-3 rounded-lg mb-4">
+                            <p class="text-sm text-blue-800 mb-2">🎫 Siap mencetak tiket gelang!</p>
+                            <button onclick="printBraceletTickets('${result.print_url}')" 
+                                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium mr-2">
+                                📄 Cetak Tiket Gelang
+                            </button>
+                            <button onclick="openPrintInNewTab('${result.print_url}')" 
+                                    class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                                🔗 Buka di Tab Baru
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        // Print bracelet tickets
+        function printBraceletTickets(printUrl) {
+            // Open print URL in new window/tab for printing
+            const printWindow = window.open(printUrl, '_blank');
+            if (printWindow) {
+                printWindow.focus();
+                // Auto-trigger print dialog after content loads
+                printWindow.onload = function() {
+                    setTimeout(() => {
+                        printWindow.print();
+                    }, 1000);
+                };
+            } else {
+                // Fallback if popup is blocked
+                showScanStatus('Pop-up diblokir! Silakan buka link cetak secara manual.', 'error');
+            }
+        }
+
+        // Open print in new tab
+        function openPrintInNewTab(printUrl) {
+            window.open(printUrl, '_blank');
         }
 
         // Add to recent scans table

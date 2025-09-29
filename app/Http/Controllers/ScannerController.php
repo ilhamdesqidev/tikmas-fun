@@ -5,196 +5,153 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\Promo;
+use Illuminate\Support\Facades\Session;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Str;
 
 class ScannerController extends Controller
 {
-    // Kode verifikasi petugas
-    private $verificationCode = '250925';
-
-    /**
-     * Tampilkan halaman verifikasi petugas
-     */
+    // Method untuk menampilkan form verifikasi petugas
     public function showVerificationForm()
     {
         return view('scanner.verification');
     }
 
-    /**
-     * Verifikasi kode petugas
-     */
+    // Method untuk verifikasi petugas
     public function verifyStaff(Request $request)
     {
         $request->validate([
-            'verification_code' => 'required|string'
+            'staff_code' => 'required|string'
         ]);
 
-        $inputCode = $request->verification_code;
-        $correctCode = env('STAFF_VERIFICATION_CODE', $this->verificationCode);
-
-        if ($inputCode === $correctCode) {
-            session(['staff_verified' => true, 'staff_verified_at' => now()]);
-            return redirect()->route('scanner.dashboard')->with('success', 'Verifikasi berhasil! Selamat datang, Petugas.');
+        // Simple staff verification - bisa disesuaikan dengan kebutuhan
+        $validCodes = ['STAFF001', 'STAFF002', 'PETUGAS01', 'SCAN123', 'ADMINSCAN', 'MESTAKARA', 'ILHAM']; // Contoh kode valid
+        
+        if (in_array(strtoupper($request->staff_code), $validCodes)) {
+            Session::put('scanner_verified', true);
+            Session::put('staff_code', strtoupper($request->staff_code));
+            
+            return redirect()->route('scanner.dashboard')
+                ->with('success', 'Verifikasi berhasil! Selamat datang, Petugas.');
         }
 
-        return back()->withErrors(['verification_code' => 'Kode verifikasi salah!']);
+        return redirect()->back()
+            ->with('error', 'Kode petugas tidak valid!')
+            ->withInput();
     }
 
-    /**
-     * Dashboard scanner untuk petugas
-     */
+    // Method untuk menampilkan dashboard scanner
     public function dashboard()
     {
-        if (!session('staff_verified')) {
-            return redirect()->route('scanner.verification')->with('error', 'Silakan masukkan kode verifikasi terlebih dahulu.');
+        // Check if staff is verified
+        if (!Session::has('scanner_verified')) {
+            return redirect()->route('scanner.verification');
         }
 
-        $verifiedAt = session('staff_verified_at');
-        if ($verifiedAt && Carbon::parse($verifiedAt)->diffInHours(now()) > 8) {
-            session()->forget(['staff_verified', 'staff_verified_at']);
-            return redirect()->route('scanner.verification')->with('error', 'Session expired. Silakan verifikasi ulang.');
-        }
+        $today = Carbon::today();
+        
+        // Get today's statistics
+        $todayUsed = Order::whereDate('used_at', $today)
+            ->where('status', 'used')
+            ->sum('ticket_quantity');
+            
+        $todayTotal = Order::whereDate('visit_date', $today)
+            ->where('status', 'success')
+            ->orWhere('status', 'used')
+            ->sum('ticket_quantity');
 
-        // Gunakan status yang sudah ada atau cek dari kolom tambahan
-        $todayUsed = $this->getTodayUsedCount();
-        $todayTotal = Order::where('status', 'success')
-                          ->whereDate('visit_date', today())
-                          ->count();
-
-        $recentScans = $this->getRecentScans();
+        // Get recent scans
+        $recentScans = Order::with('promo')
+            ->whereDate('used_at', $today)
+            ->where('status', 'used')
+            ->orderBy('used_at', 'desc')
+            ->limit(10)
+            ->get();
 
         return view('scanner.dashboard', compact('todayUsed', 'todayTotal', 'recentScans'));
     }
 
-    /**
-     * Get today used count - dengan berbagai cara
-     */
-    private function getTodayUsedCount()
-    {
-        // Cek apakah ada kolom used_at
-        if (\Schema::hasColumn('orders', 'used_at')) {
-            return Order::whereNotNull('used_at')
-                       ->whereDate('used_at', today())
-                       ->count();
-        }
-
-        // Fallback: cek dari notes atau keterangan lain
-        return Order::where('status', 'expired') // Gunakan status lain sebagai penanda 'used'
-                   ->whereDate('updated_at', today())
-                   ->where('updated_at', '>', Carbon::today()->addHours(6)) // Asumsi jam operasional
-                   ->count();
-    }
-
-    /**
-     * Get recent scans
-     */
-    private function getRecentScans()
-    {
-        if (\Schema::hasColumn('orders', 'used_at')) {
-            return Order::whereNotNull('used_at')
-                       ->whereDate('used_at', today())
-                       ->with('promo')
-                       ->orderBy('used_at', 'desc')
-                       ->take(10)
-                       ->get();
-        }
-
-        return Order::where('status', 'expired')
-                   ->whereDate('updated_at', today())
-                   ->with('promo')
-                   ->orderBy('updated_at', 'desc')
-                   ->take(10)
-                   ->get();
-    }
-
-    /**
-     * Scan barcode dan tampilkan detail
-     */
+    // Method untuk scan barcode
     public function scanBarcode(Request $request)
     {
-        if (!session('staff_verified')) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
-
         $request->validate([
             'barcode' => 'required|string'
         ]);
 
+        $barcode = trim($request->barcode);
+        
         try {
-            // Normalize barcode - hapus spasi dan karakter khusus
-            $barcode = trim($request->barcode);
-            $barcode = preg_replace('/\s+/', '', $barcode);
-            
-            // Cari order dengan berbagai kemungkinan field
-            $order = Order::where(function($query) use ($barcode) {
-                        $query->where('order_number', $barcode)
-                              ->orWhere('order_number', 'like', '%' . $barcode . '%');
-                    })
-                    ->first();
+            // Find order by order_number (barcode)
+            $order = Order::with('promo')
+                ->where('order_number', $barcode)
+                ->first();
 
             if (!$order) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Barcode tidak ditemukan!',
-                    'order' => null
+                    'message' => 'Barcode tidak ditemukan dalam sistem!'
                 ]);
             }
 
-            $order->load('promo');
-            $validation = $this->validateTicket($order);
-            
-            if (!$validation['valid']) {
+            // Check if order is paid/success
+            if ($order->status !== 'success' && $order->status !== 'used') {
                 return response()->json([
                     'success' => false,
-                    'message' => $validation['message'],
-                    'order' => null
+                    'message' => 'Tiket belum dibayar atau tidak valid!'
+                ]);
+            }
+
+            // Check if already used
+            if ($order->status === 'used') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tiket sudah pernah digunakan sebelumnya!',
+                    'order' => [
+                        'order_number' => $order->order_number,
+                        'customer_name' => $order->customer_name,
+                        'status' => $order->status,
+                        'used_at' => $order->used_at
+                    ]
                 ]);
             }
 
             return response()->json([
                 'success' => true,
-                'message' => 'Barcode berhasil di-scan!',
+                'message' => 'Tiket valid dan siap digunakan!',
                 'order' => [
                     'order_number' => $order->order_number,
                     'customer_name' => $order->customer_name,
                     'whatsapp_number' => $order->whatsapp_number,
-                    'branch' => $order->branch ?? 'Cabang Utama',
-                    'visit_date' => Carbon::parse($order->visit_date)->format('d M Y'),
+                    'visit_date' => Carbon::parse($order->visit_date)->format('d/m/Y'),
                     'ticket_quantity' => $order->ticket_quantity,
                     'total_price' => $order->total_price,
-                    'status' => $order->status,
                     'promo_name' => $order->promo ? $order->promo->name : 'Unknown',
-                    'created_at' => Carbon::parse($order->created_at)->format('d M Y H:i'),
+                    'status' => $order->status
                 ]
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Scanner error', ['error' => $e->getMessage(), 'barcode' => $request->barcode]);
+            \Log::error('Scanner error: ' . $e->getMessage());
+            
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan saat scan barcode!',
-                'order' => null
+                'message' => 'Terjadi kesalahan sistem saat memproses barcode!'
             ]);
         }
     }
 
-    /**
-     * Gunakan tiket - SOLUSI ALTERNATIF
-     */
+    // Method untuk menggunakan tiket dan mencetak bracelet
     public function useTicket(Request $request)
     {
-        if (!session('staff_verified')) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
-
         $request->validate([
             'order_number' => 'required|string'
         ]);
 
         try {
-            $order = Order::where('order_number', $request->order_number)->first();
+            $order = Order::with('promo')
+                ->where('order_number', $request->order_number)
+                ->first();
 
             if (!$order) {
                 return response()->json([
@@ -203,154 +160,208 @@ class ScannerController extends Controller
                 ]);
             }
 
-            $order->load('promo');
-            $validation = $this->validateTicket($order);
-            
-            if (!$validation['valid']) {
+            if ($order->status === 'used') {
                 return response()->json([
                     'success' => false,
-                    'message' => $validation['message']
+                    'message' => 'Tiket sudah pernah digunakan!'
                 ]);
             }
 
-            // SOLUSI 1: Cek apakah ada kolom used_at
-            if (\Schema::hasColumn('orders', 'used_at')) {
-                // Jika ada kolom used_at, tandai tiket sebagai used
-                $order->used_at = now();
-                if (\Schema::hasColumn('orders', 'used_by_staff')) {
-                    $order->used_by_staff = 'Staff-' . substr(session()->getId(), 0, 10);
-                }
-                
-                // Coba ubah status ke 'used' jika ENUM mendukung
-                try {
-                    $order->status = 'used';
-                    $order->save();
-                } catch (\Exception $e) {
-                    // Jika ENUM tidak mendukung 'used', gunakan status lain
-                    $order->status = 'expired'; // Gunakan 'expired' sebagai penanda 'used'
-                    $order->save();
-                    
-                    Log::info('Used expired status as used marker', [
-                        'order_number' => $order->order_number,
-                        'reason' => 'ENUM does not support used status'
-                    ]);
-                }
-            } else {
-                // SOLUSI 2: Fallback tanpa kolom used_at
-                // Gunakan kombinasi status + waktu update sebagai penanda
-                $order->status = 'expired'; // Penanda bahwa tiket sudah digunakan
-                $order->save();
-                
-                Log::info('Marked ticket as used using expired status', [
-                    'order_number' => $order->order_number
+            if ($order->status !== 'success') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tiket tidak valid untuk digunakan!'
                 ]);
             }
 
-            Log::info('Ticket used successfully', [
-                'order_number' => $order->order_number,
-                'customer_name' => $order->customer_name,
-                'method' => \Schema::hasColumn('orders', 'used_at') ? 'used_at_column' : 'expired_status'
-            ]);
+            // Update order status to used
+            $order->status = 'used';
+            $order->used_at = now();
+            $order->save();
+
+            // Update promo sold_count
+            if ($order->promo) {
+                $order->promo->increment('sold_count', $order->ticket_quantity);
+            }
 
             return response()->json([
                 'success' => true,
-                'message' => 'Tiket berhasil digunakan! Selamat datang ' . $order->customer_name,
+                'message' => 'Tiket berhasil digunakan! Selamat menikmati MestaKara!',
                 'order' => [
                     'order_number' => $order->order_number,
                     'customer_name' => $order->customer_name,
                     'ticket_quantity' => $order->ticket_quantity,
-                    'used_at' => Carbon::now()->format('d M Y H:i'),
-                ]
+                    'used_at' => $order->used_at->format('d/m/Y H:i:s')
+                ],
+                'print_url' => route('scanner.print.bracelet', ['order_id' => $order->order_number])
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Use ticket error', [
-                'error' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'order_number' => $request->order_number ?? 'not provided',
-                'trace' => $e->getTraceAsString()
-            ]);
+            \Log::error('Use ticket error: ' . $e->getMessage());
             
             return response()->json([
                 'success' => false,
-                'message' => 'Error: ' . $e->getMessage()
+                'message' => 'Terjadi kesalahan saat memproses tiket!'
             ]);
         }
     }
 
-    /**
-     * Validasi tiket - UPDATED
-     */
-    private function validateTicket($order)
+    // Method untuk mencetak bracelet design
+    public function printBracelet($order_id)
     {
-        // Cek apakah tiket sudah digunakan
-        if ($this->isTicketUsed($order)) {
-            return [
-                'valid' => false,
-                'message' => '❌ Tiket sudah digunakan sebelumnya!'
-            ];
+        try {
+            $order = Order::with('promo')
+                ->where('order_number', $order_id)
+                ->where('status', 'used')
+                ->firstOrFail();
+
+            if (!$order->promo || !$order->promo->bracelet_design) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Desain gelang tidak tersedia untuk tiket ini!'
+                ], 404);
+            }
+
+            // Generate PDF dengan multiple tickets
+            $pdf = $this->generateBraceletPDF($order);
+
+            $filename = "Bracelet_Tickets_{$order->order_number}_" . date('YmdHi') . ".pdf";
+            
+            return $pdf->download($filename);
+
+        } catch (\Exception $e) {
+            \Log::error('Print bracelet error: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mencetak tiket gelang: ' . $e->getMessage()
+            ], 500);
         }
-
-        // Cek status pembayaran
-        if ($order->status !== 'success') {
-            return [
-                'valid' => false,
-                'message' => '❌ Tiket belum dibayar! Status: ' . ucfirst($order->status)
-            ];
-        }
-
-        // Cek tanggal kunjungan
-        $visitDate = Carbon::parse($order->visit_date);
-        $today = Carbon::today();
-
-        if ($visitDate->lt($today)) {
-            return [
-                'valid' => false,
-                'message' => '❌ Tiket sudah expired! Tanggal kunjungan: ' . $visitDate->format('d M Y')
-            ];
-        }
-
-        if ($visitDate->gt($today)) {
-            return [
-                'valid' => false,
-                'message' => '❌ Tiket belum dapat digunakan! Tanggal kunjungan: ' . $visitDate->format('d M Y')
-            ];
-        }
-
-        return [
-            'valid' => true,
-            'message' => '✅ Tiket valid dan dapat digunakan!'
-        ];
     }
 
-    /**
-     * Cek apakah tiket sudah digunakan
-     */
-    private function isTicketUsed($order)
+    // Method untuk generate PDF bracelet
+    private function generateBraceletPDF($order)
     {
-        // Jika ada kolom used_at
-        if (\Schema::hasColumn('orders', 'used_at')) {
-            return !is_null($order->used_at);
+        $promo = $order->promo;
+        $quantity = $order->ticket_quantity;
+        
+        // Prepare data for PDF
+        $tickets = [];
+        for ($i = 1; $i <= $quantity; $i++) {
+            $tickets[] = [
+                'ticket_number' => $order->order_number . '-T' . str_pad($i, 2, '0', STR_PAD_LEFT),
+                'order_number' => $order->order_number,
+                'customer_name' => $order->customer_name,
+                'promo_name' => $promo->name,
+                'visit_date' => Carbon::parse($order->visit_date)->format('d/m/Y'),
+                'ticket_index' => $i,
+                'total_tickets' => $quantity,
+                'issued_at' => Carbon::now()->format('d/m/Y H:i')
+            ];
         }
 
-        // Fallback: gunakan kombinasi status dan waktu
-        // Asumsi: jika status = expired DAN updated hari ini setelah jam operasional, berarti sudah digunakan
-        if ($order->status === 'expired' && 
-            $order->updated_at > Carbon::today()->addHours(6) && 
-            Carbon::parse($order->updated_at)->isToday()) {
-            return true;
+        // Get bracelet design image path
+        $braceletDesignPath = null;
+        if ($promo->bracelet_design) {
+            $fullPath = storage_path('app/public/' . $promo->bracelet_design);
+            if (file_exists($fullPath)) {
+                $braceletDesignPath = $fullPath;
+            }
         }
 
-        return false;
+        $pdf = Pdf::loadView('scanner.bracelet-tickets-pdf', [
+            'tickets' => $tickets,
+            'order' => $order,
+            'promo' => $promo,
+            'bracelet_design_path' => $braceletDesignPath
+        ]);
+
+        $pdf->setPaper('A4', 'portrait');
+        $pdf->setOption('dpi', 150);
+        $pdf->setOption('defaultFont', 'sans-serif');
+        $pdf->setOption('isHtml5ParserEnabled', true);
+
+        return $pdf;
     }
 
-    /**
-     * Logout petugas
-     */
+    // Method untuk auto print setelah use ticket (AJAX endpoint)
+    public function autoPrintBracelet(Request $request)
+    {
+        $request->validate([
+            'order_number' => 'required|string'
+        ]);
+
+        try {
+            $order = Order::with('promo')
+                ->where('order_number', $request->order_number)
+                ->where('status', 'used')
+                ->first();
+
+            if (!$order) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Order tidak ditemukan atau belum digunakan!'
+                ]);
+            }
+
+            if (!$order->promo || !$order->promo->bracelet_design) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Desain gelang tidak tersedia untuk tiket ini!'
+                ]);
+            }
+
+            $printUrl = route('scanner.print.bracelet', ['order_id' => $order->order_number]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Siap untuk mencetak tiket gelang!',
+                'print_url' => $printUrl,
+                'ticket_quantity' => $order->ticket_quantity
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Auto print error: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mempersiapkan pencetakan!'
+            ]);
+        }
+    }
+
+    // Method untuk check ticket (API)
+    public function checkTicket(Request $request)
+    {
+        $request->validate([
+            'order_number' => 'required|string'
+        ]);
+
+        $order = Order::with('promo')
+            ->where('order_number', $request->order_number)
+            ->first();
+
+        if (!$order) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tiket tidak ditemukan'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'order' => $order,
+            'promo' => $order->promo
+        ]);
+    }
+
+    // Method untuk logout petugas
     public function logout()
     {
-        session()->forget(['staff_verified', 'staff_verified_at']);
-        return redirect()->route('scanner.verification')->with('success', 'Berhasil logout.');
+        Session::forget('scanner_verified');
+        Session::forget('staff_code');
+        
+        return redirect()->route('scanner.verification')
+            ->with('success', 'Anda telah logout dari sistem scanner.');
     }
 }

@@ -12,7 +12,6 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('image')->nullable();
-            $table->string('bracelet_design')->nullable();
             $table->text('description');
             $table->text('terms_conditions')->nullable();
             $table->decimal('original_price', 12, 2);

@@ -178,6 +178,12 @@ Route::prefix('scanner')->name('scanner.')->group(function () {
     // API untuk menggunakan tiket
     Route::post('/use', [ScannerController::class, 'useTicket'])->name('use');
     
+    // Route untuk mencetak tiket gelang
+    Route::get('/print/bracelet/{order_id}', [ScannerController::class, 'printBracelet'])->name('print.bracelet');
+    
+    // API untuk auto print setelah use ticket
+    Route::post('/auto-print', [ScannerController::class, 'autoPrintBracelet'])->name('auto.print');
+    
     // Logout petugas
     Route::post('/logout', [ScannerController::class, 'logout'])->name('logout');
     Route::get('/logout', [ScannerController::class, 'logout']);
