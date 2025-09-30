@@ -150,7 +150,6 @@
                     </div>
                     <div class="text-right">
                         <p class="text-sm font-semibold text-gray-900">Rp {{ number_format($package['revenue'] / 1000000, 1) }}M</p>
-                        <p class="text-xs text-green-600">{{ $package['growth'] }}</p>
                     </div>
                 </div>
                 @empty

@@ -158,7 +158,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Terjual</label>
-                    <input type="number" value="{{ $promo->sold_count }}" readonly class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50">
+                    <input type="number" value="{{ $promo->actual_sold_count }}" readonly class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50">
                 </div>
                 <div class="flex items-center justify-center">
                     <div class="flex items-center mt-6">
