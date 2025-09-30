@@ -192,7 +192,7 @@
                 
                 <div class="flex items-center text-sm text-gray-600">
                   <i data-feather="users" class="w-4 h-4 mr-2"></i>
-                  <span>Terjual: <strong>{{ $promo->sold_count }}</strong></span>
+                  <span>Terjual: <strong>{{ $promo->actual_sold_count }}</strong></span>
                 </div>
                 
                 @if($promo->quota)

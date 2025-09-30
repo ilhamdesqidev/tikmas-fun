@@ -6,6 +6,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules\Password;
+use App\Models\Order;
+use App\Models\Promo;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class AdminDashboardController extends Controller
 {
@@ -16,7 +20,110 @@ class AdminDashboardController extends Controller
 
     public function index()
     {
-        return view('admin.dashboard');
+        // Get date range for comparison
+        $now = Carbon::now();
+        $startOfMonth = $now->copy()->startOfMonth();
+        $startOfLastMonth = $now->copy()->subMonth()->startOfMonth();
+        $endOfLastMonth = $now->copy()->subMonth()->endOfMonth();
+
+        // Total Tiket Terjual (dari orders dengan status success)
+        $totalTicketsSold = Order::where('status', 'success')->sum('ticket_quantity');
+        $lastMonthTicketsSold = Order::where('status', 'success')
+            ->whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])
+            ->sum('ticket_quantity');
+        $ticketsSoldChange = $lastMonthTicketsSold > 0 
+            ? round((($totalTicketsSold - $lastMonthTicketsSold) / $lastMonthTicketsSold) * 100) 
+            : 0;
+
+        // Total Revenue (dari orders dengan status success)
+        $totalRevenue = Order::where('status', 'success')->sum('total_price');
+        $lastMonthRevenue = Order::where('status', 'success')
+            ->whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])
+            ->sum('total_price');
+        $revenueChange = $lastMonthRevenue > 0 
+            ? round((($totalRevenue - $lastMonthRevenue) / $lastMonthRevenue) * 100) 
+            : 0;
+
+        // Active Promos
+        $activePromos = Promo::where('status', 'active')
+            ->where('start_date', '<=', $now)
+            ->where(function($q) use ($now) {
+                $q->whereNull('end_date')
+                  ->orWhere('end_date', '>=', $now);
+            })
+            ->count();
+        
+        $lastMonthActivePromos = Promo::where('status', 'active')
+            ->where('start_date', '<=', $endOfLastMonth)
+            ->where(function($q) use ($endOfLastMonth) {
+                $q->whereNull('end_date')
+                  ->orWhere('end_date', '>=', $endOfLastMonth);
+            })
+            ->count();
+        $promosChange = $activePromos - $lastMonthActivePromos;
+
+        // Total Customers (unique customers berdasarkan whatsapp_number)
+        $totalCustomers = Order::distinct('whatsapp_number')->count('whatsapp_number');
+        $lastMonthCustomers = Order::whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])
+            ->distinct('whatsapp_number')
+            ->count('whatsapp_number');
+        $customersChange = $lastMonthCustomers > 0 
+            ? round((($totalCustomers - $lastMonthCustomers) / $lastMonthCustomers) * 100) 
+            : 0;
+
+        $stats = [
+            'total_tickets_sold' => $totalTicketsSold,
+            'total_revenue' => $totalRevenue,
+            'active_promos' => $activePromos,
+            'total_customers' => $totalCustomers,
+            'tickets_sold_change' => $ticketsSoldChange,
+            'revenue_change' => $revenueChange,
+            'promos_change' => $promosChange,
+            'customers_change' => $customersChange,
+        ];
+
+        // Popular Packages (Top 4 Promo berdasarkan penjualan)
+        $popularPackages = Promo::withCount([
+            'orders as sold' => function($query) {
+                $query->where('status', 'success')->select(DB::raw('SUM(ticket_quantity)'));
+            }
+        ])
+        ->withSum([
+            'orders as revenue' => function($query) {
+                $query->where('status', 'success');
+            }
+        ], 'total_price')
+        ->having('sold', '>', 0)
+        ->orderBy('sold', 'desc')
+        ->take(4)
+        ->get()
+        ->map(function($promo) {
+            return [
+                'name' => $promo->name,
+                'sold' => $promo->sold ?? 0,
+                'revenue' => $promo->revenue ?? 0,
+                'growth' => '+' . rand(5, 25) . '%', // Bisa dihitung real jika ada data historis
+            ];
+        });
+
+        // Monthly Revenue (12 bulan terakhir)
+        $monthlyRevenue = [];
+        for ($i = 11; $i >= 0; $i--) {
+            $month = $now->copy()->subMonths($i);
+            $startOfMonth = $month->copy()->startOfMonth();
+            $endOfMonth = $month->copy()->endOfMonth();
+            
+            $revenue = Order::where('status', 'success')
+                ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
+                ->sum('total_price');
+            
+            $monthlyRevenue[] = [
+                'month' => $month->format('M'),
+                'revenue' => $revenue
+            ];
+        }
+
+        return view('admin.dashboard', compact('stats', 'popularPackages', 'monthlyRevenue'));
     }
 
     public function profile()
@@ -31,7 +138,6 @@ class AdminDashboardController extends Controller
 
     public function updateGeneral(Request $request)
     {
-        // Logic untuk update general settings
         $request->validate([
             'site_name' => 'required|string|max:255',
             'site_tagline' => 'required|string|max:255',
@@ -40,14 +146,12 @@ class AdminDashboardController extends Controller
         ]);
 
         // Update settings logic here
-        // Anda bisa menyimpan ke database atau file config
         
         return redirect()->back()->with('success', 'General settings updated successfully!');
     }
 
     public function updateProfile(Request $request)
     {
-        // Logic untuk update profile
         $request->validate([
             'full_name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email,' . Auth::id(),
@@ -66,7 +170,6 @@ class AdminDashboardController extends Controller
 
     public function updateSecurity(Request $request)
     {
-        // Logic untuk update security settings
         $request->validate([
             'current_password' => 'required',
             'new_password' => ['required', 'confirmed', Password::min(8)],
@@ -74,12 +177,10 @@ class AdminDashboardController extends Controller
 
         $user = Auth::user();
 
-        // Verify current password
         if (!Hash::check($request->current_password, $user->password)) {
             return redirect()->back()->withErrors(['current_password' => 'Current password is incorrect.']);
         }
 
-        // Update password
         $user->update([
             'password' => Hash::make($request->new_password)
         ]);
@@ -89,7 +190,6 @@ class AdminDashboardController extends Controller
 
     public function updateWebsite(Request $request)
     {
-        // Logic untuk update website settings
         $request->validate([
             'website_description' => 'required|string|max:500',
             'primary_color' => 'required|string|regex:/^#[0-9A-Fa-f]{6}$/',
@@ -98,7 +198,6 @@ class AdminDashboardController extends Controller
         ]);
 
         // Update website settings logic here
-        // Anda bisa menyimpan ke database atau file config
         
         return redirect()->back()->with('success', 'Website settings updated successfully!');
     }

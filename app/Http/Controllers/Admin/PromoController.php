@@ -14,33 +14,36 @@ class PromoController extends Controller
     // Di dalam method index(), perbaiki perhitungan statistik
     public function index()
     {
-        $promos = Promo::latest()->get();
+        // Eager load relasi orders untuk optimasi
+        $promos = Promo::withCount([
+            'orders',
+            'orders as sold_tickets' => function($query) {
+                $query->where('status', 'success')->select(\DB::raw('SUM(ticket_quantity)'));
+            }
+        ])
+        ->withSum([
+            'orders as total_revenue' => function($query) {
+                $query->where('status', 'success');
+            }
+        ], 'total_price')
+        ->latest()
+        ->get();
         
-        // Hitung statistik dengan pengecekan division by zero
+        // Hitung statistik dengan data real dari orders
         $totalPromos = $promos->count();
-        $activePromos = $promos->filter(function($promo) {
-            return $promo->is_active;
-        })->count();
+        $activePromos = $promos->where('is_active', true)->count();
         
         // Hitung persentase promo aktif
         $activePercentage = $totalPromos > 0 ? round(($activePromos / $totalPromos) * 100) : 0;
         
-        // Hitung total penjualan
-        $totalSales = 0;
-        foreach ($promos as $promo) {
-            $totalSales += $promo->sold_count * $promo->promo_price;
-        }
+        // Hitung total penjualan dari orders yang success
+        $totalSales = \App\Models\Order::where('status', 'success')->sum('total_price');
         
-        // Hitung rata-rata diskon
-        $totalDiscount = 0;
-        $countWithDiscount = 0;
-        foreach ($promos as $promo) {
-            if ($promo->discount_percent > 0) {
-                $totalDiscount += $promo->discount_percent;
-                $countWithDiscount++;
-            }
-        }
-        $averageDiscount = $countWithDiscount > 0 ? round($totalDiscount / $countWithDiscount) : 0;
+        // Hitung rata-rata diskon dari promo yang memiliki diskon
+        $promoWithDiscounts = $promos->filter(fn($promo) => $promo->discount_percent > 0);
+        $averageDiscount = $promoWithDiscounts->count() > 0 
+            ? round($promoWithDiscounts->avg('discount_percent')) 
+            : 0;
         
         return view('admin.promo.index', compact('promos', 'activePercentage', 'totalSales', 'averageDiscount'));
     }
