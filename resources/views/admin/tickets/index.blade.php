@@ -137,14 +137,14 @@
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">#</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Paket Promo</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">WhatsApp</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Branch</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Visit Date</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Qty</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Qty</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Status</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
@@ -152,6 +152,14 @@
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 py-4 text-sm text-gray-500">
                                 {{ $loop->iteration + ($orders->currentPage() - 1) * $orders->perPage() }}
+                            </td>
+                            <td class="px-6 py-4">
+                                @if($order->promo)
+                                    <div class="text-sm font-medium text-gray-900">{{ $order->promo->name }}</div>
+                                    <div class="text-xs text-gray-500">{{ ucfirst($order->promo->category) }}</div>
+                                @else
+                                    <span class="text-sm text-gray-400">-</span>
+                                @endif
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm font-medium text-gray-900">{{ $order->order_number }}</div>
@@ -173,18 +181,15 @@
                                 </a>
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-900">
-                                {{ $order->branch ?? 'Cabang Utama' }}
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-900">
                                 {{ \Carbon\Carbon::parse($order->visit_date)->format('d M Y') }}
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-900 text-center">
                                 {{ $order->ticket_quantity }}
                             </td>
-                            <td class="px-6 py-4 text-sm font-medium text-gray-900">
+                            <td class="px-6 py-4 text-sm font-medium text-gray-900 text-right">
                                 Rp {{ number_format($order->total_price, 0, ',', '.') }}
                             </td>
-                            <td class="px-6 py-4">
+                            <td class="px-6 py-4 text-center">
                                 @php
                                     $statusColors = [
                                         'success' => 'text-green-700 bg-green-50 border border-green-200',
@@ -202,7 +207,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="10" class="px-6 py-12 text-center">
+                            <td colspan="9" class="px-6 py-12 text-center">
                                 <div class="text-gray-500">
                                     <i class="fas fa-inbox text-2xl mb-2"></i>
                                     <p>Tidak ada data tiket</p>
