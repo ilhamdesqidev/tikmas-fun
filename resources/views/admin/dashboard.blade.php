@@ -18,13 +18,11 @@
             'customers_change' => 8,
         ];
         
-        $fallbackRecentOrders = [
-            ['id' => 'ORD-001', 'customer_name' => 'Ahmad Rizki', 'package' => 'Paket Keluarga', 'amount' => 450000, 'status' => 'completed', 'date' => '2024-01-15 14:30'],
-            ['id' => 'ORD-002', 'customer_name' => 'Sari Dewi', 'package' => 'Paket Wisata', 'amount' => 320000, 'status' => 'pending', 'date' => '2024-01-15 12:15'],
-            ['id' => 'ORD-003', 'customer_name' => 'Budi Santoso', 'package' => 'Paket Premium', 'amount' => 650000, 'status' => 'processing', 'date' => '2024-01-14 16:45'],
-            ['id' => 'ORD-004', 'customer_name' => 'Maya Sari', 'package' => 'Paket Keluarga', 'amount' => 450000, 'status' => 'completed', 'date' => '2024-01-14 11:20'],
-            ['id' => 'ORD-005', 'customer_name' => 'Rizki Pratama', 'package' => 'Paket Wisata', 'amount' => 320000, 'status' => 'completed', 'date' => '2024-01-13 09:30'],
-        ];
+        // Mengambil data pesanan terbaru dari database
+        $recentOrders = \App\Models\Order::with('promo')
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
         
         $fallbackPopularPackages = [
             ['name' => 'Paket Keluarga', 'sold' => 450, 'revenue' => 202500000, 'growth' => '+15%'],
@@ -49,7 +47,6 @@
         ];
 
         $stats = $stats ?? $fallbackStats;
-        $recentOrders = $recentOrders ?? $fallbackRecentOrders;
         $popularPackages = $popularPackages ?? $fallbackPopularPackages;
         $monthlyRevenue = $monthlyRevenue ?? $fallbackMonthlyRevenue;
     @endphp
@@ -178,20 +175,26 @@
             <table class="w-full">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID Pesanan</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Number</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paket</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">WhatsApp</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Visit Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Qty</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse($recentOrders as $order)
                     <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="text-sm font-medium text-gray-900">{{ $order['id'] }}</span>
+                            <div class="text-sm font-medium text-gray-900">{{ $order->order_number }}</div>
+                            @if($order->invoice_number)
+                                <div class="text-xs text-blue-600">{{ $order->invoice_number }}</div>
+                            @endif
+                            <div class="text-xs text-gray-500">
+                                {{ $order->created_at->format('d M Y H:i') }}
+                            </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center">
@@ -200,52 +203,48 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                     </svg>
                                 </div>
-                                <span class="text-sm text-gray-900">{{ $order['customer_name'] }}</span>
+                                <span class="text-sm text-gray-900">{{ $order->customer_name }}</span>
                             </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="text-sm text-gray-900">{{ $order['package'] }}</span>
+                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $order->whatsapp_number) }}" target="_blank" 
+                               class="text-sm text-green-600 hover:text-green-800 flex items-center gap-1">
+                                <i class="fab fa-whatsapp"></i>
+                                {{ $order->whatsapp_number }}
+                            </a>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ \Carbon\Carbon::parse($order->visit_date)->format('d M Y') }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+                            {{ $order->ticket_quantity }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="text-sm font-medium text-gray-900">Rp {{ number_format($order['amount']) }}</span>
+                            <span class="text-sm font-medium text-gray-900">Rp {{ number_format($order->total_price, 0, ',', '.') }}</span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            @if($order['status'] === 'completed')
-                                <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Selesai</span>
-                            @elseif($order['status'] === 'pending')
-                                <span class="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">Pending</span>
-                            @else
-                                <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">Diproses</span>
-                            @endif
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {{ date('d/m/Y H:i', strtotime($order['date'])) }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            <div class="flex space-x-2">
-                                <button class="text-blue-600 hover:text-blue-800">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                    </svg>
-                                </button>
-                                <button class="text-green-600 hover:text-green-800">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                    </svg>
-                                </button>
-                                <button class="text-red-600 hover:text-red-800">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                    </svg>
-                                </button>
-                            </div>
+                            @php
+                                $statusColors = [
+                                    'success' => 'text-green-700 bg-green-50 border border-green-200',
+                                    'pending' => 'text-yellow-700 bg-yellow-50 border border-yellow-200',
+                                    'canceled' => 'text-red-700 bg-red-50 border border-red-200',
+                                    'challenge' => 'text-orange-700 bg-orange-50 border border-orange-200',
+                                    'denied' => 'text-red-700 bg-red-50 border border-red-200',
+                                    'expired' => 'text-gray-700 bg-gray-50 border border-gray-200'
+                                ];
+                            @endphp
+                            <span class="px-3 py-1 text-xs rounded-full font-medium {{ $statusColors[$order->status] ?? 'text-gray-700 bg-gray-50 border border-gray-200' }}">
+                                {{ ucfirst($order->status) }}
+                            </span>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="px-6 py-4 text-center text-gray-500">
-                            Tidak ada pesanan terbaru
+                        <td colspan="8" class="px-6 py-4 text-center text-gray-500">
+                            <div class="text-gray-500">
+                                <i class="fas fa-inbox text-2xl mb-2"></i>
+                                <p>Tidak ada pesanan terbaru</p>
+                            </div>
                         </td>
                     </tr>
                     @endforelse
@@ -295,6 +294,41 @@
                 <p class="text-xs text-yellow-100">Analytics & laporan</p>
             </div>
         </a>
+    </div>
+
+    <!-- Status Modal -->
+    <div id="statusModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Update Status Order</h3>
+                <form id="statusForm" method="POST">
+                    @csrf
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Status Saat Ini</label>
+                        <p id="currentStatusDisplay" class="text-sm text-gray-600"></p>
+                    </div>
+                    <div class="mb-4">
+                        <label for="newStatus" class="block text-sm font-medium text-gray-700 mb-2">Status Baru</label>
+                        <select id="newStatus" name="status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="pending">Pending</option>
+                            <option value="success">Success</option>
+                            <option value="challenge">Challenge</option>
+                            <option value="denied">Denied</option>
+                            <option value="expired">Expired</option>
+                            <option value="canceled">Canceled</option>
+                        </select>
+                    </div>
+                    <div class="flex justify-end space-x-3 mt-6">
+                        <button type="button" onclick="closeStatusModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-md">
+                            Batal
+                        </button>
+                        <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md">
+                            Update Status
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 @endsection
 
@@ -365,12 +399,36 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+});
 
-    // Auto refresh every 30 seconds for real-time data
-    setInterval(function() {
-        // In a real application, you would fetch new data here
-        console.log('Refreshing dashboard data...');
-    }, 30000);
+// Status modal functionality
+function openStatusModal(orderNumber, currentStatus) {
+    const modal = document.getElementById('statusModal');
+    const form = document.getElementById('statusForm');
+    const currentStatusDisplay = document.getElementById('currentStatusDisplay');
+    const newStatusSelect = document.getElementById('newStatus');
+    
+    // Set form action
+    form.action = `/admin/tickets/${orderNumber}/update-status`;
+    
+    // Display current status
+    currentStatusDisplay.textContent = currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1);
+    
+    // Set current status as value in select
+    newStatusSelect.value = currentStatus;
+    
+    modal.classList.remove('hidden');
+}
+
+function closeStatusModal() {
+    document.getElementById('statusModal').classList.add('hidden');
+}
+
+// Close modal when clicking outside
+document.getElementById('statusModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeStatusModal();
+    }
 });
 </script>
 @endsection
