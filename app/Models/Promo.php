@@ -56,7 +56,7 @@ class Promo extends Model
      */
     public function successfulOrders()
     {
-        return $this->hasMany(Order::class)->where('status', 'success');
+        return $this->hasMany(Order::class)->whereIn('status', ['success', 'used']);
     }
 
     // =====================
@@ -85,7 +85,7 @@ class Promo extends Model
     public function getActualSoldCountAttribute()
     {
         return $this->orders()
-            ->where('status', 'success')
+            ->whereIn('status', ['success', 'used']) // PERBAIKAN: tambah status 'used'
             ->sum('ticket_quantity');
     }
 
@@ -95,7 +95,7 @@ class Promo extends Model
     public function getTotalRevenueAttribute()
     {
         return $this->orders()
-            ->where('status', 'success')
+            ->whereIn('status', ['success', 'used']) // PERBAIKAN: tambah status 'used'
             ->sum('total_price');
     }
 

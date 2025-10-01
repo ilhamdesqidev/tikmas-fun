@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Promo;
+use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
@@ -18,12 +19,12 @@ class PromoController extends Controller
         $promos = Promo::withCount([
             'orders',
             'orders as sold_tickets' => function($query) {
-                $query->where('status', 'success')->select(\DB::raw('SUM(ticket_quantity)'));
+                $query->whereIn('status', ['success', 'used'])->select(\DB::raw('SUM(ticket_quantity)')); // PERBAIKAN
             }
         ])
         ->withSum([
             'orders as total_revenue' => function($query) {
-                $query->where('status', 'success');
+                $query->whereIn('status', ['success', 'used']); // PERBAIKAN
             }
         ], 'total_price')
         ->latest()
@@ -198,73 +199,105 @@ public function store(Request $request)
     }
 
     public function update(Request $request, $id)
-    {
-        try {
-            $promo = Promo::findOrFail($id);
+{
+    try {
+        $promo = Promo::findOrFail($id);
 
-            // Validasi sederhana
-            $request->validate([
-                'name' => 'required|string|max:255|unique:promos,name,' . $promo->id,
-                'description' => 'required|string',
-                'terms_conditions' => 'required|string',
-                'original_price' => 'required|numeric|min:1',
-                'promo_price' => 'required|numeric|min:1|lt:original_price',
-                'start_date' => 'required|date',
-                'end_date' => 'nullable|date|after:start_date',
-                'quota' => 'nullable|integer|min:1',
-                'status' => 'required|in:active,inactive',
-                'category' => 'required|in:bulanan,holiday,birthday,nasional,student',
-                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240',
-                'bracelet_design' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10240',
-            ]);
+        // Validasi
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255|unique:promos,name,' . $promo->id,
+            'description' => 'required|string',
+            'terms_conditions' => 'required|string',
+            'original_price' => 'required|numeric|min:1',
+            'promo_price' => 'required|numeric|min:1|lt:original_price',
+            'start_date' => 'required|date',
+            'end_date' => 'nullable|date|after:start_date',
+            'quota' => 'nullable|integer|min:1',
+            'status' => 'required|in:active,inactive',
+            'category' => 'required|in:bulanan,holiday,birthday,nasional,student',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240',
+            'bracelet_design' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10240',
+        ]);
 
-            // Upload gambar baru jika ada
-            if ($request->hasFile('image')) {
-                // Hapus gambar lama
-                if ($promo->image) {
-                    Storage::disk('public')->delete($promo->image);
-                }
-                $imagePath = $request->file('image')->store('promos', 'public');
-                $promo->image = $imagePath;
-            }
-
-            // Upload desain gelang baru jika ada
-            if ($request->hasFile('bracelet_design')) {
-                // Hapus desain gelang lama
-                if ($promo->bracelet_design) {
-                    Storage::disk('public')->delete($promo->bracelet_design);
-                }
-                $braceletDesignPath = $request->file('bracelet_design')->store('bracelet-designs', 'public');
-                $promo->bracelet_design = $braceletDesignPath;
-            }
-
-            // Hitung diskon
-            $originalPrice = (float) $request->original_price;
-            $promoPrice = (float) $request->promo_price;
-            $discountPercent = round((($originalPrice - $promoPrice) / $originalPrice) * 100);
-
-            // Update data promo
-            $promo->name = $request->name;
-            $promo->description = $request->description;
-            $promo->terms_conditions = $request->terms_conditions;
-            $promo->original_price = $originalPrice;
-            $promo->promo_price = $promoPrice;
-            $promo->discount_percent = $discountPercent;
-            $promo->start_date = $request->start_date;
-            $promo->end_date = $request->end_date;
-            $promo->quota = $request->quota;
-            $promo->status = $request->status;
-            $promo->category = $request->category;
-            $promo->featured = $request->has('featured');
-            $promo->save();
-            return redirect()->route('admin.promo.index')
-                ->with('success', 'Promo "' . $promo->name . '" berhasil diperbarui!');
-        } catch (\Exception $e) {
+        if ($validator->fails()) {
             return redirect()->back()
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
+                ->withErrors($validator)
                 ->withInput();
         }
+
+        // Handle image removal
+        if ($request->has('remove_image') && $request->remove_image == '1') {
+            if ($promo->image) {
+                Storage::disk('public')->delete($promo->image);
+                $promo->image = null;
+            }
+        }
+
+        // Handle bracelet design removal
+        if ($request->has('remove_bracelet_design') && $request->remove_bracelet_design == '1') {
+            if ($promo->bracelet_design) {
+                Storage::disk('public')->delete($promo->bracelet_design);
+                $promo->bracelet_design = null;
+            }
+        }
+
+        // Upload gambar baru jika ada
+        if ($request->hasFile('image')) {
+            // Hapus gambar lama
+            if ($promo->image) {
+                Storage::disk('public')->delete($promo->image);
+            }
+            $imagePath = $request->file('image')->store('promos', 'public');
+            $promo->image = $imagePath;
+        }
+
+        // Upload desain gelang baru jika ada
+        if ($request->hasFile('bracelet_design')) {
+            // Hapus desain gelang lama
+            if ($promo->bracelet_design) {
+                Storage::disk('public')->delete($promo->bracelet_design);
+            }
+            $braceletDesignPath = $request->file('bracelet_design')->store('bracelet-designs', 'public');
+            $promo->bracelet_design = $braceletDesignPath;
+        }
+
+        // Hitung diskon
+        $originalPrice = (float) $request->original_price;
+        $promoPrice = (float) $request->promo_price;
+        
+        if ($promoPrice >= $originalPrice) {
+            return redirect()->back()
+                ->with('error', 'Harga promo harus lebih kecil dari harga normal')
+                ->withInput();
+        }
+        
+        $discountPercent = round((($originalPrice - $promoPrice) / $originalPrice) * 100);
+
+        // Update data promo
+        $promo->name = $request->name;
+        $promo->description = $request->description;
+        $promo->terms_conditions = $request->terms_conditions;
+        $promo->original_price = $originalPrice;
+        $promo->promo_price = $promoPrice;
+        $promo->discount_percent = $discountPercent;
+        $promo->start_date = $request->start_date;
+        $promo->end_date = $request->end_date;
+        $promo->quota = $request->quota;
+        $promo->status = $request->status;
+        $promo->category = $request->category;
+        $promo->featured = $request->has('featured');
+        $promo->save();
+
+        return redirect()->route('admin.promo.index')
+            ->with('success', 'Promo "' . $promo->name . '" berhasil diperbarui!');
+            
+    } catch (\Exception $e) {
+        \Log::error('Error updating promo: ' . $e->getMessage());
+        return redirect()->back()
+            ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
+            ->withInput();
     }
+}
 
     public function show($id)
     {

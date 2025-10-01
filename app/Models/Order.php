@@ -37,11 +37,14 @@ class Order extends Model
         return $this->belongsTo(Promo::class);
     }
 
-    // Scope untuk filter berdasarkan status
-    public function scopeByStatus($query, $status)
+   // Di model Order
+    public function scopeValid($query)
     {
-        return $query->where('status', $status);
+        return $query->whereIn('status', ['success', 'used']);
     }
+
+    // Penggunaan:
+    // $promo->orders()->valid()->count()
 
     // Scope untuk filter berdasarkan tanggal kunjungan
     public function scopeByVisitDate($query, $date)

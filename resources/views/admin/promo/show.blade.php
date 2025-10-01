@@ -94,18 +94,21 @@
                             </div>
                             @endif
                             
-                            <div class="flex items-center text-sm text-gray-600">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
-                                </svg>
-                                <span>Total Orders: <strong class="text-blue-600">{{ $promo->orders()->where('status', 'success')->count() }}</strong></span>
+                            <!-- Di file blade admin (bagian statistik) -->
+                            <div class="bg-blue-50 rounded-lg p-4">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm text-blue-600 font-medium">Total Orders</span>
+                                    <span class="text-2xl font-bold text-blue-700">{{ $promo->orders()->whereIn('status', ['success', 'used'])->count() }}</span>
+                                </div>
+                                <p class="text-xs text-blue-500">Pesanan berhasil & digunakan</p>
                             </div>
-                            
-                            <div class="flex items-center text-sm text-gray-600">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path>
-                                </svg>
-                                <span>Tiket Terjual: <strong class="text-green-600">{{ $promo->actual_sold_count }}</strong></span>
+
+                            <div class="bg-green-50 rounded-lg p-4">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm text-green-600 font-medium">Tiket Terjual</span>
+                                    <span class="text-2xl font-bold text-green-700">{{ $promo->actual_sold_count }}</span>
+                                </div>
+                                <p class="text-xs text-green-500">Total tiket dari orders success & used</p>
                             </div>
                             
                             @if($promo->quota)

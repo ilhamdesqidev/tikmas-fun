@@ -190,9 +190,10 @@
                 </div>
                 @endif
                 
+                <!-- Di file blade public (bagian info promo) -->
                 <div class="flex items-center text-sm text-gray-600">
-                  <i data-feather="users" class="w-4 h-4 mr-2"></i>
-                  <span>Terjual: <strong>{{ $promo->actual_sold_count }}</strong></span>
+                    <i data-feather="users" class="w-4 h-4 mr-2"></i>
+                    <span>Terjual: <strong>{{ $promo->actual_sold_count }}</strong></span>
                 </div>
                 
                 @if($promo->quota)
