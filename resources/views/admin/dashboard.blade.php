@@ -6,49 +6,11 @@
 
 @section('content')
     @php
-        // Fallback data jika variabel tidak tersedia
-        $fallbackStats = [
-            'total_tickets_sold' => 1250,
-            'total_revenue' => 1250000000,
-            'active_promos' => 8,
-            'total_customers' => 850,
-            'tickets_sold_change' => 12,
-            'revenue_change' => 18,
-            'promos_change' => 2,
-            'customers_change' => 8,
-        ];
-        
         // Mengambil data pesanan terbaru dari database
         $recentOrders = \App\Models\Order::with('promo')
             ->orderBy('created_at', 'desc')
             ->take(5)
             ->get();
-        
-        $fallbackPopularPackages = [
-            ['name' => 'Paket Keluarga', 'sold' => 450, 'revenue' => 202500000, 'growth' => '+15%'],
-            ['name' => 'Paket Premium', 'sold' => 320, 'revenue' => 208000000, 'growth' => '+22%'],
-            ['name' => 'Paket Wisata', 'sold' => 280, 'revenue' => 89600000, 'growth' => '+8%'],
-            ['name' => 'Paket Hemat', 'sold' => 200, 'revenue' => 60000000, 'growth' => '+5%'],
-        ];
-        
-        $fallbackMonthlyRevenue = [
-            ['month' => 'Jan', 'revenue' => 120000000],
-            ['month' => 'Feb', 'revenue' => 150000000],
-            ['month' => 'Mar', 'revenue' => 180000000],
-            ['month' => 'Apr', 'revenue' => 220000000],
-            ['month' => 'May', 'revenue' => 250000000],
-            ['month' => 'Jun', 'revenue' => 280000000],
-            ['month' => 'Jul', 'revenue' => 320000000],
-            ['month' => 'Aug', 'revenue' => 350000000],
-            ['month' => 'Sep', 'revenue' => 380000000],
-            ['month' => 'Oct', 'revenue' => 410000000],
-            ['month' => 'Nov', 'revenue' => 450000000],
-            ['month' => 'Dec', 'revenue' => 500000000],
-        ];
-
-        $stats = $stats ?? $fallbackStats;
-        $popularPackages = $popularPackages ?? $fallbackPopularPackages;
-        $monthlyRevenue = $monthlyRevenue ?? $fallbackMonthlyRevenue;
     @endphp
 
     <!-- Stats Cards -->
@@ -128,13 +90,12 @@
         <div class="lg:col-span-2 card rounded-xl p-6">
             <div class="flex items-center justify-between mb-6">
                 <h3 class="text-lg font-semibold text-gray-900">Revenue Bulanan</h3>
-                <select class="text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent">
-                    <option value="2024">2024</option>
-                    <option value="2023">2023</option>
-                </select>
+                <div class="text-sm text-gray-600">
+                    12 Bulan Terakhir
+                </div>
             </div>
-            <div class="h-80">
-                <canvas id="revenueChart"></canvas>
+            <div style="height: 320px; position: relative;">
+                <canvas id="revenueChart" style="display: block; box-sizing: border-box; height: 320px; width: 100%;"></canvas>
             </div>
         </div>
 
@@ -294,140 +255,178 @@
             </div>
         </a>
     </div>
-
-    <!-- Status Modal -->
-    <div id="statusModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div class="mt-3">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Update Status Order</h3>
-                <form id="statusForm" method="POST">
-                    @csrf
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Status Saat Ini</label>
-                        <p id="currentStatusDisplay" class="text-sm text-gray-600"></p>
-                    </div>
-                    <div class="mb-4">
-                        <label for="newStatus" class="block text-sm font-medium text-gray-700 mb-2">Status Baru</label>
-                        <select id="newStatus" name="status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            <option value="pending">Pending</option>
-                            <option value="success">Success</option>
-                            <option value="challenge">Challenge</option>
-                            <option value="denied">Denied</option>
-                            <option value="expired">Expired</option>
-                            <option value="canceled">Canceled</option>
-                        </select>
-                    </div>
-                    <div class="flex justify-end space-x-3 mt-6">
-                        <button type="button" onclick="closeStatusModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-md">
-                            Batal
-                        </button>
-                        <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md">
-                            Update Status
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
 @endsection
 
 @section('extra-css')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 @endsection
 
-@section('extra-js')
+@push('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha512-CQBWl4fJHWbryGE+Pc7UAxWMUMNMWzWxF4SQo9CgkJIN1kx6djDQZjh3Y8SZ1d+6I+1zze6Z7kHXO7q3UyZAWw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
-// Revenue Chart
-document.addEventListener('DOMContentLoaded', function() {
-    const ctx = document.getElementById('revenueChart');
-    if (ctx) {
-        const revenueChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: @json(array_column($monthlyRevenue, 'month')),
-                datasets: [{
-                    label: 'Revenue (Rp)',
-                    data: @json(array_column($monthlyRevenue, 'revenue')),
-                    borderColor: '#CFD916',
-                    backgroundColor: 'rgba(207, 217, 22, 0.1)',
-                    borderWidth: 3,
-                    fill: true,
-                    tension: 0.4,
-                    pointBackgroundColor: '#CFD916',
-                    pointBorderColor: '#CFD916',
-                    pointHoverBackgroundColor: '#CFD916',
-                    pointHoverBorderColor: '#CFD916',
-                    pointRadius: 6,
-                    pointHoverRadius: 8,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
+// Revenue Chart - REAL DATA FROM DATABASE
+(function() {
+    'use strict';
+    
+    console.log('Chart script loaded');
+    
+    function initChart() {
+        console.log('Initializing chart...');
+        
+        const ctx = document.getElementById('revenueChart');
+        
+        if (!ctx) {
+            console.error('Canvas element #revenueChart not found!');
+            return;
+        }
+
+        // Check if Chart.js is loaded
+        if (typeof Chart === 'undefined') {
+            console.error('Chart.js not loaded! Retrying in 500ms...');
+            setTimeout(initChart, 500);
+            return;
+        }
+
+        console.log('Chart.js version:', Chart.version);
+
+        try {
+            // Get data from Laravel
+            const monthlyData = {!! json_encode($monthlyRevenue) !!};
+            
+            console.log('Monthly Data:', monthlyData);
+            
+            if (!monthlyData || monthlyData.length === 0) {
+                console.warn('No revenue data available');
+                ctx.parentElement.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500"><p>Tidak ada data revenue</p></div>';
+                return;
+            }
+
+            // Extract labels and data
+            const labels = monthlyData.map(item => item.month);
+            const data = monthlyData.map(item => parseFloat(item.revenue) || 0);
+            
+            console.log('Chart Labels:', labels);
+            console.log('Chart Data:', data);
+
+            // Destroy existing chart if any
+            const existingChart = Chart.getChart(ctx);
+            if (existingChart) {
+                existingChart.destroy();
+            }
+
+            // Create chart
+            const revenueChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Revenue',
+                        data: data,
+                        borderColor: '#CFD916',
+                        backgroundColor: 'rgba(207, 217, 22, 0.15)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#CFD916',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointHoverBackgroundColor: '#CFD916',
+                        pointHoverBorderColor: '#fff',
+                        pointRadius: 5,
+                        pointHoverRadius: 8,
+                    }]
                 },
-                scales: {
-                    x: {
-                        grid: {
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
                             display: false
                         },
-                        ticks: {
-                            color: '#6B7280'
-                        }
-                    },
-                    y: {
-                        grid: {
-                            color: '#F3F4F6'
-                        },
-                        ticks: {
-                            color: '#6B7280',
-                            callback: function(value) {
-                                return 'Rp ' + (value / 1000000).toFixed(0) + 'M';
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            borderColor: '#CFD916',
+                            borderWidth: 1,
+                            displayColors: false,
+                            titleFont: {
+                                size: 13,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 12
+                            },
+                            callbacks: {
+                                label: function(context) {
+                                    let value = context.parsed.y;
+                                    return 'Revenue: Rp ' + new Intl.NumberFormat('id-ID').format(value);
+                                }
                             }
                         }
-                    }
-                },
-                elements: {
-                    point: {
-                        hoverRadius: 8
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false,
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#6B7280',
+                                font: {
+                                    size: 11,
+                                    weight: '500'
+                                }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: '#F3F4F6',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#6B7280',
+                                font: {
+                                    size: 11
+                                },
+                                callback: function(value) {
+                                    if (value >= 1000000000) {
+                                        return 'Rp ' + (value / 1000000000).toFixed(1) + 'B';
+                                    } else if (value >= 1000000) {
+                                        return 'Rp ' + (value / 1000000).toFixed(1) + 'M';
+                                    } else if (value >= 1000) {
+                                        return 'Rp ' + (value / 1000).toFixed(1) + 'K';
+                                    }
+                                    return 'Rp ' + value;
+                                },
+                                maxTicksLimit: 6
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index',
                     }
                 }
-            }
+            });
+            
+            console.log('✓ Chart created successfully!');
+            
+        } catch (error) {
+            console.error('❌ Error creating chart:', error);
+            console.error('Error details:', error.message);
+        }
+    }
+
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(initChart, 100);
         });
+    } else {
+        setTimeout(initChart, 100);
     }
-});
-
-// Status modal functionality
-function openStatusModal(orderNumber, currentStatus) {
-    const modal = document.getElementById('statusModal');
-    const form = document.getElementById('statusForm');
-    const currentStatusDisplay = document.getElementById('currentStatusDisplay');
-    const newStatusSelect = document.getElementById('newStatus');
-    
-    // Set form action
-    form.action = `/admin/tickets/${orderNumber}/update-status`;
-    
-    // Display current status
-    currentStatusDisplay.textContent = currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1);
-    
-    // Set current status as value in select
-    newStatusSelect.value = currentStatus;
-    
-    modal.classList.remove('hidden');
-}
-
-function closeStatusModal() {
-    document.getElementById('statusModal').classList.add('hidden');
-}
-
-// Close modal when clicking outside
-document.getElementById('statusModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeStatusModal();
-    }
-});
+})();
 </script>
-@endsection
+@endpush

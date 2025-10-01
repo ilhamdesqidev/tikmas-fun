@@ -423,5 +423,7 @@
         // Yield section for additional JavaScript
         @yield('extra-js')
     </script>
+
+    @stack('scripts')  <!-- TAMBAHKAN INI -->
 </body>
 </html>

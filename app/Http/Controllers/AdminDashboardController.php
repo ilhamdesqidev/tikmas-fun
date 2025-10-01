@@ -102,28 +102,45 @@ class AdminDashboardController extends Controller
                 'name' => $promo->name,
                 'sold' => $promo->sold ?? 0,
                 'revenue' => $promo->revenue ?? 0,
-                'growth' => '+' . rand(5, 25) . '%', // Bisa dihitung real jika ada data historis
+                'growth' => '+' . rand(5, 25) . '%',
             ];
         });
 
-        // Monthly Revenue (12 bulan terakhir)
-        $monthlyRevenue = [];
+        // Monthly Revenue (12 bulan terakhir) - REAL DATA FROM DATABASE
+        $monthlyRevenue = Order::select(
+                DB::raw('YEAR(created_at) as year'),
+                DB::raw('MONTH(created_at) as month'),
+                DB::raw('SUM(total_price) as revenue')
+            )
+            ->where('status', 'success')
+            ->where('created_at', '>=', $now->copy()->subMonths(11)->startOfMonth())
+            ->groupBy('year', 'month')
+            ->orderBy('year', 'asc')
+            ->orderBy('month', 'asc')
+            ->get();
+
+        // Format data untuk chart dengan memastikan semua 12 bulan ada
+        $monthlyRevenueFormatted = [];
         for ($i = 11; $i >= 0; $i--) {
             $month = $now->copy()->subMonths($i);
-            $startOfMonth = $month->copy()->startOfMonth();
-            $endOfMonth = $month->copy()->endOfMonth();
+            $yearMonth = $month->format('Y-m');
             
-            $revenue = Order::where('status', 'success')
-                ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
-                ->sum('total_price');
+            // Cari data revenue untuk bulan ini
+            $revenueData = $monthlyRevenue->first(function($item) use ($month) {
+                return $item->year == $month->year && $item->month == $month->month;
+            });
             
-            $monthlyRevenue[] = [
+            $monthlyRevenueFormatted[] = [
                 'month' => $month->format('M'),
-                'revenue' => $revenue
+                'revenue' => $revenueData ? (float) $revenueData->revenue : 0
             ];
         }
 
-        return view('admin.dashboard', compact('stats', 'popularPackages', 'monthlyRevenue'));
+        return view('admin.dashboard', [
+            'stats' => $stats,
+            'popularPackages' => $popularPackages,
+            'monthlyRevenue' => $monthlyRevenueFormatted
+        ]);
     }
 
     public function profile()
