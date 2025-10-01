@@ -26,18 +26,18 @@ class AdminDashboardController extends Controller
         $startOfLastMonth = $now->copy()->subMonth()->startOfMonth();
         $endOfLastMonth = $now->copy()->subMonth()->endOfMonth();
 
-        // Total Tiket Terjual (dari orders dengan status success)
-        $totalTicketsSold = Order::where('status', 'success')->sum('ticket_quantity');
-        $lastMonthTicketsSold = Order::where('status', 'success')
+        // Total Tiket Terjual (dari orders dengan status success dan used)
+        $totalTicketsSold = Order::whereIn('status', ['success', 'used'])->sum('ticket_quantity');
+        $lastMonthTicketsSold = Order::whereIn('status', ['success', 'used'])
             ->whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])
             ->sum('ticket_quantity');
         $ticketsSoldChange = $lastMonthTicketsSold > 0 
             ? round((($totalTicketsSold - $lastMonthTicketsSold) / $lastMonthTicketsSold) * 100) 
             : 0;
 
-        // Total Revenue (dari orders dengan status success)
-        $totalRevenue = Order::where('status', 'success')->sum('total_price');
-        $lastMonthRevenue = Order::where('status', 'success')
+        // Total Revenue (dari orders dengan status success dan used)
+        $totalRevenue = Order::whereIn('status', ['success', 'used'])->sum('total_price');
+        $lastMonthRevenue = Order::whereIn('status', ['success', 'used'])
             ->whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])
             ->sum('total_price');
         $revenueChange = $lastMonthRevenue > 0 
@@ -82,15 +82,15 @@ class AdminDashboardController extends Controller
             'customers_change' => $customersChange,
         ];
 
-        // Popular Packages (Top 4 Promo berdasarkan penjualan)
+        // Popular Packages (Top 4 Promo berdasarkan penjualan dengan status success dan used)
         $popularPackages = Promo::withCount([
             'orders as sold' => function($query) {
-                $query->where('status', 'success')->select(DB::raw('SUM(ticket_quantity)'));
+                $query->whereIn('status', ['success', 'used'])->select(DB::raw('SUM(ticket_quantity)'));
             }
         ])
         ->withSum([
             'orders as revenue' => function($query) {
-                $query->where('status', 'success');
+                $query->whereIn('status', ['success', 'used']);
             }
         ], 'total_price')
         ->having('sold', '>', 0)
@@ -106,40 +106,27 @@ class AdminDashboardController extends Controller
             ];
         });
 
-        // Monthly Revenue (12 bulan terakhir) - REAL DATA FROM DATABASE
-        $monthlyRevenue = Order::select(
-                DB::raw('YEAR(created_at) as year'),
-                DB::raw('MONTH(created_at) as month'),
-                DB::raw('SUM(total_price) as revenue')
-            )
-            ->where('status', 'success')
-            ->where('created_at', '>=', $now->copy()->subMonths(11)->startOfMonth())
-            ->groupBy('year', 'month')
-            ->orderBy('year', 'asc')
-            ->orderBy('month', 'asc')
-            ->get();
-
-        // Format data untuk chart dengan memastikan semua 12 bulan ada
-        $monthlyRevenueFormatted = [];
+        // Monthly Revenue - Ambil data dari semua orders (termasuk yang baru)
+        $monthlyRevenueData = [];
         for ($i = 11; $i >= 0; $i--) {
-            $month = $now->copy()->subMonths($i);
-            $yearMonth = $month->format('Y-m');
+            $monthDate = $now->copy()->subMonths($i);
+            $startOfMonthDate = $monthDate->copy()->startOfMonth();
+            $endOfMonthDate = $monthDate->copy()->endOfMonth();
             
-            // Cari data revenue untuk bulan ini
-            $revenueData = $monthlyRevenue->first(function($item) use ($month) {
-                return $item->year == $month->year && $item->month == $month->month;
-            });
+            // Hitung total revenue untuk bulan ini (semua status untuk melihat aktivitas)
+            $revenue = Order::whereBetween('created_at', [$startOfMonthDate, $endOfMonthDate])
+                ->sum('total_price');
             
-            $monthlyRevenueFormatted[] = [
-                'month' => $month->format('M'),
-                'revenue' => $revenueData ? (float) $revenueData->revenue : 0
+            $monthlyRevenueData[] = [
+                'month' => $monthDate->format('M'),
+                'revenue' => (float) $revenue
             ];
         }
 
         return view('admin.dashboard', [
             'stats' => $stats,
             'popularPackages' => $popularPackages,
-            'monthlyRevenue' => $monthlyRevenueFormatted
+            'monthlyRevenue' => $monthlyRevenueData
         ]);
     }
 
