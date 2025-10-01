@@ -552,16 +552,6 @@
               <span class="featured-badge">Unggulan</span>
             @endif
             
-            @if($isExpired)
-              <span class="expired-badge">Kadaluarsa</span>
-            @elseif($isNotStarted)
-              <span class="coming-soon-badge">Segera Hadir</span>
-            @elseif($isSoldOut)
-              <span class="sold-out-badge">Habis</span>
-            @else
-              <span class="discount-badge">Diskon {{ $promo->discount_percent }}%</span>
-            @endif
-            
             <div class="promo-image">
               <img src="{{ asset('storage/' . $promo->image) }}" alt="{{ $promo->name }}" loading="lazy">
               @if(!$isClickable)
