@@ -86,18 +86,22 @@
 
         /* Promo card styles */
         .promo-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: white;
+            color: #333333;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
-        
-        .promo-card-alt {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
+                
+                .promo-card-alt {
+            background: white;
+            color: #333333;
+            border: 1px solid #e2e8f0;
         }
-        
+
         .promo-card-premium {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
+            background: white;
+            color: #333333;
+            border: 1px solid #e2e8f0;
         }
 
         /* Drop-up menu styles */
