@@ -103,7 +103,7 @@
         <div class="card rounded-xl p-6">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-medium text-gray-600">Kadaluarsa</p>
+                    <p class="text-sm font-medium text-gray-600">Kadalu-arsa</p>
                     <p class="text-2xl font-bold text-gray-900">{{ $expiredPromos }}</p>
                 </div>
                 <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
