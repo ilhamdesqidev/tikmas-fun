@@ -1,27 +1,3 @@
-@if (session('success'))
-    <div class="alert alert-success">
-        {{ session('success') }}
-    </div>
-@endif
-
-{{-- Tampilkan pesan error --}}
-@if (session('error'))
-    <div class="alert alert-danger">
-        {{ session('error') }}
-    </div>
-@endif
-
-{{-- Tampilkan error validasi --}}
-@if ($errors->any())
-    <div class="alert alert-danger">
-        <ul>
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
-
 @extends('layouts.app')
 
 @section('title', 'Tambah Paket Promo')
@@ -190,11 +166,14 @@
                     @enderror
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Status *</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Status Awal *</label>
                     <select name="status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                        <option value="draft" {{ old('status') == 'draft' ? 'selected' : '' }}>Draft</option>
+                        <option value="coming_soon" {{ old('status') == 'coming_soon' ? 'selected' : '' }}>Coming Soon</option>
                         <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Aktif</option>
                         <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>Tidak Aktif</option>
                     </select>
+                    <p class="text-xs text-gray-500 mt-1">Status akan disesuaikan otomatis berdasarkan tanggal</p>
                     @error('status')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
@@ -279,9 +258,28 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Auto update status based on start date
+    function updateStatusBasedOnDate() {
+        const startDateInput = document.querySelector('input[name="start_date"]');
+        const statusSelect = document.querySelector('select[name="status"]');
+        
+        if (startDateInput.value) {
+            const startDate = new Date(startDateInput.value);
+            const now = new Date();
+            
+            if (startDate > now && statusSelect.value === 'active') {
+                // Jika start date di masa depan dan status active, sarankan coming_soon
+                if (confirm('Tanggal mulai di masa depan. Ubah status menjadi "Coming Soon"?')) {
+                    statusSelect.value = 'coming_soon';
+                }
+            }
+        }
+    }
+
     // Attach event listeners
     document.querySelector('input[name="original_price"]').addEventListener('input', calculateDiscount);
     document.querySelector('input[name="promo_price"]').addEventListener('input', calculateDiscount);
+    document.querySelector('input[name="start_date"]').addEventListener('change', updateStatusBasedOnDate);
     
     // Initial calculation
     calculateDiscount();

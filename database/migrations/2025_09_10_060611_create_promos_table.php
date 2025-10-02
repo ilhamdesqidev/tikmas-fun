@@ -19,7 +19,7 @@ return new class extends Migration
             $table->integer('discount_percent')->nullable();
             $table->date('start_date');
             $table->date('end_date')->nullable();
-            $table->enum('status', ['active', 'inactive', 'expired'])->default('active');
+            $table->enum('status', ['draft', 'coming_soon', 'active', 'inactive', 'expired'])->default('draft');
             $table->integer('quota')->nullable();
             $table->integer('sold_count')->default(0);
             $table->string('category')->default('general');

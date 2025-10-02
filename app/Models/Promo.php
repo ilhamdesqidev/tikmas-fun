@@ -43,17 +43,11 @@ class Promo extends Model
     // RELATIONSHIPS
     // =====================
     
-    /**
-     * Relasi ke model Order
-     */
     public function orders()
     {
         return $this->hasMany(Order::class);
     }
 
-    /**
-     * Get successful orders only
-     */
     public function successfulOrders()
     {
         return $this->hasMany(Order::class)->whereIn('status', ['success', 'used']);
@@ -63,45 +57,30 @@ class Promo extends Model
     // ACCESSORS
     // =====================
     
-    /**
-     * Accessor untuk URL gambar
-     */
     public function getImageUrlAttribute()
     {
         return $this->image ? asset('storage/' . $this->image) : asset('images/placeholder.jpg');
     }
 
-    /**
-     * Accessor untuk URL desain gelang
-     */
     public function getBraceletDesignUrlAttribute()
     {
         return $this->bracelet_design ? asset('storage/' . $this->bracelet_design) : null;
     }
 
-    /**
-     * Get actual sold count from orders
-     */
     public function getActualSoldCountAttribute()
     {
         return $this->orders()
-            ->whereIn('status', ['success', 'used']) // PERBAIKAN: tambah status 'used'
+            ->whereIn('status', ['success', 'used'])
             ->sum('ticket_quantity');
     }
 
-    /**
-     * Get total revenue from this promo
-     */
     public function getTotalRevenueAttribute()
     {
         return $this->orders()
-            ->whereIn('status', ['success', 'used']) // PERBAIKAN: tambah status 'used'
+            ->whereIn('status', ['success', 'used'])
             ->sum('total_price');
     }
 
-    /**
-     * Method untuk cek apakah promo sudah expired
-     */
     public function getIsExpiredAttribute()
     {
         if (!$this->end_date) {
@@ -111,52 +90,65 @@ class Promo extends Model
         return Carbon::now()->isAfter($this->end_date);
     }
 
-    /**
-     * Method untuk cek apakah promo belum dimulai
-     */
     public function getIsNotStartedAttribute()
     {
         return Carbon::now()->isBefore($this->start_date);
     }
 
-    /**
-     * Method untuk cek apakah promo sedang berjalan
-     */
     public function getIsActiveAttribute()
     {
         $now = Carbon::now();
+        $isAfterStart = $now->gte($this->start_date);
+        $isBeforeEnd = !$this->end_date || $now->lte($this->end_date);
         
+        return $this->status === 'active' && $isAfterStart && $isBeforeEnd;
+    }
+
+    public function getIsComingSoonAttribute()
+    {
+        return $this->status === 'coming_soon' && Carbon::now()->lt($this->start_date);
+    }
+
+    public function getCanBeOrderedAttribute()
+    {
+        // Hanya promo dengan status active yang bisa dipesan
         if ($this->status !== 'active') {
             return false;
         }
+
+        // Cek tanggal
+        $now = Carbon::now();
+        $isAfterStart = $now->gte($this->start_date);
+        $isBeforeEnd = !$this->end_date || $now->lte($this->end_date);
         
-        if ($this->is_not_started) {
+        if (!$isAfterStart || !$isBeforeEnd) {
             return false;
         }
-        
-        if ($this->is_expired) {
-            return false;
-        }
-        
-        // Cek quota berdasarkan actual sold count
+
+        // Cek kuota
         if ($this->quota && $this->actual_sold_count >= $this->quota) {
             return false;
         }
-        
+
         return true;
     }
 
     /**
-     * Method untuk mendapatkan status display
+     * Cek apakah promo bisa diklik (hanya yang aktif dan available)
      */
+    public function getIsClickableAttribute()
+    {
+        return $this->can_be_ordered;
+    }
+
     public function getStatusDisplayAttribute()
     {
-        if ($this->is_expired) {
+        if ($this->status === 'expired' || $this->is_expired) {
             return 'expired';
         }
         
-        if ($this->is_not_started) {
-            return 'not_started';
+        if ($this->status === 'coming_soon' || $this->is_not_started) {
+            return 'coming_soon';
         }
         
         if ($this->quota && $this->actual_sold_count >= $this->quota) {
@@ -166,110 +158,168 @@ class Promo extends Model
         return $this->status;
     }
 
-    /**
-     * Method untuk mendapatkan warna badge status
-     */
     public function getStatusColorAttribute()
     {
-        switch ($this->status_display) {
-            case 'active':
-                return 'bg-green-500';
-            case 'inactive':
-                return 'bg-gray-500';
-            case 'expired':
-                return 'bg-red-500';
-            case 'not_started':
-                return 'bg-blue-500';
-            case 'sold_out':
-                return 'bg-orange-500';
-            default:
-                return 'bg-gray-500';
-        }
+        $colors = [
+            'draft' => 'bg-gray-500',
+            'coming_soon' => 'bg-blue-500',
+            'active' => 'bg-green-500',
+            'inactive' => 'bg-red-500',
+            'expired' => 'bg-gray-400',
+            'sold_out' => 'bg-red-600'
+        ];
+
+        $displayStatus = $this->status_display;
+        return $colors[$displayStatus] ?? 'bg-gray-500';
     }
 
-    /**
-     * Method untuk mendapatkan text status
-     */
     public function getStatusTextAttribute()
     {
-        switch ($this->status_display) {
-            case 'active':
-                return 'Aktif';
-            case 'inactive':
-                return 'Tidak Aktif';
-            case 'expired':
-                return 'Kadaluarsa';
-            case 'not_started':
-                return 'Belum Dimulai';
-            case 'sold_out':
-                return 'Habis';
-            default:
-                return 'Tidak Diketahui';
+        $statuses = [
+            'draft' => 'Draft',
+            'coming_soon' => 'Coming Soon',
+            'active' => 'Aktif',
+            'inactive' => 'Tidak Aktif',
+            'expired' => 'Kadaluarsa',
+            'sold_out' => 'Habis'
+        ];
+
+        $displayStatus = $this->status_display;
+        return $statuses[$displayStatus] ?? 'Unknown';
+    }
+
+    public function getButtonStatusAttribute()
+    {
+        if (!$this->can_be_ordered) {
+            if ($this->status === 'coming_soon' || $this->is_not_started) {
+                return [
+                    'text' => 'Segera Hadir',
+                    'class' => 'bg-gray-300 text-gray-500 cursor-not-allowed',
+                    'clickable' => false
+                ];
+            } elseif ($this->status === 'expired' || $this->is_expired) {
+                return [
+                    'text' => 'Promo Berakhir',
+                    'class' => 'bg-gray-300 text-gray-500 cursor-not-allowed',
+                    'clickable' => false
+                ];
+            } elseif ($this->quota && $this->actual_sold_count >= $this->quota) {
+                return [
+                    'text' => 'Kuota Habis',
+                    'class' => 'bg-gray-300 text-gray-500 cursor-not-allowed',
+                    'clickable' => false
+                ];
+            } else {
+                return [
+                    'text' => 'Tidak Tersedia',
+                    'class' => 'bg-gray-300 text-gray-500 cursor-not-allowed',
+                    'clickable' => false
+                ];
+            }
         }
+
+        return [
+            'text' => 'Dapatkan Promo',
+            'class' => 'bg-primary text-black hover:bg-yellow-500 cursor-pointer',
+            'clickable' => true
+        ];
     }
 
     // =====================
     // SCOPES
     // =====================
     
-    /**
-     * Scope untuk promo yang aktif
-     */
-    public function scopeActive($query)
+    public function scopeForDashboard($query)
+    {
+        return $query->whereIn('status', ['coming_soon', 'active', 'expired'])
+                    ->where(function($q) {
+                        $q->whereNull('end_date')
+                          ->orWhere('end_date', '>=', Carbon::now()->subDays(7));
+                    })
+                    ->orderByRaw("
+                        CASE 
+                            WHEN status = 'active' AND start_date <= NOW() AND (end_date IS NULL OR end_date >= NOW()) AND (quota IS NULL OR sold_count < quota) THEN 1
+                            WHEN status = 'coming_soon' THEN 2
+                            WHEN status = 'expired' THEN 3
+                            ELSE 4
+                        END
+                    ")
+                    ->orderBy('featured', 'desc')
+                    ->orderBy('created_at', 'desc');
+    }
+
+    public function scopeActiveAndAvailable($query)
     {
         return $query->where('status', 'active')
                     ->where('start_date', '<=', Carbon::now())
                     ->where(function($q) {
                         $q->whereNull('end_date')
                           ->orWhere('end_date', '>=', Carbon::now());
+                    })
+                    ->where(function($q) {
+                        $q->whereNull('quota')
+                          ->orWhereRaw('sold_count < quota');
                     });
     }
 
-    /**
-     * Scope untuk promo yang expired
-     */
+    public function scopeComingSoon($query)
+    {
+        return $query->where('status', 'coming_soon')
+                    ->where('start_date', '>', Carbon::now());
+    }
+
     public function scopeExpired($query)
     {
-        return $query->whereNotNull('end_date')
-                    ->where('end_date', '<', Carbon::now());
+        return $query->where(function($q) {
+            $q->where('status', 'expired')
+              ->orWhere(function($q2) {
+                  $q2->whereNotNull('end_date')
+                     ->where('end_date', '<', Carbon::now());
+              });
+        });
     }
 
-    /**
-     * Scope untuk promo yang belum dimulai
-     */
-    public function scopeNotStarted($query)
+    public function scopeActive($query)
     {
-        return $query->where('start_date', '>', Carbon::now());
+        return $query->where('status', 'active');
     }
 
-    // =====================
-    // METHODS
-    // =====================
-    
-    /**
-     * Sync sold_count with actual orders
-     */
-    public function syncSoldCount()
+    public function scopeInactive($query)
     {
-        $actualCount = $this->actual_sold_count;
-        $this->update(['sold_count' => $actualCount]);
-        return $actualCount;
+        return $query->where('status', 'inactive');
     }
 
-    /**
-     * Get promo statistics
-     */
-    public function getStatistics()
+    public function scopeDraft($query)
     {
-        return [
-            'total_orders' => $this->orders()->count(),
-            'successful_orders' => $this->orders()->where('status', 'success')->count(),
-            'pending_orders' => $this->orders()->where('status', 'pending')->count(),
-            'tickets_sold' => $this->actual_sold_count,
-            'total_revenue' => $this->total_revenue,
-            'average_order_value' => $this->successfulOrders()->count() > 0 
-                ? $this->total_revenue / $this->successfulOrders()->count() 
-                : 0,
-        ];
+        return $query->where('status', 'draft');
+    }
+
+    public function scopeFeatured($query)
+    {
+        return $query->where('featured', true);
+    }
+
+    public function updateStatusBasedOnDate()
+    {
+        $now = Carbon::now();
+        
+        if ($this->status === 'expired') {
+            return;
+        }
+
+        if ($this->end_date && $now->gt($this->end_date)) {
+            $this->update(['status' => 'expired']);
+            return;
+        }
+
+        if ($this->status === 'coming_soon' && $now->gte($this->start_date)) {
+            $this->update(['status' => 'active']);
+            return;
+        }
+
+        if ($this->status === 'active' && $now->lt($this->start_date)) {
+            $this->update(['status' => 'coming_soon']);
+            return;
+        }
     }
 }

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tiketmas</title>
+    <title>Tiketmas - Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -41,7 +41,6 @@
         background-attachment: fixed;
       }
       
-      /* Mobile optimization for hero background */
       @media (max-width: 768px) {
         .hero-bg {
           background-attachment: scroll;
@@ -60,11 +59,6 @@
         box-shadow: 1px 1px 3px rgba(1, 1, 3, 0.5);
       }
       
-      .menu-card-img {
-        background: linear-gradient(45deg, #78b65b, #a8e086);
-      }
-      
-      /* Improved mobile menu animations */
       .mobile-nav-enter {
         transform: translateX(100%);
       }
@@ -94,11 +88,11 @@
       .wahana-images {
         display: flex;
         transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        width: 500%; /* 5 gambar x 100% = 500% */
+        width: 500%;
       }
 
       .wahana-slide {
-        flex: 0 0 20%; /* Setiap slide mengambil 20% dari container (100% / 5 gambar) */
+        flex: 0 0 20%;
         position: relative;
       }
 
@@ -197,9 +191,6 @@
         transform: scale(0.8);
         filter: blur(3px);
         opacity: 0.6;
-        cursor: pointer;
-        text-decoration: none;
-        color: inherit;
       }
 
       .promo-card.active {
@@ -209,14 +200,75 @@
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
       }
 
-      .promo-card:hover {
-        transform: scale(0.85);
-        text-decoration: none;
-        color: inherit;
+      .promo-card.clickable:hover {
+        transform: scale(1.02);
+        cursor: pointer;
       }
 
-      .promo-card.active:hover {
-        transform: scale(1.02);
+      .promo-card.non-clickable {
+        cursor: not-allowed;
+      }
+
+      .promo-disabled {
+        opacity: 0.7;
+        filter: grayscale(0.3);
+      }
+
+      .promo-overlay-disabled {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        z-index: 5;
+      }
+
+      .overlay-content {
+        text-align: center;
+        padding: 1rem;
+      }
+
+      .status-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-weight: bold;
+        font-size: 12px;
+        z-index: 10;
+      }
+
+      .badge-coming-soon {
+        background: #3b82f6;
+        color: white;
+      }
+
+      .badge-expired {
+        background: #6b7280;
+        color: white;
+      }
+
+      .badge-sold-out {
+        background: #dc2626;
+        color: white;
+      }
+
+      .badge-featured {
+        background: #ff4757;
+        color: white;
+        left: 15px !important;
+        right: auto !important;
+      }
+
+      .badge-discount {
+        background: #CFD916;
+        color: #000;
       }
 
       .discount-badge {
@@ -258,7 +310,7 @@
         transition: transform 0.3s ease;
       }
 
-      .promo-card:hover .promo-image img {
+      .promo-card.clickable:hover .promo-image img {
         transform: scale(1.05);
       }
 
@@ -305,7 +357,6 @@
         transform: translateY(-50%) scale(1);
       }
 
-      /* Dots indicator */
       .dots-container {
         display: flex;
         justify-content: center;
@@ -327,7 +378,6 @@
         transform: scale(1.2);
       }
 
-      /* Mobile responsive */
       @media (max-width: 768px) {
         .promo-card {
           min-width: 280px;
@@ -377,7 +427,7 @@
           Promo
           <span class="absolute left-0 bottom-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
         </a>
-         <a href="{{route ('wahana.index') }}" class="text-black inline-block text-xl ml-0 px-4 hover:text-primary transition-all duration-500 relative group">
+        <a href="{{ route('wahana.index') }}" class="text-black inline-block text-xl ml-0 px-4 hover:text-primary transition-all duration-500 relative group">
           Wahana
           <span class="absolute left-0 bottom-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
         </a>
@@ -394,7 +444,7 @@
           <a href="#home" class="block mx-2 sm:mx-6 my-6 sm:my-8 py-4 text-2xl sm:text-3xl text-white border-b border-gray-700 transition-all duration-300 hover:text-primary hover:pl-4 touch-manipulation">Home</a>
           <a href="#about" class="block mx-2 sm:mx-6 my-6 sm:my-8 py-4 text-2xl sm:text-3xl text-white border-b border-gray-700 transition-all duration-300 hover:text-primary hover:pl-4 touch-manipulation">Tentang Kami</a>
           <a href="#menu" class="block mx-2 sm:mx-6 my-6 sm:my-8 py-4 text-2xl sm:text-3xl text-white border-b border-gray-700 transition-all duration-300 hover:text-primary hover:pl-4 touch-manipulation">Promo</a>
-          <a href="#" class="block mx-2 sm:mx-6 my-6 sm:my-8 py-4 text-2xl sm:text-3xl text-white border-b border-gray-700 transition-all duration-300 hover:text-primary hover:pl-4 touch-manipulation">Wahana</a>
+          <a href="{{ route('wahana.index') }}" class="block mx-2 sm:mx-6 my-6 sm:my-8 py-4 text-2xl sm:text-3xl text-white border-b border-gray-700 transition-all duration-300 hover:text-primary hover:pl-4 touch-manipulation">Wahana</a>
         </div>
       </div>
 
@@ -409,7 +459,7 @@
     </nav>
 
     <!-- Hero Section -->
-    <section id="home" class="hero min-h-screen flex items-center hero-bg relative px-4 sm:px-7 text-white">
+    <section id="home" class="hero min-h-screen flex items-center hero-bg relative px-4 sm:px-7 text-white pt-16">
       <main class="max-w-4xl w-full">
         <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl text-white leading-tight mb-4 sm:mb-6">
            Berlibur Dengan<span class="text-primary">Wahana</span>
@@ -515,139 +565,140 @@
       </div>
     </section>
 
-<!-- Promo Section dengan Slider -->
-<section id="menu" class="py-16 sm:py-24 md:py-32 px-4 sm:px-7">
-  <h2 class="text-center text-3xl sm:text-4xl mb-4 text-text-dark">
-    <span class="text-primary">Promo</span> Kami
-  </h2>
-  <p class="text-center max-w-lg mx-auto font-medium leading-relaxed text-text-dark mb-12 sm:mb-20 text-base sm:text-lg">
-     Nikmati berbagai pilihan wahana dan rekreasi yang menyenangkan
-  </p>
-  
-  @if($promos->count() > 0)
-    <div class="relative promo-slider">
-      <!-- Navigation Buttons -->
-      <button class="nav-button prev" id="prevBtn">
-        <i data-feather="chevron-left" class="w-6 h-6"></i>
-      </button>
+    <!-- Promo Section dengan Slider -->
+    <section id="menu" class="py-16 sm:py-24 md:py-32 px-4 sm:px-7">
+      <h2 class="text-center text-3xl sm:text-4xl mb-4 text-text-dark">
+        <span class="text-primary">Promo</span> Kami
+      </h2>
+      <p class="text-center max-w-lg mx-auto font-medium leading-relaxed text-text-dark mb-12 sm:mb-20 text-base sm:text-lg">
+        Nikmati berbagai pilihan promo menarik untuk pengalaman liburan yang tak terlupakan
+      </p>
       
-      <button class="nav-button next" id="nextBtn">
-        <i data-feather="chevron-right" class="w-6 h-6"></i>
-      </button>
-
-      <!-- Slider Container -->
-      <div class="promo-container" id="promoContainer">
-        @foreach($promos as $promo)
-          @php
-            $isExpired = $promo->is_expired;
-            $isNotStarted = $promo->is_not_started;
-            $isSoldOut = $promo->quota && $promo->sold_count >= $promo->quota;
-            $isClickable = $promo->is_active && !$isExpired && !$isSoldOut;
-          @endphp
+      @if($promos->count() > 0)
+        <div class="relative promo-slider">
+          <!-- Navigation Buttons -->
+          <button class="nav-button prev" id="prevBtn">
+            <i data-feather="chevron-left" class="w-6 h-6"></i>
+          </button>
           
-          <div class="promo-card block hover:no-underline {{ !$isClickable ? 'promo-disabled' : '' }}" 
-               @if($isClickable) onclick="window.location.href='{{ route('promo.show', $promo->id) }}'" @endif>
-               
-            @if($promo->featured && $isClickable)
-              <span class="featured-badge">Unggulan</span>
-            @endif
-            
-            @if($isExpired)
-              <span class="expired-badge">Kadaluarsa</span>
-            @elseif($isNotStarted)
-              <span class="coming-soon-badge">Segera Hadir</span>
-            @elseif($isSoldOut)
-              <span class="sold-out-badge">Habis</span>
-            @else
-              <span class="discount-badge">Diskon {{ $promo->discount_percent }}%</span>
-            @endif
-            
-            <div class="promo-image">
-              <img src="{{ asset('storage/' . $promo->image) }}" alt="{{ $promo->name }}" loading="lazy">
-              @if(!$isClickable)
-                <div class="promo-overlay-disabled">
-                  <div class="overlay-content">
-                    @if($isExpired)
-                      <i data-feather="clock" class="w-8 h-8 mb-2"></i>
-                      <span class="text-sm font-medium">Promo Berakhir</span>
-                    @elseif($isNotStarted)
-                      <i data-feather="calendar" class="w-8 h-8 mb-2"></i>
-                      <span class="text-sm font-medium">Mulai {{ $promo->start_date->format('d M Y') }}</span>
-                    @elseif($isSoldOut)
-                      <i data-feather="x-circle" class="w-8 h-8 mb-2"></i>
-                      <span class="text-sm font-medium">Kuota Habis</span>
+          <button class="nav-button next" id="nextBtn">
+            <i data-feather="chevron-right" class="w-6 h-6"></i>
+          </button>
+
+          <!-- Slider Container -->
+          <div class="promo-container" id="promoContainer">
+            @foreach($promos as $promo)
+              @php
+                $isClickable = $promo->is_clickable; // Hanya aktif yang bisa diklik
+                $buttonStatus = $promo->button_status;
+              @endphp
+              
+              <div class="promo-card block hover:no-underline {{ $isClickable ? 'clickable' : 'non-clickable promo-disabled' }}" 
+                   @if($isClickable) onclick="window.location.href='{{ route('promo.show', $promo->id) }}'" @endif>
+                   
+                <!-- Featured Badge -->
+                @if($promo->featured && $isClickable)
+                  <span class="badge-featured">Unggulan</span>
+                @endif
+                
+                <!-- Status Badge -->
+                @if($promo->status_display === 'coming_soon')
+                  <span class="badge-coming-soon status-badge">Segera Hadir</span>
+                @elseif($promo->status_display === 'expired')
+                  <span class="badge-expired status-badge">Kadaluarsa</span>
+                @elseif($promo->status_display === 'sold_out')
+                  <span class="badge-sold-out status-badge">Habis</span>
+                @elseif($promo->status === 'active' && $promo->discount_percent > 0)
+                  <span class="badge-discount status-badge">Diskon {{ $promo->discount_percent }}%</span>
+                @endif
+                
+                <!-- Promo Image -->
+                <div class="promo-image">
+                  <img src="{{ $promo->image_url }}" alt="{{ $promo->name }}" loading="lazy">
+                  
+                  <!-- Overlay untuk promo yang tidak bisa diklik -->
+                  @if(!$isClickable)
+                    <div class="promo-overlay-disabled">
+                      <div class="overlay-content">
+                        @if($promo->status_display === 'coming_soon')
+                          <i data-feather="clock" class="w-8 h-8 mb-2 mx-auto"></i>
+                          <span class="text-sm font-medium">Segera Hadir</span>
+                          <p class="text-xs mt-1">Mulai {{ $promo->start_date->format('d M Y') }}</p>
+                        @elseif($promo->status_display === 'expired')
+                          <i data-feather="x-circle" class="w-8 h-8 mb-2 mx-auto"></i>
+                          <span class="text-sm font-medium">Promo Berakhir</span>
+                        @elseif($promo->status_display === 'sold_out')
+                          <i data-feather="package" class="w-8 h-8 mb-2 mx-auto"></i>
+                          <span class="text-sm font-medium">Kuota Habis</span>
+                        @endif
+                      </div>
+                    </div>
+                  @endif
+                </div>
+                
+                <!-- Promo Content -->
+                <div class="p-6">
+                  <h3 class="text-xl font-bold mb-2 text-text-dark">{{ $promo->name }}</h3>
+                  <p class="text-gray-600 mb-4">{{ Str::limit($promo->description, 100) }}</p>
+                  
+                  <!-- Price Section -->
+                  <div class="flex items-center justify-between mb-4">
+                    <div>
+                      @if($promo->discount_percent > 0)
+                        <span class="text-gray-400 line-through text-sm">Rp {{ number_format($promo->original_price, 0, ',', '.') }}</span>
+                      @endif
+                      <span class="text-primary font-bold text-xl block">Rp {{ number_format($promo->promo_price, 0, ',', '.') }}</span>
+                    </div>
+                    <span class="bg-gray-100 text-gray-700 text-sm font-semibold px-3 py-1 rounded-full capitalize">
+                      {{ $promo->category }}
+                    </span>
+                  </div>
+                  
+                  <!-- Date & Quota Info -->
+                  <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                    <span>
+                      @if($promo->status_display === 'expired')
+                        Berakhir: {{ $promo->end_date ? $promo->end_date->format('d M Y') : '-' }}
+                      @elseif($promo->status_display === 'coming_soon')
+                        Mulai: {{ $promo->start_date->format('d M Y') }}
+                      @else
+                        @if($promo->end_date)
+                          Sampai: {{ $promo->end_date->format('d M Y') }}
+                        @else
+                          Tidak terbatas
+                        @endif
+                      @endif
+                    </span>
+                    @if($promo->quota && $promo->status === 'active')
+                      <span>Tersisa: {{ $promo->quota - $promo->actual_sold_count }}</span>
                     @endif
                   </div>
+                  
+                  <!-- Action Button -->
+                  <div class="w-full text-center font-semibold py-3 rounded-lg transition-colors duration-300 {{ $buttonStatus['class'] }}"
+                       @if(!$buttonStatus['clickable']) style="cursor: not-allowed;" @endif>
+                    {{ $buttonStatus['text'] }}
+                  </div>
                 </div>
-              @endif
-            </div>
-            
-            <div class="p-6">
-              <h3 class="text-xl font-bold mb-2 text-text-dark">{{ $promo->name }}</h3>
-              <p class="text-gray-600 mb-4">{{ Str::limit($promo->description, 100) }}</p>
-              
-              <div class="flex items-center justify-between mb-4">
-                <div>
-                  <span class="text-gray-400 line-through text-sm">Rp {{ number_format($promo->original_price, 0, ',', '.') }}</span>
-                  <span class="text-primary font-bold text-xl block">Rp {{ number_format($promo->promo_price, 0, ',', '.') }}</span>
-                </div>
-                <span class="bg-primary text-black text-sm font-semibold px-3 py-1 rounded-full">
-                  {{ $promo->category }}
-                </span>
               </div>
-              
-              <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
-                <span>
-                  @if($isExpired)
-                    Berakhir: {{ \Carbon\Carbon::parse($promo->end_date)->format('d M Y') }}
-                  @elseif($isNotStarted)
-                    Mulai: {{ \Carbon\Carbon::parse($promo->start_date)->format('d M Y') }}
-                  @else
-                    Berlaku hingga: {{ $promo->end_date ? \Carbon\Carbon::parse($promo->end_date)->format('d M Y') : 'Tidak terbatas' }}
-                  @endif
-                </span>
-                @if($promo->quota)
-                  <span>Kuota: {{ $promo->quota - $promo->sold_count }}</span>
-                @endif
-              </div>
-              
-              @if($isClickable)
-                <div class="w-full bg-primary text-black text-center font-semibold py-3 rounded-lg hover:bg-yellow-500 transition-colors duration-300 cursor-pointer">
-                  Dapatkan Promo
-                </div>
-              @else
-                <div class="w-full bg-gray-300 text-gray-500 text-center font-semibold py-3 rounded-lg cursor-not-allowed">
-                  @if($isExpired)
-                    Promo Berakhir
-                  @elseif($isNotStarted)
-                    Segera Hadir
-                  @elseif($isSoldOut)
-                    Kuota Habis
-                  @else
-                    Tidak Tersedia
-                  @endif
-                </div>
-              @endif
-            </div>
+            @endforeach
           </div>
-        @endforeach
-      </div>
 
-      <!-- Dots Indicator -->
-      <div class="dots-container" id="dotsContainer">
-        <!-- Dots akan di-generate otomatis oleh JavaScript -->
-      </div>
-    </div>
-  @else
-    <div class="text-center py-12">
-      <div class="inline-block p-4 bg-gray-100 rounded-full mb-4">
-        <i data-feather="tag" class="w-12 h-12 text-gray-400"></i>
-      </div>
-      <h3 class="text-xl font-semibold text-gray-600 mb-2">Tidak ada promo saat ini</h3>
-      <p class="text-gray-500">Silakan kembali lagi nanti untuk melihat promo terbaru</p>
-    </div>
-  @endif
-</section>
+          <!-- Dots Indicator -->
+          <div class="dots-container" id="dotsContainer">
+            <!-- Dots akan di-generate otomatis oleh JavaScript -->
+          </div>
+        </div>
+      @else
+        <div class="text-center py-12">
+          <div class="inline-block p-4 bg-gray-100 rounded-full mb-4">
+            <i data-feather="tag" class="w-12 h-12 text-gray-400"></i>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-600 mb-2">Tidak ada promo saat ini</h3>
+          <p class="text-gray-500">Silakan kembali lagi nanti untuk melihat promo terbaru</p>
+        </div>
+      @endif
+    </section>
 
     <!-- Footer -->
     <footer class="bg-black text-white pt-8 sm:pt-12 pb-6 sm:pb-8">
@@ -707,329 +758,306 @@
     </footer>
 
     <script>
-// Initialize Feather icons
-feather.replace();
+      // Initialize Feather icons
+      feather.replace();
 
-// Mobile menu toggle
-const navbarNav = document.getElementById('mobile-nav');
-const menuIcon = document.getElementById('menu-icon');
-const closeMenu = document.getElementById('close-menu');
-const overlay = document.getElementById('overlay');
-let isMenuOpen = false;
+      // Mobile menu toggle
+      const navbarNav = document.getElementById('mobile-nav');
+      const menuIcon = document.getElementById('menu-icon');
+      const closeMenu = document.getElementById('close-menu');
+      const overlay = document.getElementById('overlay');
+      let isMenuOpen = false;
 
-function openMobileMenu() {
-  if (!isMenuOpen) {
-    navbarNav.style.right = '0';
-    overlay.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-    isMenuOpen = true;
-  }
-}
-
-function closeMobileMenu() {
-  if (isMenuOpen) {
-    navbarNav.style.right = '-100%';
-    overlay.classList.add('hidden');
-    document.body.style.overflow = '';
-    isMenuOpen = false;
-  }
-}
-
-menuIcon.addEventListener('click', (e) => {
-  e.stopPropagation();
-  openMobileMenu();
-});
-
-closeMenu.addEventListener('click', (e) => {
-  e.stopPropagation();
-  closeMobileMenu();
-});
-
-closeMenu.addEventListener('touchend', (e) => {
-  e.preventDefault();
-  e.stopPropagation();
-  closeMobileMenu();
-});
-
-overlay.addEventListener('click', closeMobileMenu);
-
-document.addEventListener('click', (e) => {
-  const isClickInsideNav = e.target.closest('#mobile-nav') !== null;
-  const isClickOnMenuIcon = e.target.closest('#menu-icon') !== null;
-  if (!isClickInsideNav && !isClickOnMenuIcon && isMenuOpen) {
-    closeMobileMenu();
-  }
-});
-
-// Smooth scrolling for navigation links with offset
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-  anchor.addEventListener('click', function (e) {
-    e.preventDefault();
-    const targetId = this.getAttribute('href');
-    if (targetId === '#') return;
-    const target = document.querySelector(targetId);
-    if (target) {
-      const navbarHeight = document.querySelector('nav').offsetHeight;
-      const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - navbarHeight;
-      window.scrollTo({
-        top: targetPosition,
-        behavior: 'smooth'
-      });
-    }
-    closeMobileMenu();
-  });
-
-  anchor.addEventListener('touchend', function (e) {
-    this.click();
-  });
-});
-
-// Prevent scrolling when mobile menu is open
-let touchStartY = 0;
-document.addEventListener('touchstart', e => {
-  touchStartY = e.touches[0].clientY;
-});
-document.addEventListener('touchmove', e => {
-  if (isMenuOpen && !e.target.closest('#mobile-nav')) {
-    e.preventDefault();
-  }
-}, { passive: false });
-
-// Handle orientation change
-window.addEventListener('orientationchange', function() {
-  setTimeout(() => {
-    feather.replace();
-  }, 100);
-});
-
-// Optimize scroll performance
-let ticking = false;
-function updateNavbar() {
-  const navbar = document.querySelector('nav');
-  const scrollTop = window.pageYOffset;
-  if (scrollTop > 100) {
-    navbar.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
-  } else {
-    navbar.style.backgroundColor = '';
-  }
-  ticking = false;
-}
-function requestTick() {
-  if (!ticking) {
-    window.requestAnimationFrame(updateNavbar);
-    ticking = true;
-  }
-}
-window.addEventListener('scroll', requestTick);
-
-// WAHANA CAROUSEL FUNCTIONALITY
-class WahanaCarousel {
-  constructor() {
-    this.container = document.getElementById('wahanaImages');
-    if (!this.container) return;
-    this.slides = this.container.querySelectorAll('.wahana-slide');
-    this.totalSlides = this.slides.length;
-    this.indicators = document.getElementById('carouselIndicators');
-    this.currentIndex = 0;
-    this.init();
-  }
-
-  init() {
-    this.createIndicators();
-    this.startAutoPlay();
-    this.bindEvents();
-    this.updateSlide();
-  }
-
-  createIndicators() {
-    if (!this.indicators) return;
-    this.indicators.innerHTML = '';
-    for (let i = 0; i < this.totalSlides; i++) {
-      const indicator = document.createElement('div');
-      indicator.className = `indicator ${i === 0 ? 'active' : ''}`;
-      indicator.addEventListener('click', () => this.goToSlide(i));
-      this.indicators.appendChild(indicator);
-    }
-    this.indicatorElements = this.indicators.querySelectorAll('.indicator');
-  }
-
-  bindEvents() {
-    const carousel = document.getElementById('wahanaCarousel');
-    if (!carousel) return;
-    carousel.addEventListener('mouseenter', () => this.pauseAutoPlay());
-    carousel.addEventListener('mouseleave', () => this.resumeAutoPlay());
-
-    // Touch events for mobile swipe
-    let startX = 0;
-    let currentX = 0;
-    let isDragging = false;
-
-    this.container.addEventListener('touchstart', (e) => {
-      startX = e.touches[0].clientX;
-      isDragging = true;
-      this.pauseAutoPlay();
-    });
-
-    this.container.addEventListener('touchmove', (e) => {
-      if (!isDragging) return;
-      currentX = e.touches[0].clientX;
-    });
-
-    this.container.addEventListener('touchend', () => {
-      if (!isDragging) return;
-      isDragging = false;
-      const diffX = startX - currentX;
-      if (Math.abs(diffX) > 50) {
-        if (diffX > 0) {
-          this.nextSlide();
-        } else {
-          this.prevSlide();
+      function openMobileMenu() {
+        if (!isMenuOpen) {
+          navbarNav.style.right = '0';
+          overlay.classList.remove('hidden');
+          document.body.style.overflow = 'hidden';
+          isMenuOpen = true;
         }
       }
-      this.resumeAutoPlay();
-    });
-  }
 
-  updateSlide() {
-    if (!this.container) return;
-    const translateX = -this.currentIndex * (100 / this.totalSlides);
-    this.container.style.transform = `translateX(${translateX}%)`;
-    if (this.indicatorElements) {
-      this.indicatorElements.forEach((indicator, index) => {
-        indicator.classList.toggle('active', index === this.currentIndex);
+      function closeMobileMenu() {
+        if (isMenuOpen) {
+          navbarNav.style.right = '-100%';
+          overlay.classList.add('hidden');
+          document.body.style.overflow = '';
+          isMenuOpen = false;
+        }
+      }
+
+      menuIcon.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openMobileMenu();
       });
-    }
-  }
 
-  nextSlide() {
-    this.currentIndex = (this.currentIndex + 1) % this.totalSlides;
-    this.updateSlide();
-  }
-
-  prevSlide() {
-    this.currentIndex = this.currentIndex === 0 ? this.totalSlides - 1 : this.currentIndex - 1;
-    this.updateSlide();
-  }
-
-  goToSlide(index) {
-    this.currentIndex = index;
-    this.updateSlide();
-  }
-
-  startAutoPlay() {
-    this.autoPlayInterval = setInterval(() => {
-      this.nextSlide();
-    }, 3000);
-  }
-
-  pauseAutoPlay() {
-    clearInterval(this.autoPlayInterval);
-  }
-
-  resumeAutoPlay() {
-    this.pauseAutoPlay();
-    this.startAutoPlay();
-  }
-}
-
-// PROMO SLIDER FUNCTIONALITY - DINAMIS BERDASARKAN DATA DATABASE
-class PromoSlider {
-  constructor() {
-    this.container = document.getElementById('promoContainer');
-    this.cards = this.container ? this.container.querySelectorAll('.promo-card') : [];
-    this.totalCards = this.cards.length;
-    this.dotsContainer = document.getElementById('dotsContainer');
-    this.currentIndex = 0;
-    this.prevBtn = document.getElementById('prevBtn');
-    this.nextBtn = document.getElementById('nextBtn');
-    this.init();
-  }
-
-  init() {
-    if (!this.container || this.totalCards === 0) return;
-    this.createDots();
-    this.bindEvents();
-    this.updateSlider();
-    this.autoPlay();
-  }
-
-  createDots() {
-    if (!this.dotsContainer) return;
-    this.dotsContainer.innerHTML = '';
-    for (let i = 0; i < this.totalCards; i++) {
-      const dot = document.createElement('div');
-      dot.className = `dot ${i === 0 ? 'active' : ''}`;
-      dot.addEventListener('click', () => this.goToSlide(i));
-      this.dotsContainer.appendChild(dot);
-    }
-    this.dotElements = this.dotsContainer.querySelectorAll('.dot');
-  }
-
-  bindEvents() {
-    if (this.prevBtn) {
-      this.prevBtn.addEventListener('click', () => this.prevSlide());
-    }
-    if (this.nextBtn) {
-      this.nextBtn.addEventListener('click', () => this.nextSlide());
-    }
-    window.addEventListener('resize', () => this.handleResize());
-  }
-
-  handleResize() {
-    this.updateSlider();
-  }
-
-  updateSlider() {
-    if (!this.container) return;
-    this.cards.forEach((card, idx) => {
-      card.classList.toggle('active', idx === this.currentIndex);
-    });
-    if (this.dotElements) {
-      this.dotElements.forEach((dot, idx) => {
-        dot.classList.toggle('active', idx === this.currentIndex);
+      closeMenu.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeMobileMenu();
       });
-    }
-    const offset = -this.currentIndex * (this.cards[0]?.offsetWidth + 32 || 350);
-    this.container.style.transform = `translateX(${offset}px)`;
-  }
 
-  nextSlide() {
-    this.currentIndex = (this.currentIndex + 1) % this.totalCards;
-    this.updateSlider();
-  }
+      closeMenu.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        closeMobileMenu();
+      });
 
-  prevSlide() {
-    this.currentIndex = this.currentIndex === 0 ? this.totalCards - 1 : this.currentIndex - 1;
-    this.updateSlider();
-  }
+      overlay.addEventListener('click', closeMobileMenu);
 
-  goToSlide(index) {
-    this.currentIndex = index;
-    this.updateSlider();
-  }
+      document.addEventListener('click', (e) => {
+        const isClickInsideNav = e.target.closest('#mobile-nav') !== null;
+        const isClickOnMenuIcon = e.target.closest('#menu-icon') !== null;
+        if (!isClickInsideNav && !isClickOnMenuIcon && isMenuOpen) {
+          closeMobileMenu();
+        }
+      });
 
-  autoPlay() {
-    this.autoPlayInterval = setInterval(() => {
-      this.nextSlide();
-    }, 1989);
-  }
+      // Smooth scrolling for navigation links with offset
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+          e.preventDefault();
+          const targetId = this.getAttribute('href');
+          if (targetId === '#') return;
+          const target = document.querySelector(targetId);
+          if (target) {
+            const navbarHeight = document.querySelector('nav').offsetHeight;
+            const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - navbarHeight;
+            window.scrollTo({
+              top: targetPosition,
+              behavior: 'smooth'
+            });
+          }
+          closeMobileMenu();
+        });
 
-  pauseAutoPlay() {
-    clearInterval(this.autoPlayInterval);
-  }
+        anchor.addEventListener('touchend', function (e) {
+          this.click();
+        });
+      });
 
-  resumeAutoPlay() {
-    this.pauseAutoPlay();
-    this.autoPlay();
-  }
-}
+      // WAHANA CAROUSEL FUNCTIONALITY
+      class WahanaCarousel {
+        constructor() {
+          this.container = document.getElementById('wahanaImages');
+          if (!this.container) return;
+          this.slides = this.container.querySelectorAll('.wahana-slide');
+          this.totalSlides = this.slides.length;
+          this.indicators = document.getElementById('carouselIndicators');
+          this.currentIndex = 0;
+          this.init();
+        }
 
-// Initialize sliders when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-  new WahanaCarousel();
-  new PromoSlider();
-  feather.replace();
-});
+        init() {
+          this.createIndicators();
+          this.startAutoPlay();
+          this.bindEvents();
+          this.updateSlide();
+        }
+
+        createIndicators() {
+          if (!this.indicators) return;
+          this.indicators.innerHTML = '';
+          for (let i = 0; i < this.totalSlides; i++) {
+            const indicator = document.createElement('div');
+            indicator.className = `indicator ${i === 0 ? 'active' : ''}`;
+            indicator.addEventListener('click', () => this.goToSlide(i));
+            this.indicators.appendChild(indicator);
+          }
+          this.indicatorElements = this.indicators.querySelectorAll('.indicator');
+        }
+
+        bindEvents() {
+          const carousel = document.getElementById('wahanaCarousel');
+          if (!carousel) return;
+          carousel.addEventListener('mouseenter', () => this.pauseAutoPlay());
+          carousel.addEventListener('mouseleave', () => this.resumeAutoPlay());
+
+          // Touch events for mobile swipe
+          let startX = 0;
+          let currentX = 0;
+          let isDragging = false;
+
+          this.container.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            isDragging = true;
+            this.pauseAutoPlay();
+          });
+
+          this.container.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            currentX = e.touches[0].clientX;
+          });
+
+          this.container.addEventListener('touchend', () => {
+            if (!isDragging) return;
+            isDragging = false;
+            const diffX = startX - currentX;
+            if (Math.abs(diffX) > 50) {
+              if (diffX > 0) {
+                this.nextSlide();
+              } else {
+                this.prevSlide();
+              }
+            }
+            this.resumeAutoPlay();
+          });
+        }
+
+        updateSlide() {
+          if (!this.container) return;
+          const translateX = -this.currentIndex * (100 / this.totalSlides);
+          this.container.style.transform = `translateX(${translateX}%)`;
+          if (this.indicatorElements) {
+            this.indicatorElements.forEach((indicator, index) => {
+              indicator.classList.toggle('active', index === this.currentIndex);
+            });
+          }
+        }
+
+        nextSlide() {
+          this.currentIndex = (this.currentIndex + 1) % this.totalSlides;
+          this.updateSlide();
+        }
+
+        prevSlide() {
+          this.currentIndex = this.currentIndex === 0 ? this.totalSlides - 1 : this.currentIndex - 1;
+          this.updateSlide();
+        }
+
+        goToSlide(index) {
+          this.currentIndex = index;
+          this.updateSlide();
+        }
+
+        startAutoPlay() {
+          this.autoPlayInterval = setInterval(() => {
+            this.nextSlide();
+          }, 3000);
+        }
+
+        pauseAutoPlay() {
+          clearInterval(this.autoPlayInterval);
+        }
+
+        resumeAutoPlay() {
+          this.pauseAutoPlay();
+          this.startAutoPlay();
+        }
+      }
+
+      // PROMO SLIDER FUNCTIONALITY
+      class PromoSlider {
+        constructor() {
+          this.container = document.getElementById('promoContainer');
+          this.cards = this.container ? this.container.querySelectorAll('.promo-card') : [];
+          this.totalCards = this.cards.length;
+          this.dotsContainer = document.getElementById('dotsContainer');
+          this.currentIndex = 0;
+          this.prevBtn = document.getElementById('prevBtn');
+          this.nextBtn = document.getElementById('nextBtn');
+          this.init();
+        }
+
+        init() {
+          if (!this.container || this.totalCards === 0) return;
+          this.createDots();
+          this.bindEvents();
+          this.updateSlider();
+          this.autoPlay();
+        }
+
+        createDots() {
+          if (!this.dotsContainer) return;
+          this.dotsContainer.innerHTML = '';
+          for (let i = 0; i < this.totalCards; i++) {
+            const dot = document.createElement('div');
+            dot.className = `dot ${i === 0 ? 'active' : ''}`;
+            dot.addEventListener('click', () => this.goToSlide(i));
+            this.dotsContainer.appendChild(dot);
+          }
+          this.dotElements = this.dotsContainer.querySelectorAll('.dot');
+        }
+
+        bindEvents() {
+          if (this.prevBtn) {
+            this.prevBtn.addEventListener('click', () => this.prevSlide());
+          }
+          if (this.nextBtn) {
+            this.nextBtn.addEventListener('click', () => this.nextSlide());
+          }
+
+          if (this.container) {
+            this.container.addEventListener('mouseenter', () => this.pauseAutoPlay());
+            this.container.addEventListener('mouseleave', () => this.resumeAutoPlay());
+          }
+
+          window.addEventListener('resize', () => this.handleResize());
+        }
+
+        handleResize() {
+          this.updateSlider();
+        }
+
+        updateSlider() {
+          if (!this.container) return;
+          
+          this.cards.forEach((card, idx) => {
+            card.classList.toggle('active', idx === this.currentIndex);
+          });
+
+          if (this.dotElements) {
+            this.dotElements.forEach((dot, idx) => {
+              dot.classList.toggle('active', idx === this.currentIndex);
+            });
+          }
+
+          const cardWidth = this.cards[0]?.offsetWidth || 350;
+          const gap = 32;
+          const offset = -this.currentIndex * (cardWidth + gap);
+          this.container.style.transform = `translateX(${offset}px)`;
+        }
+
+        nextSlide() {
+          this.currentIndex = (this.currentIndex + 1) % this.totalCards;
+          this.updateSlider();
+        }
+
+        prevSlide() {
+          this.currentIndex = this.currentIndex === 0 ? this.totalCards - 1 : this.currentIndex - 1;
+          this.updateSlider();
+        }
+
+        goToSlide(index) {
+          this.currentIndex = index;
+          this.updateSlider();
+        }
+
+        autoPlay() {
+          this.autoPlayInterval = setInterval(() => {
+            this.nextSlide();
+          }, 4000);
+        }
+
+        pauseAutoPlay() {
+          clearInterval(this.autoPlayInterval);
+        }
+
+        resumeAutoPlay() {
+          this.pauseAutoPlay();
+          this.autoPlay();
+        }
+      }
+
+      // Initialize sliders when DOM is loaded
+      document.addEventListener('DOMContentLoaded', () => {
+        new WahanaCarousel();
+        new PromoSlider();
+        feather.replace();
+
+        setTimeout(() => {
+          feather.replace();
+        }, 100);
+      });
     </script>
   </body>
 </html>

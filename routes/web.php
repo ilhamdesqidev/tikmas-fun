@@ -32,6 +32,9 @@ Route::get('/', function () {
 Route::get('dashboard', [DashboardController::class, 'index'])->name('home');
 
 Route::get('/promo/{id}', [PromoController::class, 'show'])->name('promo.show');
+Route::get('/promos', [PromoController::class, 'index'])->name('promo.index');
+// routes/web.php
+Route::get('/promo/{id}', [PromoController::class, 'show'])->name('promo.show');
 
 Route::controller(WahanaController::class)->group(function () {
     Route::get('/wahana', 'index')->name('wahana.index');
@@ -82,20 +85,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/profile', [AdminDashboardController::class, 'profile'])->name('profile');
         Route::post('/profile/update', [AdminDashboardController::class, 'updateProfile'])->name('profile.update');
         
-        // Promo Management Routes
+        // Promo Management Routes - Simplified Version
         Route::prefix('promo')->name('promo.')->group(function () {
+            // Resource Routes (CRUD)
             Route::get('/', [AdminPromoController::class, 'index'])->name('index');
             Route::get('/create', [AdminPromoController::class, 'create'])->name('create');
-            Route::post('/store', [AdminPromoController::class, 'store'])->name('store');
+            Route::post('/', [AdminPromoController::class, 'store'])->name('store');
             Route::get('/{id}', [AdminPromoController::class, 'show'])->name('show');
             Route::get('/{id}/edit', [AdminPromoController::class, 'edit'])->name('edit');
             Route::put('/{id}', [AdminPromoController::class, 'update'])->name('update');
             Route::delete('/{id}', [AdminPromoController::class, 'destroy'])->name('destroy');
+            
+            // Additional Functionality
             Route::post('/{id}/toggle-status', [AdminPromoController::class, 'toggleStatus'])->name('toggle-status');
-            Route::post('/admin/promo/bulk-action', [PromoController::class, 'bulkAction'])->name('admin.promo.bulk-action');
-Route::post('/admin/promo/update-expired', [PromoController::class, 'updateExpiredPromos'])->name('admin.promo.update-expired');
-Route::get('/admin/promo/stats', [PromoController::class, 'getPromoStats'])->name('admin.promo.stats');
-Route::post('/admin/promo/{id}/toggle-status', [PromoController::class, 'toggleStatus'])->name('admin.promo.toggle-status');
+            Route::post('/bulk-action', [AdminPromoController::class, 'bulkAction'])->name('bulk-action');
+            Route::get('/stats/overview', [AdminPromoController::class, 'getPromoStats'])->name('stats');
         });
         
         // Facility Management Routes
