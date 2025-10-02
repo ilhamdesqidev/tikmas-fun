@@ -86,9 +86,11 @@
                         </div>
                     </div>
                     
+                    <!-- Tombol Batalkan -->
                     <div class="mt-8 text-center">
-                        <a href="{{ route('home') }}" class="inline-block text-gray-600 hover:text-primary">
-                            <i data-feather="arrow-left" class="w-4 h-4 inline mr-1"></i> Kembali ke Beranda
+                        <a href="{{ route('payment.unfinish') }}?order_id={{ $order->order_number }}" 
+                           class="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                            <i data-feather="x" class="w-4 h-4 mr-2"></i> Batalkan
                         </a>
                     </div>
                 </div>
@@ -98,33 +100,33 @@
 
     <!-- Script Midtrans -->
     <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ $clientKey }}"></script>
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        @if($snapToken)
-            window.snap.embed("{{ $snapToken }}", {
-                embedId: "snap-container",
-                onSuccess: function(result){
-                    console.log("success", result);
-                    // Langsung redirect ke finish
-                    window.location.href = "{{ route('payment.finish') }}?order_id={{ $order->order_number }}";
-                },
-                onPending: function(result){
-                    console.log("pending", result);
-                    window.location.href = "{{ route('payment.unfinish') }}?order_id={{ $order->order_number }}";
-                },
-                onError: function(result){
-                    console.log("error", result);
-                    window.location.href = "{{ route('payment.error') }}?order_id={{ $order->order_number }}";
-                },
-                onClose: function(){
-                    console.log("customer closed the popup without finishing the payment");
-                    // PASTIKAN redirect ke unfinish dengan order_id
-                    window.location.href = "{{ route('payment.unfinish') }}?order_id={{ $order->order_number }}";
-                }
-            });
-        @endif
-    });
-</script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            @if($snapToken)
+                window.snap.embed("{{ $snapToken }}", {
+                    embedId: "snap-container",
+                    onSuccess: function(result){
+                        console.log("success", result);
+                        // Langsung redirect ke finish
+                        window.location.href = "{{ route('payment.finish') }}?order_id={{ $order->order_number }}";
+                    },
+                    onPending: function(result){
+                        console.log("pending", result);
+                        window.location.href = "{{ route('payment.unfinish') }}?order_id={{ $order->order_number }}";
+                    },
+                    onError: function(result){
+                        console.log("error", result);
+                        window.location.href = "{{ route('payment.error') }}?order_id={{ $order->order_number }}";
+                    },
+                    onClose: function(){
+                        console.log("customer closed the popup without finishing the payment");
+                        // PASTIKAN redirect ke unfinish dengan order_id
+                        window.location.href = "{{ route('payment.unfinish') }}?order_id={{ $order->order_number }}";
+                    }
+                });
+            @endif
+        });
+    </script>
     
     <!-- Feather Icons -->
     <script src="https://unpkg.com/feather-icons"></script>
