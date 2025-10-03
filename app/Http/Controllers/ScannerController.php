@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\Promo;
+use App\Models\StaffCode;
 use Illuminate\Support\Facades\Session;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Str;
 
 class ScannerController extends Controller
 {
@@ -18,26 +18,37 @@ class ScannerController extends Controller
         return view('scanner.verification');
     }
 
-    // Method untuk verifikasi petugas
+    // Method untuk verifikasi petugas dengan database
     public function verifyStaff(Request $request)
     {
         $request->validate([
             'staff_code' => 'required|string'
         ]);
 
-        // Simple staff verification - bisa disesuaikan dengan kebutuhan
-        $validCodes = ['STAFF001', 'STAFF002', 'PETUGAS01', 'SCAN123', 'ADMINSCAN', 'MESTAKARA', 'ILHAM']; // Contoh kode valid
+        $code = strtoupper($request->staff_code);
         
-        if (in_array(strtoupper($request->staff_code), $validCodes)) {
+        // Cek kode di database
+        $staffCode = StaffCode::where('code', $code)
+            ->where('is_active', true)
+            ->first();
+        
+        if ($staffCode) {
+            // Record penggunaan
+            $staffCode->recordUsage();
+            
+            // Set session
             Session::put('scanner_verified', true);
-            Session::put('staff_code', strtoupper($request->staff_code));
+            Session::put('staff_code', $code);
+            Session::put('staff_name', $staffCode->name);
+            Session::put('staff_role', $staffCode->role);
+            Session::put('staff_id', $staffCode->id);
             
             return redirect()->route('scanner.dashboard')
-                ->with('success', 'Verifikasi berhasil! Selamat datang, Petugas.');
+                ->with('success', "Verifikasi berhasil! Selamat datang, {$staffCode->name}.");
         }
 
         return redirect()->back()
-            ->with('error', 'Kode petugas tidak valid!')
+            ->with('error', 'Kode petugas tidak valid atau sudah dinonaktifkan!')
             ->withInput();
     }
 
@@ -69,7 +80,11 @@ class ScannerController extends Controller
             ->limit(10)
             ->get();
 
-        return view('scanner.dashboard', compact('todayUsed', 'todayTotal', 'recentScans'));
+        // Get staff info
+        $staffName = Session::get('staff_name', 'Petugas');
+        $staffRole = Session::get('staff_role', 'scanner');
+
+        return view('scanner.dashboard', compact('todayUsed', 'todayTotal', 'recentScans', 'staffName', 'staffRole'));
     }
 
     // Method untuk scan barcode
@@ -360,6 +375,9 @@ class ScannerController extends Controller
     {
         Session::forget('scanner_verified');
         Session::forget('staff_code');
+        Session::forget('staff_name');
+        Session::forget('staff_role');
+        Session::forget('staff_id');
         
         return redirect()->route('scanner.verification')
             ->with('success', 'Anda telah logout dari sistem scanner.');

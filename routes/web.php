@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\FacilityController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\ScannerController;
 use App\Http\Controllers\WahanaController;
+use App\Http\Controllers\Admin\StaffVerificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -72,6 +73,22 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // Protected routes (harus login sebagai admin)
     Route::middleware('admin')->group(function () {
+
+        Route::prefix('staff/verification')->name('staff.verification.')->group(function () {
+            Route::get('/', [StaffVerificationController::class, 'index'])->name('index');
+            Route::post('/', [StaffVerificationController::class, 'store'])->name('store');
+            
+            // Generate routes
+            Route::get('/generate', [StaffVerificationController::class, 'generateCode'])->name('generate');
+            Route::post('/generate-custom', [StaffVerificationController::class, 'generateCustomCode'])->name('generate.custom');
+            Route::post('/check-code', [StaffVerificationController::class, 'checkCode'])->name('check');
+            Route::get('/suggestions', [StaffVerificationController::class, 'getCodeSuggestions'])->name('suggestions');
+            
+            Route::put('/{id}', [StaffVerificationController::class, 'update'])->name('update');
+            Route::post('/{id}/toggle', [StaffVerificationController::class, 'toggleStatus'])->name('toggle');
+            Route::delete('/{id}', [StaffVerificationController::class, 'destroy'])->name('destroy');
+            Route::post('/bulk', [StaffVerificationController::class, 'bulkAction'])->name('bulk');
+        });
         
         // Dashboard
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
