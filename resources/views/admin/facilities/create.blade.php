@@ -144,9 +144,6 @@
         </div>
     </form>
 </div>
-@endsection
-
-@section('extra-js')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Preview image utama

@@ -190,9 +190,6 @@
             </div>
         </form>
     </div>
-@endsection
-
-@section('extra-js')
 <script>
     // Preview gambar promo
     function previewImage(input) {

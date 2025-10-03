@@ -34,6 +34,15 @@
         scroll-behavior: smooth;
       }
       
+      * {
+        box-sizing: border-box;
+      }
+      
+      body {
+        overflow-x: hidden;
+        max-width: 100vw;
+      }
+      
       .hero-bg {
         background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("/assets/img/mainimg.jpg");
         background-size: cover;
@@ -48,7 +57,7 @@
       }
       
       .hero h1 {
-        text-shadow: 1px 1px 3px rgba(1, 1, 3, 0.5);
+        text-shadow: 2px 2px 4px rgba(1, 1, 3, 0.7);
       }
       
       .hero p {
@@ -58,24 +67,6 @@
       .hero .cta {
         box-shadow: 1px 1px 3px rgba(1, 1, 3, 0.5);
       }
-      
-      .mobile-nav-enter {
-        transform: translateX(100%);
-      }
-      
-      .mobile-nav-enter-active {
-        transform: translateX(0);
-        transition: transform 300ms ease-in-out;
-      }
-      
-      .mobile-nav-exit {
-        transform: translateX(0);
-      }
-      
-      .mobile-nav-exit-active {
-        transform: translateX(100%);
-        transition: transform 300ms ease-in-out;
-      }
 
       /* WAHANA CAROUSEL STYLES */
       .wahana-carousel {
@@ -83,6 +74,7 @@
         overflow: hidden;
         border-radius: 1rem;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        max-width: 100%;
       }
 
       .wahana-images {
@@ -98,7 +90,7 @@
 
       .wahana-image {
         width: 100%;
-        height: 350px;
+        height: 400px;
         object-fit: cover;
         display: block;
       }
@@ -108,7 +100,7 @@
         bottom: 0;
         left: 0;
         right: 0;
-        background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
         padding: 2rem 1.5rem 1rem;
         color: white;
       }
@@ -122,8 +114,9 @@
 
       .wahana-description {
         font-size: 1rem;
-        opacity: 0.9;
+        opacity: 0.95;
         text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        line-height: 1.4;
       }
 
       .carousel-indicators {
@@ -137,8 +130,8 @@
       }
 
       .indicator {
-        width: 8px;
-        height: 8px;
+        width: 10px;
+        height: 10px;
         border-radius: 50%;
         background: rgba(255, 255, 255, 0.5);
         cursor: pointer;
@@ -150,6 +143,14 @@
         transform: scale(1.3);
       }
 
+      /* Tablet Responsiveness */
+      @media (max-width: 1024px) {
+        .wahana-image {
+          height: 350px;
+        }
+      }
+
+      /* Mobile Responsiveness */
       @media (max-width: 768px) {
         .wahana-image {
           height: 280px;
@@ -160,7 +161,25 @@
         }
         
         .wahana-description {
-          font-size: 0.9rem;
+          font-size: 0.875rem;
+        }
+        
+        .wahana-overlay {
+          padding: 1.5rem 1rem 0.75rem;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .wahana-image {
+          height: 240px;
+        }
+        
+        .wahana-title {
+          font-size: 1.125rem;
+        }
+        
+        .wahana-description {
+          font-size: 0.8rem;
         }
       }
 
@@ -169,14 +188,14 @@
         overflow: hidden;
         position: relative;
         padding: 2rem 0;
+        max-width: 100%;
       }
 
       .promo-container {
-        margin-left: -15%;
         display: flex;
         transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         gap: 2rem;
-        padding: 0 50%;
+        padding: 0 calc(50% - 175px);
       }
 
       .promo-card {
@@ -188,9 +207,10 @@
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         transition: all 0.5s ease;
         position: relative;
-        transform: scale(0.8);
-        filter: blur(3px);
+        transform: scale(0.85);
+        filter: blur(2px);
         opacity: 0.6;
+        flex-shrink: 0;
       }
 
       .promo-card.active {
@@ -228,11 +248,6 @@
         z-index: 5;
       }
 
-      .overlay-content {
-        text-align: center;
-        padding: 1rem;
-      }
-
       .status-badge {
         position: absolute;
         top: 15px;
@@ -259,29 +274,9 @@
         color: white;
       }
 
-      .badge-featured {
-        background: #ff4757;
-        color: white;
-        left: 15px !important;
-        right: auto !important;
-      }
-
       .badge-discount {
         background: #CFD916;
         color: #000;
-      }
-
-      .discount-badge {
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        background: #CFD916;
-        color: #000;
-        padding: 6px 12px;
-        border-radius: 6px;
-        font-weight: bold;
-        font-size: 14px;
-        z-index: 10;
       }
 
       .featured-badge {
@@ -318,7 +313,7 @@
         position: absolute;
         top: 50%;
         transform: translateY(-50%);
-        background: rgba(255, 255, 255, 0.9);
+        background: rgba(255, 255, 255, 0.95);
         border: 2px solid #CFD916;
         width: 50px;
         height: 50px;
@@ -352,7 +347,7 @@
       }
 
       .nav-button:disabled:hover {
-        background: rgba(255, 255, 255, 0.9);
+        background: rgba(255, 255, 255, 0.95);
         color: inherit;
         transform: translateY(-50%) scale(1);
       }
@@ -362,6 +357,7 @@
         justify-content: center;
         gap: 10px;
         margin-top: 2rem;
+        flex-wrap: wrap;
       }
 
       .dot {
@@ -378,10 +374,23 @@
         transform: scale(1.2);
       }
 
+      /* Tablet Promo Slider */
+      @media (max-width: 1024px) {
+        .promo-container {
+          padding: 0 calc(50% - 165px);
+        }
+        
+        .promo-card {
+          min-width: 330px;
+          max-width: 330px;
+        }
+      }
+
+      /* Mobile Promo Slider */
       @media (max-width: 768px) {
         .promo-card {
-          min-width: 280px;
-          max-width: 280px;
+          min-width: 300px;
+          max-width: 300px;
         }
 
         .nav-button {
@@ -398,7 +407,41 @@
         }
 
         .promo-container {
-          padding: 0 40%;
+          padding: 0 calc(50% - 150px);
+          gap: 1.5rem;
+        }
+        
+        .promo-image {
+          height: 200px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .promo-card {
+          min-width: 280px;
+          max-width: 280px;
+        }
+        
+        .promo-container {
+          padding: 0 calc(50% - 140px);
+          gap: 1rem;
+        }
+        
+        .nav-button {
+          width: 35px;
+          height: 35px;
+        }
+      }
+
+      /* Small phones */
+      @media (max-width: 375px) {
+        .promo-card {
+          min-width: 260px;
+          max-width: 260px;
+        }
+        
+        .promo-container {
+          padding: 0 calc(50% - 130px);
         }
       }
     </style>
@@ -408,26 +451,26 @@
     <div id="overlay" class="hidden fixed top-0 left-0 w-full h-screen bg-black bg-opacity-50 z-40 transition-opacity duration-300"></div>
 
     <!-- Navbar -->
-    <nav class="w-full py-3 sm:py-5 px-4 sm:px-7 flex items-center justify-between bg-white border-b border-gray-400 fixed top-0 left-0 right-0 z-50" style="border-bottom: 1px solid #597336;">
-      <a href="#" class="text-2xl sm:text-3xl font-bold text-black italic">
+    <nav class="w-full py-3 sm:py-4 lg:py-5 px-4 sm:px-6 lg:px-7 flex items-center justify-between bg-white border-b border-gray-400 fixed top-0 left-0 right-0 z-50" style="border-bottom: 1px solid #597336;">
+      <a href="#" class="text-xl sm:text-2xl lg:text-3xl font-bold text-black italic">
         Mesta<span class="text-primary">Kara</span>.
       </a>
       
       <!-- Desktop Navigation -->
       <div id="navbar-nav" class="hidden md:flex">
-        <a href="#home" class="text-black inline-block text-xl ml-0 px-4 hover:text-primary transition-all duration-500 relative group">
+        <a href="#home" class="text-black inline-block text-base lg:text-xl ml-0 px-3 lg:px-4 hover:text-primary transition-all duration-500 relative group">
           Home
           <span class="absolute left-0 bottom-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
         </a>
-        <a href="#about" class="text-black inline-block text-xl ml-0 px-4 hover:text-primary transition-all duration-500 relative group">
+        <a href="#about" class="text-black inline-block text-base lg:text-xl ml-0 px-3 lg:px-4 hover:text-primary transition-all duration-500 relative group">
           Tentang Kami
           <span class="absolute left-0 bottom-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
         </a>
-        <a href="#menu" class="text-black inline-block text-xl ml-0 px-4 hover:text-primary transition-all duration-500 relative group">
+        <a href="#menu" class="text-black inline-block text-base lg:text-xl ml-0 px-3 lg:px-4 hover:text-primary transition-all duration-500 relative group">
           Promo
           <span class="absolute left-0 bottom-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
         </a>
-        <a href="{{ route('wahana.index') }}" class="text-black inline-block text-xl ml-0 px-4 hover:text-primary transition-all duration-500 relative group">
+        <a href="#wahana" class="text-black inline-block text-base lg:text-xl ml-0 px-3 lg:px-4 hover:text-primary transition-all duration-500 relative group">
           Wahana
           <span class="absolute left-0 bottom-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
         </a>
@@ -441,98 +484,96 @@
         </div>
         
         <div class="flex flex-col px-4">
-          <a href="#home" class="block mx-2 sm:mx-6 my-6 sm:my-8 py-4 text-2xl sm:text-3xl text-white border-b border-gray-700 transition-all duration-300 hover:text-primary hover:pl-4 touch-manipulation">Home</a>
-          <a href="#about" class="block mx-2 sm:mx-6 my-6 sm:my-8 py-4 text-2xl sm:text-3xl text-white border-b border-gray-700 transition-all duration-300 hover:text-primary hover:pl-4 touch-manipulation">Tentang Kami</a>
-          <a href="#menu" class="block mx-2 sm:mx-6 my-6 sm:my-8 py-4 text-2xl sm:text-3xl text-white border-b border-gray-700 transition-all duration-300 hover:text-primary hover:pl-4 touch-manipulation">Promo</a>
-          <a href="{{ route('wahana.index') }}" class="block mx-2 sm:mx-6 my-6 sm:my-8 py-4 text-2xl sm:text-3xl text-white border-b border-gray-700 transition-all duration-300 hover:text-primary hover:pl-4 touch-manipulation">Wahana</a>
+          <a href="#home" class="block mx-2 sm:mx-6 my-4 sm:my-6 lg:my-8 py-3 sm:py-4 text-xl sm:text-2xl lg:text-3xl text-white border-b border-gray-700 transition-all duration-300 hover:text-primary hover:pl-4 touch-manipulation">Home</a>
+          <a href="#about" class="block mx-2 sm:mx-6 my-4 sm:my-6 lg:my-8 py-3 sm:py-4 text-xl sm:text-2xl lg:text-3xl text-white border-b border-gray-700 transition-all duration-300 hover:text-primary hover:pl-4 touch-manipulation">Tentang Kami</a>
+          <a href="#menu" class="block mx-2 sm:mx-6 my-4 sm:my-6 lg:my-8 py-3 sm:py-4 text-xl sm:text-2xl lg:text-3xl text-white border-b border-gray-700 transition-all duration-300 hover:text-primary hover:pl-4 touch-manipulation">Promo</a>
+          <a href="#wahana" class="block mx-2 sm:mx-6 my-4 sm:my-6 lg:my-8 py-3 sm:py-4 text-xl sm:text-2xl lg:text-3xl text-white border-b border-gray-700 transition-all duration-300 hover:text-primary hover:pl-4 touch-manipulation">Wahana</a>
         </div>
       </div>
 
       <!-- Navbar Extra -->
-      <div class="flex items-center">
-        <a href="#" class="text-black mx-1 sm:mx-2 hover:text-primary transition-all duration-500 p-2 touch-manipulation"><i data-feather="search" class="w-5 h-5 sm:w-6 sm:h-6"></i></a>
-        <a href="#" class="text-black mx-1 sm:mx-2 hover:text-primary transition-all duration-500 p-2 touch-manipulation"><i data-feather="shopping-cart" class="w-5 h-5 sm:w-6 sm:h-6"></i></a>
-        <a href="#" id="menu-icon" class="text-black mx-1 sm:mx-2 hover:text-primary transition-all duration-500 md:hidden cursor-pointer text-xl p-2 touch-manipulation">
+      <div class="flex items-center gap-1 sm:gap-2">
+        <a href="#" class="text-black hover:text-primary transition-all duration-500 p-2 touch-manipulation"><i data-feather="search" class="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6"></i></a>
+        <a href="#" class="text-black hover:text-primary transition-all duration-500 p-2 touch-manipulation"><i data-feather="shopping-cart" class="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6"></i></a>
+        <a href="#" id="menu-icon" class="text-black hover:text-primary transition-all duration-500 md:hidden cursor-pointer p-2 touch-manipulation">
           <i data-feather="menu" class="w-5 h-5 sm:w-6 sm:h-6"></i>
         </a>
       </div>
     </nav>
 
     <!-- Hero Section -->
-    <section id="home" class="hero min-h-screen flex items-center hero-bg relative px-4 sm:px-7 text-white pt-16">
+    <section id="home" class="hero min-h-screen flex items-center hero-bg relative px-4 sm:px-6 lg:px-7 text-white pt-16">
       <main class="max-w-4xl w-full">
-        <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl text-white leading-tight mb-4 sm:mb-6">
-           Berlibur Dengan<span class="text-primary">Wahana</span>
+        <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl text-white leading-tight mb-4 sm:mb-6">
+           Berlibur Dengan<span class="text-primary"> Wahana</span>
         </h1>
-        <p class="text-lg sm:text-xl md:text-2xl mt-4 leading-relaxed font-medium text-white max-w-3xl">
+        <p class="text-base sm:text-lg md:text-xl lg:text-2xl mt-3 sm:mt-4 leading-relaxed font-medium text-white max-w-3xl">
           Mari Berlibur dan Nikmati Berbagai Wahana Seru di Agrowisata Gunung Mas
           Bersama Keluarga Tercinta
           Dengan Harga Tiket Masuk yang Terjangkau
           dan Dapatkan Berbagai Promo Menarik Setiap Bulannya
         </p>
-        <a href="#menu" class="cta inline-block mt-6 sm:mt-8 px-8 sm:px-12 py-3 sm:py-4 text-lg sm:text-xl text-white bg-primary rounded-lg hover:bg-yellow-500 transition-colors duration-300 touch-manipulation">
+        <a href="#menu" class="cta inline-block mt-6 sm:mt-8 px-6 sm:px-8 lg:px-12 py-3 sm:py-4 text-base sm:text-lg lg:text-xl text-black font-semibold bg-primary rounded-lg hover:bg-yellow-500 transition-colors duration-300 touch-manipulation">
           Dapatkan Promo
         </a>
       </main>
     </section>
 
     <!-- About Section -->
-    <section id="about" class="py-16 sm:py-24 md:py-32 px-4 sm:px-7">
-      <h2 class="text-center text-3xl sm:text-4xl mb-8 sm:mb-12 text-text-dark">
+    <section id="about" class="py-12 sm:py-16 md:py-24 lg:py-32 px-4 sm:px-6 lg:px-7">
+      <h2 class="text-center text-2xl sm:text-3xl lg:text-4xl mb-6 sm:mb-8 lg:mb-12 text-text-dark">
         <span class="text-primary">Tentang</span> Kami
       </h2>
-      <div class="flex flex-col lg:flex-row max-w-6xl mx-auto">
+      <div class="flex flex-col lg:flex-row gap-6 lg:gap-8 max-w-6xl mx-auto">
         <!-- Wahana Carousel -->
-        <div class="flex-1 lg:min-w-96 mb-6 lg:mb-0">
-        <div class="wahana-carousel" id="wahanaCarousel">
-          <div class="wahana-images" id="wahanaImages">
-            <div class="wahana-slide">
-              <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="Roller Coaster" class="wahana-image" />
-              <div class="wahana-overlay">
-                <div class="wahana-title">Roller Coaster</div>
-                <div class="wahana-description">Rasakan sensasi kecepatan tinggi dengan pemandangan menakjubkan</div>
+        <div class="flex-1 w-full lg:min-w-96">
+          <div class="wahana-carousel" id="wahanaCarousel">
+            <div class="wahana-images" id="wahanaImages">
+              <div class="wahana-slide">
+                <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Roller Coaster" class="wahana-image" />
+                <div class="wahana-overlay">
+                  <div class="wahana-title">Roller Coaster</div>
+                  <div class="wahana-description">Rasakan sensasi kecepatan tinggi dengan pemandangan menakjubkan</div>
+                </div>
+              </div>
+              
+              <div class="wahana-slide">
+                <img src="https://images.unsplash.com/photo-1517457373958-b7bdd4587205?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Ferris Wheel" class="wahana-image" />
+                <div class="wahana-overlay">
+                  <div class="wahana-title">Bianglala</div>
+                  <div class="wahana-description">Nikmati view 360° dari ketinggian bersama orang tercinta</div>
+                </div>
+              </div>
+              
+              <div class="wahana-slide">
+                <img src="https://images.unsplash.com/photo-1544197150-b99a580bb7a8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Bumper Cars" class="wahana-image" />
+                <div class="wahana-overlay">
+                  <div class="wahana-title">Bumper Car</div>
+                  <div class="wahana-description">Keseruan menabrak dan tertawa bersama keluarga</div>
+                </div>
+              </div>
+              
+              <div class="wahana-slide">
+                <img src="https://images.unsplash.com/photo-1570197788417-0e82375c9371?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Carousel" class="wahana-image" />
+                <div class="wahana-overlay">
+                  <div class="wahana-title">Komidi Putar</div>
+                  <div class="wahana-description">Wahana klasik yang cocok untuk segala usia</div>
+                </div>
+              </div>
+              
+              <div class="wahana-slide">
+                <img src="https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Water Ride" class="wahana-image" />
+                <div class="wahana-overlay">
+                  <div class="wahana-title">Arung Jeram Mini</div>
+                  <div class="wahana-description">Bermain air yang menyegarkan dan menyenangkan</div>
+                </div>
               </div>
             </div>
             
-            <div class="wahana-slide">
-              <img src="https://images.unsplash.com/photo-1517457373958-b7bdd4587205?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="Ferris Wheel" class="wahana-image" />
-              <div class="wahana-overlay">
-                <div class="wahana-title">Bianglala</div>
-                <div class="wahana-description">Nikmati view 360° dari ketinggian bersama orang tercinta</div>
-              </div>
-            </div>
-            
-            <div class="wahana-slide">
-              <img src="https://images.unsplash.com/photo-1544197150-b99a580bb7a8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="Bumper Cars" class="wahana-image" />
-              <div class="wahana-overlay">
-                <div class="wahana-title">Bumper Car</div>
-                <div class="wahana-description">Keseruan menabrak dan tertawa bersama keluarga</div>
-              </div>
-            </div>
-            
-            <div class="wahana-slide">
-              <img src="https://images.unsplash.com/photo-1570197788417-0e82375c9371?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="Carousel" class="wahana-image" />
-              <div class="wahana-overlay">
-                <div class="wahana-title">Komidi Putar</div>
-                <div class="wahana-description">Wahana klasik yang cocok untuk segala usia</div>
-              </div>
-            </div>
-            
-            <div class="wahana-slide">
-              <img src="https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="Water Ride" class="wahana-image" />
-              <div class="wahana-overlay">
-                <div class="wahana-title">Arung Jeram Mini</div>
-                <div class="wahana-description">Bermain air yang menyegarkan dan menyenangkan</div>
-              </div>
-            </div>
+            <div class="carousel-indicators" id="carouselIndicators"></div>
           </div>
           
-          <div class="carousel-indicators" id="carouselIndicators">
-            <!-- Indicators akan di-generate otomatis -->
-          </div>
-        </div>
-          
-        <!-- Tombol Lihat Lebih Banyak -->
+          <!-- Tombol Lihat Lebih Banyak -->
           <div class="text-center mt-6">
             <button onclick="window.location='{{ route('wahana.index') }}'"
                     class="inline-flex items-center px-6 py-3 bg-primary text-black font-semibold rounded-lg hover:bg-yellow-500 transition-colors duration-300 group">
@@ -543,20 +584,20 @@
           </div>
         </div>
         
-        <div class="flex-1 lg:min-w-96 px-0 lg:px-8">
-          <h3 class="text-2xl sm:text-3xl mb-4 text-text-dark">Kenapa memilih Wahana kami?</h3>
-          <p class="mb-4 text-base sm:text-lg md:text-xl font-medium leading-relaxed text-text-dark">
+        <div class="flex-1 w-full lg:min-w-96 px-0 lg:px-8">
+          <h3 class="text-xl sm:text-2xl lg:text-3xl mb-3 sm:mb-4 text-text-dark">Kenapa memilih Wahana kami?</h3>
+          <p class="mb-3 sm:mb-4 text-sm sm:text-base lg:text-lg font-medium leading-relaxed text-text-dark">
             MestaKara adalah penyedia wahana yang didirikan dengan cinta dan
             dedikasi untuk menghadirkan pengalaman wahana terbaik. Kami percaya
             bahwa setiap tawa dapat menciptakan kenangan indah yang akan
             diingat selamanya.
           </p>
-          <p class="mb-4 text-base sm:text-lg md:text-xl font-medium leading-relaxed text-text-dark">
+          <p class="mb-3 sm:mb-4 text-sm sm:text-base lg:text-lg font-medium leading-relaxed text-text-dark">
             Wahana kami didirikan langsung di tengah perkebunan terbaik dan ditata
             dengan presisi yang sempurna. Setiap wahana yang kami
             sediakan adalah hasil dari perpaduan tradisi dan kualitas premium.
           </p>
-          <p class="text-base sm:text-lg md:text-xl font-medium leading-relaxed text-text-dark">
+          <p class="text-sm sm:text-base lg:text-lg font-medium leading-relaxed text-text-dark">
             Dengan lebih dari 20 wahana menarik, fasilitas lengkap, dan staff
             berpengalaman, kami siap memberikan pengalaman liburan yang tak terlupakan
             untuk seluruh keluarga.
@@ -565,6 +606,7 @@
       </div>
     </section>
 
+    <!-- Promo Section -->
     <!-- Promo Section dengan Slider -->
     <section id="menu" class="py-16 sm:py-24 md:py-32 px-4 sm:px-7">
       <h2 class="text-center text-3xl sm:text-4xl mb-4 text-text-dark">
@@ -598,8 +640,8 @@
                    
                 <!-- Featured Badge -->
                 @if($promo->featured && $isClickable)
-                    <div class="featured-badge">Unggulan</div>
-                @endif  
+                  <span class="badge-featured">Unggulan</span>
+                @endif
                 
                 <!-- Status Badge -->
                 @if($promo->status_display === 'coming_soon')
@@ -701,56 +743,56 @@
     </section>
 
     <!-- Footer -->
-    <footer class="bg-black text-white pt-8 sm:pt-12 pb-6 sm:pb-8">
+    <footer class="bg-black text-white pt-8 sm:pt-10 lg:pt-12 pb-6 sm:pb-8">
       <div class="container mx-auto px-4 sm:px-6">
         <!-- Footer Content -->
-        <div class="flex flex-col md:flex-row justify-between items-center mb-8 sm:mb-12">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-6 sm:gap-8 mb-8 sm:mb-10 lg:mb-12">
           <!-- Brand -->
-          <div class="mb-6 sm:mb-8 md:mb-0 text-center md:text-left">
+          <div class="text-center md:text-left">
             <h3 class="text-2xl sm:text-3xl font-bold italic mb-3 sm:mb-4">
               Mesta<span class="text-white">Kara</span>.
             </h3>
-            <p class="max-w-xs text-base sm:text-lg opacity-90">
+            <p class="max-w-xs text-sm sm:text-base lg:text-lg opacity-90">
               Menyajikan wahana menyenangkan dengan keseruan yang tak terlupakan.
             </p>
           </div>
           
           <!-- Quick Links -->
-          <div class="mb-6 sm:mb-8 md:mb-0">
-            <h4 class="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-center md:text-left">Tautan Cepat</h4>
-            <div class="flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-8">
-              <a href="#home" class="hover:text-gray-200 transition-colors duration-300 text-base sm:text-lg touch-manipulation text-center md:text-left">Home</a>
-              <a href="#about" class="hover:text-gray-200 transition-colors duration-300 text-base sm:text-lg touch-manipulation text-center md:text-left">Tentang Kami</a>
-              <a href="#menu" class="hover:text-gray-200 transition-colors duration-300 text-base sm:text-lg touch-manipulation text-center md:text-left">Promo</a>
+          <div>
+            <h4 class="text-base sm:text-lg lg:text-xl font-semibold mb-4 sm:mb-5 lg:mb-6 text-center md:text-left">Tautan Cepat</h4>
+            <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-6 lg:space-x-8">
+              <a href="#home" class="hover:text-gray-300 transition-colors duration-300 text-sm sm:text-base lg:text-lg touch-manipulation text-center md:text-left">Home</a>
+              <a href="#about" class="hover:text-gray-300 transition-colors duration-300 text-sm sm:text-base lg:text-lg touch-manipulation text-center md:text-left">Tentang Kami</a>
+              <a href="#menu" class="hover:text-gray-300 transition-colors duration-300 text-sm sm:text-base lg:text-lg touch-manipulation text-center md:text-left">Promo</a>
             </div>
           </div>
           
           <!-- Social Media -->
           <div>
-            <h4 class="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-center md:text-left">Ikuti Kami</h4>
-            <div class="flex justify-center md:justify-start space-x-4 sm:space-x-6">
-              <a href="https://www.instagram.com/wisataagro8/?hl=id" class="bg-white bg-opacity-20 p-2 sm:p-3 rounded-full hover:bg-opacity-30 transition-all duration-300 touch-manipulation">
-                <i data-feather="instagram" class="w-5 h-5 sm:w-6 sm:h-6"></i>
+            <h4 class="text-base sm:text-lg lg:text-xl font-semibold mb-4 sm:mb-5 lg:mb-6 text-center md:text-left">Ikuti Kami</h4>
+            <div class="flex justify-center md:justify-start space-x-3 sm:space-x-4 lg:space-x-6">
+              <a href="https://www.instagram.com/wisataagro8/?hl=id" class="bg-white bg-opacity-20 p-2 sm:p-2.5 lg:p-3 rounded-full hover:bg-opacity-30 transition-all duration-300 touch-manipulation">
+                <i data-feather="instagram" class="w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-6"></i>
               </a>
-              <a href="https://twitter.com/agrowisata_n8" class="bg-white bg-opacity-20 p-2 sm:p-3 rounded-full hover:bg-opacity-30 transition-all duration-300 touch-manipulation">
-                <i data-feather="twitter" class="w-5 h-5 sm:w-6 sm:h-6"></i>
+              <a href="https://twitter.com/agrowisata_n8" class="bg-white bg-opacity-20 p-2 sm:p-2.5 lg:p-3 rounded-full hover:bg-opacity-30 transition-all duration-300 touch-manipulation">
+                <i data-feather="twitter" class="w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-6"></i>
               </a>
-              <a href="https://www.facebook.com/AgrowisataN8/" class="bg-white bg-opacity-20 p-2 sm:p-3 rounded-full hover:bg-opacity-30 transition-all duration-300 touch-manipulation">
-                <i data-feather="facebook" class="w-5 h-5 sm:w-6 sm:h-6"></i>
+              <a href="https://www.facebook.com/AgrowisataN8/" class="bg-white bg-opacity-20 p-2 sm:p-2.5 lg:p-3 rounded-full hover:bg-opacity-30 transition-all duration-300 touch-manipulation">
+                <i data-feather="facebook" class="w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-6"></i>
               </a>
             </div>
           </div>
         </div>
         
         <!-- Divider -->
-        <div class="border-t border-white border-opacity-30 my-6 sm:my-8"></div>
+        <div class="border-t border-white border-opacity-30 my-6 sm:my-7 lg:my-8"></div>
         
         <!-- Copyright -->
-        <div class="flex flex-col md:flex-row justify-between items-center text-center md:text-left">
-          <p class="text-xs sm:text-sm md:text-base opacity-80 mb-3 md:mb-0">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-3 text-center md:text-left">
+          <p class="text-xs sm:text-sm lg:text-base opacity-80">
             &copy; 2025 Tiketmas. All rights reserved.
           </p>
-          <p class="text-xs sm:text-sm md:text-base opacity-80">
+          <p class="text-xs sm:text-sm lg:text-base opacity-80">
             Created by <a href="#" class="font-bold hover:underline">Mestakara</a>
           </p>
         </div>
@@ -932,7 +974,7 @@
         startAutoPlay() {
           this.autoPlayInterval = setInterval(() => {
             this.nextSlide();
-          }, 3000);
+          }, 4000);
         }
 
         pauseAutoPlay() {
@@ -992,6 +1034,36 @@
           }
 
           window.addEventListener('resize', () => this.handleResize());
+          
+          // Touch events for mobile swipe
+          let startX = 0;
+          let currentX = 0;
+          let isDragging = false;
+
+          this.container.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            isDragging = true;
+            this.pauseAutoPlay();
+          });
+
+          this.container.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            currentX = e.touches[0].clientX;
+          });
+
+          this.container.addEventListener('touchend', () => {
+            if (!isDragging) return;
+            isDragging = false;
+            const diffX = startX - currentX;
+            if (Math.abs(diffX) > 50) {
+              if (diffX > 0) {
+                this.nextSlide();
+              } else {
+                this.prevSlide();
+              }
+            }
+            this.resumeAutoPlay();
+          });
         }
 
         handleResize() {
@@ -1012,7 +1084,7 @@
           }
 
           const cardWidth = this.cards[0]?.offsetWidth || 350;
-          const gap = 32;
+          const gap = window.innerWidth < 768 ? 16 : 32;
           const offset = -this.currentIndex * (cardWidth + gap);
           this.container.style.transform = `translateX(${offset}px)`;
         }
@@ -1035,7 +1107,7 @@
         autoPlay() {
           this.autoPlayInterval = setInterval(() => {
             this.nextSlide();
-          }, 4000);
+          }, 5000);
         }
 
         pauseAutoPlay() {
@@ -1052,7 +1124,7 @@
       document.addEventListener('DOMContentLoaded', () => {
         new WahanaCarousel();
         new PromoSlider();
-        feather.replace();
+        feather.replace(); 
 
         setTimeout(() => {
           feather.replace();

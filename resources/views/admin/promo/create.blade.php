@@ -196,9 +196,6 @@
             </div>
         </form>
     </div>
-@endsection
-
-@section('extra-js')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Simple image preview functions

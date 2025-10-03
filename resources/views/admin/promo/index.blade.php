@@ -269,9 +269,6 @@
         </a>
     </div>
     @endif
-@endsection
-
-@section('extra-js')
 <script>
     // Toggle status promo
     function togglePromoStatus(promoId) {
