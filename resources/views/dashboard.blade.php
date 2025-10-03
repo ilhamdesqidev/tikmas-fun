@@ -598,8 +598,8 @@
                    
                 <!-- Featured Badge -->
                 @if($promo->featured && $isClickable)
-                  <span class="badge-featured">Unggulan</span>
-                @endif
+                    <div class="featured-badge">Unggulan</div>
+                @endif  
                 
                 <!-- Status Badge -->
                 @if($promo->status_display === 'coming_soon')
