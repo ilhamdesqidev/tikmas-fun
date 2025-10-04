@@ -134,15 +134,16 @@ class AdminDashboardController extends Controller
             ];
         });
 
-        // Monthly Revenue - Ambil data dari semua orders (termasuk yang baru)
+        // Monthly Revenue - Hanya dari order SUCCESS dan USED
         $monthlyRevenueData = [];
         for ($i = 11; $i >= 0; $i--) {
             $monthDate = $now->copy()->subMonths($i);
             $startOfMonthDate = $monthDate->copy()->startOfMonth();
             $endOfMonthDate = $monthDate->copy()->endOfMonth();
             
-            // Hitung total revenue untuk bulan ini (semua status untuk melihat aktivitas)
+            // Hitung total revenue untuk bulan ini (HANYA status success dan used)
             $revenue = Order::whereBetween('created_at', [$startOfMonthDate, $endOfMonthDate])
+                ->whereIn('status', ['success', 'used'])
                 ->sum('total_price');
             
             $monthlyRevenueData[] = [
