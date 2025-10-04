@@ -201,6 +201,7 @@
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         transition: all 0.5s ease;
         position: relative;
+        margin-bottom: 10px;
         transform: scale(0.85);
         filter: blur(2px);
         opacity: 0.6;
@@ -566,7 +567,7 @@
     </section>
 
     <!-- Promo Section -->
-    <section id="menu" class="py-16 sm:py-24 md:py-32 px-4 sm:px-7">
+    <section id="menu" class="py-6">
       <h2 class="text-center text-3xl sm:text-4xl mb-4 text-text-dark">
         <span class="text-primary">Promo</span> Kami
       </h2>
