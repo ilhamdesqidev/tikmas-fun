@@ -129,14 +129,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::delete('/{facility}', [FacilityController::class, 'destroy'])->name('destroy');
         });
 
-        // Tickets Management Routes (FIXED - menggunakan controller yang benar)
-        Route::prefix('tickets')->name('tickets.')->group(function () {
-            Route::get('/', [TicketController::class, 'index'])->name('index');
-            Route::get('/{order_id}', [TicketController::class, 'show'])->name('show');
-            Route::post('/{order_id}/status', [TicketController::class, 'updateStatus'])->name('update-status');
-            Route::delete('/{order_id}', [TicketController::class, 'destroy'])->name('destroy');
-            Route::get('/export/export', [TicketController::class, 'export'])->name('export');
-        });
+    // Tickets Management Routes (PERBAIKI URUTAN)
+Route::prefix('tickets')->name('tickets.')->group(function () {
+    Route::get('/', [TicketController::class, 'index'])->name('index');
+    
+    // PENTING: Route spesifik HARUS di atas route dengan parameter
+    Route::get('/export', [TicketController::class, 'export'])->name('export');
+    Route::get('/export-all', [TicketController::class, 'exportAll'])->name('exportAll');
+    
+    // Route dengan parameter di bawah
+    Route::get('/{order_id}', [TicketController::class, 'show'])->name('show');
+    Route::post('/{order_id}/status', [TicketController::class, 'updateStatus'])->name('update-status');
+    Route::delete('/{order_id}', [TicketController::class, 'destroy'])->name('destroy');
+});
+        
         
    // Settings Routes
 Route::prefix('settings')->name('settings.')->group(function () {

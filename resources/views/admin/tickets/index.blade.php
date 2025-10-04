@@ -40,77 +40,131 @@
                     </button>
                 </form>
 
-                <!-- Status Filter Dropdown -->
-                <div class="relative">
-                    <button type="button" 
-                            id="filterDropdownButton"
-                            onclick="toggleFilterDropdown()"
-                            class="px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg flex items-center gap-2 min-w-[140px]">
-                        <i class="fas fa-filter text-sm"></i>
-                        <span id="filterButtonText">
-                            @if(request('status'))
-                                @php
-                                    $currentStatus = request('status');
-                                    $statusLabels = [
-                                        'pending' => 'Pending',
-                                        'success' => 'Success',
-                                        'challenge' => 'Challenge',
-                                        'denied' => 'Denied',
-                                        'expired' => 'Expired',
-                                        'canceled' => 'Canceled'
-                                    ];
-                                @endphp
-                                {{ $statusLabels[$currentStatus] ?? ucfirst($currentStatus) }}
-                            @else
-                                Filter Status
-                            @endif
-                        </span>
-                        <i class="fas fa-chevron-down text-xs transition-transform duration-200" id="filterChevron"></i>
-                    </button>
+                <div class="flex items-center gap-3">
+                    <!-- Export Button -->
+                    <div class="relative">
+                        <button type="button" 
+                                id="exportDropdownButton"
+                                onclick="toggleExportDropdown()"
+                                class="px-4 py-2 bg-green-600 text-white hover:bg-green-700 rounded-lg flex items-center gap-2 min-w-[140px]">
+                            <i class="fas fa-download text-sm"></i>
+                            <span>Export CSV</span>
+                            <i class="fas fa-chevron-down text-xs transition-transform duration-200" id="exportChevron"></i>
+                        </button>
 
-                    <!-- Dropdown Menu -->
-                    <div id="filterDropdown" 
-                         class="absolute right-0 mt-1 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-10 hidden">
-                        <div class="py-2">
-                            <!-- All Orders Option -->
-                            <a href="{{ route('admin.tickets.index') }}" 
-                               class="block px-4 py-2 text-sm {{ !request('status') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50' }}">
-                                <div class="flex items-center justify-between">
-                                    <span>Semua Status</span>
-                                    <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                                        {{ $totalOrders }}
-                                    </span>
-                                </div>
-                            </a>
-
-                            <hr class="my-1">
-
-                            <!-- Status Options -->
-                            @php
-                                $statuses = [
-                                    'pending' => ['label' => 'Pending', 'color' => 'yellow'],
-                                    'success' => ['label' => 'Success', 'color' => 'green'],
-                                    'challenge' => ['label' => 'Challenge', 'color' => 'orange'],
-                                    'denied' => ['label' => 'Denied', 'color' => 'red'],
-                                    'expired' => ['label' => 'Expired', 'color' => 'gray'],
-                                    'canceled' => ['label' => 'Canceled', 'color' => 'red']
-                                ];
-                            @endphp
-                            
-                            @foreach($statuses as $status => $config)
-                                <a href="{{ route('admin.tickets.index', ['status' => $status]) }}" 
-                                   class="block px-4 py-2 text-sm {{ request('status') == $status ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50' }}">
+                        <!-- Export Dropdown Menu -->
+                        <div id="exportDropdown" 
+                             class="absolute right-0 mt-1 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-10 hidden">
+                            <div class="py-2">
+                                <!-- Export All with Separation -->
+                                <a href="{{ route('admin.tickets.exportAll') }}" 
+                                   class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 border-b border-gray-100">
                                     <div class="flex items-center justify-between">
-                                        <div class="flex items-center gap-2">
-                                            <div class="w-2 h-2 rounded-full bg-{{ $config['color'] }}-500"></div>
-                                            <span>{{ $config['label'] }}</span>
+                                        <div>
+                                            <div class="font-medium text-green-700">Semua Data (Terpisah)</div>
+                                            <div class="text-xs text-gray-500">Per status dalam 1 file</div>
                                         </div>
-                                        <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                                            {{ $statusCounts[$status] ?? 0 }}
+                                        <span class="text-xs text-gray-500 bg-green-100 px-2 py-1 rounded">
+                                            {{ $totalOrders }}
                                         </span>
                                     </div>
                                 </a>
-                            @endforeach
+
+                                <div class="px-4 py-2 text-xs font-medium text-gray-500 uppercase">
+                                    Export Per Status
+                                </div>
+
+                                <!-- Export by Status -->
+                                @php
+                                    $statuses = [
+                                        'success' => ['label' => 'Success', 'color' => 'green'],
+                                        'pending' => ['label' => 'Pending', 'color' => 'yellow'],
+                                        'challenge' => ['label' => 'Challenge', 'color' => 'orange'],
+                                        'denied' => ['label' => 'Denied', 'color' => 'red'],
+                                        'expired' => ['label' => 'Expired', 'color' => 'gray'],
+                                        'canceled' => ['label' => 'Canceled', 'color' => 'red']
+                                    ];
+                                @endphp
+                                
+                                @foreach($statuses as $status => $config)
+                                    <a href="{{ route('admin.tickets.export', ['status' => $status]) }}" 
+                                       class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-2 h-2 rounded-full bg-{{ $config['color'] }}-500"></div>
+                                                <span>{{ $config['label'] }}</span>
+                                            </div>
+                                            <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                                                {{ $statusCounts[$status] ?? 0 }}
+                                            </span>
+                                        </div>
+                                    </a>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status Filter Dropdown -->
+                    <div class="relative">
+                        <button type="button" 
+                                id="filterDropdownButton"
+                                onclick="toggleFilterDropdown()"
+                                class="px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg flex items-center gap-2 min-w-[140px]">
+                            <i class="fas fa-filter text-sm"></i>
+                            <span id="filterButtonText">
+                                @if(request('status'))
+                                    @php
+                                        $currentStatus = request('status');
+                                        $statusLabels = [
+                                            'pending' => 'Pending',
+                                            'success' => 'Success',
+                                            'challenge' => 'Challenge',
+                                            'denied' => 'Denied',
+                                            'expired' => 'Expired',
+                                            'canceled' => 'Canceled'
+                                        ];
+                                    @endphp
+                                    {{ $statusLabels[$currentStatus] ?? ucfirst($currentStatus) }}
+                                @else
+                                    Filter Status
+                                @endif
+                            </span>
+                            <i class="fas fa-chevron-down text-xs transition-transform duration-200" id="filterChevron"></i>
+                        </button>
+
+                        <!-- Filter Dropdown Menu -->
+                        <div id="filterDropdown" 
+                             class="absolute right-0 mt-1 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-10 hidden">
+                            <div class="py-2">
+                                <!-- All Orders Option -->
+                                <a href="{{ route('admin.tickets.index') }}" 
+                                   class="block px-4 py-2 text-sm {{ !request('status') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50' }}">
+                                    <div class="flex items-center justify-between">
+                                        <span>Semua Status</span>
+                                        <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                                            {{ $totalOrders }}
+                                        </span>
+                                    </div>
+                                </a>
+
+                                <hr class="my-1">
+
+                                <!-- Status Options -->
+                                @foreach($statuses as $status => $config)
+                                    <a href="{{ route('admin.tickets.index', ['status' => $status]) }}" 
+                                       class="block px-4 py-2 text-sm {{ request('status') == $status ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50' }}">
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-2 h-2 rounded-full bg-{{ $config['color'] }}-500"></div>
+                                                <span>{{ $config['label'] }}</span>
+                                            </div>
+                                            <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                                                {{ $statusCounts[$status] ?? 0 }}
+                                            </span>
+                                        </div>
+                                    </a>
+                                @endforeach
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -238,54 +292,54 @@
     </div>
 </div>
 <script>
-    // Filter dropdown functionality
-    function toggleFilterDropdown() {
-        const dropdown = document.getElementById('filterDropdown');
-        const chevron = document.getElementById('filterChevron');
+    // Export dropdown functionality
+    function toggleExportDropdown() {
+        const dropdown = document.getElementById('exportDropdown');
+        const chevron = document.getElementById('exportChevron');
+        const filterDropdown = document.getElementById('filterDropdown');
+        
+        // Close filter dropdown if open
+        filterDropdown.classList.add('hidden');
+        document.getElementById('filterChevron').classList.remove('rotate-180');
         
         dropdown.classList.toggle('hidden');
         chevron.classList.toggle('rotate-180');
     }
 
-    // Close dropdown when clicking outside
-    document.addEventListener('click', function(event) {
-        const button = document.getElementById('filterDropdownButton');
+    // Filter dropdown functionality
+    function toggleFilterDropdown() {
         const dropdown = document.getElementById('filterDropdown');
         const chevron = document.getElementById('filterChevron');
+        const exportDropdown = document.getElementById('exportDropdown');
         
-        if (!button.contains(event.target) && !dropdown.contains(event.target)) {
-            dropdown.classList.add('hidden');
-            chevron.classList.remove('rotate-180');
+        // Close export dropdown if open
+        exportDropdown.classList.add('hidden');
+        document.getElementById('exportChevron').classList.remove('rotate-180');
+        
+        dropdown.classList.toggle('hidden');
+        chevron.classList.toggle('rotate-180');
+    }
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function(event) {
+        const filterButton = document.getElementById('filterDropdownButton');
+        const filterDropdown = document.getElementById('filterDropdown');
+        const filterChevron = document.getElementById('filterChevron');
+        
+        const exportButton = document.getElementById('exportDropdownButton');
+        const exportDropdown = document.getElementById('exportDropdown');
+        const exportChevron = document.getElementById('exportChevron');
+        
+        // Close filter dropdown
+        if (!filterButton.contains(event.target) && !filterDropdown.contains(event.target)) {
+            filterDropdown.classList.add('hidden');
+            filterChevron.classList.remove('rotate-180');
         }
-    });
-
-    // Status modal functionality
-    function openStatusModal(orderNumber, currentStatus) {
-        const modal = document.getElementById('statusModal');
-        const form = document.getElementById('statusForm');
-        const currentStatusDisplay = document.getElementById('currentStatusDisplay');
-        const newStatusSelect = document.getElementById('newStatus');
         
-        // Set form action
-        form.action = `/admin/tickets/${orderNumber}/update-status`;
-        
-        // Display current status
-        currentStatusDisplay.textContent = currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1);
-        
-        // Set current status as value in select
-        newStatusSelect.value = currentStatus;
-        
-        modal.classList.remove('hidden');
-    }
-
-    function closeStatusModal() {
-        document.getElementById('statusModal').classList.add('hidden');
-    }
-
-    // Close modal when clicking outside
-    document.getElementById('statusModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeStatusModal();
+        // Close export dropdown
+        if (!exportButton.contains(event.target) && !exportDropdown.contains(event.target)) {
+            exportDropdown.classList.add('hidden');
+            exportChevron.classList.remove('rotate-180');
         }
     });
 </script>
