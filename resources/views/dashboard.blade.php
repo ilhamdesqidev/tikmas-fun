@@ -640,7 +640,7 @@
                    
                 <!-- Featured Badge -->
                 @if($promo->featured && $isClickable)
-                  <span class="badge-featured">Unggulan</span>
+                  <span class="featured-badge">Unggulan</span>
                 @endif
                 
                 <!-- Status Badge -->
