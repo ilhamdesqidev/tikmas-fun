@@ -470,7 +470,7 @@
           Promo
           <span class="absolute left-0 bottom-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
         </a>
-        <a href="#wahana" class="text-black inline-block text-base lg:text-xl ml-0 px-3 lg:px-4 hover:text-primary transition-all duration-500 relative group">
+        <a href="wahana" class="text-black inline-block text-base lg:text-xl ml-0 px-3 lg:px-4 hover:text-primary transition-all duration-500 relative group">
           Wahana
           <span class="absolute left-0 bottom-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
         </a>
@@ -487,7 +487,7 @@
           <a href="#home" class="block mx-2 sm:mx-6 my-4 sm:my-6 lg:my-8 py-3 sm:py-4 text-xl sm:text-2xl lg:text-3xl text-white border-b border-gray-700 transition-all duration-300 hover:text-primary hover:pl-4 touch-manipulation">Home</a>
           <a href="#about" class="block mx-2 sm:mx-6 my-4 sm:my-6 lg:my-8 py-3 sm:py-4 text-xl sm:text-2xl lg:text-3xl text-white border-b border-gray-700 transition-all duration-300 hover:text-primary hover:pl-4 touch-manipulation">Tentang Kami</a>
           <a href="#menu" class="block mx-2 sm:mx-6 my-4 sm:my-6 lg:my-8 py-3 sm:py-4 text-xl sm:text-2xl lg:text-3xl text-white border-b border-gray-700 transition-all duration-300 hover:text-primary hover:pl-4 touch-manipulation">Promo</a>
-          <a href="#wahana" class="block mx-2 sm:mx-6 my-4 sm:my-6 lg:my-8 py-3 sm:py-4 text-xl sm:text-2xl lg:text-3xl text-white border-b border-gray-700 transition-all duration-300 hover:text-primary hover:pl-4 touch-manipulation">Wahana</a>
+          <a href="wahana" class="block mx-2 sm:mx-6 my-4 sm:my-6 lg:my-8 py-3 sm:py-4 text-xl sm:text-2xl lg:text-3xl text-white border-b border-gray-700 transition-all duration-300 hover:text-primary hover:pl-4 touch-manipulation">Wahana</a>
         </div>
       </div>
 
