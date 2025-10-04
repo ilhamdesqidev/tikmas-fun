@@ -566,9 +566,7 @@
     </div>
 </div>
 
-@endsection
 
-@section('extra-js')
 <script>
 let deleteId = null;
 

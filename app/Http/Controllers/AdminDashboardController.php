@@ -18,6 +18,32 @@ class AdminDashboardController extends Controller
         $this->middleware('admin');
     }
 
+    /**
+     * Format revenue dengan suffix dinamis (K, Jt, M, T)
+     * 
+     * @param float $amount
+     * @return string
+     */
+    private function formatRevenue($amount)
+    {
+        if ($amount >= 1000000000000) {
+            // Triliun
+            return 'Rp ' . number_format($amount / 1000000000000, 1) . 'T';
+        } elseif ($amount >= 1000000000) {
+            // Miliar
+            return 'Rp ' . number_format($amount / 1000000000, 1) . 'M';
+        } elseif ($amount >= 1000000) {
+            // Juta
+            return 'Rp ' . number_format($amount / 1000000, 1) . 'Jt';
+        } elseif ($amount >= 1000) {
+            // Ribu
+            return 'Rp ' . number_format($amount / 1000, 0) . 'K';
+        } else {
+            // Di bawah ribu
+            return 'Rp ' . number_format($amount, 0);
+        }
+    }
+
     public function index()
     {
         // Get date range for comparison
@@ -74,6 +100,7 @@ class AdminDashboardController extends Controller
         $stats = [
             'total_tickets_sold' => $totalTicketsSold,
             'total_revenue' => $totalRevenue,
+            'total_revenue_formatted' => $this->formatRevenue($totalRevenue),
             'active_promos' => $activePromos,
             'total_customers' => $totalCustomers,
             'tickets_sold_change' => $ticketsSoldChange,
@@ -102,6 +129,7 @@ class AdminDashboardController extends Controller
                 'name' => $promo->name,
                 'sold' => $promo->sold ?? 0,
                 'revenue' => $promo->revenue ?? 0,
+                'revenue_formatted' => $this->formatRevenue($promo->revenue ?? 0),
                 'growth' => '+' . rand(5, 25) . '%',
             ];
         });

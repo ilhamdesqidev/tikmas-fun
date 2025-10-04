@@ -36,7 +36,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Total Revenue</p>
-                    <p class="text-2xl font-bold text-gray-900">Rp {{ number_format($stats['total_revenue'] / 1000000, 1) }}M</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $stats['total_revenue_formatted'] }}</p>
                 </div>
                 <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                     <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -110,7 +110,7 @@
                         <p class="text-xs text-gray-600">{{ $package['sold'] }} terjual</p>
                     </div>
                     <div class="text-right">
-                        <p class="text-sm font-semibold text-gray-900">Rp {{ number_format($package['revenue'] / 1000000, 1) }}M</p>
+                        <p class="text-sm font-semibold text-gray-900">{{ $package['revenue_formatted'] }}</p>
                     </div>
                 </div>
                 @empty
@@ -279,11 +279,10 @@ document.addEventListener('DOMContentLoaded', function() {
     try {
         const monthlyData = @json($monthlyRevenue);
         
-        console.log('Monthly Data:', monthlyData); // Debug
+        console.log('Monthly Data:', monthlyData);
         
         if (!monthlyData || monthlyData.length === 0) {
             console.warn('No revenue data available');
-            // Tampilkan pesan jika tidak ada data
             const parent = ctx.parentElement;
             parent.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500"><p>Tidak ada data revenue</p></div>';
             return;
@@ -359,10 +358,12 @@ document.addEventListener('DOMContentLoaded', function() {
                                 size: 11
                             },
                             callback: function(value) {
-                                if (value >= 1000000000) {
-                                    return 'Rp ' + (value / 1000000000).toFixed(1) + 'B';
+                                if (value >= 1000000000000) {
+                                    return 'Rp ' + (value / 1000000000000).toFixed(1) + 'T';
+                                } else if (value >= 1000000000) {
+                                    return 'Rp ' + (value / 1000000000).toFixed(1) + 'M';
                                 } else if (value >= 1000000) {
-                                    return 'Rp ' + (value / 1000000).toFixed(1) + 'M';
+                                    return 'Rp ' + (value / 1000000).toFixed(1) + 'Jt';
                                 } else if (value >= 1000) {
                                     return 'Rp ' + (value / 1000).toFixed(0) + 'K';
                                 }
