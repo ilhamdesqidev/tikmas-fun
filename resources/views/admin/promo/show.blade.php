@@ -45,7 +45,7 @@
                             <span class="bg-primary bg-opacity-20 text-primary px-3 py-1 rounded-full text-sm font-medium">
                                 {{ ucfirst($promo->category) }}
                             </span>
-                            <div class="flex space-x-2">
+                            <!-- <div class="flex space-x-2">
                                 <a href="{{ route('admin.promo.edit', $promo->id) }}" class="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all">
                                     <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -60,7 +60,7 @@
                                         </svg>
                                     </button>
                                 </form>
-                            </div>
+                            </div> -->
                         </div>
                         
                         <h1 class="text-2xl font-bold text-gray-900 mb-2">{{ $promo->name }}</h1>

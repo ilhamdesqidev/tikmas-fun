@@ -213,7 +213,7 @@
         </div>
     </div>
 
-    <!-- Quick Actions -->
+    <!-- Quick Actions
     <div class="mt-8 grid grid-cols-1 md:grid-cols-4 gap-4">
         <a href="{{ route('admin.promo.index') }}" class="flex items-center p-4 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl text-white hover:from-blue-600 hover:to-blue-700 transition-all duration-200">
             <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -254,7 +254,7 @@
                 <p class="text-xs text-yellow-100">Analytics & laporan</p>
             </div>
         </a>
-    </div>
+    </div> -->
 
 
 @section('extra-css')

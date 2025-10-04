@@ -830,7 +830,7 @@ document.getElementById('wahana-form')?.addEventListener('submit', async (e) => 
             if (file) {
                 // Check file size (max 2MB)
                 if (file.size > 10048 * 1024) {
-                    showToast('Image size must be less than 2MB', 'error');
+                    showToast('Image size must be less than 10MB', 'error');
                     this.value = '';
                     return;
                 }
