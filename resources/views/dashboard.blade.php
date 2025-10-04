@@ -3,23 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tiketmas - Dashboard</title>
+    <title>{{ $settings['site_name'] ?? 'MestaKara' }} - Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,300;0,400;0,700;1,700&display=swap"
-      rel="stylesheet"
-    />
-    <!-- feather icon -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,300;0,400;0,700;1,700&display=swap" rel="stylesheet" />
     <script src="https://unpkg.com/feather-icons"></script>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
         theme: {
           extend: {
             colors: {
-              primary: '#CFD916',
+              primary: '{{ $settings["primary_color"] ?? "#CFD916" }}',
               'text-dark': '#333333',
             },
             fontFamily: {
@@ -44,7 +39,8 @@
       }
       
       .hero-bg {
-        background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("/assets/img/mainimg.jpg");
+        background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+          url("{{ isset($settings['hero_background_path']) ? asset('storage/' . $settings['hero_background_path']) : '/assets/img/mainimg.jpg' }}");
         background-size: cover;
         background-position: center;
         background-attachment: fixed;
@@ -80,11 +76,11 @@
       .wahana-images {
         display: flex;
         transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        width: 500%;
+        width: {{ $wahanaImages->count() * 100 }}%;
       }
 
       .wahana-slide {
-        flex: 0 0 20%;
+        flex: 0 0 {{ $wahanaImages->count() > 0 ? (100 / $wahanaImages->count()) : 100 }}%;
         position: relative;
       }
 
@@ -139,18 +135,16 @@
       }
 
       .indicator.active {
-        background: #CFD916;
+        background: {{ $settings['primary_color'] ?? '#CFD916' }};
         transform: scale(1.3);
       }
 
-      /* Tablet Responsiveness */
       @media (max-width: 1024px) {
         .wahana-image {
           height: 350px;
         }
       }
 
-      /* Mobile Responsiveness */
       @media (max-width: 768px) {
         .wahana-image {
           height: 280px;
@@ -275,7 +269,7 @@
       }
 
       .badge-discount {
-        background: #CFD916;
+        background: {{ $settings['primary_color'] ?? '#CFD916' }};
         color: #000;
       }
 
@@ -314,7 +308,7 @@
         top: 50%;
         transform: translateY(-50%);
         background: rgba(255, 255, 255, 0.95);
-        border: 2px solid #CFD916;
+        border: 2px solid {{ $settings['primary_color'] ?? '#CFD916' }};
         width: 50px;
         height: 50px;
         border-radius: 50%;
@@ -328,7 +322,7 @@
       }
 
       .nav-button:hover {
-        background: #CFD916;
+        background: {{ $settings['primary_color'] ?? '#CFD916' }};
         color: #000;
         transform: translateY(-50%) scale(1.1);
       }
@@ -370,11 +364,10 @@
       }
 
       .dot.active {
-        background: #CFD916;
+        background: {{ $settings['primary_color'] ?? '#CFD916' }};
         transform: scale(1.2);
       }
 
-      /* Tablet Promo Slider */
       @media (max-width: 1024px) {
         .promo-container {
           padding: 0 calc(50% - 165px);
@@ -386,7 +379,6 @@
         }
       }
 
-      /* Mobile Promo Slider */
       @media (max-width: 768px) {
         .promo-card {
           min-width: 300px;
@@ -433,7 +425,6 @@
         }
       }
 
-      /* Small phones */
       @media (max-width: 375px) {
         .promo-card {
           min-width: 260px;
@@ -453,7 +444,7 @@
     <!-- Navbar -->
     <nav class="w-full py-3 sm:py-4 lg:py-5 px-4 sm:px-6 lg:px-7 flex items-center justify-between bg-white border-b border-gray-400 fixed top-0 left-0 right-0 z-50" style="border-bottom: 1px solid #597336;">
       <a href="#" class="text-xl sm:text-2xl lg:text-3xl font-bold text-black italic">
-        Mesta<span class="text-primary">Kara</span>.
+        {{ $settings['site_name'] ?? 'MestaKara' }}<span class="text-primary">.</span>
       </a>
       
       <!-- Desktop Navigation -->
@@ -478,7 +469,6 @@
 
       <!-- Mobile Navigation -->
       <div id="mobile-nav" class="fixed top-0 -right-full w-full sm:w-80 h-screen bg-black transition-all duration-300 z-50 pt-16" style="box-shadow: -5px 0 15px rgba(0, 0, 0, 0.5);">
-        <!-- Close button -->
         <div id="close-menu" class="absolute top-4 sm:top-6 right-4 sm:right-6 text-white cursor-pointer text-3xl sm:text-4xl touch-manipulation">
           <i data-feather="x"></i>
         </div>
@@ -505,16 +495,13 @@
     <section id="home" class="hero min-h-screen flex items-center hero-bg relative px-4 sm:px-6 lg:px-7 text-white pt-16">
       <main class="max-w-4xl w-full">
         <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl text-white leading-tight mb-4 sm:mb-6">
-           Berlibur Dengan<span class="text-primary"> Wahana</span>
+          {{ $settings['hero_title'] ?? 'Berlibur Dengan' }}<span class="text-primary"> {{ $settings['hero_subtitle'] ?? 'Wahana' }}</span>
         </h1>
         <p class="text-base sm:text-lg md:text-xl lg:text-2xl mt-3 sm:mt-4 leading-relaxed font-medium text-white max-w-3xl">
-          Mari Berlibur dan Nikmati Berbagai Wahana Seru di Agrowisata Gunung Mas
-          Bersama Keluarga Tercinta
-          Dengan Harga Tiket Masuk yang Terjangkau
-          dan Dapatkan Berbagai Promo Menarik Setiap Bulannya
+          {{ $settings['hero_description'] ?? 'Mari Berlibur dan Nikmati Berbagai Wahana Seru di Agrowisata Gunung Mas Bersama Keluarga Tercinta Dengan Harga Tiket Masuk yang Terjangkau dan Dapatkan Berbagai Promo Menarik Setiap Bulannya' }}
         </p>
         <a href="#menu" class="cta inline-block mt-6 sm:mt-8 px-6 sm:px-8 lg:px-12 py-3 sm:py-4 text-base sm:text-lg lg:text-xl text-black font-semibold bg-primary rounded-lg hover:bg-yellow-500 transition-colors duration-300 touch-manipulation">
-          Dapatkan Promo
+          {{ $settings['hero_cta_text'] ?? 'Dapatkan Promo' }}
         </a>
       </main>
     </section>
@@ -522,60 +509,37 @@
     <!-- About Section -->
     <section id="about" class="py-12 sm:py-16 md:py-24 lg:py-32 px-4 sm:px-6 lg:px-7">
       <h2 class="text-center text-2xl sm:text-3xl lg:text-4xl mb-6 sm:mb-8 lg:mb-12 text-text-dark">
-        <span class="text-primary">Tentang</span> Kami
+        <span class="text-primary">{{ $settings['about_title'] ?? 'Tentang' }}</span> {{ $settings['about_subtitle'] ?? 'Kami' }}
       </h2>
       <div class="flex flex-col lg:flex-row gap-6 lg:gap-8 max-w-6xl mx-auto">
         <!-- Wahana Carousel -->
         <div class="flex-1 w-full lg:min-w-96">
+          @if($wahanaImages->count() > 0)
           <div class="wahana-carousel" id="wahanaCarousel">
             <div class="wahana-images" id="wahanaImages">
+              @foreach($wahanaImages as $wahana)
               <div class="wahana-slide">
-                <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Roller Coaster" class="wahana-image" />
+                <img src="{{ $wahana->image_url }}" alt="{{ $wahana->title }}" class="wahana-image" />
                 <div class="wahana-overlay">
-                  <div class="wahana-title">Roller Coaster</div>
-                  <div class="wahana-description">Rasakan sensasi kecepatan tinggi dengan pemandangan menakjubkan</div>
+                  <div class="wahana-title">{{ $wahana->title }}</div>
+                  <div class="wahana-description">{{ $wahana->description }}</div>
                 </div>
               </div>
-              
-              <div class="wahana-slide">
-                <img src="https://images.unsplash.com/photo-1517457373958-b7bdd4587205?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Ferris Wheel" class="wahana-image" />
-                <div class="wahana-overlay">
-                  <div class="wahana-title">Bianglala</div>
-                  <div class="wahana-description">Nikmati view 360° dari ketinggian bersama orang tercinta</div>
-                </div>
-              </div>
-              
-              <div class="wahana-slide">
-                <img src="https://images.unsplash.com/photo-1544197150-b99a580bb7a8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Bumper Cars" class="wahana-image" />
-                <div class="wahana-overlay">
-                  <div class="wahana-title">Bumper Car</div>
-                  <div class="wahana-description">Keseruan menabrak dan tertawa bersama keluarga</div>
-                </div>
-              </div>
-              
-              <div class="wahana-slide">
-                <img src="https://images.unsplash.com/photo-1570197788417-0e82375c9371?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Carousel" class="wahana-image" />
-                <div class="wahana-overlay">
-                  <div class="wahana-title">Komidi Putar</div>
-                  <div class="wahana-description">Wahana klasik yang cocok untuk segala usia</div>
-                </div>
-              </div>
-              
-              <div class="wahana-slide">
-                <img src="https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Water Ride" class="wahana-image" />
-                <div class="wahana-overlay">
-                  <div class="wahana-title">Arung Jeram Mini</div>
-                  <div class="wahana-description">Bermain air yang menyegarkan dan menyenangkan</div>
-                </div>
-              </div>
+              @endforeach
             </div>
             
             <div class="carousel-indicators" id="carouselIndicators"></div>
           </div>
+          @else
+          <div class="bg-gray-100 rounded-xl p-12 text-center">
+            <i data-feather="image" class="w-16 h-16 mx-auto text-gray-400 mb-4"></i>
+            <p class="text-gray-500">No wahana images available</p>
+          </div>
+          @endif
           
           <!-- Tombol Lihat Lebih Banyak -->
           <div class="text-center mt-6">
-            <button onclick="window.location='{{ route('wahana.index') }}'"
+            <button onclick="window.location='#wahana'"
                     class="inline-flex items-center px-6 py-3 bg-primary text-black font-semibold rounded-lg hover:bg-yellow-500 transition-colors duration-300 group">
               Lihat Lebih Banyak
               <i data-feather="chevron-down"
@@ -585,29 +549,23 @@
         </div>
         
         <div class="flex-1 w-full lg:min-w-96 px-0 lg:px-8">
-          <h3 class="text-xl sm:text-2xl lg:text-3xl mb-3 sm:mb-4 text-text-dark">Kenapa memilih Wahana kami?</h3>
+          <h3 class="text-xl sm:text-2xl lg:text-3xl mb-3 sm:mb-4 text-text-dark">
+            {{ $settings['about_question'] ?? 'Kenapa memilih Wahana kami?' }}
+          </h3>
           <p class="mb-3 sm:mb-4 text-sm sm:text-base lg:text-lg font-medium leading-relaxed text-text-dark">
-            MestaKara adalah penyedia wahana yang didirikan dengan cinta dan
-            dedikasi untuk menghadirkan pengalaman wahana terbaik. Kami percaya
-            bahwa setiap tawa dapat menciptakan kenangan indah yang akan
-            diingat selamanya.
+            {{ $settings['about_content_1'] ?? 'MestaKara adalah penyedia wahana yang didirikan dengan cinta dan dedikasi untuk menghadirkan pengalaman wahana terbaik. Kami percaya bahwa setiap tawa dapat menciptakan kenangan indah yang akan diingat selamanya.' }}
           </p>
           <p class="mb-3 sm:mb-4 text-sm sm:text-base lg:text-lg font-medium leading-relaxed text-text-dark">
-            Wahana kami didirikan langsung di tengah perkebunan terbaik dan ditata
-            dengan presisi yang sempurna. Setiap wahana yang kami
-            sediakan adalah hasil dari perpaduan tradisi dan kualitas premium.
+            {{ $settings['about_content_2'] ?? 'Wahana kami didirikan langsung di tengah perkebunan terbaik dan ditata dengan presisi yang sempurna. Setiap wahana yang kami sediakan adalah hasil dari perpaduan tradisi dan kualitas premium.' }}
           </p>
           <p class="text-sm sm:text-base lg:text-lg font-medium leading-relaxed text-text-dark">
-            Dengan lebih dari 20 wahana menarik, fasilitas lengkap, dan staff
-            berpengalaman, kami siap memberikan pengalaman liburan yang tak terlupakan
-            untuk seluruh keluarga.
+            {{ $settings['about_content_3'] ?? 'Dengan lebih dari 20 wahana menarik, fasilitas lengkap, dan staff berpengalaman, kami siap memberikan pengalaman liburan yang tak terlupakan untuk seluruh keluarga.' }}
           </p>
         </div>
       </div>
     </section>
 
     <!-- Promo Section -->
-    <!-- Promo Section dengan Slider -->
     <section id="menu" class="py-16 sm:py-24 md:py-32 px-4 sm:px-7">
       <h2 class="text-center text-3xl sm:text-4xl mb-4 text-text-dark">
         <span class="text-primary">Promo</span> Kami
@@ -631,19 +589,17 @@
           <div class="promo-container" id="promoContainer">
             @foreach($promos as $promo)
               @php
-                $isClickable = $promo->is_clickable; // Hanya aktif yang bisa diklik
+                $isClickable = $promo->is_clickable;
                 $buttonStatus = $promo->button_status;
               @endphp
               
               <div class="promo-card block hover:no-underline {{ $isClickable ? 'clickable' : 'non-clickable promo-disabled' }}" 
                    @if($isClickable) onclick="window.location.href='{{ route('promo.show', $promo->id) }}'" @endif>
                    
-                <!-- Featured Badge -->
                 @if($promo->featured && $isClickable)
                   <span class="featured-badge">Unggulan</span>
                 @endif
                 
-                <!-- Status Badge -->
                 @if($promo->status_display === 'coming_soon')
                   <span class="badge-coming-soon status-badge">Segera Hadir</span>
                 @elseif($promo->status_display === 'expired')
@@ -654,11 +610,9 @@
                   <span class="badge-discount status-badge">Diskon {{ $promo->discount_percent }}%</span>
                 @endif
                 
-                <!-- Promo Image -->
                 <div class="promo-image">
                   <img src="{{ $promo->image_url }}" alt="{{ $promo->name }}" loading="lazy">
                   
-                  <!-- Overlay untuk promo yang tidak bisa diklik -->
                   @if(!$isClickable)
                     <div class="promo-overlay-disabled">
                       <div class="overlay-content">
@@ -678,12 +632,10 @@
                   @endif
                 </div>
                 
-                <!-- Promo Content -->
                 <div class="p-6">
                   <h3 class="text-xl font-bold mb-2 text-text-dark">{{ $promo->name }}</h3>
                   <p class="text-gray-600 mb-4">{{ Str::limit($promo->description, 100) }}</p>
                   
-                  <!-- Price Section -->
                   <div class="flex items-center justify-between mb-4">
                     <div>
                       @if($promo->discount_percent > 0)
@@ -696,7 +648,6 @@
                     </span>
                   </div>
                   
-                  <!-- Date & Quota Info -->
                   <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
                     <span>
                       @if($promo->status_display === 'expired')
@@ -704,7 +655,7 @@
                       @elseif($promo->status_display === 'coming_soon')
                         Mulai: {{ $promo->start_date->format('d M Y') }}
                       @else
-                        @if($promo->end_date)
+                      @if($promo->end_date)
                           Sampai: {{ $promo->end_date->format('d M Y') }}
                         @else
                           Tidak terbatas
@@ -716,7 +667,6 @@
                     @endif
                   </div>
                   
-                  <!-- Action Button -->
                   <div class="w-full text-center font-semibold py-3 rounded-lg transition-colors duration-300 {{ $buttonStatus['class'] }}"
                        @if(!$buttonStatus['clickable']) style="cursor: not-allowed;" @endif>
                     {{ $buttonStatus['text'] }}
@@ -727,9 +677,7 @@
           </div>
 
           <!-- Dots Indicator -->
-          <div class="dots-container" id="dotsContainer">
-            <!-- Dots akan di-generate otomatis oleh JavaScript -->
-          </div>
+          <div class="dots-container" id="dotsContainer"></div>
         </div>
       @else
         <div class="text-center py-12">
@@ -745,19 +693,16 @@
     <!-- Footer -->
     <footer class="bg-black text-white pt-8 sm:pt-10 lg:pt-12 pb-6 sm:pb-8">
       <div class="container mx-auto px-4 sm:px-6">
-        <!-- Footer Content -->
         <div class="flex flex-col md:flex-row justify-between items-center gap-6 sm:gap-8 mb-8 sm:mb-10 lg:mb-12">
-          <!-- Brand -->
           <div class="text-center md:text-left">
             <h3 class="text-2xl sm:text-3xl font-bold italic mb-3 sm:mb-4">
-              Mesta<span class="text-white">Kara</span>.
+              {{ $settings['site_name'] ?? 'MestaKara' }}<span class="text-white">.</span>
             </h3>
             <p class="max-w-xs text-sm sm:text-base lg:text-lg opacity-90">
-              Menyajikan wahana menyenangkan dengan keseruan yang tak terlupakan.
+              {{ $settings['website_description'] ?? 'Menyajikan wahana menyenangkan dengan keseruan yang tak terlupakan.' }}
             </p>
           </div>
           
-          <!-- Quick Links -->
           <div>
             <h4 class="text-base sm:text-lg lg:text-xl font-semibold mb-4 sm:mb-5 lg:mb-6 text-center md:text-left">Tautan Cepat</h4>
             <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-6 lg:space-x-8">
@@ -767,7 +712,6 @@
             </div>
           </div>
           
-          <!-- Social Media -->
           <div>
             <h4 class="text-base sm:text-lg lg:text-xl font-semibold mb-4 sm:mb-5 lg:mb-6 text-center md:text-left">Ikuti Kami</h4>
             <div class="flex justify-center md:justify-start space-x-3 sm:space-x-4 lg:space-x-6">
@@ -784,16 +728,14 @@
           </div>
         </div>
         
-        <!-- Divider -->
         <div class="border-t border-white border-opacity-30 my-6 sm:my-7 lg:my-8"></div>
         
-        <!-- Copyright -->
         <div class="flex flex-col md:flex-row justify-between items-center gap-3 text-center md:text-left">
           <p class="text-xs sm:text-sm lg:text-base opacity-80">
-            &copy; 2025 Tiketmas. All rights reserved.
+            {{ $settings['footer_text'] ?? '© 2025 Tiketmas. All rights reserved.' }}
           </p>
           <p class="text-xs sm:text-sm lg:text-base opacity-80">
-            Created by <a href="#" class="font-bold hover:underline">Mestakara</a>
+            Created by <a href="#" class="font-bold hover:underline">{{ $settings['site_name'] ?? 'Mestakara' }}</a>
           </p>
         </div>
       </div>
@@ -854,7 +796,7 @@
         }
       });
 
-      // Smooth scrolling for navigation links with offset
+      // Smooth scrolling
       document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
           e.preventDefault();
@@ -877,7 +819,7 @@
         });
       });
 
-      // WAHANA CAROUSEL FUNCTIONALITY
+      // WAHANA CAROUSEL
       class WahanaCarousel {
         constructor() {
           this.container = document.getElementById('wahanaImages');
@@ -914,7 +856,6 @@
           carousel.addEventListener('mouseenter', () => this.pauseAutoPlay());
           carousel.addEventListener('mouseleave', () => this.resumeAutoPlay());
 
-          // Touch events for mobile swipe
           let startX = 0;
           let currentX = 0;
           let isDragging = false;
@@ -987,7 +928,7 @@
         }
       }
 
-      // PROMO SLIDER FUNCTIONALITY
+      // PROMO SLIDER
       class PromoSlider {
         constructor() {
           this.container = document.getElementById('promoContainer');
@@ -1035,7 +976,6 @@
 
           window.addEventListener('resize', () => this.handleResize());
           
-          // Touch events for mobile swipe
           let startX = 0;
           let currentX = 0;
           let isDragging = false;
@@ -1120,7 +1060,7 @@
         }
       }
 
-      // Initialize sliders when DOM is loaded
+      // Initialize
       document.addEventListener('DOMContentLoaded', () => {
         new WahanaCarousel();
         new PromoSlider();
