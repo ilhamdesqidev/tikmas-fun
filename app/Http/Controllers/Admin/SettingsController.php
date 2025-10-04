@@ -151,7 +151,7 @@ class SettingsController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string|max:500',
-            'image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'image' => 'required|image|mimes:jpeg,png,jpg|max:10048',
             'order' => 'nullable|integer',
         ]);
 
@@ -182,7 +182,7 @@ class SettingsController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string|max:500',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:10048',
             'order' => 'nullable|integer',
             'is_active' => 'nullable|boolean',
         ]);
@@ -216,6 +216,12 @@ class SettingsController extends Controller
     public function deleteWahanaImage($id)
     {
         $wahana = WahanaImage::findOrFail($id);
+        
+        // Delete image file from storage
+        if (Storage::disk('public')->exists($wahana->image_path)) {
+            Storage::disk('public')->delete($wahana->image_path);
+        }
+        
         $wahana->delete();
 
         return response()->json([

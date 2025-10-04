@@ -138,23 +138,23 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/export/export', [TicketController::class, 'export'])->name('export');
         });
         
-        // Settings Routes
-        Route::prefix('settings')->name('settings.')->group(function () {
-            Route::get('/', [SettingsController::class, 'index'])->name('index');
-            
-            // Update settings
-            Route::post('/general', [SettingsController::class, 'updateGeneral'])->name('general.update');
-            Route::post('/hero', [SettingsController::class, 'updateHero'])->name('hero.update');
-            Route::post('/about', [SettingsController::class, 'updateAbout'])->name('about.update');
-            Route::post('/website', [SettingsController::class, 'updateWebsite'])->name('website.update');
-            
-            // Wahana images CRUD
-            Route::get('/wahana-images', [SettingsController::class, 'getWahanaImages'])->name('wahana.index');
-            Route::post('/wahana-images', [SettingsController::class, 'storeWahanaImage'])->name('wahana.store');
-            Route::post('/wahana-images/{id}', [SettingsController::class, 'updateWahanaImage'])->name('wahana.update');
-            Route::delete('/wahana-images/{id}', [SettingsController::class, 'deleteWahanaImage'])->name('wahana.delete');
-            Route::post('/wahana-images/reorder', [SettingsController::class, 'reorderWahanaImages'])->name('wahana.reorder');
-        });
+   // Settings Routes
+Route::prefix('settings')->name('settings.')->group(function () {
+    Route::get('/', [SettingsController::class, 'index'])->name('index');
+    
+    // Update settings
+    Route::post('/general', [SettingsController::class, 'updateGeneral'])->name('general.update');
+    Route::post('/hero', [SettingsController::class, 'updateHero'])->name('hero.update');
+    Route::post('/about', [SettingsController::class, 'updateAbout'])->name('about.update');
+    Route::post('/website', [SettingsController::class, 'updateWebsite'])->name('website.update');
+    
+    // Wahana Images Routes (DIPERBAIKI - hapus /settings/)
+    Route::get('/wahana-images', [SettingsController::class, 'getWahanaImages'])->name('wahana.index');
+    Route::post('/wahana-images', [SettingsController::class, 'storeWahanaImage'])->name('wahana.store');
+    Route::post('/wahana-images/{id}', [SettingsController::class, 'updateWahanaImage'])->name('wahana.update');
+    Route::delete('/wahana-images/{id}', [SettingsController::class, 'deleteWahanaImage'])->name('wahana.delete');
+    Route::post('/wahana-images/reorder', [SettingsController::class, 'reorderWahanaImages'])->name('wahana.reorder');
+});
         
         // Customers Routes (placeholder untuk pengembangan selanjutnya)
         Route::prefix('customers')->name('customers.')->group(function () {
