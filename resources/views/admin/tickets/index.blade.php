@@ -79,10 +79,9 @@
                                     $statuses = [
                                         'success' => ['label' => 'Success', 'color' => 'green'],
                                         'pending' => ['label' => 'Pending', 'color' => 'yellow'],
-                                        'challenge' => ['label' => 'Challenge', 'color' => 'orange'],
-                                        'denied' => ['label' => 'Denied', 'color' => 'red'],
                                         'expired' => ['label' => 'Expired', 'color' => 'gray'],
-                                        'canceled' => ['label' => 'Canceled', 'color' => 'red']
+                                        'canceled' => ['label' => 'Canceled', 'color' => 'red'],
+                                        'used' => ['label' => 'Used', 'color' => 'blue'],
                                     ];
                                 @endphp
                                 

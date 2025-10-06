@@ -160,7 +160,8 @@ class TicketController extends Controller
             'challenge' => 'Challenge',
             'denied' => 'Denied',
             'expired' => 'Expired',
-            'canceled' => 'Canceled'
+            'canceled' => 'Canceled',
+            'used' => 'Used'
         ];
         
         $sheetIndex = 0;
