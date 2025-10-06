@@ -569,245 +569,6 @@
 
 <script>
 let deleteId = null;
-
-// Open Add Modal
-function openAddModal() {
-    document.getElementById('modalTitle').textContent = 'Tambah Kode Staff';
-    document.getElementById('staffForm').action = '{{ route("admin.staff.verification.store") }}';
-    document.getElementById('method').value = 'POST';
-    document.getElementById('staffForm').reset();
-    document.getElementById('modalError').classList.add('hidden');
-    document.getElementById('staffModal').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-}
-
-// Open Edit Modal
-function openEditModal(staff) {
-    document.getElementById('modalTitle').textContent = 'Edit Kode Staff';
-    document.getElementById('staffForm').action = `/admin/staff/verification/${staff.id}`;
-    document.getElementById('method').value = 'PUT';
-    document.getElementById('code').value = staff.code;
-    document.getElementById('name').value = staff.name;
-    document.getElementById('role').value = staff.role;
-    document.getElementById('description').value = staff.description || '';
-    document.getElementById('modalError').classList.add('hidden');
-    document.getElementById('staffModal').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-}
-
-// Close Modal
-function closeModal() {
-    document.getElementById('staffModal').classList.add('hidden');
-    document.getElementById('staffForm').reset();
-    document.getElementById('modalError').classList.add('hidden');
-    document.body.style.overflow = 'auto';
-}
-
-// Generate Random Code
-async function generateRandomCode() {
-    const generateBtn = document.getElementById('generateBtn');
-    const codeInput = document.getElementById('code');
-    
-    try {
-        generateBtn.disabled = true;
-        generateBtn.classList.add('opacity-50', 'cursor-not-allowed');
-        
-        const response = await fetch('{{ route("admin.staff.verification.generate") }}');
-        
-        if (!response.ok) {
-            throw new Error('Gagal generate kode');
-        }
-        
-        const data = await response.json();
-        codeInput.value = data.code;
-        
-        // Visual feedback
-        codeInput.classList.add('ring-2', 'ring-green-500');
-        setTimeout(() => {
-            codeInput.classList.remove('ring-2', 'ring-green-500');
-        }, 1000);
-        
-    } catch (error) {
-        console.error('Error generating code:', error);
-        showModalError('Gagal generate kode. Silakan coba lagi.');
-    } finally {
-        generateBtn.disabled = false;
-        generateBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-    }
-}
-
-// Validate Form
-function validateForm(event) {
-    const code = document.getElementById('code').value.trim();
-    const name = document.getElementById('name').value.trim();
-    const role = document.getElementById('role').value;
-    
-    if (!code) {
-        showModalError('Kode staff wajib diisi');
-        event.preventDefault();
-        return false;
-    }
-    
-    if (code.length < 3) {
-        showModalError('Kode staff minimal 3 karakter');
-        event.preventDefault();
-        return false;
-    }
-    
-    if (!name) {
-        showModalError('Nama staff wajib diisi');
-        event.preventDefault();
-        return false;
-    }
-    
-    if (!role) {
-        showModalError('Role wajib dipilih');
-        event.preventDefault();
-        return false;
-    }
-    
-    // Show loading state
-    const submitBtn = document.getElementById('submitBtn');
-    const submitBtnText = document.getElementById('submitBtnText');
-    const submitBtnLoading = document.getElementById('submitBtnLoading');
-    
-    submitBtn.disabled = true;
-    submitBtnText.classList.add('hidden');
-    submitBtnLoading.classList.remove('hidden');
-    
-    return true;
-}
-
-// Show Modal Error
-function showModalError(message) {
-    const modalError = document.getElementById('modalError');
-    const modalErrorMessage = document.getElementById('modalErrorMessage');
-    
-    modalErrorMessage.textContent = message;
-    modalError.classList.remove('hidden');
-    
-    // Auto hide after 5 seconds
-    setTimeout(() => {
-        modalError.classList.add('hidden');
-    }, 5000);
-}
-
-// Toggle Select All
-function toggleSelectAll(checkbox) {
-    const checkboxes = document.querySelectorAll('.staff-checkbox');
-    checkboxes.forEach(cb => cb.checked = checkbox.checked);
-}
-
-// Execute Bulk Action
-function executeBulkAction() {
-    const action = document.getElementById('bulkAction').value;
-    
-    if (!action) {
-        alert('Pilih aksi terlebih dahulu!');
-        return;
-    }
-
-    const selectedIds = Array.from(document.querySelectorAll('.staff-checkbox:checked'))
-        .map(cb => cb.value);
-
-    if (selectedIds.length === 0) {
-        alert('Pilih minimal satu kode staff!');
-        return;
-    }
-
-    const actionText = {
-        'activate': 'mengaktifkan',
-        'deactivate': 'menonaktifkan',
-        'delete': 'menghapus'
-    };
-
-    const confirmMessage = action === 'delete' 
-        ? `Yakin ingin menghapus ${selectedIds.length} kode staff terpilih? Tindakan ini tidak dapat dibatalkan.`
-        : `Yakin ingin ${actionText[action]} ${selectedIds.length} kode staff terpilih?`;
-
-    if (!confirm(confirmMessage)) {
-        return;
-    }
-
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '{{ route("admin.staff.verification.bulk") }}';
-    
-    form.innerHTML = `
-        @csrf
-        <input type="hidden" name="action" value="${action}">
-        ${selectedIds.map(id => `<input type="hidden" name="ids[]" value="${id}">`).join('')}
-    `;
-    
-    document.body.appendChild(form);
-    form.submit();
-}
-
-// Confirm Delete
-function confirmDelete(id) {
-    deleteId = id;
-    document.getElementById('deleteModal').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-}
-
-// Close Delete Modal
-function closeDeleteModal() {
-    deleteId = null;
-    document.getElementById('deleteModal').classList.add('hidden');
-    document.body.style.overflow = 'auto';
-}
-
-// Execute Delete
-function executeDelete() {
-    if (!deleteId) return;
-    
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = `/admin/staff/verification/${deleteId}`;
-    form.innerHTML = `
-        @csrf
-        @method('DELETE')
-    `;
-    document.body.appendChild(form);
-    form.submit();
-}
-
-// Close modal on ESC key
-document.addEventListener('keydown', function(event) {
-    if (event.key === 'Escape') {
-        closeModal();
-        closeDeleteModal();
-    }
-});
-
-// Close modal on backdrop click
-document.getElementById('staffModal').addEventListener('click', function(event) {
-    if (event.target === this) {
-        closeModal();
-    }
-});
-
-document.getElementById('deleteModal').addEventListener('click', function(event) {
-    if (event.target === this) {
-        closeDeleteModal();
-    }
-});
-
-// Auto hide alerts after 5 seconds
-document.addEventListener('DOMContentLoaded', function() {
-    const alerts = document.querySelectorAll('[role="alert"]');
-    alerts.forEach(alert => {
-        setTimeout(() => {
-            alert.style.transition = 'opacity 0.5s';
-            alert.style.opacity = '0';
-            setTimeout(() => alert.remove(), 500);
-        }, 5000);
-    });
-});
-</script>
-
-<script>
-let deleteId = null;
 let selectedFormat = 'custom';
 let checkCodeTimeout = null;
 
@@ -925,13 +686,10 @@ async function checkCodeAvailability() {
 
 // Open Code Generator Modal
 function openCodeGenerator() {
+    closeModal(); // pastikan modal lain ditutup
     document.getElementById('codeGeneratorModal').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
-    
-    // Reset to custom format
     selectGeneratorFormat('custom');
-    
-    // Load quick suggestions based on role
     loadQuickSuggestions();
 }
 
@@ -1033,11 +791,11 @@ async function generateCodeFromGenerator() {
 function useGeneratedCode() {
     const generatedCode = document.getElementById('generatedCode').textContent;
     document.getElementById('code').value = generatedCode;
-    
-    // Close generator and check availability
     closeCodeGenerator();
+    // Buka modal tambah staff agar input terlihat
+    document.getElementById('staffModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
     checkCodeAvailability();
-    
     // Visual feedback
     const codeInput = document.getElementById('code');
     codeInput.classList.add('ring-2', 'ring-green-500');
