@@ -49,7 +49,10 @@ class TicketController extends Controller
         
         $totalOrders = Order::count();
         
-        return view('admin.tickets.index', compact('orders', 'status', 'search', 'statusCounts', 'totalOrders'));
+        // Get all promos with order counts
+        $promos = Promo::withCount('orders')->orderBy('name')->get();
+        
+        return view('admin.tickets.index', compact('orders', 'status', 'search', 'statusCounts', 'totalOrders', 'promos'));
     }
     
     /**
@@ -79,18 +82,28 @@ class TicketController extends Controller
     }
     
     /**
-     * Export data tiket berdasarkan status (CSV)
+     * Export data tiket berdasarkan status dan promo (CSV)
      */
     public function export(Request $request)
     {
         $status = $request->get('status', 'all');
+        $promoId = $request->get('promo_id', 'all');
         
-        $filename = 'tickets_' . $status . '_' . date('Y-m-d_His') . '.csv';
+        $filename = 'tickets_' . $status;
+        if ($promoId !== 'all') {
+            $promo = Promo::find($promoId);
+            $filename .= '_' . ($promo ? str_replace(' ', '_', $promo->name) : 'promo');
+        }
+        $filename .= '_' . date('Y-m-d_His') . '.csv';
         
         $query = Order::with('promo')->orderBy('created_at', 'desc');
         
         if ($status !== 'all') {
             $query->where('status', $status);
+        }
+        
+        if ($promoId !== 'all') {
+            $query->where('promo_id', $promoId);
         }
         
         $orders = $query->get();
@@ -148,10 +161,12 @@ class TicketController extends Controller
     }
     
     /**
-     * Export semua data dengan multiple sheets (Excel)
+     * Export semua data dengan multiple sheets (Excel) - dengan filter promo
      */
-    public function exportAll()
+    public function exportAll(Request $request)
     {
+        $promoId = $request->get('promo_id', 'all');
+        
         $spreadsheet = new Spreadsheet();
         
         $statuses = [
@@ -167,10 +182,20 @@ class TicketController extends Controller
         $sheetIndex = 0;
         
         foreach ($statuses as $statusKey => $statusLabel) {
-            $orders = Order::with('promo')
+            $query = Order::with('promo')
                 ->where('status', $statusKey)
-                ->orderBy('created_at', 'desc')
-                ->get();
+                ->orderBy('created_at', 'desc');
+            
+            if ($promoId !== 'all') {
+                $query->where('promo_id', $promoId);
+            }
+            
+            $orders = $query->get();
+            
+            // Skip empty sheets
+            if ($orders->isEmpty()) {
+                continue;
+            }
             
             if ($sheetIndex == 0) {
                 $sheet = $spreadsheet->getActiveSheet();
@@ -241,7 +266,12 @@ class TicketController extends Controller
         
         $spreadsheet->setActiveSheetIndex(0);
         
-        $filename = 'tickets_all_sheets_' . date('Y-m-d_His') . '.xlsx';
+        $filename = 'tickets_all_sheets';
+        if ($promoId !== 'all') {
+            $promo = Promo::find($promoId);
+            $filename .= '_' . ($promo ? str_replace(' ', '_', $promo->name) : 'promo');
+        }
+        $filename .= '_' . date('Y-m-d_His') . '.xlsx';
         
         $writer = new Xlsx($spreadsheet);
         

@@ -45,7 +45,7 @@ class Promo extends Model
     
     public function orders()
     {
-        return $this->hasMany(Order::class);
+        return $this->hasMany(Order::class, 'promo_id');
     }
 
     public function successfulOrders()

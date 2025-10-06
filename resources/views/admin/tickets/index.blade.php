@@ -48,57 +48,77 @@
                                 onclick="toggleExportDropdown()"
                                 class="px-4 py-2 bg-green-600 text-white hover:bg-green-700 rounded-lg flex items-center gap-2 min-w-[140px]">
                             <i class="fas fa-download text-sm"></i>
-                            <span>Export CSV</span>
+                            <span>Export</span>
                             <i class="fas fa-chevron-down text-xs transition-transform duration-200" id="exportChevron"></i>
                         </button>
 
                         <!-- Export Dropdown Menu -->
                         <div id="exportDropdown" 
-                             class="absolute right-0 mt-1 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-10 hidden">
+                             class="absolute right-0 mt-1 w-80 bg-white border border-gray-200 rounded-lg shadow-lg z-10 hidden">
                             <div class="py-2">
-                                <!-- Export All with Separation -->
-                                <a href="{{ route('admin.tickets.exportAll') }}" 
-                                   class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 border-b border-gray-100">
-                                    <div class="flex items-center justify-between">
-                                        <div>
-                                            <div class="font-medium text-green-700">Semua Data (Terpisah)</div>
-                                            <div class="text-xs text-gray-500">Per status dalam 1 file</div>
-                                        </div>
-                                        <span class="text-xs text-gray-500 bg-green-100 px-2 py-1 rounded">
-                                            {{ $totalOrders }}
-                                        </span>
-                                    </div>
-                                </a>
-
-                                <div class="px-4 py-2 text-xs font-medium text-gray-500 uppercase">
-                                    Export Per Status
+                                <!-- Promo Filter Section -->
+                                <div class="px-4 py-2 border-b border-gray-200">
+                                    <label class="text-xs font-medium text-gray-500 uppercase block mb-2">Filter by Promo</label>
+                                    <select id="exportPromoFilter" 
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
+                                        <option value="all">Semua Promo</option>
+                                        @foreach($promos as $promo)
+                                            <option value="{{ $promo->id }}">
+                                                {{ $promo->name }} ({{ $promo->orders_count ?? 0 }})
+                                            </option>
+                                        @endforeach
+                                    </select>
                                 </div>
 
-                                <!-- Export by Status -->
-                                @php
-                                    $statuses = [
-                                        'success' => ['label' => 'Success', 'color' => 'green'],
-                                        'pending' => ['label' => 'Pending', 'color' => 'yellow'],
-                                        'expired' => ['label' => 'Expired', 'color' => 'gray'],
-                                        'canceled' => ['label' => 'Canceled', 'color' => 'red'],
-                                        'used' => ['label' => 'Used', 'color' => 'blue'],
-                                    ];
-                                @endphp
-                                
-                                @foreach($statuses as $status => $config)
-                                    <a href="{{ route('admin.tickets.export', ['status' => $status]) }}" 
-                                       class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <!-- Export Options -->
+                                <div class="mt-2">
+                                    <!-- Export All with Separation -->
+                                    <a href="#" 
+                                       onclick="exportAllSheets(event)"
+                                       class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 border-b border-gray-100">
                                         <div class="flex items-center justify-between">
-                                            <div class="flex items-center gap-2">
-                                                <div class="w-2 h-2 rounded-full bg-{{ $config['color'] }}-500"></div>
-                                                <span>{{ $config['label'] }}</span>
+                                            <div>
+                                                <div class="font-medium text-green-700">
+                                                    <i class="fas fa-file-excel mr-1"></i>
+                                                    Excel - Semua Status
+                                                </div>
+                                                <div class="text-xs text-gray-500">Terpisah per status dalam 1 file</div>
                                             </div>
-                                            <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                                                {{ $statusCounts[$status] ?? 0 }}
-                                            </span>
                                         </div>
                                     </a>
-                                @endforeach
+
+                                    <div class="px-4 py-2 text-xs font-medium text-gray-500 uppercase">
+                                        Export CSV Per Status
+                                    </div>
+
+                                    <!-- Export by Status -->
+                                    @php
+                                        $statuses = [
+                                            'success' => ['label' => 'Success', 'color' => 'green'],
+                                            'pending' => ['label' => 'Pending', 'color' => 'yellow'],
+                                            'challenge' => ['label' => 'Challenge', 'color' => 'orange'],
+                                            'denied' => ['label' => 'Denied', 'color' => 'red'],
+                                            'expired' => ['label' => 'Expired', 'color' => 'gray'],
+                                            'canceled' => ['label' => 'Canceled', 'color' => 'red'],
+                                        ];
+                                    @endphp
+                                    
+                                    @foreach($statuses as $status => $config)
+                                        <a href="#" 
+                                           onclick="exportByStatus(event, '{{ $status }}')"
+                                           class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                            <div class="flex items-center justify-between">
+                                                <div class="flex items-center gap-2">
+                                                    <div class="w-2 h-2 rounded-full bg-{{ $config['color'] }}-500"></div>
+                                                    <span><i class="fas fa-file-csv mr-1 text-xs"></i>{{ $config['label'] }}</span>
+                                                </div>
+                                                <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                                                    {{ $statusCounts[$status] ?? 0 }}
+                                                </span>
+                                            </div>
+                                        </a>
+                                    @endforeach
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -290,7 +310,35 @@
         </div>
     </div>
 </div>
+
 <script>
+    // Export functions
+    function exportAllSheets(event) {
+        event.preventDefault();
+        const promoId = document.getElementById('exportPromoFilter').value;
+        const url = '{{ route("admin.tickets.exportAll") }}' + '?promo_id=' + promoId;
+        window.location.href = url;
+        
+        // Close dropdown after short delay
+        setTimeout(() => {
+            document.getElementById('exportDropdown').classList.add('hidden');
+            document.getElementById('exportChevron').classList.remove('rotate-180');
+        }, 300);
+    }
+
+    function exportByStatus(event, status) {
+        event.preventDefault();
+        const promoId = document.getElementById('exportPromoFilter').value;
+        const url = '{{ route("admin.tickets.export") }}' + '?status=' + status + '&promo_id=' + promoId;
+        window.location.href = url;
+        
+        // Close dropdown after short delay
+        setTimeout(() => {
+            document.getElementById('exportDropdown').classList.add('hidden');
+            document.getElementById('exportChevron').classList.remove('rotate-180');
+        }, 300);
+    }
+
     // Export dropdown functionality
     function toggleExportDropdown() {
         const dropdown = document.getElementById('exportDropdown');
