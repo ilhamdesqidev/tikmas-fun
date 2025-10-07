@@ -84,81 +84,100 @@ class TicketController extends Controller
     /**
      * Export data tiket berdasarkan status dan promo (CSV)
      */
-    public function export(Request $request)
-    {
-        $status = $request->get('status', 'all');
-        $promoId = $request->get('promo_id', 'all');
-        
-        $filename = 'tickets_' . $status;
-        if ($promoId !== 'all') {
-            $promo = Promo::find($promoId);
-            $filename .= '_' . ($promo ? str_replace(' ', '_', $promo->name) : 'promo');
-        }
-        $filename .= '_' . date('Y-m-d_His') . '.csv';
-        
-        $query = Order::with('promo')->orderBy('created_at', 'desc');
-        
-        if ($status !== 'all') {
-            $query->where('status', $status);
-        }
-        
-        if ($promoId !== 'all') {
-            $query->where('promo_id', $promoId);
-        }
-        
-        $orders = $query->get();
-        
-        $headers = [
-            'Content-Type' => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-            'Pragma' => 'no-cache',
-            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
-            'Expires' => '0'
-        ];
-        
-        $callback = function() use ($orders) {
-            $file = fopen('php://output', 'w');
-            
-            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
-            
-            fputcsv($file, [
-                'No',
-                'Order Number',
-                'Invoice Number',
-                'Paket Promo',
-                'Category',
-                'Customer Name',
-                'WhatsApp',
-                'Visit Date',
-                'Quantity',
-                'Total Price',
-                'Status',
-                'Order Date'
-            ]);
-            
-            $no = 1;
-            foreach ($orders as $order) {
-                fputcsv($file, [
-                    $no++,
-                    $order->order_number,
-                    $order->invoice_number ?? '-',
-                    $order->promo ? $order->promo->name : '-',
-                    $order->promo ? ucfirst($order->promo->category) : '-',
-                    $order->customer_name,
-                    $order->whatsapp_number,
-                    \Carbon\Carbon::parse($order->visit_date)->format('d M Y'),
-                    $order->ticket_quantity,
-                    $order->total_price,
-                    ucfirst($order->status),
-                    $order->created_at->format('d M Y H:i')
-                ]);
-            }
-            
-            fclose($file);
-        };
-        
-        return response()->stream($callback, 200, $headers);
+public function export(Request $request)
+{
+    $status = $request->get('status', 'all');
+    $promoId = $request->get('promo_id', 'all');
+
+    $filename = 'tickets_' . $status;
+    if ($promoId !== 'all') {
+        $promo = Promo::find($promoId);
+        $filename .= '_' . ($promo ? str_replace(' ', '_', $promo->name) : 'promo');
     }
+    $filename .= '_' . date('Y-m-d_His') . '.xlsx';
+
+    $query = Order::with('promo')->orderBy('created_at', 'desc');
+
+    if ($status !== 'all') {
+        $query->where('status', $status);
+    }
+
+    if ($promoId !== 'all') {
+        $query->where('promo_id', $promoId);
+    }
+
+    $orders = $query->get();
+
+    // Buat spreadsheet baru
+    $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+    $sheet->setTitle(ucfirst($status));
+
+    // Header styling
+    $headerStyle = [
+        'font' => [
+            'bold' => true,
+            'color' => ['rgb' => 'FFFFFF']
+        ],
+        'fill' => [
+            'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+            'startColor' => ['rgb' => '4472C4']
+        ],
+        'alignment' => [
+            'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+        ]
+    ];
+
+    // Set headers
+    $headers = ['No', 'Order Number', 'Invoice Number', 'Paket Promo', 'Category', 
+               'Customer Name', 'WhatsApp', 'Visit Date', 'Quantity', 'Total Price', 
+               'Status', 'Order Date'];
+
+    $sheet->fromArray($headers, null, 'A1');
+    $sheet->getStyle('A1:L1')->applyFromArray($headerStyle);
+
+    // Set column widths
+    $sheet->getColumnDimension('A')->setWidth(5);
+    $sheet->getColumnDimension('B')->setWidth(18);
+    $sheet->getColumnDimension('C')->setWidth(18);
+    $sheet->getColumnDimension('D')->setWidth(25);
+    $sheet->getColumnDimension('E')->setWidth(12);
+    $sheet->getColumnDimension('F')->setWidth(20);
+    $sheet->getColumnDimension('G')->setWidth(15);
+    $sheet->getColumnDimension('H')->setWidth(12);
+    $sheet->getColumnDimension('I')->setWidth(10);
+    $sheet->getColumnDimension('J')->setWidth(15);
+    $sheet->getColumnDimension('K')->setWidth(12);
+    $sheet->getColumnDimension('L')->setWidth(18);
+
+    // Add data
+    $row = 2;
+    $no = 1;
+    foreach ($orders as $order) {
+        $sheet->setCellValue('A' . $row, $no++);
+        $sheet->setCellValue('B' . $row, $order->order_number);
+        $sheet->setCellValue('C' . $row, $order->invoice_number ?? '-');
+        $sheet->setCellValue('D' . $row, $order->promo ? $order->promo->name : '-');
+        $sheet->setCellValue('E' . $row, $order->promo ? ucfirst($order->promo->category) : '-');
+        $sheet->setCellValue('F' . $row, $order->customer_name);
+        $sheet->setCellValue('G' . $row, $order->whatsapp_number);
+        $sheet->setCellValue('H' . $row, \Carbon\Carbon::parse($order->visit_date)->format('d M Y'));
+        $sheet->setCellValue('I' . $row, $order->ticket_quantity);
+        $sheet->setCellValue('J' . $row, $order->total_price);
+        $sheet->setCellValue('K' . $row, ucfirst($order->status));
+        $sheet->setCellValue('L' . $row, $order->created_at->format('d M Y H:i'));
+        $row++;
+    }
+
+    $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+    header('Cache-Control: max-age=0');
+
+    $writer->save('php://output');
+    exit;
+}
     
     /**
      * Export semua data dengan multiple sheets (Excel) - dengan filter promo
