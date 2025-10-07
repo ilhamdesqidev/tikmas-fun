@@ -540,7 +540,7 @@
           
           <!-- Tombol Lihat Lebih Banyak -->
           <div class="text-center mt-6">
-            <button onclick="window.location='#wahana'"
+            <button onclick="window.location='wahana'"
                     class="inline-flex items-center px-6 py-3 bg-primary text-black font-semibold rounded-lg hover:bg-yellow-500 transition-colors duration-300 group">
               Lihat Lebih Banyak
               <i data-feather="chevron-down"

@@ -58,7 +58,7 @@ class SettingsController extends Controller
             'hero_subtitle' => 'required|string|max:255',
             'hero_description' => 'required|string',
             'hero_cta_text' => 'required|string|max:100',
-            'hero_background' => 'nullable|image|mimes:jpeg,png,jpg|max:10048',
+            'hero_background' => 'nullable|image|mimes:jpeg,png,jpg|max:20048',
         ]);
 
         // Save text settings
@@ -151,7 +151,7 @@ class SettingsController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string|max:500',
-            'image' => 'required|image|mimes:jpeg,png,jpg|max:10048',
+            'image' => 'required|image|mimes:jpeg,png,jpg|max:20048',
             'order' => 'nullable|integer',
         ]);
 
@@ -182,7 +182,7 @@ class SettingsController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string|max:500',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:10048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:20048',
             'order' => 'nullable|integer',
             'is_active' => 'nullable|boolean',
         ]);

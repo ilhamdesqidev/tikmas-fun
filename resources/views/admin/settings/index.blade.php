@@ -379,7 +379,7 @@
                                         class="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
                                     Choose Image
                                 </button>
-                                <p class="text-xs text-gray-500 mt-2">JPG, PNG max 10MB</p>
+                                <p class="text-xs text-gray-500 mt-2">JPG, PNG max 20MB</p>
                                 <p class="text-xs text-gray-400 mt-1" id="file-name"></p>
                             </div>
                         </div>
