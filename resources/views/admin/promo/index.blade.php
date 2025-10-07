@@ -134,7 +134,6 @@
                     <option value="publish_draft">Publish Draft</option>
                     <option value="activate">Aktifkan</option>
                     <option value="deactivate">Nonaktifkan</option>
-                    <option value="delete">Hapus</option>
                 </select>
                 <button id="applyBulkAction" class="px-4 py-2 bg-primary text-black rounded-lg hover:bg-yellow-500 transition-colors duration-200 text-sm font-medium">
                     Terapkan
