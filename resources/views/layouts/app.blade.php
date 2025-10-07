@@ -92,7 +92,7 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
                 
-                .promo-card-alt {
+        .promo-card-alt {
             background: white;
             color: #333333;
             border: 1px solid #e2e8f0;
@@ -102,61 +102,6 @@
             background: white;
             color: #333333;
             border: 1px solid #e2e8f0;
-        }
-
-        /* Drop-up menu styles */
-        .dropup-menu {
-            position: absolute;
-            bottom: 100%;
-            left: 0;
-            right: 0;
-            margin-bottom: 0.5rem;
-            opacity: 0;
-            transform: translateY(10px);
-            visibility: hidden;
-            transition: all 0.3s ease;
-            z-index: 50;
-            background: #374151;
-            border-radius: 8px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            overflow: hidden;
-        }
-        
-        .dropup-menu.show {
-            opacity: 1;
-            transform: translateY(0);
-            visibility: visible;
-        }
-        
-        .dropup-item {
-            display: flex;
-            align-items: center;
-            padding: 12px 16px;
-            color: #e5e7eb;
-            text-decoration: none;
-            transition: all 0.2s ease;
-            border-bottom: 1px solid #4b5563;
-            background: none;
-            border: none;
-            width: 100%;
-            text-align: left;
-            cursor: pointer;
-            font-family: inherit;
-        }
-        
-        .dropup-item:hover {
-            background-color: #4b5563;
-            color: white;
-        }
-        
-        .dropup-item:last-child {
-            border-bottom: none;
-        }
-        
-        .dropup-item svg {
-            margin-right: 12px;
-            width: 18px;
-            height: 18px;
         }
 
         /* Additional custom styles */
@@ -173,7 +118,7 @@
     </div>
 
     <!-- Sidebar -->
-    <aside id="sidebar" class="fixed left-0 top-0 w-64 h-screen bg-sidebar text-white sidebar-transition sidebar-mobile md:translate-x-0 z-50">
+    <aside id="sidebar" class="fixed left-0 top-0 w-64 h-screen bg-sidebar text-white sidebar-transition sidebar-mobile md:translate-x-0 z-50 overflow-y-auto">
         <!-- Sidebar Header -->
         <div class="flex items-center justify-between p-4 border-b border-gray-600">
             <div class="flex items-center space-x-3">
@@ -192,7 +137,7 @@
         </div>
 
         <!-- Navigation Menu -->
-        <nav class="mt-6">
+        <nav class="mt-6 pb-24">
             <!-- Main Menu -->
             <div class="px-4 pb-2">
                 <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Main</h3>
@@ -245,57 +190,47 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                         </svg>
                         Reports
-                         <span class="ml-auto bg-primary text-black text-xs px-2 py-1 rounded-full font-medium">Coming soon</span>
+                        <span class="ml-auto bg-primary text-black text-xs px-2 py-1 rounded-full font-medium">Coming soon</span>
                     </a>
                 </li>
             </ul>
-        </nav>
 
-        <!-- Settings & Logout Drop-up Menu -->
-        <div class="absolute bottom-4 left-0 right-0 px-4">
-            <div class="relative">
-                <button id="settings-dropup-toggle" class="w-full flex items-center justify-between px-4 py-3 text-gray-300 rounded-lg hover:bg-sidebar-hover hover:text-white transition-all duration-200 border border-gray-600">
-                    <div class="flex items-center">
+            <!-- Settings Menu -->
+            <div class="px-4 pt-6 pb-2">
+                <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Settings</h3>
+            </div>
+            <ul class="space-y-1 px-2">
+                <li>
+                    <a href="{{ route('admin.staff.verification.index') }}" class="nav-link flex items-center px-4 py-3 text-gray-300 rounded-lg hover:bg-sidebar-hover hover:text-white transition-all duration-200 {{ request()->routeIs('admin.staff.verification.*') ? 'active bg-sidebar-hover text-white' : '' }}">
                         <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        </svg>
-                        <span>Settings & Account</span>
-                    </div>
-                    <svg class="w-5 h-5 transition-transform duration-200" id="dropup-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
-                    </svg>
-                </button>
-                
-                <!-- Drop-up Menu -->
-                
-                <div id="settings-dropup" class="dropup-menu">
-
-                    <a href="{{ route('admin.staff.verification.index') }}" class="dropup-item">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
                         </svg>
                         Verifikasi Staff
                     </a>
-                    
-                    <a href="{{ route('admin.settings.index') }}" class="dropup-item">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                </li>
+                <li>
+                    <a href="{{ route('admin.settings.index') }}" class="nav-link flex items-center px-4 py-3 text-gray-300 rounded-lg hover:bg-sidebar-hover hover:text-white transition-all duration-200 {{ request()->routeIs('admin.settings.*') ? 'active bg-sidebar-hover text-white' : '' }}">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                         </svg>
                         Settings
                     </a>
-                    <form method="POST" action="{{ route('admin.logout') }}">
-                        @csrf
-                        <button type="submit" class="dropup-item w-full text-left">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                            </svg>
-                            Logout
-                        </button>
-                    </form>
-                </div>
-            </div>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Logout Button (Fixed at bottom) -->
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-600 bg-sidebar">
+            <form method="POST" action="{{ route('admin.logout') }}" class="w-full">
+                @csrf
+                <button type="submit" class="w-full flex items-center px-4 py-3 text-gray-300 rounded-lg hover:bg-red-600 hover:text-white transition-all duration-200">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                    </svg>
+                    Logout
+                </button>
+            </form>
         </div>
     </aside>
 
@@ -377,33 +312,6 @@
             }
         });
 
-        // Settings drop-up menu functionality
-        const settingsDropupToggle = document.getElementById('settings-dropup-toggle');
-        const settingsDropup = document.getElementById('settings-dropup');
-        const dropupChevron = document.getElementById('dropup-chevron');
-
-        if (settingsDropupToggle) {
-            settingsDropupToggle.addEventListener('click', (e) => {
-                e.stopPropagation();
-                settingsDropup.classList.toggle('show');
-                
-                // Rotate chevron icon
-                if (settingsDropup.classList.contains('show')) {
-                    dropupChevron.style.transform = 'rotate(180deg)';
-                } else {
-                    dropupChevron.style.transform = 'rotate(0deg)';
-                }
-            });
-        }
-
-        // Close drop-up when clicking outside
-        document.addEventListener('click', (e) => {
-            if (settingsDropup && !e.target.closest('#settings-dropup-toggle') && !e.target.closest('#settings-dropup')) {
-                settingsDropup.classList.remove('show');
-                if (dropupChevron) dropupChevron.style.transform = 'rotate(0deg)';
-            }
-        });
-
         // Toast functionality
         const toast = document.getElementById('toast');
         const toastMessage = document.getElementById('toast-message');
@@ -431,6 +339,6 @@
         @yield('extra-js')
     </script>
 
-    @stack('scripts')  <!-- TAMBAHKAN INI -->
+    @stack('scripts')
 </body>
 </html>
