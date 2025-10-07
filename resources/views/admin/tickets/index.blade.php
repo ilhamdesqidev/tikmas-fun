@@ -96,10 +96,9 @@
                                         $statuses = [
                                             'success' => ['label' => 'Success', 'color' => 'green'],
                                             'pending' => ['label' => 'Pending', 'color' => 'yellow'],
-                                            'challenge' => ['label' => 'Challenge', 'color' => 'orange'],
-                                            'denied' => ['label' => 'Denied', 'color' => 'red'],
                                             'expired' => ['label' => 'Expired', 'color' => 'gray'],
                                             'canceled' => ['label' => 'Canceled', 'color' => 'red'],
+                                            'used' => ['label' => 'Used', 'color' => 'blue'],
                                         ];
                                     @endphp
                                     
@@ -137,10 +136,9 @@
                                         $statusLabels = [
                                             'pending' => 'Pending',
                                             'success' => 'Success',
-                                            'challenge' => 'Challenge',
-                                            'denied' => 'Denied',
                                             'expired' => 'Expired',
-                                            'canceled' => 'Canceled'
+                                            'canceled' => 'Canceled',
+                                            'used' => 'Used',
                                         ];
                                     @endphp
                                     {{ $statusLabels[$currentStatus] ?? ucfirst($currentStatus) }}
