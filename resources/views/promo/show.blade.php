@@ -190,7 +190,6 @@
                 </div>
                 @endif
                 
-                <!-- Di file blade public (bagian info promo) -->
                 <div class="flex items-center text-sm text-gray-600">
                     <i data-feather="users" class="w-4 h-4 mr-2"></i>
                     <span>Terjual: <strong>{{ $promo->actual_sold_count }}</strong></span>
@@ -240,65 +239,67 @@
     </main>
 
     <!-- Modal Form Checkout -->
-<div id="checkout-modal" class="modal fixed inset-0 w-full h-full flex items-center justify-center z-50 opacity-0 invisible transition-opacity duration-300">
-  <div class="modal-overlay absolute inset-0 bg-black opacity-50"></div>
-  
-  <div class="modal-container bg-white w-11/12 md:max-w-2xl mx-auto rounded-xl shadow-lg z-50 overflow-y-auto max-h-screen">
-    <div class="modal-content py-4 px-6">
-      <!-- Modal Header -->
-      <div class="flex justify-between items-center pb-3 border-b">
-        <h3 class="text-2xl font-bold text-text-dark">Form Pemesanan Tiket</h3>
-        <button id="modal-close" class="text-gray-500 hover:text-gray-700">
-          <i data-feather="x" class="w-6 h-6"></i>
-        </button>
-      </div>
+    <div id="checkout-modal" class="modal fixed inset-0 w-full h-full flex items-center justify-center z-50 opacity-0 invisible transition-opacity duration-300">
+      <div class="modal-overlay absolute inset-0 bg-black opacity-50"></div>
       
-      <!-- Modal Body -->
-      <div class="my-4">
-        <!-- PERBAIKAN: Form memiliki action dan method -->
-          <form id="checkout-form" action="{{ route('checkout.process', $promo->id) }}" method="POST" class="space-y-4">
+      <div class="modal-container bg-white w-11/12 md:max-w-2xl mx-auto rounded-xl shadow-lg z-50 overflow-y-auto max-h-screen">
+        <div class="modal-content py-4 px-6">
+          <!-- Modal Header -->
+          <div class="flex justify-between items-center pb-3 border-b">
+            <h3 class="text-2xl font-bold text-text-dark">Form Pemesanan Tiket</h3>
+            <button id="modal-close" class="text-gray-500 hover:text-gray-700">
+              <i data-feather="x" class="w-6 h-6"></i>
+            </button>
+          </div>
+          
+          <!-- Modal Body -->
+          <div class="my-4">
+            <form id="checkout-form" action="{{ route('checkout.process', $promo->id) }}" method="POST" class="space-y-4">
               @csrf
-              <!-- ... field form lainnya ... -->
               
               <!-- No Pemesanan (Auto-generated) -->
               <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">No. Pemesanan</label>
-                  <input type="text" id="order-number" class="w-full px-4 py-2 bg-gray-100 rounded-lg" readonly>
+                <label class="block text-sm font-medium text-gray-700 mb-1">No. Pemesanan</label>
+                <input type="text" id="order-number" class="w-full px-4 py-2 bg-gray-100 rounded-lg" readonly>
               </div>
               
               <!-- Nama Pemesan -->
               <div>
-                  <label for="customer-name" class="block text-sm font-medium text-gray-700 mb-1">Nama Pemesan <span class="text-red-500">*</span></label>
-                  <input type="text" id="customer-name" name="customer_name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" required>
+                <label for="customer-name" class="block text-sm font-medium text-gray-700 mb-1">Nama Pemesan <span class="text-red-500">*</span></label>
+                <input type="text" id="customer-name" name="customer_name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" required>
               </div>
               
               <!-- No WhatsApp -->
               <div>
-                <label for="whatsapp-number" class="block text-sm font-medium text-gray-700 mb-1">
+                <label for="whatsapp-display" class="block text-sm font-medium text-gray-700 mb-1">
                   No. WhatsApp <span class="text-red-500">*</span>
                 </label>
                 <div class="flex">
-                  <!-- Input angka saja -->
-                  <input type="text" id="whatsapp-number" name="whatsapp_number"
+                  <span class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border border-r-0 border-gray-300 rounded-l-lg">
+                    +62
+                  </span>
+                  <input type="text" id="whatsapp-display"
                     class="w-full px-4 py-2 border border-gray-300 rounded-r-lg focus:ring-primary focus:border-primary"
-                    placeholder="81234567890" pattern="[0-9]+" inputmode="numeric" required>
+                    placeholder="81234567890" pattern="[1-9][0-9]{8,11}" inputmode="numeric" required>
+                  <!-- Hidden input yang akan dikirim ke server dengan format 62xxx -->
+                  <input type="hidden" id="whatsapp-number" name="whatsapp_number">
                 </div>
+                <p class="text-xs text-gray-500 mt-1">Contoh: 81234567890 (tanpa 0 di depan)</p>
               </div>
-
               
               <!-- Cabang (Fixed Value) -->
               <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Unit <span class="text-red-500">*</span></label>
-                  <input type="text" value="Agrowisata Gunung Mas" class="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg" readonly>
-                  <input type="hidden" id="branch" name="branch" value="Agrowisata Gunung Mas">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Unit <span class="text-red-500">*</span></label>
+                <input type="text" value="Agrowisata Gunung Mas" class="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg" readonly>
+                <input type="hidden" id="branch" name="branch" value="Agrowisata Gunung Mas">
               </div>
               
               <!-- Tanggal Kunjungan -->
               <div>
-                  <label for="visit-date" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Kunjungan <span class="text-red-500">*</span></label>
-                  <input type="date" id="visit-date" name="visit_date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" required>
-                  <p class="text-xs text-gray-500 mt-1">Pilih tanggal antara {{ \Carbon\Carbon::parse($promo->start_date)->format('d M Y') }} - {{ \Carbon\Carbon::parse($promo->end_date)->format('d M Y') }}</p>
-                  <p id="date-error" class="error-message">Tanggal yang dipilih harus dalam periode promo.</p>
+                <label for="visit-date" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Kunjungan <span class="text-red-500">*</span></label>
+                <input type="date" id="visit-date" name="visit_date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" required>
+                <p class="text-xs text-gray-500 mt-1">Pilih tanggal antara {{ \Carbon\Carbon::parse($promo->start_date)->format('d M Y') }} - {{ \Carbon\Carbon::parse($promo->end_date)->format('d M Y') }}</p>
+                <p id="date-error" class="error-message">Tanggal yang dipilih harus dalam periode promo.</p>
               </div>
               
               <div class="mb-3 flex items-center justify-between">
@@ -326,35 +327,33 @@
                     class="w-9 h-9 flex items-center justify-center rounded-md bg-gray-200 hover:bg-gray-300 font-bold">+</button>
                 </div>
               </div>
-
-
               
               <!-- Informasi Harga -->
               <div class="bg-gray-50 p-4 rounded-lg">
-                  <div class="flex justify-between mb-2">
-                      <span class="text-gray-600">Harga per tiket:</span>
-                      <span class="font-medium" id="price-per-ticket">Rp {{ number_format($promo->promo_price, 0, ',', '.') }}</span>
-                  </div>
-                  <div class="flex justify-between font-bold text-lg">
-                      <span>Total Harga:</span>
-                      <span class="text-primary" id="total-price">Rp {{ number_format($promo->promo_price, 0, ',', '.') }}</span>
-                  </div>
+                <div class="flex justify-between mb-2">
+                  <span class="text-gray-600">Harga per tiket:</span>
+                  <span class="font-medium" id="price-per-ticket">Rp {{ number_format($promo->promo_price, 0, ',', '.') }}</span>
+                </div>
+                <div class="flex justify-between font-bold text-lg">
+                  <span>Total Harga:</span>
+                  <span class="text-primary" id="total-price">Rp {{ number_format($promo->promo_price, 0, ',', '.') }}</span>
+                </div>
               </div>
               
               <!-- Modal Footer -->
               <div class="flex justify-end space-x-3 pt-4 border-t">
-                  <button id="cancel-btn" type="button" class="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors">
-                      Batal
-                  </button>
-                  <button type="submit" class="px-6 py-2 bg-primary text-black rounded-lg hover:bg-yellow-500 transition-colors font-semibold">
-                      Beli Sekarang
-                  </button>
+                <button id="cancel-btn" type="button" class="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors">
+                  Batal
+                </button>
+                <button type="submit" class="px-6 py-2 bg-primary text-black rounded-lg hover:bg-yellow-500 transition-colors font-semibold">
+                  Beli Sekarang
+                </button>
               </div>
-          </form>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
 
     <!-- Footer -->
     <footer class="bg-black text-white pt-8 sm:pt-12 pb-6 sm:pb-8">
@@ -445,6 +444,8 @@
       const totalPriceElement = document.getElementById('total-price');
       const visitDateField = document.getElementById('visit-date');
       const dateError = document.getElementById('date-error');
+      const whatsappDisplay = document.getElementById('whatsapp-display');
+      const whatsappInput = document.getElementById('whatsapp-number');
       const pricePerTicket = {{ $promo->promo_price }};
       
       // Format number to Rupiah
@@ -455,6 +456,42 @@
           minimumFractionDigits: 0 
         }).format(amount);
       }
+      
+      // Validasi input WhatsApp - hanya angka dan tidak bisa diawali 0
+      whatsappDisplay.addEventListener('input', function(e) {
+        // Hapus semua karakter non-digit
+        let value = e.target.value.replace(/\D/g, '');
+        
+        // Jika diawali 0, hapus 0 tersebut
+        if (value.startsWith('0')) {
+          value = value.substring(1);
+        }
+        
+        // Update display input value
+        e.target.value = value;
+        
+        // Update hidden input dengan format 62 + nomor (ini yang akan dikirim ke server)
+        if (value) {
+          whatsappInput.value = '62' + value;
+        } else {
+          whatsappInput.value = '';
+        }
+      });
+      
+      // Prevent paste dengan angka 0 di depan
+      whatsappDisplay.addEventListener('paste', function(e) {
+        e.preventDefault();
+        let pastedText = (e.clipboardData || window.clipboardData).getData('text');
+        let cleanedText = pastedText.replace(/\D/g, '');
+        
+        // Hapus 0 di depan jika ada
+        if (cleanedText.startsWith('0')) {
+          cleanedText = cleanedText.substring(1);
+        }
+        
+        e.target.value = cleanedText;
+        whatsappInput.value = cleanedText ? '62' + cleanedText : '';
+      });
       
       // Set min and max date for visit date based on promo period
       function setVisitDateRange() {
@@ -547,16 +584,26 @@
       // Validate date when changed
       visitDateField.addEventListener('change', validateVisitDate);
       
+      // Form submission handler
       document.getElementById('checkout-form').addEventListener('submit', function(e) {
         // Validate date first
         if (!validateVisitDate()) {
-            e.preventDefault();
-            alert('Tanggal kunjungan tidak valid. Silakan pilih tanggal dalam periode promo.');
-            return;
+          e.preventDefault();
+          alert('Tanggal kunjungan tidak valid. Silakan pilih tanggal dalam periode promo.');
+          return;
+        }
+        
+        // Validate WhatsApp number
+        const whatsappValue = whatsappDisplay.value;
+        if (!whatsappValue || whatsappValue.length < 9) {
+          e.preventDefault();
+          alert('Nomor WhatsApp tidak valid. Minimal 9 digit dan tidak boleh diawali 0.');
+          whatsappDisplay.focus();
+          return;
         }
         
         // Form akan di-submit secara normal ke action yang telah ditentukan
-    });
+      });
 
       // Smooth scrolling untuk anchor links
       document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -578,6 +625,7 @@
         });
       });
 
+      // Increment and Decrement buttons for ticket quantity
       const incrementBtn = document.getElementById('increment');
       const decrementBtn = document.getElementById('decrement');
 
@@ -595,4 +643,4 @@
       });
     </script>
   </body>
-</html>
+</html> 
