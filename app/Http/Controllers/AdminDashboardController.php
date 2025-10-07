@@ -20,39 +20,152 @@ class AdminDashboardController extends Controller
 
     /**
      * Format revenue dengan suffix dinamis (K, Jt, M, T)
-     * 
-     * @param float $amount
-     * @return string
      */
     private function formatRevenue($amount)
     {
         if ($amount >= 1000000000000) {
-            // Triliun
             return 'Rp ' . number_format($amount / 1000000000000, 1) . 'T';
         } elseif ($amount >= 1000000000) {
-            // Miliar
             return 'Rp ' . number_format($amount / 1000000000, 1) . 'M';
         } elseif ($amount >= 1000000) {
-            // Juta
             return 'Rp ' . number_format($amount / 1000000, 1) . 'Jt';
         } elseif ($amount >= 1000) {
-            // Ribu
             return 'Rp ' . number_format($amount / 1000, 0) . 'K';
         } else {
-            // Di bawah ribu
             return 'Rp ' . number_format($amount, 0);
         }
     }
 
-    public function index()
+    /**
+     * Generate revenue data berdasarkan periode
+     */
+    private function getRevenueByPeriod($period)
     {
-        // Get date range for comparison
+        $now = Carbon::now();
+        $revenueData = [];
+
+        switch ($period) {
+            case 'daily':
+                // 30 hari terakhir
+                for ($i = 29; $i >= 0; $i--) {
+                    $date = $now->copy()->subDays($i);
+                    $startOfDay = $date->copy()->startOfDay();
+                    $endOfDay = $date->copy()->endOfDay();
+                    
+                    $revenue = Order::whereBetween('created_at', [$startOfDay, $endOfDay])
+                        ->whereIn('status', ['success', 'used'])
+                        ->sum('total_price');
+                    
+                    $revenueData[] = [
+                        'label' => $date->format('d M'),
+                        'revenue' => (float) $revenue
+                    ];
+                }
+                break;
+
+            case 'weekly':
+                // 12 minggu terakhir
+                for ($i = 11; $i >= 0; $i--) {
+                    $weekStart = $now->copy()->subWeeks($i)->startOfWeek();
+                    $weekEnd = $now->copy()->subWeeks($i)->endOfWeek();
+                    
+                    $revenue = Order::whereBetween('created_at', [$weekStart, $weekEnd])
+                        ->whereIn('status', ['success', 'used'])
+                        ->sum('total_price');
+                    
+                    $revenueData[] = [
+                        'label' => 'W' . $weekStart->weekOfYear,
+                        'revenue' => (float) $revenue
+                    ];
+                }
+                break;
+
+            case 'monthly':
+                // 12 bulan terakhir
+                for ($i = 11; $i >= 0; $i--) {
+                    $monthDate = $now->copy()->subMonths($i);
+                    $startOfMonth = $monthDate->copy()->startOfMonth();
+                    $endOfMonth = $monthDate->copy()->endOfMonth();
+                    
+                    $revenue = Order::whereBetween('created_at', [$startOfMonth, $endOfMonth])
+                        ->whereIn('status', ['success', 'used'])
+                        ->sum('total_price');
+                    
+                    $revenueData[] = [
+                        'label' => $monthDate->format('M Y'),
+                        'revenue' => (float) $revenue
+                    ];
+                }
+                break;
+
+            case 'quarterly':
+                // 4 quarter terakhir (3 bulan)
+                for ($i = 3; $i >= 0; $i--) {
+                    $quarterStart = $now->copy()->subMonths($i * 3)->startOfMonth();
+                    $quarterEnd = $quarterStart->copy()->addMonths(2)->endOfMonth();
+                    
+                    $revenue = Order::whereBetween('created_at', [$quarterStart, $quarterEnd])
+                        ->whereIn('status', ['success', 'used'])
+                        ->sum('total_price');
+                    
+                    $revenueData[] = [
+                        'label' => 'Q' . ceil(($quarterStart->month) / 3) . ' ' . $quarterStart->format('Y'),
+                        'revenue' => (float) $revenue
+                    ];
+                }
+                break;
+
+            case 'biannual':
+                // 2 semester terakhir (6 bulan)
+                for ($i = 1; $i >= 0; $i--) {
+                    $semesterStart = $now->copy()->subMonths($i * 6)->startOfMonth();
+                    $semesterEnd = $semesterStart->copy()->addMonths(5)->endOfMonth();
+                    
+                    $revenue = Order::whereBetween('created_at', [$semesterStart, $semesterEnd])
+                        ->whereIn('status', ['success', 'used'])
+                        ->sum('total_price');
+                    
+                    $semester = $semesterStart->month <= 6 ? 'S1' : 'S2';
+                    $revenueData[] = [
+                        'label' => $semester . ' ' . $semesterStart->format('Y'),
+                        'revenue' => (float) $revenue
+                    ];
+                }
+                break;
+
+            case 'yearly':
+                // 5 tahun terakhir
+                for ($i = 4; $i >= 0; $i--) {
+                    $yearStart = $now->copy()->subYears($i)->startOfYear();
+                    $yearEnd = $now->copy()->subYears($i)->endOfYear();
+                    
+                    $revenue = Order::whereBetween('created_at', [$yearStart, $yearEnd])
+                        ->whereIn('status', ['success', 'used'])
+                        ->sum('total_price');
+                    
+                    $revenueData[] = [
+                        'label' => $yearStart->format('Y'),
+                        'revenue' => (float) $revenue
+                    ];
+                }
+                break;
+
+            default:
+                // Default ke monthly
+                return $this->getRevenueByPeriod('monthly');
+        }
+
+        return $revenueData;
+    }
+
+    public function index(Request $request)
+    {
         $now = Carbon::now();
         $startOfMonth = $now->copy()->startOfMonth();
         $startOfLastMonth = $now->copy()->subMonth()->startOfMonth();
         $endOfLastMonth = $now->copy()->subMonth()->endOfMonth();
 
-        // Total Tiket Terjual (dari orders dengan status success dan used)
+        // Total Tiket Terjual
         $totalTicketsSold = Order::whereIn('status', ['success', 'used'])->sum('ticket_quantity');
         $lastMonthTicketsSold = Order::whereIn('status', ['success', 'used'])
             ->whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])
@@ -61,7 +174,7 @@ class AdminDashboardController extends Controller
             ? round((($totalTicketsSold - $lastMonthTicketsSold) / $lastMonthTicketsSold) * 100) 
             : 0;
 
-        // Total Revenue (dari orders dengan status success dan used)
+        // Total Revenue
         $totalRevenue = Order::whereIn('status', ['success', 'used'])->sum('total_price');
         $lastMonthRevenue = Order::whereIn('status', ['success', 'used'])
             ->whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])
@@ -88,7 +201,7 @@ class AdminDashboardController extends Controller
             ->count();
         $promosChange = $activePromos - $lastMonthActivePromos;
 
-        // Total Customers (unique customers berdasarkan whatsapp_number)
+        // Total Customers
         $totalCustomers = Order::distinct('whatsapp_number')->count('whatsapp_number');
         $lastMonthCustomers = Order::whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])
             ->distinct('whatsapp_number')
@@ -109,7 +222,7 @@ class AdminDashboardController extends Controller
             'customers_change' => $customersChange,
         ];
 
-        // Popular Packages (Top 4 Promo berdasarkan penjualan dengan status success dan used)
+        // Popular Packages
         $popularPackages = Promo::withCount([
             'orders as sold' => function($query) {
                 $query->whereIn('status', ['success', 'used'])->select(DB::raw('SUM(ticket_quantity)'));
@@ -134,28 +247,29 @@ class AdminDashboardController extends Controller
             ];
         });
 
-        // Monthly Revenue - Hanya dari order SUCCESS dan USED
-        $monthlyRevenueData = [];
-        for ($i = 11; $i >= 0; $i--) {
-            $monthDate = $now->copy()->subMonths($i);
-            $startOfMonthDate = $monthDate->copy()->startOfMonth();
-            $endOfMonthDate = $monthDate->copy()->endOfMonth();
-            
-            // Hitung total revenue untuk bulan ini (HANYA status success dan used)
-            $revenue = Order::whereBetween('created_at', [$startOfMonthDate, $endOfMonthDate])
-                ->whereIn('status', ['success', 'used'])
-                ->sum('total_price');
-            
-            $monthlyRevenueData[] = [
-                'month' => $monthDate->format('M'),
-                'revenue' => (float) $revenue
-            ];
-        }
+        // Revenue Chart - Ambil periode dari request, default monthly
+        $period = $request->get('period', 'monthly');
+        $revenueChartData = $this->getRevenueByPeriod($period);
 
         return view('admin.dashboard', [
             'stats' => $stats,
             'popularPackages' => $popularPackages,
-            'monthlyRevenue' => $monthlyRevenueData
+            'revenueChart' => $revenueChartData,
+            'currentPeriod' => $period
+        ]);
+    }
+
+    /**
+     * AJAX endpoint untuk update chart
+     */
+    public function getRevenueChart(Request $request)
+    {
+        $period = $request->get('period', 'monthly');
+        $revenueData = $this->getRevenueByPeriod($period);
+        
+        return response()->json([
+            'success' => true,
+            'data' => $revenueData
         ]);
     }
 
@@ -178,8 +292,6 @@ class AdminDashboardController extends Controller
             'timezone' => 'required|string',
         ]);
 
-        // Update settings logic here
-        
         return redirect()->back()->with('success', 'General settings updated successfully!');
     }
 
@@ -230,8 +342,6 @@ class AdminDashboardController extends Controller
             'maintenance_mode' => 'nullable|boolean',
         ]);
 
-        // Update website settings logic here
-        
         return redirect()->back()->with('success', 'Website settings updated successfully!');
     }
 }

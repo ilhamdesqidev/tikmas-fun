@@ -89,12 +89,22 @@
         <!-- Revenue Chart -->
         <div class="lg:col-span-2 card rounded-xl p-6">
             <div class="flex items-center justify-between mb-6">
-                <h3 class="text-lg font-semibold text-gray-900">Revenue Bulanan</h3>
-                <div class="text-sm text-gray-600">
-                    12 Bulan Terakhir
+                <h3 class="text-lg font-semibold text-gray-900">Revenue</h3>
+                <div class="flex items-center gap-3">
+                    <select id="revenuePeriodFilter" class="text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer">
+                        <option value="daily" {{ $currentPeriod == 'daily' ? 'selected' : '' }}>Harian (30 Hari)</option>
+                        <option value="weekly" {{ $currentPeriod == 'weekly' ? 'selected' : '' }}>Mingguan (12 Minggu)</option>
+                        <option value="monthly" {{ $currentPeriod == 'monthly' ? 'selected' : '' }}>Bulanan (12 Bulan)</option>
+                        <option value="quarterly" {{ $currentPeriod == 'quarterly' ? 'selected' : '' }}>3 Bulanan (4 Quarter)</option>
+                        <option value="biannual" {{ $currentPeriod == 'biannual' ? 'selected' : '' }}>6 Bulanan (2 Semester)</option>
+                        <option value="yearly" {{ $currentPeriod == 'yearly' ? 'selected' : '' }}>Tahunan (5 Tahun)</option>
+                    </select>
                 </div>
             </div>
-            <div class="h-80">
+            <div class="h-80 relative">
+                <div id="chartLoader" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 hidden">
+                    <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+                </div>
                 <canvas id="revenueChart"></canvas>
             </div>
         </div>
@@ -213,177 +223,179 @@
         </div>
     </div>
 
-    <!-- Quick Actions
-    <div class="mt-8 grid grid-cols-1 md:grid-cols-4 gap-4">
-        <a href="{{ route('admin.promo.index') }}" class="flex items-center p-4 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl text-white hover:from-blue-600 hover:to-blue-700 transition-all duration-200">
-            <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path>
-            </svg>
-            <div>
-                <p class="font-medium">Kelola Promo</p>
-                <p class="text-xs text-blue-100">Buat & edit promo</p>
-            </div>
-        </a>
-        
-        <a href="{{ route('admin.tickets.index') }}" class="flex items-center p-4 bg-gradient-to-r from-green-500 to-green-600 rounded-xl text-white hover:from-green-600 hover:to-green-700 transition-all duration-200">
-            <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path>
-            </svg>
-            <div>
-                <p class="font-medium">Tiket</p>
-                <p class="text-xs text-green-100">Kelola tiket</p>
-            </div>
-        </a>
-        
-        <a href="{{ route('admin.customers.index') }}" class="flex items-center p-4 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl text-white hover:from-purple-600 hover:to-purple-700 transition-all duration-200">
-            <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
-            </svg>
-            <div>
-                <p class="font-medium">Customers</p>
-                <p class="text-xs text-purple-100">Data customer</p>
-            </div>
-        </a>
-        
-        <a href="{{ route('admin.reports.index') }}" class="flex items-center p-4 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-xl text-white hover:from-yellow-600 hover:to-yellow-700 transition-all duration-200">
-            <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-            </svg>
-            <div>
-                <p class="font-medium">Laporan</p>
-                <p class="text-xs text-yellow-100">Analytics & laporan</p>
-            </div>
-        </a>
-    </div> -->
-
+@endsection
 
 @section('extra-css')
 @endsection
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-@endpush
-
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-// Revenue Chart - REAL DATA FROM DATABASE
+// Revenue Chart dengan Multi Period Filter
 document.addEventListener('DOMContentLoaded', function() {
     const ctx = document.getElementById('revenueChart');
+    const loader = document.getElementById('chartLoader');
+    let revenueChart = null;
     
     if (!ctx) {
         console.error('Canvas element not found');
         return;
     }
 
-    try {
-        const monthlyData = @json($monthlyRevenue);
-        
-        console.log('Monthly Data:', monthlyData);
-        
-        if (!monthlyData || monthlyData.length === 0) {
-            console.warn('No revenue data available');
-            const parent = ctx.parentElement;
-            parent.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500"><p>Tidak ada data revenue</p></div>';
-            return;
-        }
-
-        const revenueChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: monthlyData.map(item => item.month),
-                datasets: [{
-                    label: 'Revenue',
-                    data: monthlyData.map(item => parseFloat(item.revenue) || 0),
-                    borderColor: '#CFD916',
-                    backgroundColor: 'rgba(207, 217, 22, 0.1)',
-                    borderWidth: 3,
-                    fill: true,
-                    tension: 0.4,
-                    pointBackgroundColor: '#CFD916',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointHoverBackgroundColor: '#CFD916',
-                    pointHoverBorderColor: '#fff',
-                    pointRadius: 5,
-                    pointHoverRadius: 7,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        padding: 12,
-                        titleColor: '#fff',
-                        bodyColor: '#fff',
-                        borderColor: '#CFD916',
-                        borderWidth: 1,
-                        displayColors: false,
-                        callbacks: {
-                            label: function(context) {
-                                let value = context.parsed.y;
-                                return 'Revenue: Rp ' + new Intl.NumberFormat('id-ID').format(value);
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    x: {
-                        grid: {
-                            display: false,
-                            drawBorder: false
-                        },
-                        ticks: {
-                            color: '#6B7280',
-                            font: {
-                                size: 11,
-                                weight: '500'
-                            }
-                        }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            color: '#F3F4F6',
-                            drawBorder: false
-                        },
-                        ticks: {
-                            color: '#6B7280',
-                            font: {
-                                size: 11
-                            },
-                            callback: function(value) {
-                                if (value >= 1000000000000) {
-                                    return 'Rp ' + (value / 1000000000000).toFixed(1) + 'T';
-                                } else if (value >= 1000000000) {
-                                    return 'Rp ' + (value / 1000000000).toFixed(1) + 'M';
-                                } else if (value >= 1000000) {
-                                    return 'Rp ' + (value / 1000000).toFixed(1) + 'Jt';
-                                } else if (value >= 1000) {
-                                    return 'Rp ' + (value / 1000).toFixed(0) + 'K';
-                                }
-                                return 'Rp ' + value;
-                            },
-                            maxTicksLimit: 6
-                        }
-                    }
-                },
-                interaction: {
-                    intersect: false,
-                    mode: 'index',
-                }
+    // Function to initialize/update chart
+    function initRevenueChart(data) {
+        try {
+            if (!data || data.length === 0) {
+                console.warn('No revenue data available');
+                const parent = ctx.parentElement;
+                parent.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500"><p>Tidak ada data revenue</p></div>';
+                return;
             }
-        });
-        
-        console.log('Chart created successfully');
-    } catch (error) {
-        console.error('Error creating chart:', error);
+
+            // Destroy existing chart
+            if (revenueChart) {
+                revenueChart.destroy();
+            }
+
+            // Create new chart
+            revenueChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.map(item => item.label),
+                    datasets: [{
+                        label: 'Revenue',
+                        data: data.map(item => parseFloat(item.revenue) || 0),
+                        borderColor: '#CFD916',
+                        backgroundColor: 'rgba(207, 217, 22, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#CFD916',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointHoverBackgroundColor: '#CFD916',
+                        pointHoverBorderColor: '#fff',
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            borderColor: '#CFD916',
+                            borderWidth: 1,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    let value = context.parsed.y;
+                                    return 'Revenue: Rp ' + new Intl.NumberFormat('id-ID').format(value);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false,
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#6B7280',
+                                font: {
+                                    size: 11,
+                                    weight: '500'
+                                }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: '#F3F4F6',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#6B7280',
+                                font: {
+                                    size: 11
+                                },
+                                callback: function(value) {
+                                    if (value >= 1000000000000) {
+                                        return 'Rp ' + (value / 1000000000000).toFixed(1) + 'T';
+                                    } else if (value >= 1000000000) {
+                                        return 'Rp ' + (value / 1000000000).toFixed(1) + 'M';
+                                    } else if (value >= 1000000) {
+                                        return 'Rp ' + (value / 1000000).toFixed(1) + 'Jt';
+                                    } else if (value >= 1000) {
+                                        return 'Rp ' + (value / 1000).toFixed(0) + 'K';
+                                    }
+                                    return 'Rp ' + value;
+                                },
+                                maxTicksLimit: 6
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index',
+                    }
+                }
+            });
+            
+            console.log('Chart created successfully');
+        } catch (error) {
+            console.error('Error creating chart:', error);
+        }
     }
+
+    // Initialize with initial data
+    const initialData = @json($revenueChart);
+    initRevenueChart(initialData);
+    
+    // Period filter change handler
+    document.getElementById('revenuePeriodFilter').addEventListener('change', function() {
+        const period = this.value;
+        
+        // Show loader
+        loader.classList.remove('hidden');
+        
+        // Fetch new data via AJAX
+        fetch(`{{ route('admin.dashboard.revenue') }}?period=${period}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success && data.data) {
+                initRevenueChart(data.data);
+            } else {
+                console.error('Invalid data format received');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching revenue data:', error);
+            alert('Gagal memuat data. Silakan refresh halaman.');
+        })
+        .finally(() => {
+            // Hide loader
+            loader.classList.add('hidden');
+        });
+    });
 });
 </script>
-@endsection
+@endpush
