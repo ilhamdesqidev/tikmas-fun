@@ -139,7 +139,7 @@ public function export(Request $request)
     // Set column widths
     $sheet->getColumnDimension('A')->setWidth(5);
     $sheet->getColumnDimension('B')->setWidth(18);
-    $sheet->getColumnDimension('C')->setWidth(18);
+    $sheet->getColumnDimension('C')->setWidth(25);
     $sheet->getColumnDimension('D')->setWidth(25);
     $sheet->getColumnDimension('E')->setWidth(12);
     $sheet->getColumnDimension('F')->setWidth(20);
@@ -250,7 +250,7 @@ public function export(Request $request)
             // Set column widths
             $sheet->getColumnDimension('A')->setWidth(5);
             $sheet->getColumnDimension('B')->setWidth(18);
-            $sheet->getColumnDimension('C')->setWidth(18);
+            $sheet->getColumnDimension('C')->setWidth(25);
             $sheet->getColumnDimension('D')->setWidth(25);
             $sheet->getColumnDimension('E')->setWidth(12);
             $sheet->getColumnDimension('F')->setWidth(20);
