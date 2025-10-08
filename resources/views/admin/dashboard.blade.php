@@ -95,9 +95,7 @@
                         <option value="daily" {{ $currentPeriod == 'daily' ? 'selected' : '' }}>Harian (30 Hari)</option>
                         <option value="weekly" {{ $currentPeriod == 'weekly' ? 'selected' : '' }}>Mingguan (12 Minggu)</option>
                         <option value="monthly" {{ $currentPeriod == 'monthly' ? 'selected' : '' }}>Bulanan (12 Bulan)</option>
-                        <option value="quarterly" {{ $currentPeriod == 'quarterly' ? 'selected' : '' }}>3 Bulanan (4 Quarter)</option>
-                        <option value="biannual" {{ $currentPeriod == 'biannual' ? 'selected' : '' }}>6 Bulanan (2 Semester)</option>
-                        <option value="yearly" {{ $currentPeriod == 'yearly' ? 'selected' : '' }}>Tahunan (5 Tahun)</option>
+
                     </select>
                 </div>
             </div>

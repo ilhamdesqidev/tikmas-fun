@@ -25,6 +25,7 @@
       }
     </script>
     <style>
+      /* ==================== GLOBAL STYLES ==================== */
       html {
         scroll-behavior: smooth;
       }
@@ -36,8 +37,10 @@
       body {
         overflow-x: hidden;
         max-width: 100vw;
+        font-family: 'Poppins', sans-serif;
       }
       
+      /* ==================== HERO SECTION ==================== */
       .hero-bg {
         background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
           url("{{ isset($settings['hero_background_path']) ? asset('storage/' . $settings['hero_background_path']) : '/assets/img/mainimg.jpg' }}");
@@ -64,8 +67,8 @@
         box-shadow: 1px 1px 3px rgba(1, 1, 3, 0.5);
       }
 
-      /* WAHANA CAROUSEL STYLES */
-      .wahana-carousel {
+      /* ==================== FACILITY CAROUSEL STYLES ==================== */
+      .facility-carousel {
         position: relative;
         overflow: hidden;
         border-radius: 1rem;
@@ -73,25 +76,25 @@
         max-width: 100%;
       }
 
-      .wahana-images {
+      .facility-images {
         display: flex;
         transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        width: {{ $wahanaImages->count() * 100 }}%;
+        width: {{ $facilities->count() * 100 }}%;
       }
 
-      .wahana-slide {
-        flex: 0 0 {{ $wahanaImages->count() > 0 ? (100 / $wahanaImages->count()) : 100 }}%;
+      .facility-slide {
+        flex: 0 0 {{ $facilities->count() > 0 ? (100 / $facilities->count()) : 100 }}%;
         position: relative;
       }
 
-      .wahana-image {
+      .facility-image {
         width: 100%;
         height: 400px;
         object-fit: cover;
         display: block;
       }
 
-      .wahana-overlay {
+      .facility-overlay {
         position: absolute;
         bottom: 0;
         left: 0;
@@ -101,14 +104,14 @@
         color: white;
       }
 
-      .wahana-title {
+      .facility-title {
         font-size: 1.5rem;
         font-weight: bold;
         margin-bottom: 0.5rem;
         text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
       }
 
-      .wahana-description {
+      .facility-description {
         font-size: 1rem;
         opacity: 0.95;
         text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
@@ -116,20 +119,17 @@
       }
 
       .carousel-indicators {
-        position: absolute;
-        bottom: 15px;
-        left: 50%;
-        transform: translateX(-50%);
         display: flex;
         gap: 8px;
-        z-index: 10;
+        justify-content: center;
+        margin-top: 1rem;
       }
 
       .indicator {
         width: 10px;
         height: 10px;
         border-radius: 50%;
-        background: rgba(255, 255, 255, 0.5);
+        background: #d1d5db;
         cursor: pointer;
         transition: all 0.3s ease;
       }
@@ -140,44 +140,44 @@
       }
 
       @media (max-width: 1024px) {
-        .wahana-image {
+        .facility-image {
           height: 350px;
         }
       }
 
       @media (max-width: 768px) {
-        .wahana-image {
+        .facility-image {
           height: 280px;
         }
         
-        .wahana-title {
+        .facility-title {
           font-size: 1.25rem;
         }
         
-        .wahana-description {
+        .facility-description {
           font-size: 0.875rem;
         }
         
-        .wahana-overlay {
+        .facility-overlay {
           padding: 1.5rem 1rem 0.75rem;
         }
       }
 
       @media (max-width: 480px) {
-        .wahana-image {
+        .facility-image {
           height: 240px;
         }
         
-        .wahana-title {
+        .facility-title {
           font-size: 1.125rem;
         }
         
-        .wahana-description {
+        .facility-description {
           font-size: 0.8rem;
         }
       }
 
-      /* PROMO SLIDER STYLES */
+      /* ==================== PROMO SLIDER STYLES ==================== */
       .promo-slider {
         overflow: hidden;
         position: relative;
@@ -513,28 +513,29 @@
         <span class="text-primary">{{ $settings['about_title'] ?? 'Tentang' }}</span> {{ $settings['about_subtitle'] ?? 'Kami' }}
       </h2>
       <div class="flex flex-col lg:flex-row gap-6 lg:gap-8 max-w-6xl mx-auto">
-        <!-- Wahana Carousel -->
+        <!-- Facility Carousel -->
         <div class="flex-1 w-full lg:min-w-96">
-          @if($wahanaImages->count() > 0)
-          <div class="wahana-carousel" id="wahanaCarousel">
-            <div class="wahana-images" id="wahanaImages">
-              @foreach($wahanaImages as $wahana)
-              <div class="wahana-slide">
-                <img src="{{ $wahana->image_url }}" alt="{{ $wahana->title }}" class="wahana-image" />
-                <div class="wahana-overlay">
-                  <div class="wahana-title">{{ $wahana->title }}</div>
-                  <div class="wahana-description">{{ $wahana->description }}</div>
+          @if($facilities->count() > 0)
+          <div class="facility-carousel" id="facilityCarousel">
+            <div class="facility-images" id="facilityImages">
+              @foreach($facilities as $facility)
+              <div class="facility-slide">
+                <img src="{{ asset('storage/' . $facility->image) }}" alt="{{ $facility->name }}" class="facility-image" />
+                <div class="facility-overlay">
+                  <div class="facility-title">{{ $facility->name }}</div>
+                  <div class="facility-description">{{ Str::limit($facility->description, 120) }}</div>
                 </div>
               </div>
               @endforeach
             </div>
-            
-            <div class="carousel-indicators" id="carouselIndicators"></div>
           </div>
+          
+          <!-- Indicators di luar gambar -->
+          <div class="carousel-indicators" id="carouselIndicators"></div>
           @else
           <div class="bg-gray-100 rounded-xl p-12 text-center">
             <i data-feather="image" class="w-16 h-16 mx-auto text-gray-400 mb-4"></i>
-            <p class="text-gray-500">No wahana images available</p>
+            <p class="text-gray-500">Belum ada wahana tersedia</p>
           </div>
           @endif
           
@@ -656,7 +657,7 @@
                       @elseif($promo->status_display === 'coming_soon')
                         Mulai: {{ $promo->start_date->format('d M Y') }}
                       @else
-                      @if($promo->end_date)
+                        @if($promo->end_date)
                           Sampai: {{ $promo->end_date->format('d M Y') }}
                         @else
                           Tidak terbatas
@@ -742,11 +743,12 @@
       </div>
     </footer>
 
+    <!-- ==================== JAVASCRIPT ==================== -->
     <script>
       // Initialize Feather icons
       feather.replace();
 
-      // Mobile menu toggle
+      // ==================== MOBILE MENU TOGGLE ====================
       const navbarNav = document.getElementById('mobile-nav');
       const menuIcon = document.getElementById('menu-icon');
       const closeMenu = document.getElementById('close-menu');
@@ -797,7 +799,7 @@
         }
       });
 
-      // Smooth scrolling
+      // ==================== SMOOTH SCROLLING ====================
       document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
           e.preventDefault();
@@ -820,12 +822,12 @@
         });
       });
 
-      // WAHANA CAROUSEL
-      class WahanaCarousel {
+      // ==================== FACILITY CAROUSEL ====================
+      class FacilityCarousel {
         constructor() {
-          this.container = document.getElementById('wahanaImages');
+          this.container = document.getElementById('facilityImages');
           if (!this.container) return;
-          this.slides = this.container.querySelectorAll('.wahana-slide');
+          this.slides = this.container.querySelectorAll('.facility-slide');
           this.totalSlides = this.slides.length;
           this.indicators = document.getElementById('carouselIndicators');
           this.currentIndex = 0;
@@ -852,7 +854,7 @@
         }
 
         bindEvents() {
-          const carousel = document.getElementById('wahanaCarousel');
+          const carousel = document.getElementById('facilityCarousel');
           if (!carousel) return;
           carousel.addEventListener('mouseenter', () => this.pauseAutoPlay());
           carousel.addEventListener('mouseleave', () => this.resumeAutoPlay());
@@ -929,7 +931,7 @@
         }
       }
 
-      // PROMO SLIDER
+      // ==================== PROMO SLIDER ====================
       class PromoSlider {
         constructor() {
           this.container = document.getElementById('promoContainer');
@@ -1061,9 +1063,9 @@
         }
       }
 
-      // Initialize
+      // ==================== INITIALIZE ALL ====================
       document.addEventListener('DOMContentLoaded', () => {
-        new WahanaCarousel();
+        new FacilityCarousel();
         new PromoSlider();
         feather.replace(); 
 

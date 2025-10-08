@@ -36,43 +36,6 @@ class SettingsSeeder extends Seeder
         Setting::set('footer_text', '© 2025 Tiketmas. All rights reserved.', 'text', 'website');
         Setting::set('maintenance_mode', '0', 'boolean', 'website');
 
-        // Wahana Images
-        $wahanas = [
-            [
-                'title' => 'Roller Coaster',
-                'description' => 'Rasakan sensasi kecepatan tinggi dengan pemandangan menakjubkan',
-                'image_path' => 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800',
-                'order' => 1
-            ],
-            [
-                'title' => 'Bianglala',
-                'description' => 'Nikmati view 360° dari ketinggian bersama orang tercinta',
-                'image_path' => 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=800',
-                'order' => 2
-            ],
-            [
-                'title' => 'Bumper Car',
-                'description' => 'Keseruan menabrak dan tertawa bersama keluarga',
-                'image_path' => 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=800',
-                'order' => 3
-            ],
-            [
-                'title' => 'Komidi Putar',
-                'description' => 'Wahana klasik yang cocok untuk segala usia',
-                'image_path' => 'https://images.unsplash.com/photo-1570197788417-0e82375c9371?w=800',
-                'order' => 4
-            ],
-            [
-                'title' => 'Arung Jeram Mini',
-                'description' => 'Bermain air yang menyegarkan dan menyenangkan',
-                'image_path' => 'https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?w=800',
-                'order' => 5
-            ],
-        ];
-
-        foreach ($wahanas as $wahana) {
-            WahanaImage::create($wahana);
-        }
 
         $this->command->info('Settings seeded successfully!');
     }
