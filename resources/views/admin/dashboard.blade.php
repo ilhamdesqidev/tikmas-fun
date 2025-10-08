@@ -95,7 +95,6 @@
                         <option value="daily" {{ $currentPeriod == 'daily' ? 'selected' : '' }}>Harian (30 Hari)</option>
                         <option value="weekly" {{ $currentPeriod == 'weekly' ? 'selected' : '' }}>Mingguan (12 Minggu)</option>
                         <option value="monthly" {{ $currentPeriod == 'monthly' ? 'selected' : '' }}>Bulanan (12 Bulan)</option>
-
                     </select>
                 </div>
             </div>
