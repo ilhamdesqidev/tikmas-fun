@@ -151,7 +151,7 @@
         <div class="card rounded-xl overflow-hidden promo-card {{ $promo->status != 'active' ? 'opacity-75' : '' }}" data-status="{{ $promo->status }}" data-name="{{ strtolower($promo->name) }}">
             <div class="relative">
                 <a href="{{ route('admin.promo.show', $promo->id) }}" class="block">
-                <div class="h-48 bg-cover bg-center" style="background-image: url('{{ asset('storage/' . $promo->image) }}')"></div>
+                    <div class="h-48 bg-cover bg-center" style="background-image: url('{{ $promo->image_url }}')"></div>
                 </a>
                 <div class="absolute top-3 right-3">
                     <input type="checkbox" class="bulk-checkbox hidden" value="{{ $promo->id }}">
