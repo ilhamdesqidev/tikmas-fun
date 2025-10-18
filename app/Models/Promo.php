@@ -59,12 +59,18 @@ class Promo extends Model
     
     public function getImageUrlAttribute()
     {
-        return $this->image ? asset('storage/' . $this->image) : asset('images/placeholder.jpg');
+        if ($this->image) {
+            return asset('webfiles/' . $this->image);
+        }
+        return asset('images/placeholder.jpg');
     }
 
     public function getBraceletDesignUrlAttribute()
     {
-        return $this->bracelet_design ? asset('storage/' . $this->bracelet_design) : null;
+        if ($this->bracelet_design) {
+            return asset('webfiles/' . $this->bracelet_design);
+        }
+        return null;
     }
 
     public function getActualSoldCountAttribute()
