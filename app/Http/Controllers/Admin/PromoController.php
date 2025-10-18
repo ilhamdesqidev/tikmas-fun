@@ -72,7 +72,7 @@ class PromoController extends Controller
     {
         \Log::info('Store method called');
         \Log::info('Request data:', $request->all());
-    
+
         // Validasi
         $request->validate([
             'name' => 'required|string|max:255|unique:promos,name',
@@ -88,22 +88,22 @@ class PromoController extends Controller
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
             'bracelet_design' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10240',
         ]);
-    
+
         try {
-            // Upload gambar promo - simpan di storage/app/public/promos
-            $imagePath = $request->file('image')->store('app/public/promos', 'public');
+            // Upload gambar promo
+            $imagePath = $request->file('image')->store('promos', 'public');
             
             // Upload desain gelang jika ada
             $braceletDesignPath = null;
             if ($request->hasFile('bracelet_design')) {
-                $braceletDesignPath = $request->file('bracelet_design')->store('app/public/bracelet-designs', 'public');
+                $braceletDesignPath = $request->file('bracelet_design')->store('bracelet-designs', 'public');
             }
-    
+
             // Hitung diskon
             $originalPrice = (float) $request->original_price;
             $promoPrice = (float) $request->promo_price;
             $discountPercent = round((($originalPrice - $promoPrice) / $originalPrice) * 100);
-    
+
             // Tentukan status berdasarkan tanggal
             $status = $request->status;
             $startDate = Carbon::parse($request->start_date);
@@ -112,7 +112,7 @@ class PromoController extends Controller
             if ($status === 'active' && $startDate->gt(Carbon::now())) {
                 $status = 'coming_soon';
             }
-    
+
             // Create promo
             $promo = Promo::create([
                 'name' => $request->name,
@@ -131,7 +131,7 @@ class PromoController extends Controller
                 'featured' => $request->has('featured'),
                 'sold_count' => 0,
             ]);
-    
+
             \Log::info('Promo created successfully: ' . $promo->id);
         
             return redirect()->route('admin.promo.index')
@@ -232,118 +232,118 @@ class PromoController extends Controller
     }
 
     public function update(Request $request, $id)
-{
-    try {
-        $promo = Promo::findOrFail($id);
+    {
+        try {
+            $promo = Promo::findOrFail($id);
 
-        // Validasi
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255|unique:promos,name,' . $promo->id,
-            'description' => 'required|string',
-            'terms_conditions' => 'required|string',
-            'original_price' => 'required|numeric|min:1',
-            'promo_price' => 'required|numeric|min:1|lt:original_price',
-            'start_date' => 'required|date',
-            'end_date' => 'nullable|date|after:start_date',
-            'quota' => 'nullable|integer|min:1',
-            'status' => 'required|in:draft,coming_soon,active,inactive,expired',
-            'category' => 'required|in:bulanan,holiday,birthday,nasional,student',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240',
-            'bracelet_design' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10240',
-        ]);
+            // Validasi
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|string|max:255|unique:promos,name,' . $promo->id,
+                'description' => 'required|string',
+                'terms_conditions' => 'required|string',
+                'original_price' => 'required|numeric|min:1',
+                'promo_price' => 'required|numeric|min:1|lt:original_price',
+                'start_date' => 'required|date',
+                'end_date' => 'nullable|date|after:start_date',
+                'quota' => 'nullable|integer|min:1',
+                'status' => 'required|in:draft,coming_soon,active,inactive,expired',
+                'category' => 'required|in:bulanan,holiday,birthday,nasional,student',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240',
+                'bracelet_design' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10240',
+            ]);
 
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
-
-        // Handle image removal
-        if ($request->has('remove_image') && $request->remove_image == '1') {
-            if ($promo->image) {
-                Storage::disk('public')->delete($promo->image);
-                $promo->image = null;
+            if ($validator->fails()) {
+                return redirect()->back()
+                    ->withErrors($validator)
+                    ->withInput();
             }
-        }
 
-        // Handle bracelet design removal
-        if ($request->has('remove_bracelet_design') && $request->remove_bracelet_design == '1') {
-            if ($promo->bracelet_design) {
-                Storage::disk('public')->delete($promo->bracelet_design);
-                $promo->bracelet_design = null;
+            // Handle image removal
+            if ($request->has('remove_image') && $request->remove_image == '1') {
+                if ($promo->image) {
+                    Storage::disk('public')->delete($promo->image);
+                    $promo->image = null;
+                }
             }
-        }
 
-        // Upload gambar baru jika ada
-        if ($request->hasFile('image')) {
-            // Hapus gambar lama
-            if ($promo->image) {
-                Storage::disk('public')->delete($promo->image);
+            // Handle bracelet design removal
+            if ($request->has('remove_bracelet_design') && $request->remove_bracelet_design == '1') {
+                if ($promo->bracelet_design) {
+                    Storage::disk('public')->delete($promo->bracelet_design);
+                    $promo->bracelet_design = null;
+                }
             }
-            $imagePath = $request->file('image')->store('app/public/promos', 'public');
-            $promo->image = $imagePath;
-        }
 
-        // Upload desain gelang baru jika ada
-        if ($request->hasFile('bracelet_design')) {
-            // Hapus desain gelang lama
-            if ($promo->bracelet_design) {
-                Storage::disk('public')->delete($promo->bracelet_design);
+            // Upload gambar baru jika ada
+            if ($request->hasFile('image')) {
+                // Hapus gambar lama
+                if ($promo->image) {
+                    Storage::disk('public')->delete($promo->image);
+                }
+                $imagePath = $request->file('image')->store('promos', 'public');
+                $promo->image = $imagePath;
             }
-            $braceletDesignPath = $request->file('bracelet_design')->store('app/public/bracelet-designs', 'public');
-            $promo->bracelet_design = $braceletDesignPath;
-        }
 
-        // Hitung diskon
-        $originalPrice = (float) $request->original_price;
-        $promoPrice = (float) $request->promo_price;
-        
-        if ($promoPrice >= $originalPrice) {
-            return redirect()->back()
-                ->with('error', 'Harga promo harus lebih kecil dari harga normal')
-                ->withInput();
-        }
-        
-        $discountPercent = round((($originalPrice - $promoPrice) / $originalPrice) * 100);
-
-        // Update status berdasarkan tanggal jika diperlukan
-        $status = $request->status;
-        $startDate = Carbon::parse($request->start_date);
-        
-        // Auto-correct status based on dates
-        if ($status !== 'expired') {
-            if ($promo->is_expired) {
-                $status = 'expired';
-            } elseif ($startDate->gt(Carbon::now()) && $status === 'active') {
-                $status = 'coming_soon';
+            // Upload desain gelang baru jika ada
+            if ($request->hasFile('bracelet_design')) {
+                // Hapus desain gelang lama
+                if ($promo->bracelet_design) {
+                    Storage::disk('public')->delete($promo->bracelet_design);
+                }
+                $braceletDesignPath = $request->file('bracelet_design')->store('bracelet-designs', 'public');
+                $promo->bracelet_design = $braceletDesignPath;
             }
-        }
 
-        // Update data promo
-        $promo->name = $request->name;
-        $promo->description = $request->description;
-        $promo->terms_conditions = $request->terms_conditions;
-        $promo->original_price = $originalPrice;
-        $promo->promo_price = $promoPrice;
-        $promo->discount_percent = $discountPercent;
-        $promo->start_date = $request->start_date;
-        $promo->end_date = $request->end_date;
-        $promo->quota = $request->quota;
-        $promo->status = $status;
-        $promo->category = $request->category;
-        $promo->featured = $request->has('featured');
-        $promo->save();
-
-        return redirect()->route('admin.promo.index')
-            ->with('success', 'Promo "' . $promo->name . '" berhasil diperbarui!');
+            // Hitung diskon
+            $originalPrice = (float) $request->original_price;
+            $promoPrice = (float) $request->promo_price;
             
-    } catch (\Exception $e) {
-        \Log::error('Error updating promo: ' . $e->getMessage());
-        return redirect()->back()
-            ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
-            ->withInput();
+            if ($promoPrice >= $originalPrice) {
+                return redirect()->back()
+                    ->with('error', 'Harga promo harus lebih kecil dari harga normal')
+                    ->withInput();
+            }
+            
+            $discountPercent = round((($originalPrice - $promoPrice) / $originalPrice) * 100);
+
+            // Update status berdasarkan tanggal jika diperlukan
+            $status = $request->status;
+            $startDate = Carbon::parse($request->start_date);
+            
+            // Auto-correct status based on dates
+            if ($status !== 'expired') {
+                if ($promo->is_expired) {
+                    $status = 'expired';
+                } elseif ($startDate->gt(Carbon::now()) && $status === 'active') {
+                    $status = 'coming_soon';
+                }
+            }
+
+            // Update data promo
+            $promo->name = $request->name;
+            $promo->description = $request->description;
+            $promo->terms_conditions = $request->terms_conditions;
+            $promo->original_price = $originalPrice;
+            $promo->promo_price = $promoPrice;
+            $promo->discount_percent = $discountPercent;
+            $promo->start_date = $request->start_date;
+            $promo->end_date = $request->end_date;
+            $promo->quota = $request->quota;
+            $promo->status = $status;
+            $promo->category = $request->category;
+            $promo->featured = $request->has('featured');
+            $promo->save();
+
+            return redirect()->route('admin.promo.index')
+                ->with('success', 'Promo "' . $promo->name . '" berhasil diperbarui!');
+                
+        } catch (\Exception $e) {
+            \Log::error('Error updating promo: ' . $e->getMessage());
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
+                ->withInput();
+        }
     }
-}
 
     public function show($id)
     {
