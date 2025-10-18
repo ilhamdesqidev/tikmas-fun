@@ -133,7 +133,7 @@
           <!-- Bagian Kiri: Gambar dan Info Utama -->
           <div class="w-full lg:w-2/3">
             <div class="card rounded-xl overflow-hidden mb-6">
-              <img src="{{ asset('storage/' . $promo->image) }}" alt="{{ $promo->name }}" class="w-full h-64 object-cover">
+              <img src="{{ asset('storage/app/public' . $promo->image) }}" alt="{{ $promo->name }}" class="w-full h-64 object-cover">
             </div>
             
             <div class="card rounded-xl p-6 mb-6">
