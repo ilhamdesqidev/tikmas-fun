@@ -484,8 +484,6 @@
 
       <!-- Navbar Extra -->
       <div class="flex items-center gap-1 sm:gap-2">
-        <a href="#" class="text-black hover:text-primary transition-all duration-500 p-2 touch-manipulation"><i data-feather="search" class="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6"></i></a>
-        <a href="#" class="text-black hover:text-primary transition-all duration-500 p-2 touch-manipulation"><i data-feather="shopping-cart" class="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6"></i></a>
         <a href="#" id="menu-icon" class="text-black hover:text-primary transition-all duration-500 md:hidden cursor-pointer p-2 touch-manipulation">
           <i data-feather="menu" class="w-5 h-5 sm:w-6 sm:h-6"></i>
         </a>
