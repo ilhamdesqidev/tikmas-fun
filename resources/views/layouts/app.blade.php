@@ -118,26 +118,28 @@
     </div>
 
     <!-- Sidebar -->
-    <aside id="sidebar" class="fixed left-0 top-0 w-64 h-screen bg-sidebar text-white sidebar-transition sidebar-mobile md:translate-x-0 z-50 overflow-y-auto">
+    <aside id="sidebar" class="fixed left-0 top-0 w-64 h-screen bg-sidebar text-white sidebar-transition sidebar-mobile md:translate-x-0 z-50 flex flex-col">
         <!-- Sidebar Header -->
-        <div class="flex items-center justify-between p-4 border-b border-gray-600">
-            <div class="flex items-center space-x-3">
-                <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                    <svg class="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path>
-                    </svg>
+        <div class="flex-shrink-0">
+            <div class="flex items-center justify-between p-4 border-b border-gray-600">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path>
+                        </svg>
+                    </div>
+                    <span class="text-xl font-bold">MestaKara</span>
                 </div>
-                <span class="text-xl font-bold">MestaKara</span>
+                <button id="close-sidebar" class="md:hidden text-white hover:text-gray-300">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
             </div>
-            <button id="close-sidebar" class="md:hidden text-white hover:text-gray-300">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-            </button>
         </div>
 
         <!-- Navigation Menu -->
-        <nav class="mt-6 pb-24">
+        <nav class="flex-1 overflow-y-auto py-4">
             <!-- Main Menu -->
             <div class="px-4 pb-2">
                 <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Main</h3>
@@ -221,7 +223,7 @@
         </nav>
 
         <!-- Logout Button (Fixed at bottom) -->
-        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-600 bg-sidebar">
+        <div class="flex-shrink-0 p-4 border-t border-gray-600 bg-sidebar">
             <form method="POST" action="{{ route('admin.logout') }}" class="w-full">
                 @csrf
                 <button type="submit" class="w-full flex items-center px-4 py-3 text-gray-300 rounded-lg hover:bg-red-600 hover:text-white transition-all duration-200">
