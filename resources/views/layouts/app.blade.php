@@ -218,9 +218,7 @@
                     </a>
                 </li>
             </ul>
-        </nav>
-
-        <!-- Logout Button (Fixed at bottom) -->
+            <!-- Logout Button (Fixed at bottom) -->
         <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-600 bg-sidebar">
             <form method="POST" action="{{ route('admin.logout') }}" class="w-full">
                 @csrf
@@ -232,6 +230,7 @@
                 </button>
             </form>
         </div>
+        </nav>
     </aside>
 
     <!-- Main Content -->
