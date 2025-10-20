@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ $settings['site_name'] ?? 'MestaKara' }} - Dashboard</title>
+    <title>MestaKara - Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,300;0,400;0,700;1,700&display=swap" rel="stylesheet" />
@@ -14,7 +14,7 @@
         theme: {
           extend: {
             colors: {
-              primary: '{{ $settings["primary_color"] ?? "#CFD916" }}',
+              primary: '#CFD916',
               'text-dark': '#333333',
             },
             fontFamily: {
@@ -43,7 +43,7 @@
       /* ==================== HERO SECTION ==================== */
       .hero-bg {
         background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
-          url("{{ isset($settings['hero_background_path']) ? asset('storage/' . $settings['hero_background_path']) : '/assets/img/mainimg.jpg' }}");
+          url("https://images.unsplash.com/photo-1520639888713-7851133b1ed0?w=1920");
         background-size: cover;
         background-position: center;
         background-attachment: fixed;
@@ -52,19 +52,25 @@
       @media (max-width: 768px) {
         .hero-bg {
           background-attachment: scroll;
+          min-height: 100svh;
+        }
+        
+        .hero-content {
+          padding-bottom: 3rem;
         }
       }
       
       .hero h1 {
-        text-shadow: 2px 2px 4px rgba(1, 1, 3, 0.7);
+        text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
+        line-height: 1.2;
       }
       
       .hero p {
-        text-shadow: 1px 1px 3px rgba(1, 1, 3, 0.5);
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
       }
       
       .hero .cta {
-        box-shadow: 1px 1px 3px rgba(1, 1, 3, 0.5);
+        box-shadow: 0 4px 15px rgba(207, 217, 22, 0.4);
       }
 
       /* ==================== FACILITY CAROUSEL STYLES ==================== */
@@ -79,11 +85,11 @@
       .facility-images {
         display: flex;
         transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        width: {{ $facilities->count() * 100 }}%;
+        width: 300%;
       }
 
       .facility-slide {
-        flex: 0 0 {{ $facilities->count() > 0 ? (100 / $facilities->count()) : 100 }}%;
+        flex: 0 0 33.333%;
         position: relative;
       }
 
@@ -99,8 +105,8 @@
         bottom: 0;
         left: 0;
         right: 0;
-        background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
-        padding: 2rem 1.5rem 1rem;
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.85));
+        padding: 2.5rem 1.5rem 1.5rem;
         color: white;
       }
 
@@ -108,21 +114,21 @@
         font-size: 1.5rem;
         font-weight: bold;
         margin-bottom: 0.5rem;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
       }
 
       .facility-description {
         font-size: 1rem;
         opacity: 0.95;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-        line-height: 1.4;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+        line-height: 1.5;
       }
 
       .carousel-indicators {
         display: flex;
-        gap: 8px;
+        gap: 10px;
         justify-content: center;
-        margin-top: 1rem;
+        margin-top: 1.25rem;
       }
 
       .indicator {
@@ -135,13 +141,13 @@
       }
 
       .indicator.active {
-        background: {{ $settings['primary_color'] ?? '#CFD916' }};
-        transform: scale(1.3);
+        background: #CFD916;
+        transform: scale(1.4);
       }
 
       @media (max-width: 1024px) {
         .facility-image {
-          height: 350px;
+          height: 320px;
         }
       }
 
@@ -155,17 +161,17 @@
         }
         
         .facility-description {
-          font-size: 0.875rem;
+          font-size: 0.9rem;
         }
         
         .facility-overlay {
-          padding: 1.5rem 1rem 0.75rem;
+          padding: 2rem 1.25rem 1rem;
         }
       }
 
       @media (max-width: 480px) {
         .facility-image {
-          height: 240px;
+          height: 260px;
         }
         
         .facility-title {
@@ -173,7 +179,12 @@
         }
         
         .facility-description {
-          font-size: 0.8rem;
+          font-size: 0.85rem;
+          line-height: 1.4;
+        }
+        
+        .facility-overlay {
+          padding: 1.75rem 1rem 0.875rem;
         }
       }
 
@@ -270,7 +281,7 @@
       }
 
       .badge-discount {
-        background: {{ $settings['primary_color'] ?? '#CFD916' }};
+        background: #CFD916;
         color: #000;
       }
 
@@ -309,7 +320,7 @@
         top: 50%;
         transform: translateY(-50%);
         background: rgba(255, 255, 255, 0.95);
-        border: 2px solid {{ $settings['primary_color'] ?? '#CFD916' }};
+        border: 2px solid #CFD916;
         width: 50px;
         height: 50px;
         border-radius: 50%;
@@ -323,7 +334,7 @@
       }
 
       .nav-button:hover {
-        background: {{ $settings['primary_color'] ?? '#CFD916' }};
+        background: #CFD916;
         color: #000;
         transform: translateY(-50%) scale(1.1);
       }
@@ -365,7 +376,7 @@
       }
 
       .dot.active {
-        background: {{ $settings['primary_color'] ?? '#CFD916' }};
+        background: #CFD916;
         transform: scale(1.2);
       }
 
@@ -387,8 +398,8 @@
         }
 
         .nav-button {
-          width: 40px;
-          height: 40px;
+          width: 45px;
+          height: 45px;
         }
 
         .nav-button.prev {
@@ -405,7 +416,7 @@
         }
         
         .promo-image {
-          height: 200px;
+          height: 220px;
         }
       }
 
@@ -421,8 +432,12 @@
         }
         
         .nav-button {
-          width: 35px;
-          height: 35px;
+          width: 40px;
+          height: 40px;
+        }
+        
+        .promo-image {
+          height: 200px;
         }
       }
 
@@ -435,6 +450,21 @@
         .promo-container {
           padding: 0 calc(50% - 130px);
         }
+        
+        .promo-image {
+          height: 180px;
+        }
+      }
+      
+      /* Mobile Navbar Improvements */
+      @media (max-width: 768px) {
+        .navbar-mobile-optimized {
+          padding: 0.75rem 1rem;
+        }
+        
+        .navbar-mobile-optimized a {
+          font-size: 1.25rem;
+        }
       }
     </style>
   </head>
@@ -443,9 +473,9 @@
     <div id="overlay" class="hidden fixed top-0 left-0 w-full h-screen bg-black bg-opacity-50 z-40 transition-opacity duration-300"></div>
 
     <!-- Navbar -->
-    <nav class="w-full py-3 sm:py-4 lg:py-5 px-4 sm:px-6 lg:px-7 flex items-center justify-between bg-white border-b border-gray-400 fixed top-0 left-0 right-0 z-50" style="border-bottom: 1px solid #597336;">
+    <nav class="navbar-mobile-optimized w-full py-3 sm:py-4 lg:py-5 px-4 sm:px-6 lg:px-7 flex items-center justify-between bg-white border-b border-gray-400 fixed top-0 left-0 right-0 z-50" style="border-bottom: 1px solid #597336;">
       <a href="#" class="text-xl sm:text-2xl lg:text-3xl font-bold text-black italic">
-        {{ $settings['site_name'] ?? 'MestaKara' }}<span class="text-primary">.</span>
+        MestaKara<span class="text-primary">.</span>
       </a>
       
       <!-- Desktop Navigation -->
@@ -462,7 +492,7 @@
           Promo
           <span class="absolute left-0 bottom-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
         </a>
-        <a href="wahana" class="text-black inline-block text-base lg:text-xl ml-0 px-3 lg:px-4 hover:text-primary transition-all duration-500 relative group">
+        <a href="#wahana" class="text-black inline-block text-base lg:text-xl ml-0 px-3 lg:px-4 hover:text-primary transition-all duration-500 relative group">
           Wahana
           <span class="absolute left-0 bottom-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
         </a>
@@ -474,75 +504,80 @@
           <i data-feather="x"></i>
         </div>
         
-        <div class="flex flex-col px-4">
-          <a href="#home" class="block mx-2 sm:mx-6 my-4 sm:my-6 lg:my-8 py-3 sm:py-4 text-xl sm:text-2xl lg:text-3xl text-white border-b border-gray-700 transition-all duration-300 hover:text-primary hover:pl-4 touch-manipulation">Home</a>
-          <a href="#about" class="block mx-2 sm:mx-6 my-4 sm:my-6 lg:my-8 py-3 sm:py-4 text-xl sm:text-2xl lg:text-3xl text-white border-b border-gray-700 transition-all duration-300 hover:text-primary hover:pl-4 touch-manipulation">Tentang Kami</a>
-          <a href="#menu" class="block mx-2 sm:mx-6 my-4 sm:my-6 lg:my-8 py-3 sm:py-4 text-xl sm:text-2xl lg:text-3xl text-white border-b border-gray-700 transition-all duration-300 hover:text-primary hover:pl-4 touch-manipulation">Promo</a>
-          <a href="wahana" class="block mx-2 sm:mx-6 my-4 sm:my-6 lg:my-8 py-3 sm:py-4 text-xl sm:text-2xl lg:text-3xl text-white border-b border-gray-700 transition-all duration-300 hover:text-primary hover:pl-4 touch-manipulation">Wahana</a>
+        <div class="flex flex-col px-2">
+          <a href="#home" class="block mx-4 my-4 py-3 text-lg sm:text-xl text-white border-b border-gray-700 transition-all duration-300 hover:text-primary hover:pl-3 touch-manipulation">Home</a>
+          <a href="#about" class="block mx-4 my-4 py-3 text-lg sm:text-xl text-white border-b border-gray-700 transition-all duration-300 hover:text-primary hover:pl-3 touch-manipulation">Tentang Kami</a>
+          <a href="#menu" class="block mx-4 my-4 py-3 text-lg sm:text-xl text-white border-b border-gray-700 transition-all duration-300 hover:text-primary hover:pl-3 touch-manipulation">Promo</a>
+          <a href="#wahana" class="block mx-4 my-4 py-3 text-lg sm:text-xl text-white border-b border-gray-700 transition-all duration-300 hover:text-primary hover:pl-3 touch-manipulation">Wahana</a>
         </div>
       </div>
 
       <!-- Navbar Extra -->
-      <div class="flex items-center gap-1 sm:gap-2">
-        <a href="#" class="text-black hover:text-primary transition-all duration-500 p-2 touch-manipulation"><i data-feather="search" class="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6"></i></a>
-        <a href="#" class="text-black hover:text-primary transition-all duration-500 p-2 touch-manipulation"><i data-feather="shopping-cart" class="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6"></i></a>
+      <div class="flex items-center gap-2 sm:gap-3">
+        <a href="#" class="text-black hover:text-primary transition-all duration-500 p-2 touch-manipulation"><i data-feather="search" class="w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-6"></i></a>
+        <a href="#" class="text-black hover:text-primary transition-all duration-500 p-2 touch-manipulation"><i data-feather="shopping-cart" class="w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-6"></i></a>
         <a href="#" id="menu-icon" class="text-black hover:text-primary transition-all duration-500 md:hidden cursor-pointer p-2 touch-manipulation">
-          <i data-feather="menu" class="w-5 h-5 sm:w-6 sm:h-6"></i>
+          <i data-feather="menu" class="w-6 h-6"></i>
         </a>
       </div>
     </nav>
 
     <!-- Hero Section -->
-    <section id="home" class="hero min-h-screen flex items-center hero-bg relative px-4 sm:px-6 lg:px-7 text-white pt-16">
-      <main class="max-w-4xl w-full">
+    <section id="home" class="hero min-h-screen flex items-center hero-bg relative px-4 sm:px-6 lg:px-7 text-white pt-20 sm:pt-16">
+      <main class="hero-content max-w-4xl w-full">
         <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl text-white leading-tight mb-4 sm:mb-6">
-          {{ $settings['hero_title'] ?? 'Berlibur Dengan' }}<span class="text-primary"> {{ $settings['hero_subtitle'] ?? 'Wahana' }}</span>
+          Berlibur Dengan<span class="text-primary"> Wahana</span>
         </h1>
-        <p class="text-base sm:text-lg md:text-xl lg:text-2xl mt-3 sm:mt-4 leading-relaxed font-medium text-white max-w-3xl">
-          {{ $settings['hero_description'] ?? 'Mari Berlibur dan Nikmati Berbagai Wahana Seru di Agrowisata Gunung Mas Bersama Keluarga Tercinta Dengan Harga Tiket Masuk yang Terjangkau dan Dapatkan Berbagai Promo Menarik Setiap Bulannya' }}
+        <p class="text-sm sm:text-base md:text-lg lg:text-xl mt-3 sm:mt-4 leading-relaxed font-medium text-white max-w-2xl">
+          Mari Berlibur dan Nikmati Berbagai Wahana Seru di Agrowisata Gunung Mas Bersama Keluarga Tercinta Dengan Harga Tiket Masuk yang Terjangkau dan Dapatkan Berbagai Promo Menarik Setiap Bulannya
         </p>
-        <a href="#menu" class="cta inline-block mt-6 sm:mt-8 px-6 sm:px-8 lg:px-12 py-3 sm:py-4 text-base sm:text-lg lg:text-xl text-black font-semibold bg-primary rounded-lg hover:bg-yellow-500 transition-colors duration-300 touch-manipulation">
-          {{ $settings['hero_cta_text'] ?? 'Dapatkan Promo' }}
+        <a href="#menu" class="cta inline-block mt-6 sm:mt-8 px-6 sm:px-8 lg:px-12 py-3 sm:py-4 text-sm sm:text-base lg:text-lg text-black font-semibold bg-primary rounded-lg hover:bg-yellow-500 transition-colors duration-300 touch-manipulation">
+          Dapatkan Promo
         </a>
       </main>
     </section>
 
     <!-- About Section -->
-    <section id="about" class="py-12 sm:py-16 md:py-24 lg:py-32 px-4 sm:px-6 lg:px-7">
-      <h2 class="text-center text-2xl sm:text-3xl lg:text-4xl mb-6 sm:mb-8 lg:mb-12 text-text-dark">
-        <span class="text-primary">{{ $settings['about_title'] ?? 'Tentang' }}</span> {{ $settings['about_subtitle'] ?? 'Kami' }}
+    <section id="about" class="py-12 sm:py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-7">
+      <h2 class="text-center text-2xl sm:text-3xl lg:text-4xl mb-8 sm:mb-10 lg:mb-12 text-text-dark font-bold">
+        <span class="text-primary">Tentang</span> Kami
       </h2>
-      <div class="flex flex-col lg:flex-row gap-6 lg:gap-8 max-w-6xl mx-auto">
+      <div class="flex flex-col lg:flex-row gap-8 lg:gap-10 max-w-6xl mx-auto">
         <!-- Facility Carousel -->
-        <div class="flex-1 w-full lg:min-w-96">
-          @if($facilities->count() > 0)
+        <div class="flex-1 w-full">
           <div class="facility-carousel" id="facilityCarousel">
             <div class="facility-images" id="facilityImages">
-              @foreach($facilities as $facility)
               <div class="facility-slide">
-                <img src="{{ asset('storage/' . $facility->image) }}" alt="{{ $facility->name }}" class="facility-image" />
+                <img src="https://images.unsplash.com/photo-1594818379496-da1e345b0ded?w=800" alt="Wahana 1" class="facility-image" />
                 <div class="facility-overlay">
-                  <div class="facility-title">{{ $facility->name }}</div>
-                  <div class="facility-description">{{ Str::limit($facility->description, 120) }}</div>
+                  <div class="facility-title">Wahana Petualangan</div>
+                  <div class="facility-description">Nikmati pengalaman petualangan yang mendebarkan dengan berbagai wahana seru</div>
                 </div>
               </div>
-              @endforeach
+              <div class="facility-slide">
+                <img src="https://images.unsplash.com/photo-1519452575417-564c1401ecc0?w=800" alt="Wahana 2" class="facility-image" />
+                <div class="facility-overlay">
+                  <div class="facility-title">Taman Bermain</div>
+                  <div class="facility-description">Area bermain yang aman dan menyenangkan untuk seluruh keluarga</div>
+                </div>
+              </div>
+              <div class="facility-slide">
+                <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800" alt="Wahana 3" class="facility-image" />
+                <div class="facility-overlay">
+                  <div class="facility-title">Wisata Alam</div>
+                  <div class="facility-description">Jelajahi keindahan alam dengan pemandangan yang memukau</div>
+                </div>
+              </div>
             </div>
           </div>
           
-          <!-- Indicators di luar gambar -->
+          <!-- Indicators -->
           <div class="carousel-indicators" id="carouselIndicators"></div>
-          @else
-          <div class="bg-gray-100 rounded-xl p-12 text-center">
-            <i data-feather="image" class="w-16 h-16 mx-auto text-gray-400 mb-4"></i>
-            <p class="text-gray-500">Belum ada wahana tersedia</p>
-          </div>
-          @endif
           
           <!-- Tombol Lihat Lebih Banyak -->
           <div class="text-center mt-6">
-            <button onclick="window.location='wahana'"
-                    class="inline-flex items-center px-6 py-3 bg-primary text-black font-semibold rounded-lg hover:bg-yellow-500 transition-colors duration-300 group">
+            <button onclick="alert('Menuju halaman wahana')"
+                    class="inline-flex items-center px-6 py-3 bg-primary text-black font-semibold rounded-lg hover:bg-yellow-500 transition-colors duration-300 group touch-manipulation">
               Lihat Lebih Banyak
               <i data-feather="chevron-down"
                 class="w-5 h-5 ml-2 group-hover:transform group-hover:translate-y-1 transition-transform duration-300"></i>
@@ -550,194 +585,242 @@
           </div>
         </div>
         
-        <div class="flex-1 w-full lg:min-w-96 px-0 lg:px-8">
-          <h3 class="text-xl sm:text-2xl lg:text-3xl mb-3 sm:mb-4 text-text-dark">
-            {{ $settings['about_question'] ?? 'Kenapa memilih Wahana kami?' }}
+        <div class="flex-1 w-full lg:px-4">
+          <h3 class="text-xl sm:text-2xl lg:text-3xl mb-4 text-text-dark font-semibold">
+            Kenapa memilih Wahana kami?
           </h3>
-          <p class="mb-3 sm:mb-4 text-sm sm:text-base lg:text-lg font-medium leading-relaxed text-text-dark">
-            {{ $settings['about_content_1'] ?? 'MestaKara adalah penyedia wahana yang didirikan dengan cinta dan dedikasi untuk menghadirkan pengalaman wahana terbaik. Kami percaya bahwa setiap tawa dapat menciptakan kenangan indah yang akan diingat selamanya.' }}
+          <p class="mb-4 text-sm sm:text-base lg:text-lg font-medium leading-relaxed text-text-dark">
+            MestaKara adalah penyedia wahana yang didirikan dengan cinta dan dedikasi untuk menghadirkan pengalaman wahana terbaik. Kami percaya bahwa setiap tawa dapat menciptakan kenangan indah yang akan diingat selamanya.
           </p>
-          <p class="mb-3 sm:mb-4 text-sm sm:text-base lg:text-lg font-medium leading-relaxed text-text-dark">
-            {{ $settings['about_content_2'] ?? 'Wahana kami didirikan langsung di tengah perkebunan terbaik dan ditata dengan presisi yang sempurna. Setiap wahana yang kami sediakan adalah hasil dari perpaduan tradisi dan kualitas premium.' }}
+          <p class="mb-4 text-sm sm:text-base lg:text-lg font-medium leading-relaxed text-text-dark">
+            Wahana kami didirikan langsung di tengah perkebunan terbaik dan ditata dengan presisi yang sempurna. Setiap wahana yang kami sediakan adalah hasil dari perpaduan tradisi dan kualitas premium.
           </p>
           <p class="text-sm sm:text-base lg:text-lg font-medium leading-relaxed text-text-dark">
-            {{ $settings['about_content_3'] ?? 'Dengan lebih dari 20 wahana menarik, fasilitas lengkap, dan staff berpengalaman, kami siap memberikan pengalaman liburan yang tak terlupakan untuk seluruh keluarga.' }}
+            Dengan lebih dari 20 wahana menarik, fasilitas lengkap, dan staff berpengalaman, kami siap memberikan pengalaman liburan yang tak terlupakan untuk seluruh keluarga.
           </p>
         </div>
       </div>
     </section>
 
     <!-- Promo Section -->
-    <section id="menu" class="py-6">
-      <h2 class="text-center text-3xl sm:text-4xl mb-4 text-text-dark">
+    <section id="menu" class="py-8 sm:py-12 bg-gray-50">
+      <h2 class="text-center text-2xl sm:text-3xl lg:text-4xl mb-3 sm:mb-4 text-text-dark font-bold">
         <span class="text-primary">Promo</span> Kami
       </h2>
-      <p class="text-center max-w-lg mx-auto font-medium leading-relaxed text-text-dark mb-12 sm:mb-20 text-base sm:text-lg">
+      <p class="text-center max-w-lg mx-auto font-medium leading-relaxed text-text-dark mb-8 sm:mb-12 lg:mb-16 text-sm sm:text-base lg:text-lg px-4">
         Nikmati berbagai pilihan promo menarik untuk pengalaman liburan yang tak terlupakan
       </p>
       
-      @if($promos->count() > 0)
-        <div class="relative promo-slider">
-          <!-- Navigation Buttons -->
-          <button class="nav-button prev" id="prevBtn">
-            <i data-feather="chevron-left" class="w-6 h-6"></i>
-          </button>
-          
-          <button class="nav-button next" id="nextBtn">
-            <i data-feather="chevron-right" class="w-6 h-6"></i>
-          </button>
+      <div class="relative promo-slider">
+        <!-- Navigation Buttons -->
+        <button class="nav-button prev" id="prevBtn">
+          <i data-feather="chevron-left" class="w-5 h-5 sm:w-6 sm:h-6"></i>
+        </button>
+        
+        <button class="nav-button next" id="nextBtn">
+          <i data-feather="chevron-right" class="w-5 h-5 sm:w-6 sm:h-6"></i>
+        </button>
 
-          <!-- Slider Container -->
-          <div class="promo-container" id="promoContainer">
-            @foreach($promos as $promo)
-              @php
-                $isClickable = $promo->is_clickable;
-                $buttonStatus = $promo->button_status;
-              @endphp
+        <!-- Slider Container -->
+        <div class="promo-container" id="promoContainer">
+          <!-- Promo Card 1 -->
+          <div class="promo-card clickable active" onclick="alert('Detail Promo 1')">
+            <span class="featured-badge">Unggulan</span>
+            <span class="badge-discount status-badge">Diskon 20%</span>
+            
+            <div class="promo-image">
+              <img src="https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=400" alt="Promo 1" loading="lazy">
+            </div>
+            
+            <div class="p-5 sm:p-6">
+              <h3 class="text-lg sm:text-xl font-bold mb-2 text-text-dark">Paket Keluarga Hemat</h3>
+              <p class="text-gray-600 mb-4 text-sm sm:text-base">Nikmati liburan bersama keluarga dengan harga spesial untuk 4 orang</p>
               
-              <div class="promo-card block hover:no-underline {{ $isClickable ? 'clickable' : 'non-clickable promo-disabled' }}" 
-                   @if($isClickable) onclick="window.location.href='{{ route('promo.show', $promo->id) }}'" @endif>
-                   
-                @if($promo->featured && $isClickable)
-                  <span class="featured-badge">Unggulan</span>
-                @endif
-                
-                @if($promo->status_display === 'coming_soon')
-                  <span class="badge-coming-soon status-badge">Segera Hadir</span>
-                @elseif($promo->status_display === 'expired')
-                  <span class="badge-expired status-badge">Kadaluarsa</span>
-                @elseif($promo->status_display === 'sold_out')
-                  <span class="badge-sold-out status-badge">Habis</span>
-                @elseif($promo->status === 'active' && $promo->discount_percent > 0)
-                  <span class="badge-discount status-badge">Diskon {{ $promo->discount_percent }}%</span>
-                @endif
-                
-                <div class="promo-image">
-                  <img src="{{ $promo->image_url }}" alt="{{ $promo->name }}" loading="lazy">
-                  
-                  @if(!$isClickable)
-                    <div class="promo-overlay-disabled">
-                      <div class="overlay-content">
-                        @if($promo->status_display === 'coming_soon')
-                          <i data-feather="clock" class="w-8 h-8 mb-2 mx-auto"></i>
-                          <span class="text-sm font-medium">Segera Hadir</span>
-                          <p class="text-xs mt-1">Mulai {{ $promo->start_date->format('d M Y') }}</p>
-                        @elseif($promo->status_display === 'expired')
-                          <i data-feather="x-circle" class="w-8 h-8 mb-2 mx-auto"></i>
-                          <span class="text-sm font-medium">Promo Berakhir</span>
-                        @elseif($promo->status_display === 'sold_out')
-                          <i data-feather="package" class="w-8 h-8 mb-2 mx-auto"></i>
-                          <span class="text-sm font-medium">Kuota Habis</span>
-                        @endif
-                      </div>
-                    </div>
-                  @endif
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <span class="text-gray-400 line-through text-xs sm:text-sm">Rp 500.000</span>
+                  <span class="text-primary font-bold text-lg sm:text-xl block">Rp 400.000</span>
                 </div>
-                
-                <div class="p-6">
-                  <h3 class="text-xl font-bold mb-2 text-text-dark">{{ $promo->name }}</h3>
-                  <p class="text-gray-600 mb-4">{{ Str::limit($promo->description, 100) }}</p>
-                  
-                  <div class="flex items-center justify-between mb-4">
-                    <div>
-                      @if($promo->discount_percent > 0)
-                        <span class="text-gray-400 line-through text-sm">Rp {{ number_format($promo->original_price, 0, ',', '.') }}</span>
-                      @endif
-                      <span class="text-primary font-bold text-xl block">Rp {{ number_format($promo->promo_price, 0, ',', '.') }}</span>
-                    </div>
-                    <span class="bg-gray-100 text-gray-700 text-sm font-semibold px-3 py-1 rounded-full capitalize">
-                      {{ $promo->category }}
-                    </span>
-                  </div>
-                  
-                  <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
-                    <span>
-                      @if($promo->status_display === 'expired')
-                        Berakhir: {{ $promo->end_date ? $promo->end_date->format('d M Y') : '-' }}
-                      @elseif($promo->status_display === 'coming_soon')
-                        Mulai: {{ $promo->start_date->format('d M Y') }}
-                      @else
-                        @if($promo->end_date)
-                          Sampai: {{ $promo->end_date->format('d M Y') }}
-                        @else
-                          Tidak terbatas
-                        @endif
-                      @endif
-                    </span>
-                    @if($promo->quota && $promo->status === 'active')
-                      <span>Tersisa: {{ $promo->quota - $promo->actual_sold_count }}</span>
-                    @endif
-                  </div>
-                  
-                  <div class="w-full text-center font-semibold py-3 rounded-lg transition-colors duration-300 {{ $buttonStatus['class'] }}"
-                       @if(!$buttonStatus['clickable']) style="cursor: not-allowed;" @endif>
-                    {{ $buttonStatus['text'] }}
-                  </div>
+                <span class="bg-gray-100 text-gray-700 text-xs sm:text-sm font-semibold px-3 py-1 rounded-full">
+                  Keluarga
+                </span>
+              </div>
+              
+              <div class="flex items-center justify-between text-xs sm:text-sm text-gray-500 mb-4">
+                <span>Sampai: 31 Des 2025</span>
+                <span>Tersisa: 50</span>
+              </div>
+              
+              <div class="w-full text-center font-semibold py-3 rounded-lg bg-primary text-black hover:bg-yellow-500 transition-colors cursor-pointer">
+                Pesan Sekarang
+              </div>
+            </div>
+          </div>
+
+          <!-- Promo Card 2 -->
+          <div class="promo-card clickable" onclick="alert('Detail Promo 2')">
+            <span class="badge-discount status-badge">Diskon 15%</span>
+            
+            <div class="promo-image">
+              <img src="https://images.unsplash.com/photo-1519452635265-7b1fbfd1e4e0?w=400" alt="Promo 2" loading="lazy">
+            </div>
+            
+            <div class="p-5 sm:p-6">
+              <h3 class="text-lg sm:text-xl font-bold mb-2 text-text-dark">Weekend Special</h3>
+              <p class="text-gray-600 mb-4 text-sm sm:text-base">Promo spesial untuk akhir pekan bersama orang tersayang</p>
+              
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <span class="text-gray-400 line-through text-xs sm:text-sm">Rp 300.000</span>
+                  <span class="text-primary font-bold text-lg sm:text-xl block">Rp 255.000</span>
+                </div>
+                <span class="bg-gray-100 text-gray-700 text-xs sm:text-sm font-semibold px-3 py-1 rounded-full">
+                  Couple
+                </span>
+              </div>
+              
+              <div class="flex items-center justify-between text-xs sm:text-sm text-gray-500 mb-4">
+                <span>Sampai: 30 Nov 2025</span>
+                <span>Tersisa: 30</span>
+              </div>
+              
+              <div class="w-full text-center font-semibold py-3 rounded-lg bg-primary text-black hover:bg-yellow-500 transition-colors cursor-pointer">
+                Pesan Sekarang
+              </div>
+            </div>
+          </div>
+
+          <!-- Promo Card 3 - Coming Soon -->
+          <div class="promo-card non-clickable promo-disabled">
+            <span class="badge-coming-soon status-badge">Segera Hadir</span>
+            
+            <div class="promo-image">
+              <img src="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400" alt="Promo 3" loading="lazy">
+              
+              <div class="promo-overlay-disabled">
+                <div class="overlay-content text-center">
+                  <i data-feather="clock" class="w-8 h-8 mb-2 mx-auto"></i>
+                  <span class="text-sm font-medium block">Segera Hadir</span>
+                  <p class="text-xs mt-1">Mulai 1 Jan 2026</p>
                 </div>
               </div>
-            @endforeach
+            </div>
+            
+            <div class="p-5 sm:p-6">
+              <h3 class="text-lg sm:text-xl font-bold mb-2 text-text-dark">Tahun Baru Meriah</h3>
+              <p class="text-gray-600 mb-4 text-sm sm:text-base">Rayakan tahun baru dengan promo istimewa untuk keluarga</p>
+              
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <span class="text-primary font-bold text-lg sm:text-xl block">Rp 600.000</span>
+                </div>
+                <span class="bg-gray-100 text-gray-700 text-xs sm:text-sm font-semibold px-3 py-1 rounded-full">
+                  Special
+                </span>
+              </div>
+              
+              <div class="flex items-center justify-between text-xs sm:text-sm text-gray-500 mb-4">
+                <span>Mulai: 1 Jan 2026</span>
+              </div>
+              
+              <div class="w-full text-center font-semibold py-3 rounded-lg bg-gray-300 text-gray-600 cursor-not-allowed">
+                Segera Hadir
+              </div>
+            </div>
           </div>
 
-          <!-- Dots Indicator -->
-          <div class="dots-container" id="dotsContainer"></div>
-        </div>
-      @else
-        <div class="text-center py-12">
-          <div class="inline-block p-4 bg-gray-100 rounded-full mb-4">
-            <i data-feather="tag" class="w-12 h-12 text-gray-400"></i>
+          <!-- Promo Card 4 -->
+          <div class="promo-card clickable" onclick="alert('Detail Promo 4')">
+            <span class="badge-discount status-badge">Diskon 25%</span>
+            
+            <div class="promo-image">
+              <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400" alt="Promo 4" loading="lazy">
+            </div>
+            
+            <div class="p-5 sm:p-6">
+              <h3 class="text-lg sm:text-xl font-bold mb-2 text-text-dark">Adventure Pack</h3>
+              <p class="text-gray-600 mb-4 text-sm sm:text-base">Paket lengkap untuk petualangan seru di semua wahana</p>
+              
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <span class="text-gray-400 line-through text-xs sm:text-sm">Rp 800.000</span>
+                  <span class="text-primary font-bold text-lg sm:text-xl block">Rp 600.000</span>
+                </div>
+                <span class="bg-gray-100 text-gray-700 text-xs sm:text-sm font-semibold px-3 py-1 rounded-full">
+                  Premium
+                </span>
+              </div>
+              
+              <div class="flex items-center justify-between text-xs sm:text-sm text-gray-500 mb-4">
+                <span>Tidak terbatas</span>
+                <span>Tersisa: 100</span>
+              </div>
+              
+              <div class="w-full text-center font-semibold py-3 rounded-lg bg-primary text-black hover:bg-yellow-500 transition-colors cursor-pointer">
+                Pesan Sekarang
+              </div>
+            </div>
           </div>
-          <h3 class="text-xl font-semibold text-gray-600 mb-2">Tidak ada promo saat ini</h3>
-          <p class="text-gray-500">Silakan kembali lagi nanti untuk melihat promo terbaru</p>
         </div>
-      @endif
+
+        <!-- Dots Indicator -->
+        <div class="dots-container" id="dotsContainer"></div>
+      </div>
     </section>
 
     <!-- Footer -->
-    <footer class="bg-black text-white pt-8 sm:pt-10 lg:pt-12 pb-6 sm:pb-8">
-      <div class="container mx-auto px-4 sm:px-6">
-        <div class="flex flex-col md:flex-row justify-between items-center gap-6 sm:gap-8 mb-8 sm:mb-10 lg:mb-12">
+    <footer class="bg-black text-white pt-10 sm:pt-12 lg:pt-16 pb-6 sm:pb-8">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-10 mb-8 sm:mb-10 lg:mb-12">
           <div class="text-center md:text-left">
             <h3 class="text-2xl sm:text-3xl font-bold italic mb-3 sm:mb-4">
-              {{ $settings['site_name'] ?? 'MestaKara' }}<span class="text-white">.</span>
+              MestaKara<span class="text-primary">.</span>
             </h3>
-            <p class="max-w-xs text-sm sm:text-base lg:text-lg opacity-90">
-              {{ $settings['website_description'] ?? 'Menyajikan wahana menyenangkan dengan keseruan yang tak terlupakan.' }}
+            <p class="max-w-xs mx-auto md:mx-0 text-sm sm:text-base opacity-90 leading-relaxed">
+              Menyajikan wahana menyenangkan dengan keseruan yang tak terlupakan bersama keluarga tercinta.
             </p>
           </div>
           
-          <div>
-            <h4 class="text-base sm:text-lg lg:text-xl font-semibold mb-4 sm:mb-5 lg:mb-6 text-center md:text-left">Tautan Cepat</h4>
-            <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-6 lg:space-x-8">
-              <a href="#home" class="hover:text-gray-300 transition-colors duration-300 text-sm sm:text-base lg:text-lg touch-manipulation text-center md:text-left">Home</a>
-              <a href="#about" class="hover:text-gray-300 transition-colors duration-300 text-sm sm:text-base lg:text-lg touch-manipulation text-center md:text-left">Tentang Kami</a>
-              <a href="#menu" class="hover:text-gray-300 transition-colors duration-300 text-sm sm:text-base lg:text-lg touch-manipulation text-center md:text-left">Promo</a>
+          <div class="text-center">
+            <h4 class="text-base sm:text-lg font-semibold mb-4 sm:mb-5">Tautan Cepat</h4>
+            <div class="flex flex-col space-y-3">
+              <a href="#home" class="hover:text-primary transition-colors duration-300 text-sm sm:text-base touch-manipulation">Home</a>
+              <a href="#about" class="hover:text-primary transition-colors duration-300 text-sm sm:text-base touch-manipulation">Tentang Kami</a>
+              <a href="#menu" class="hover:text-primary transition-colors duration-300 text-sm sm:text-base touch-manipulation">Promo</a>
+              <a href="#wahana" class="hover:text-primary transition-colors duration-300 text-sm sm:text-base touch-manipulation">Wahana</a>
             </div>
           </div>
           
-          <div>
-            <h4 class="text-base sm:text-lg lg:text-xl font-semibold mb-4 sm:mb-5 lg:mb-6 text-center md:text-left">Ikuti Kami</h4>
-            <div class="flex justify-center md:justify-start space-x-3 sm:space-x-4 lg:space-x-6">
-              <a href="https://www.instagram.com/wisataagro8/?hl=id" class="bg-white bg-opacity-20 p-2 sm:p-2.5 lg:p-3 rounded-full hover:bg-opacity-30 transition-all duration-300 touch-manipulation">
-                <i data-feather="instagram" class="w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-6"></i>
+          <div class="text-center md:text-right">
+            <h4 class="text-base sm:text-lg font-semibold mb-4 sm:mb-5">Ikuti Kami</h4>
+            <div class="flex justify-center md:justify-end space-x-4">
+              <a href="https://www.instagram.com/wisataagro8/?hl=id" class="bg-white bg-opacity-20 p-3 rounded-full hover:bg-opacity-30 hover:scale-110 transition-all duration-300 touch-manipulation">
+                <i data-feather="instagram" class="w-5 h-5"></i>
               </a>
-              <a href="https://twitter.com/agrowisata_n8" class="bg-white bg-opacity-20 p-2 sm:p-2.5 lg:p-3 rounded-full hover:bg-opacity-30 transition-all duration-300 touch-manipulation">
-                <i data-feather="twitter" class="w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-6"></i>
+              <a href="https://twitter.com/agrowisata_n8" class="bg-white bg-opacity-20 p-3 rounded-full hover:bg-opacity-30 hover:scale-110 transition-all duration-300 touch-manipulation">
+                <i data-feather="twitter" class="w-5 h-5"></i>
               </a>
-              <a href="https://www.facebook.com/AgrowisataN8/" class="bg-white bg-opacity-20 p-2 sm:p-2.5 lg:p-3 rounded-full hover:bg-opacity-30 transition-all duration-300 touch-manipulation">
-                <i data-feather="facebook" class="w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-6"></i>
+              <a href="https://www.facebook.com/AgrowisataN8/" class="bg-white bg-opacity-20 p-3 rounded-full hover:bg-opacity-30 hover:scale-110 transition-all duration-300 touch-manipulation">
+                <i data-feather="facebook" class="w-5 h-5"></i>
+              </a>
+            </div>
+            <div class="mt-6">
+              <p class="text-sm opacity-80 mb-2">Hubungi Kami</p>
+              <a href="tel:+6281234567890" class="text-primary hover:text-yellow-400 transition-colors text-sm sm:text-base font-medium">
+                +62 812-3456-7890
               </a>
             </div>
           </div>
         </div>
         
-        <div class="border-t border-white border-opacity-30 my-6 sm:my-7 lg:my-8"></div>
+        <div class="border-t border-white border-opacity-30 pt-6 sm:pt-8"></div>
         
-        <div class="flex flex-col md:flex-row justify-between items-center gap-3 text-center md:text-left">
-          <p class="text-xs sm:text-sm lg:text-base opacity-80">
-            {{ $settings['footer_text'] ?? '© 2025 Tiketmas. All rights reserved.' }}
+        <div class="flex flex-col sm:flex-row justify-between items-center gap-3 text-center sm:text-left">
+          <p class="text-xs sm:text-sm opacity-80">
+            © 2025 MestaKara. All rights reserved.
           </p>
-          <p class="text-xs sm:text-sm lg:text-base opacity-80">
-            Created by <a href="#" class="font-bold hover:underline">{{ $settings['site_name'] ?? 'Mestakara' }}</a>
+          <p class="text-xs sm:text-sm opacity-80">
+            Created with <span class="text-primary">❤</span> by <a href="#" class="font-bold hover:text-primary transition-colors">MestaKara Team</a>
           </p>
         </div>
       </div>
@@ -783,12 +866,6 @@
         closeMobileMenu();
       });
 
-      closeMenu.addEventListener('touchend', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        closeMobileMenu();
-      });
-
       overlay.addEventListener('click', closeMobileMenu);
 
       document.addEventListener('click', (e) => {
@@ -815,10 +892,6 @@
             });
           }
           closeMobileMenu();
-        });
-
-        anchor.addEventListener('touchend', function (e) {
-          this.click();
         });
       });
 
