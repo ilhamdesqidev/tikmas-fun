@@ -36,8 +36,8 @@ class FacilityController extends Controller
         'description' => 'required|string',
         'duration' => 'required|string|max:100',
         'age_range' => 'required|string|max:100',
-        'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
-        'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240'
+        'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:30728',
+        'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:30728'
     ]);
 
     // Upload gambar utama
@@ -92,8 +92,8 @@ class FacilityController extends Controller
             'duration' => 'required|string|max:100',
             'age_range' => 'required|string|max:100',
             'category' => 'required|string|max:50',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240',
-            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240'
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:30728',
+            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:30728'
         ]);
 
         $data = [

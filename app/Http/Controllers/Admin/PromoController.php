@@ -85,8 +85,8 @@ class PromoController extends Controller
             'quota' => 'nullable|integer|min:1',
             'status' => 'required|in:draft,coming_soon,active,inactive',
             'category' => 'required|in:bulanan,holiday,birthday,nasional,student',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
-            'bracelet_design' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10240',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:30728',
+            'bracelet_design' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:30728',
         ]);
 
         try {
@@ -248,8 +248,8 @@ class PromoController extends Controller
                 'quota' => 'nullable|integer|min:1',
                 'status' => 'required|in:draft,coming_soon,active,inactive,expired',
                 'category' => 'required|in:bulanan,holiday,birthday,nasional,student',
-                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240',
-                'bracelet_design' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10240',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:30728',
+                'bracelet_design' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:30728',
             ]);
 
             if ($validator->fails()) {
