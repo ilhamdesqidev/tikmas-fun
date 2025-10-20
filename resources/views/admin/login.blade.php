@@ -31,25 +31,29 @@
     </script>
     <style>
       .login-bg {
-        background-image :url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80');
+        background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80');
         background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
         position: relative;
         overflow: hidden;
+        min-height: 100vh;
       }
       
-      /* Efek blur pada background - Line 35-43 */
-      .login-bg::after {
+      /* Efek blur pada background */
+      .login-bg::before {
         content: '';
         position: absolute;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        backdrop-filter: blur(8px); /* Nilai blur bisa disesuaikan */
-        z-index: 0;
+        backdrop-filter: blur(8px);
+        z-index: 1;
       }
       
-      .login-bg::before {
+      /* Efek floating untuk desktop */
+      .login-bg::after {
         content: '';
         position: absolute;
         top: -50%;
@@ -68,11 +72,21 @@
         66% { transform: translate(-30px, 20px) rotate(240deg); }
       }
       
+      /* Hilangkan efek floating di mobile untuk menghindari gambar double */
+      @media (max-width: 768px) {
+        .login-bg::after {
+          display: none;
+        }
+        
+        .login-bg::before {
+          backdrop-filter: blur(4px); /* Kurangi blur di mobile */
+        }
+      }
+      
       .glass-card {
         background: rgba(255, 255, 255, 0.95);
         backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.2);
-        
       }
       
       .input-group {
@@ -172,109 +186,136 @@
         position: relative;
         z-index: 2;
       }
+      
+      /* Container untuk memastikan konten tidak kepotong di desktop */
+      .login-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        width: 100%;
+      }
+      
+      /* Atur tinggi maksimum untuk konten di mobile */
+      @media (max-width: 768px) {
+        .login-container {
+          padding: 16px;
+          align-items: flex-start;
+          padding-top: 40px;
+        }
+        
+        .glass-card {
+          margin-top: 0;
+        }
+      }
     </style>
 </head>
-<body class="font-poppins min-h-screen login-bg flex items-center justify-center p-4">
-    <div class="w-full max-w-md relative z-10">
-        <!-- Logo/Brand -->
-        <div class="text-center mb-8">
-            <div class="tea-icon">
-                <i data-feather="coffee" class="w-8 h-8 text-white"></i>
-            </div>
-            <h1 class="text-3xl font-bold text-white mb-2">
-                Mesta<span class="text-black">Kara</span>
-            </h1>
-            <p class="text-white/90 text-lg">Admin Portal</p>
-        </div>
-        
-        <!-- Login Card -->
-        <div class="glass-card rounded-2xl shadow-2xl p-8">
-            <div class="text-center mb-8">
-                <h2 class="text-2xl font-semibold text-gray-800 mb-2">Welcome Back</h2>
-                <p class="text-gray-600">Please sign in to your admin account</p>
-            </div>
-            
-            <!-- Error Messages -->
-            @if ($errors->any())
-                <div class="error-alert rounded-xl p-4 mb-6">
-                    <div class="flex items-center">
-                        <i data-feather="alert-circle" class="w-5 h-5 text-red-600 mr-2 flex-shrink-0"></i>
-                        <div>
-                            <p class="font-semibold text-red-800 text-sm">Please fix the following errors:</p>
-                            <ul class="list-disc list-inside text-red-700 text-sm mt-1">
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
+<body class="font-poppins">
+    <div class="login-bg">
+        <div class="login-container">
+            <div class="w-full max-w-md">
+                <!-- Logo/Brand -->
+                <div class="text-center mb-8">
+                    <div class="tea-icon">
+                        <i data-feather="coffee" class="w-8 h-8 text-white"></i>
+                    </div>
+                    <h1 class="text-3xl font-bold text-white mb-2">
+                        Mesta<span class="text-black">Kara</span>
+                    </h1>
+                    <p class="text-white/90 text-lg">Admin Portal</p>
+                </div>
+                
+                <!-- Login Card -->
+                <div class="glass-card rounded-2xl shadow-2xl p-6 md:p-8">
+                    <div class="text-center mb-8">
+                        <h2 class="text-2xl font-semibold text-gray-800 mb-2">Welcome Back</h2>
+                        <p class="text-gray-600">Please sign in to your admin account</p>
+                    </div>
+                    
+                    <!-- Error Messages -->
+                    @if ($errors->any())
+                        <div class="error-alert rounded-xl p-4 mb-6">
+                            <div class="flex items-center">
+                                <i data-feather="alert-circle" class="w-5 h-5 text-red-600 mr-2 flex-shrink-0"></i>
+                                <div>
+                                    <p class="font-semibold text-red-800 text-sm">Please fix the following errors:</p>
+                                    <ul class="list-disc list-inside text-red-700 text-sm mt-1">
+                                        @foreach ($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
+                    @endif
+
+                    <!-- Login Form -->
+                    <form method="POST" action="{{ route('admin.login') }}" class="space-y-6">
+                        @csrf
+                        
+                        <!-- Username Field -->
+                        <div class="input-group">
+                            <input 
+                                type="text" 
+                                class="form-input w-full px-4 py-3 rounded-xl text-gray-700 text-base"
+                                id="username" 
+                                name="username" 
+                                value="{{ old('username') }}" 
+                                placeholder=" "
+                                required 
+                                autofocus
+                            >
+                            <label for="username" class="floating-label font-medium">
+                                <i data-feather="user" class="w-4 h-4 inline mr-1"></i>
+                                Username
+                            </label>
+                        </div>
+                        
+                        <!-- Password Field -->
+                        <div class="input-group">
+                            <input 
+                                type="password" 
+                                class="form-input w-full px-4 py-3 rounded-xl text-gray-700 text-base"
+                                id="password" 
+                                name="password" 
+                                placeholder=" "
+                                required
+                            >
+                            <label for="password" class="floating-label font-medium">
+                                <i data-feather="lock" class="w-4 h-4 inline mr-1"></i>
+                                Password
+                            </label>
+                        </div>
+                        
+                        <!-- Login Button -->
+                        <button 
+                            type="submit" 
+                            class="login-btn w-full py-3 px-6 rounded-xl text-white font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 relative z-10"
+                        >
+                            <span class="flex items-center justify-center">
+                                <i data-feather="log-in" class="w-5 h-5 mr-2"></i>
+                                Sign In
+                            </span>
+                        </button>
+                    </form>
+                    
+                    <!-- Footer -->
+                    <div class="text-center mt-8 pt-6 border-t border-gray-200">
+                        <p class="text-gray-500 text-sm">
+                            Protected by <span class="font-semibold text-primary">MestaKara Security</span>
+                        </p>
                     </div>
                 </div>
-            @endif
-
-            <!-- Login Form -->
-            <form method="POST" action="{{ route('admin.login') }}" class="space-y-6">
-                @csrf
                 
-                <!-- Username Field -->
-                <div class="input-group">
-                    <input 
-                        type="text" 
-                        class="form-input w-full px-4 py-3 rounded-xl text-gray-700 text-base"
-                        id="username" 
-                        name="username" 
-                        value="{{ old('username') }}" 
-                        placeholder=" "
-                        required 
-                        autofocus
-                    >
-                    <label for="username" class="floating-label font-medium">
-                        <i data-feather="user" class="w-4 h-4 inline mr-1"></i>
-                        Username
-                    </label>
+                <!-- Back to Website -->
+                <div class="text-center mt-6">
+                    <a href="/" class="inline-flex items-center text-white/90 hover:text-white transition-colors duration-300">
+                        <i data-feather="arrow-left" class="w-4 h-4 mr-2"></i>
+                        Back to Website
+                    </a>
                 </div>
-                
-                <!-- Password Field -->
-                <div class="input-group">
-                    <input 
-                        type="password" 
-                        class="form-input w-full px-4 py-3 rounded-xl text-gray-700 text-base"
-                        id="password" 
-                        name="password" 
-                        placeholder=" "
-                        required
-                    >
-                    <label for="password" class="floating-label font-medium">
-                        <i data-feather="lock" class="w-4 h-4 inline mr-1"></i>
-                        Password
-                    </label>
-                </div>
-                
-                <!-- Login Button -->
-                <button 
-                    type="submit" 
-                    class="login-btn w-full py-3 px-6 rounded-xl text-white font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 relative z-10"
-                >
-                    <span class="flex items-center justify-center">
-                        <i data-feather="log-in" class="w-5 h-5 mr-2"></i>
-                        Sign In
-                    </span>
-                </button>
-            </form>
-            
-            <!-- Footer -->
-            <div class="text-center mt-8 pt-6 border-t border-gray-200">
-                <p class="text-gray-500 text-sm">
-                    Protected by <span class="font-semibold text-primary">MestaKara Security</span>
-                </p>
             </div>
-        </div>
-        
-        <!-- Back to Website -->
-        <div class="text-center mt-6">
-            <a href="/" class="inline-flex items-center text-white/90 hover:text-white transition-colors duration-300">
-                <i data-feather="arrow-left" class="w-4 h-4 mr-2"></i>
-                Back to Website
-            </a>
         </div>
     </div>
 
@@ -314,11 +355,32 @@
             const form = document.querySelector('form');
             const submitBtn = document.querySelector('.login-btn');
             
-            form.addEventListener('submit', function() {
-                submitBtn.innerHTML = '<i data-feather="loader" class="w-5 h-5 mr-2 animate-spin"></i>Signing In...';
-                submitBtn.disabled = true;
-                feather.replace();
-            });
+            if (form && submitBtn) {
+                form.addEventListener('submit', function() {
+                    submitBtn.innerHTML = '<i data-feather="loader" class="w-5 h-5 mr-2 animate-spin"></i>Signing In...';
+                    submitBtn.disabled = true;
+                    feather.replace();
+                });
+            }
+            
+            // Adjust layout for mobile
+            function adjustLayout() {
+                const isMobile = window.innerWidth <= 768;
+                const container = document.querySelector('.login-container');
+                
+                if (isMobile) {
+                    // For mobile, ensure content fits well
+                    document.body.style.minHeight = '100vh';
+                    document.body.style.overflow = 'auto';
+                } else {
+                    // For desktop, center everything properly
+                    document.body.style.minHeight = '100vh';
+                }
+            }
+            
+            // Call on load and resize
+            adjustLayout();
+            window.addEventListener('resize', adjustLayout);
         });
     </script>
 </body>
