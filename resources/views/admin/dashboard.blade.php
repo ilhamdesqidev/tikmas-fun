@@ -14,115 +14,115 @@
     @endphp
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="card rounded-xl p-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
+        <div class="card rounded-xl p-4 md:p-6">
             <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-gray-600">Total Tiket Terjual</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['total_tickets_sold']) }}</p>
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs md:text-sm font-medium text-gray-600 truncate">Total Tiket Terjual</p>
+                    <p class="text-xl md:text-2xl font-bold text-gray-900 mt-1">{{ number_format($stats['total_tickets_sold']) }}</p>
                 </div>
-                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <div class="w-10 h-10 md:w-12 md:h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0 ml-2">
+                    <svg class="w-5 h-5 md:w-6 md:h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path>
                     </svg>
                 </div>
             </div>
-            <div class="mt-4">
-                <span class="text-green-600 text-sm font-medium">{{ $stats['tickets_sold_change'] }}% dari bulan lalu</span>
+            <div class="mt-3 md:mt-4">
+                <span class="text-green-600 text-xs md:text-sm font-medium">{{ $stats['tickets_sold_change'] }}% dari bulan lalu</span>
             </div>
         </div>
 
-        <div class="card rounded-xl p-6">
+        <div class="card rounded-xl p-4 md:p-6">
             <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-gray-600">Total Revenue</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $stats['total_revenue_formatted'] }}</p>
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs md:text-sm font-medium text-gray-600 truncate">Total Revenue</p>
+                    <p class="text-xl md:text-2xl font-bold text-gray-900 mt-1 truncate">{{ $stats['total_revenue_formatted'] }}</p>
                 </div>
-                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <div class="w-10 h-10 md:w-12 md:h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0 ml-2">
+                    <svg class="w-5 h-5 md:w-6 md:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
             </div>
-            <div class="mt-4">
-                <span class="text-green-600 text-sm font-medium">{{ $stats['revenue_change'] }}% dari bulan lalu</span>
+            <div class="mt-3 md:mt-4">
+                <span class="text-green-600 text-xs md:text-sm font-medium">{{ $stats['revenue_change'] }}% dari bulan lalu</span>
             </div>
         </div>
 
-        <div class="card rounded-xl p-6">
+        <div class="card rounded-xl p-4 md:p-6">
             <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-gray-600">Promo Aktif</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $stats['active_promos'] }}</p>
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs md:text-sm font-medium text-gray-600 truncate">Promo Aktif</p>
+                    <p class="text-xl md:text-2xl font-bold text-gray-900 mt-1">{{ $stats['active_promos'] }}</p>
                 </div>
-                <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                    <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <div class="w-10 h-10 md:w-12 md:h-12 bg-yellow-100 rounded-lg flex items-center justify-center flex-shrink-0 ml-2">
+                    <svg class="w-5 h-5 md:w-6 md:h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path>
                     </svg>
                 </div>
             </div>
-            <div class="mt-4">
-                <span class="text-green-600 text-sm font-medium">{{ $stats['promos_change'] }} promo baru</span>
+            <div class="mt-3 md:mt-4">
+                <span class="text-green-600 text-xs md:text-sm font-medium">{{ $stats['promos_change'] }} promo baru</span>
             </div>
         </div>
 
-        <div class="card rounded-xl p-6">
+        <div class="card rounded-xl p-4 md:p-6">
             <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-gray-600">Total Customers</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['total_customers']) }}</p>
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs md:text-sm font-medium text-gray-600 truncate">Total Customers</p>
+                    <p class="text-xl md:text-2xl font-bold text-gray-900 mt-1">{{ number_format($stats['total_customers']) }}</p>
                 </div>
-                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-10 h-10 md:w-12 md:h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0 ml-2">
+                    <svg class="w-5 h-5 md:w-6 md:h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                     </svg>
                 </div>
             </div>
-            <div class="mt-4">
-                <span class="text-green-600 text-sm font-medium">{{ $stats['customers_change'] }}% dari bulan lalu</span>
+            <div class="mt-3 md:mt-4">
+                <span class="text-green-600 text-xs md:text-sm font-medium">{{ $stats['customers_change'] }}% dari bulan lalu</span>
             </div>
         </div>
     </div>
 
     <!-- Charts and Tables Row -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 mb-6 md:mb-8">
         <!-- Revenue Chart -->
-        <div class="lg:col-span-2 card rounded-xl p-6">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-lg font-semibold text-gray-900">Revenue</h3>
+        <div class="lg:col-span-2 card rounded-xl p-4 md:p-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 md:mb-6 gap-3">
+                <h3 class="text-base md:text-lg font-semibold text-gray-900">Revenue</h3>
                 <div class="flex items-center gap-3">
-                    <select id="revenuePeriodFilter" class="text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer">
+                    <select id="revenuePeriodFilter" class="text-xs md:text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer w-full sm:w-auto">
                         <option value="daily" {{ $currentPeriod == 'daily' ? 'selected' : '' }}>Harian (30 Hari)</option>
                         <option value="weekly" {{ $currentPeriod == 'weekly' ? 'selected' : '' }}>Mingguan (12 Minggu)</option>
                         <option value="monthly" {{ $currentPeriod == 'monthly' ? 'selected' : '' }}>Bulanan (12 Bulan)</option>
                     </select>
                 </div>
             </div>
-            <div class="h-80 relative">
-                <div id="chartLoader" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 hidden">
-                    <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+            <div class="h-64 md:h-80 relative">
+                <div id="chartLoader" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 hidden z-10">
+                    <div class="animate-spin rounded-full h-8 w-8 md:h-10 md:w-10 border-b-2 border-blue-600"></div>
                 </div>
                 <canvas id="revenueChart"></canvas>
             </div>
         </div>
 
         <!-- Popular Packages -->
-        <div class="card rounded-xl p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-6">Paket Populer</h3>
-            <div class="space-y-4">
+        <div class="card rounded-xl p-4 md:p-6">
+            <h3 class="text-base md:text-lg font-semibold text-gray-900 mb-4 md:mb-6">Paket Populer</h3>
+            <div class="space-y-3 md:space-y-4">
                 @forelse($popularPackages as $package)
-                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div class="flex-1">
-                        <h4 class="text-sm font-medium text-gray-900">{{ $package['name'] }}</h4>
-                        <p class="text-xs text-gray-600">{{ $package['sold'] }} terjual</p>
+                <div class="flex items-center justify-between p-3 md:p-4 bg-gray-50 rounded-lg">
+                    <div class="flex-1 min-w-0 mr-3">
+                        <h4 class="text-xs md:text-sm font-medium text-gray-900 truncate">{{ $package['name'] }}</h4>
+                        <p class="text-xs text-gray-600 mt-0.5">{{ $package['sold'] }} terjual</p>
                     </div>
-                    <div class="text-right">
-                        <p class="text-sm font-semibold text-gray-900">{{ $package['revenue_formatted'] }}</p>
+                    <div class="text-right flex-shrink-0">
+                        <p class="text-xs md:text-sm font-semibold text-gray-900">{{ $package['revenue_formatted'] }}</p>
                     </div>
                 </div>
                 @empty
-                <div class="text-center py-4 text-gray-500">
-                    <p>Tidak ada data paket populer</p>
+                <div class="text-center py-6 md:py-8 text-gray-500">
+                    <p class="text-sm">Tidak ada data paket populer</p>
                 </div>
                 @endforelse
             </div>
@@ -131,14 +131,77 @@
 
     <!-- Recent Orders -->
     <div class="card rounded-xl">
-        <div class="flex items-center justify-between p-6 border-b border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-900">Pesanan Terbaru</h3>
-            <a href="{{ route('admin.tickets.index') }}" class="text-primary hover:text-yellow-600 text-sm font-medium">
+        <div class="flex items-center justify-between p-4 md:p-6 border-b border-gray-200">
+            <h3 class="text-base md:text-lg font-semibold text-gray-900">Pesanan Terbaru</h3>
+            <a href="{{ route('admin.tickets.index') }}" class="text-primary hover:text-yellow-600 text-xs md:text-sm font-medium">
                 Lihat Semua
             </a>
         </div>
         
-        <div class="overflow-x-auto">
+        <!-- Mobile Card View -->
+        <div class="block md:hidden">
+            @forelse($recentOrders as $order)
+            <div class="border-b border-gray-200 p-4 hover:bg-gray-50">
+                <div class="flex items-start justify-between mb-3">
+                    <div class="flex-1 min-w-0">
+                        <div class="text-sm font-medium text-gray-900 truncate">{{ $order->order_number }}</div>
+                        @if($order->invoice_number)
+                            <div class="text-xs text-blue-600 truncate">{{ $order->invoice_number }}</div>
+                        @endif
+                        <div class="text-xs text-gray-500 mt-1">
+                            {{ $order->created_at->format('d M Y H:i') }}
+                        </div>
+                    </div>
+                    @php
+                        $statusColors = [
+                            'success' => 'text-green-700 bg-green-50 border border-green-200',
+                            'pending' => 'text-yellow-700 bg-yellow-50 border border-yellow-200',
+                            'canceled' => 'text-red-700 bg-red-50 border border-red-200',
+                            'challenge' => 'text-orange-700 bg-orange-50 border border-orange-200',
+                            'denied' => 'text-red-700 bg-red-50 border border-red-200',
+                            'expired' => 'text-gray-700 bg-gray-50 border border-gray-200'
+                        ];
+                    @endphp
+                    <span class="px-2 py-1 text-xs rounded-full font-medium flex-shrink-0 ml-2 {{ $statusColors[$order->status] ?? 'text-gray-700 bg-gray-50 border border-gray-200' }}">
+                        {{ ucfirst($order->status) }}
+                    </span>
+                </div>
+                
+                <div class="space-y-2">
+                    <div class="flex items-center text-sm">
+                        <div class="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
+                            <svg class="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                        </div>
+                        <span class="text-gray-900 truncate">{{ $order->customer_name }}</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between text-xs text-gray-600">
+                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $order->whatsapp_number) }}" target="_blank" 
+                           class="text-green-600 hover:text-green-800 flex items-center gap-1 truncate">
+                            <i class="fab fa-whatsapp"></i>
+                            <span class="truncate">{{ $order->whatsapp_number }}</span>
+                        </a>
+                        <span class="ml-2">{{ \Carbon\Carbon::parse($order->visit_date)->format('d M Y') }}</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between pt-2 border-t border-gray-100">
+                        <span class="text-xs text-gray-600">{{ $order->ticket_quantity }} tiket</span>
+                        <span class="text-sm font-semibold text-gray-900">Rp {{ number_format($order->total_price, 0, ',', '.') }}</span>
+                    </div>
+                </div>
+            </div>
+            @empty
+            <div class="p-8 text-center text-gray-500">
+                <i class="fas fa-inbox text-2xl mb-2"></i>
+                <p class="text-sm">Tidak ada pesanan terbaru</p>
+            </div>
+            @endforelse
+        </div>
+
+        <!-- Desktop Table View -->
+        <div class="hidden md:block overflow-x-auto">
             <table class="w-full">
                 <thead class="bg-gray-50">
                     <tr>
@@ -166,7 +229,7 @@
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center">
                                 <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center mr-3">
-                                    <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                     </svg>
                                 </div>
@@ -207,7 +270,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="px-6 py-4 text-center text-gray-500">
+                        <td colspan="7" class="px-6 py-4 text-center text-gray-500">
                             <div class="text-gray-500">
                                 <i class="fas fa-inbox text-2xl mb-2"></i>
                                 <p>Tidak ada pesanan terbaru</p>
@@ -245,7 +308,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!data || data.length === 0) {
                 console.warn('No revenue data available');
                 const parent = ctx.parentElement;
-                parent.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500"><p>Tidak ada data revenue</p></div>';
+                parent.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500"><p class="text-sm">Tidak ada data revenue</p></div>';
                 return;
             }
 
@@ -253,6 +316,12 @@ document.addEventListener('DOMContentLoaded', function() {
             if (revenueChart) {
                 revenueChart.destroy();
             }
+
+            // Responsive font sizes
+            const isMobile = window.innerWidth < 768;
+            const fontSize = isMobile ? 9 : 11;
+            const pointRadius = isMobile ? 3 : 5;
+            const pointHoverRadius = isMobile ? 5 : 7;
 
             // Create new chart
             revenueChart = new Chart(ctx, {
@@ -264,16 +333,16 @@ document.addEventListener('DOMContentLoaded', function() {
                         data: data.map(item => parseFloat(item.revenue) || 0),
                         borderColor: '#CFD916',
                         backgroundColor: 'rgba(207, 217, 22, 0.1)',
-                        borderWidth: 3,
+                        borderWidth: isMobile ? 2 : 3,
                         fill: true,
                         tension: 0.4,
                         pointBackgroundColor: '#CFD916',
                         pointBorderColor: '#fff',
-                        pointBorderWidth: 2,
+                        pointBorderWidth: isMobile ? 1 : 2,
                         pointHoverBackgroundColor: '#CFD916',
                         pointHoverBorderColor: '#fff',
-                        pointRadius: 5,
-                        pointHoverRadius: 7,
+                        pointRadius: pointRadius,
+                        pointHoverRadius: pointHoverRadius,
                     }]
                 },
                 options: {
@@ -285,12 +354,18 @@ document.addEventListener('DOMContentLoaded', function() {
                         },
                         tooltip: {
                             backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                            padding: 12,
+                            padding: isMobile ? 8 : 12,
                             titleColor: '#fff',
                             bodyColor: '#fff',
                             borderColor: '#CFD916',
                             borderWidth: 1,
                             displayColors: false,
+                            titleFont: {
+                                size: fontSize
+                            },
+                            bodyFont: {
+                                size: fontSize
+                            },
                             callbacks: {
                                 label: function(context) {
                                     let value = context.parsed.y;
@@ -308,9 +383,11 @@ document.addEventListener('DOMContentLoaded', function() {
                             ticks: {
                                 color: '#6B7280',
                                 font: {
-                                    size: 11,
+                                    size: fontSize,
                                     weight: '500'
-                                }
+                                },
+                                maxRotation: isMobile ? 45 : 0,
+                                minRotation: isMobile ? 45 : 0
                             }
                         },
                         y: {
@@ -322,7 +399,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             ticks: {
                                 color: '#6B7280',
                                 font: {
-                                    size: 11
+                                    size: fontSize
                                 },
                                 callback: function(value) {
                                     if (value >= 1000000000000) {
@@ -336,7 +413,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     }
                                     return 'Rp ' + value;
                                 },
-                                maxTicksLimit: 6
+                                maxTicksLimit: isMobile ? 4 : 6
                             }
                         }
                     },
@@ -356,6 +433,21 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize with initial data
     const initialData = @json($revenueChart);
     initRevenueChart(initialData);
+    
+    // Reinitialize chart on window resize
+    let resizeTimeout;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(function() {
+            if (revenueChart) {
+                const currentData = revenueChart.data.datasets[0].data.map((value, index) => ({
+                    label: revenueChart.data.labels[index],
+                    revenue: value
+                }));
+                initRevenueChart(currentData);
+            }
+        }, 250);
+    });
     
     // Period filter change handler
     document.getElementById('revenuePeriodFilter').addEventListener('change', function() {
