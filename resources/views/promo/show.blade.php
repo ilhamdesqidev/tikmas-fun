@@ -414,233 +414,250 @@
 
     <script>
       // Initialize Feather icons
-      feather.replace();
+      // Initialize Feather icons
+feather.replace();
 
-      // Generate order number function dengan urutan
-      let orderCounter = 1;
-      
-      function generateOrderNumber() {
-        const now = new Date();
-        const year = now.getFullYear().toString().substr(-2);
-        const month = (now.getMonth() + 1).toString().padStart(2, '0');
-        const day = now.getDate().toString().padStart(2, '0');
-        
-        // Format counter dengan 2 digit (01, 02, ...)
-        const sequentialNum = orderCounter.toString().padStart(2, '0');
-        
-        // Increment counter
-        orderCounter++;
-        
-        return `MK${year}${month}${day}${sequentialNum}`;
-      }
+// Generate order number function dengan urutan
+let orderCounter = 1;
 
-      // Modal functionality
-      const modal = document.getElementById('checkout-modal');
-      const checkoutBtn = document.getElementById('checkout-btn');
-      const closeModalBtn = document.getElementById('modal-close');
-      const cancelBtn = document.getElementById('cancel-btn');
-      const orderNumberField = document.getElementById('order-number');
-      const ticketQuantity = document.getElementById('ticket-quantity');
-      const totalPriceElement = document.getElementById('total-price');
-      const visitDateField = document.getElementById('visit-date');
-      const dateError = document.getElementById('date-error');
-      const whatsappDisplay = document.getElementById('whatsapp-display');
-      const whatsappInput = document.getElementById('whatsapp-number');
-      const pricePerTicket = {{ $promo->promo_price }};
-      
-      // Format number to Rupiah
-      function formatRupiah(amount) {
-        return new Intl.NumberFormat('id-ID', { 
-          style: 'currency', 
-          currency: 'IDR',
-          minimumFractionDigits: 0 
-        }).format(amount);
-      }
-      
-      // Validasi input WhatsApp - hanya angka dan tidak bisa diawali 0
-      whatsappDisplay.addEventListener('input', function(e) {
-        // Hapus semua karakter non-digit
-        let value = e.target.value.replace(/\D/g, '');
-        
-        // Jika diawali 0, hapus 0 tersebut
-        if (value.startsWith('0')) {
-          value = value.substring(1);
-        }
-        
-        // Update display input value
-        e.target.value = value;
-        
-        // Update hidden input dengan format 62 + nomor (ini yang akan dikirim ke server)
-        if (value) {
-          whatsappInput.value = '62' + value;
-        } else {
-          whatsappInput.value = '';
-        }
-      });
-      
-      // Prevent paste dengan angka 0 di depan
-      whatsappDisplay.addEventListener('paste', function(e) {
-        e.preventDefault();
-        let pastedText = (e.clipboardData || window.clipboardData).getData('text');
-        let cleanedText = pastedText.replace(/\D/g, '');
-        
-        // Hapus 0 di depan jika ada
-        if (cleanedText.startsWith('0')) {
-          cleanedText = cleanedText.substring(1);
-        }
-        
-        e.target.value = cleanedText;
-        whatsappInput.value = cleanedText ? '62' + cleanedText : '';
-      });
-      
-      // Set min and max date for visit date based on promo period
-      function setVisitDateRange() {
-        // Get promo dates from PHP variables
-        const startDate = new Date('{{ $promo->start_date }}');
-        const endDate = new Date('{{ $promo->end_date }}');
-        
-        // Format dates to YYYY-MM-DD for input[type="date"]
-        const formatDate = (date) => {
-          const year = date.getFullYear();
-          const month = (date.getMonth() + 1).toString().padStart(2, '0');
-          const day = date.getDate().toString().padStart(2, '0');
-          return `${year}-${month}-${day}`;
-        };
-        
-        // Set min and max attributes
-        visitDateField.min = formatDate(startDate);
-        visitDateField.max = formatDate(endDate);
-        
-        // Set default value to today if within range, otherwise set to start date
-        const today = new Date();
-        if (today >= startDate && today <= endDate) {
-          visitDateField.value = formatDate(today);
-        } else {
-          visitDateField.value = formatDate(startDate);
-        }
-      }
-      
-      // Validate selected date is within promo period
-      function validateVisitDate() {
-        const selectedDate = new Date(visitDateField.value);
-        const startDate = new Date('{{ $promo->start_date }}');
-        const endDate = new Date('{{ $promo->end_date }}');
-        
-        // Reset end of day for endDate to include the entire last day
-        endDate.setHours(23, 59, 59, 999);
-        
-        if (selectedDate < startDate || selectedDate > endDate) {
-          dateError.style.display = 'block';
-          visitDateField.classList.add('border-red-500');
-          return false;
-        } else {
-          dateError.style.display = 'none';
-          visitDateField.classList.remove('border-red-500');
-          return true;
-        }
-      }
-      
-      // Calculate total price
-      function calculateTotalPrice() {
-        const quantity = parseInt(ticketQuantity.value) || 1;
-        const total = quantity * pricePerTicket;
-        totalPriceElement.textContent = formatRupiah(total);
-      }
-      
-      // Show modal
-      function showModal() {
-        orderNumberField.value = generateOrderNumber();
-        setVisitDateRange();
-        calculateTotalPrice();
-        modal.classList.remove('invisible');
-        setTimeout(() => {
-          modal.classList.add('opacity-100');
-          document.body.classList.add('modal-active');
-        }, 10);
-      }
-      
-      // Hide modal
-      function hideModal() {
-        modal.classList.remove('opacity-100');
-        setTimeout(() => {
-          modal.classList.add('invisible');
-          document.body.classList.remove('modal-active');
-        }, 300);
-      }
-      
-      // Event listeners
-      checkoutBtn?.addEventListener('click', showModal);
-      closeModalBtn.addEventListener('click', hideModal);
-      cancelBtn.addEventListener('click', hideModal);
-      
-      // Close modal when clicking outside
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) hideModal();
-      });
-      
-      // Update total price when quantity changes
-      ticketQuantity.addEventListener('input', calculateTotalPrice);
-      
-      // Validate date when changed
-      visitDateField.addEventListener('change', validateVisitDate);
-      
-      // Form submission handler
-      document.getElementById('checkout-form').addEventListener('submit', function(e) {
-        // Validate date first
-        if (!validateVisitDate()) {
-          e.preventDefault();
-          alert('Tanggal kunjungan tidak valid. Silakan pilih tanggal dalam periode promo.');
-          return;
-        }
-        
-        // Validate WhatsApp number
-        const whatsappValue = whatsappDisplay.value;
-        if (!whatsappValue || whatsappValue.length < 9) {
-          e.preventDefault();
-          alert('Nomor WhatsApp tidak valid. Minimal 9 digit dan tidak boleh diawali 0.');
-          whatsappDisplay.focus();
-          return;
-        }
-        
-        // Form akan di-submit secara normal ke action yang telah ditentukan
-      });
+function generateOrderNumber() {
+  const now = new Date();
+  const year = now.getFullYear().toString().substr(-2);
+  const month = (now.getMonth() + 1).toString().padStart(2, '0');
+  const day = now.getDate().toString().padStart(2, '0');
+  
+  // Format counter dengan 2 digit (01, 02, ...)
+  const sequentialNum = orderCounter.toString().padStart(2, '0');
+  
+  // Increment counter
+  orderCounter++;
+  
+  return `MK${year}${month}${day}${sequentialNum}`;
+}
 
-      // Smooth scrolling untuk anchor links
-      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-          e.preventDefault();
-          const targetId = this.getAttribute('href');
-          if (targetId === '#') return;
-          
-          const target = document.querySelector(targetId);
-          if (target) {
-            const navbarHeight = document.querySelector('nav').offsetHeight;
-            const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - navbarHeight;
-            
-            window.scrollTo({
-              top: targetPosition,
-              behavior: 'smooth'
-            });
-          }
-        });
-      });
+// Modal functionality
+const modal = document.getElementById('checkout-modal');
+const checkoutBtn = document.getElementById('checkout-btn');
+const closeModalBtn = document.getElementById('modal-close');
+const cancelBtn = document.getElementById('cancel-btn');
+const orderNumberField = document.getElementById('order-number');
+const ticketQuantity = document.getElementById('ticket-quantity');
+const totalPriceElement = document.getElementById('total-price');
+const visitDateField = document.getElementById('visit-date');
+const dateError = document.getElementById('date-error');
+const whatsappDisplay = document.getElementById('whatsapp-display');
+const whatsappInput = document.getElementById('whatsapp-number');
+const pricePerTicket = {{ $promo->promo_price }};
 
-      // Increment and Decrement buttons for ticket quantity
-      const incrementBtn = document.getElementById('increment');
-      const decrementBtn = document.getElementById('decrement');
+// Format number to Rupiah
+function formatRupiah(amount) {
+  return new Intl.NumberFormat('id-ID', { 
+    style: 'currency', 
+    currency: 'IDR',
+    minimumFractionDigits: 0 
+  }).format(amount);
+}
 
-      incrementBtn.addEventListener('click', () => {
-        ticketQuantity.value = parseInt(ticketQuantity.value) + 1;
-        calculateTotalPrice();
-      });
+// Validasi input WhatsApp - hanya angka dan tidak bisa diawali 0
+whatsappDisplay.addEventListener('input', function(e) {
+  // Hapus semua karakter non-digit
+  let value = e.target.value.replace(/\D/g, '');
+  
+  // Jika diawali 0, hapus 0 tersebut
+  if (value.startsWith('0')) {
+    value = value.substring(1);
+  }
+  
+  // Update display input value
+  e.target.value = value;
+  
+  // Update hidden input dengan format 62 + nomor (ini yang akan dikirim ke server)
+  if (value) {
+    whatsappInput.value = '62' + value;
+  } else {
+    whatsappInput.value = '';
+  }
+});
 
-      decrementBtn.addEventListener('click', () => {
-        let current = parseInt(ticketQuantity.value);
-        if (current > 1) {
-          ticketQuantity.value = current - 1;
-          calculateTotalPrice();
-        }
+// Prevent paste dengan angka 0 di depan
+whatsappDisplay.addEventListener('paste', function(e) {
+  e.preventDefault();
+  let pastedText = (e.clipboardData || window.clipboardData).getData('text');
+  let cleanedText = pastedText.replace(/\D/g, '');
+  
+  // Hapus 0 di depan jika ada
+  if (cleanedText.startsWith('0')) {
+    cleanedText = cleanedText.substring(1);
+  }
+  
+  e.target.value = cleanedText;
+  whatsappInput.value = cleanedText ? '62' + cleanedText : '';
+});
+
+// Set min and max date for visit date based on promo period
+function setVisitDateRange() {
+  // Get promo dates from PHP variables
+  const startDate = new Date('{{ $promo->start_date }}');
+  const endDate = new Date('{{ $promo->end_date }}');
+  
+  // Format dates to YYYY-MM-DD for input[type="date"]
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+  
+  // Set min and max attributes
+  visitDateField.min = formatDate(startDate);
+  visitDateField.max = formatDate(endDate);
+  
+  // Set default value to today if within range, otherwise set to start date
+  const today = new Date();
+  if (today >= startDate && today <= endDate) {
+    visitDateField.value = formatDate(today);
+  } else {
+    visitDateField.value = formatDate(startDate);
+  }
+}
+
+// Validate selected date is within promo period
+function validateVisitDate() {
+  const selectedDate = new Date(visitDateField.value);
+  const startDate = new Date('{{ $promo->start_date }}');
+  const endDate = new Date('{{ $promo->end_date }}');
+  
+  // Reset end of day for endDate to include the entire last day
+  endDate.setHours(23, 59, 59, 999);
+  
+  if (selectedDate < startDate || selectedDate > endDate) {
+    dateError.style.display = 'block';
+    visitDateField.classList.add('border-red-500');
+    return false;
+  } else {
+    dateError.style.display = 'none';
+    visitDateField.classList.remove('border-red-500');
+    return true;
+  }
+}
+
+// Calculate total price
+function calculateTotalPrice() {
+  const quantity = parseInt(ticketQuantity.value) || 1;
+  const total = quantity * pricePerTicket;
+  totalPriceElement.textContent = formatRupiah(total);
+}
+
+// Show modal
+function showModal() {
+  orderNumberField.value = generateOrderNumber();
+  setVisitDateRange();
+  calculateTotalPrice();
+  modal.classList.remove('invisible');
+  setTimeout(() => {
+    modal.classList.add('opacity-100');
+    document.body.classList.add('modal-active');
+  }, 10);
+}
+
+// Hide modal
+function hideModal() {
+  modal.classList.remove('opacity-100');
+  setTimeout(() => {
+    modal.classList.add('invisible');
+    document.body.classList.remove('modal-active');
+  }, 300);
+}
+
+// Event listeners
+checkoutBtn?.addEventListener('click', showModal);
+closeModalBtn.addEventListener('click', hideModal);
+cancelBtn.addEventListener('click', hideModal);
+
+// Close modal when clicking outside
+modal.addEventListener('click', (e) => {
+  if (e.target === modal) hideModal();
+});
+
+// Update total price when quantity changes
+ticketQuantity.addEventListener('input', calculateTotalPrice);
+
+// Validate date when changed
+visitDateField.addEventListener('change', validateVisitDate);
+
+// Form submission handler - FIXED VERSION
+document.getElementById('checkout-form').addEventListener('submit', function(e) {
+  // Validasi tanpa preventDefault terlebih dahulu
+  const isDateValid = validateVisitDate();
+  const whatsappValue = whatsappDisplay.value;
+  const isWhatsappValid = whatsappValue && whatsappValue.length >= 9;
+  
+  // Hanya prevent jika ada error validasi
+  if (!isDateValid || !isWhatsappValid) {
+    e.preventDefault();
+    
+    if (!isDateValid) {
+      alert('Tanggal kunjungan tidak valid. Silakan pilih tanggal dalam periode promo.');
+      visitDateField.focus();
+    } else if (!isWhatsappValid) {
+      alert('Nomor WhatsApp tidak valid. Minimal 9 digit dan tidak boleh diawali 0.');
+      whatsappDisplay.focus();
+    }
+    return false;
+  }
+  
+  // Jika validasi lolos, disable submit button untuk mencegah double submit
+  const submitBtn = this.querySelector('button[type="submit"]');
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="animate-pulse">Memproses...</span>';
+  }
+  
+  // Biarkan form submit secara natural (tidak ada e.preventDefault di sini)
+  return true;
+});
+
+// Smooth scrolling untuk anchor links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function (e) {
+    e.preventDefault();
+    const targetId = this.getAttribute('href');
+    if (targetId === '#') return;
+    
+    const target = document.querySelector(targetId);
+    if (target) {
+      const navbarHeight = document.querySelector('nav').offsetHeight;
+      const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - navbarHeight;
+      
+      window.scrollTo({
+        top: targetPosition,
+        behavior: 'smooth'
       });
+    }
+  });
+});
+
+// Increment and Decrement buttons for ticket quantity
+const incrementBtn = document.getElementById('increment');
+const decrementBtn = document.getElementById('decrement');
+
+incrementBtn.addEventListener('click', () => {
+  ticketQuantity.value = parseInt(ticketQuantity.value) + 1;
+  calculateTotalPrice();
+});
+
+decrementBtn.addEventListener('click', () => {
+  let current = parseInt(ticketQuantity.value);
+  if (current > 1) {
+    ticketQuantity.value = current - 1;
+    calculateTotalPrice();
+  }
+});
+
+// Debug: Log form submission untuk troubleshooting
+console.log('Checkout form script loaded successfully');
+console.log('Form action:', document.getElementById('checkout-form').action);
+console.log('Form method:', document.getElementById('checkout-form').method);
     </script>
   </body>
 </html> 
