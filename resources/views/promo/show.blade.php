@@ -1,4 +1,43 @@
-<!DOCTYPE html>
+<!-- Footer -->
+<footer class="bg-black text-white pt-8 sm:pt-12 pb-6 sm:pb-8">
+      <div class="container mx-auto px-4 sm:px-6">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8 sm:mb-12">
+          <!-- Brand -->
+          <div class="mb-6 sm:mb-8 md:mb-0 text-center md:text-left">
+            <h3 class="text-2xl sm:text-3xl font-bold italic mb-3 sm:mb-4">
+              Mesta<span class="text-white">Kara</span>.
+            </h3>
+            <p class="max-w-xs text-base sm:text-lg opacity-90">
+              Menyajikan wahana menyenangkan dengan keseruan yang tak terlupakan.
+            </p>
+          </div>
+          
+          <!-- Quick Links -->
+          <div class="mb-6 sm:mb-8 md:mb-0">
+            <h4 class="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-center md:text-left">Tautan Cepat</h4>
+            <div class="flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-8">
+              <a href="/#home" class="hover:text-gray-200 transition-colors duration-300 text-base sm:text-lg">Home</a>
+              <a href="/#about" class="hover:text-gray-200 transition-colors duration-300 text-base sm:text-lg">Tentang Kami</a>
+              <a href="/#menu" class="hover:text-gray-200 transition-colors duration-300 text-base sm:text-lg">Promo</a>
+            </div>
+          </div>
+          
+          <!-- Social Media -->
+          <div>
+            <h4 class="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-center md:text-left">Ikuti Kami</h4>
+            <div class="flex justify-center md:justify-start space-x-4 sm:space-x-6">
+              <a href="https://www.instagram.com/wisataagro8/?hl=id" class="bg-white bg-opacity-20 p-2 sm:p-3 rounded-full hover:bg-opacity-30 transition-all duration-300">
+                <i data-feather="instagram" class="w-5 h-5 sm:w-6 sm:h-6"></i>
+              </a>
+              <a href="https://twitter.com/agrowisata_n8" class="bg-white bg-opacity-20 p-2 sm:p-3 rounded-full hover:bg-opacity-30 transition-all duration-300">
+                <i data-feather="twitter" class="w-5 h-5 sm:w-6 sm:h-6"></i>
+              </a>
+              <a href="https://www.facebook.com/AgrowisataN8/" class="bg-white bg-opacity-20 p-2 sm:p-3 rounded-full hover:bg-opacity-30 transition-all duration-300">
+                <i data-feather="facebook" class="w-5 h-5 sm:w-6 sm:h-6"></i>
+              </a>
+            </div>
+          </div>
+        </div><!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -59,13 +98,8 @@
       
       .card {
         background: white;
-        border-radius: 16px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-        transition: all 0.3s ease;
-      }
-      
-      .card:hover {
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
       }
       
       .modal {
@@ -95,22 +129,9 @@
       .info-item {
         display: flex;
         align-items: center;
-        padding: 0.875rem;
+        padding: 0.75rem;
         background: #f9fafb;
-        border-radius: 12px;
-        transition: all 0.2s ease;
-      }
-      
-      .info-item:hover {
-        background: #f3f4f6;
-        transform: translateX(4px);
-      }
-      
-      .price-card {
-        background: linear-gradient(135deg, #CFD916 0%, #E8F35E 100%);
-        border-radius: 16px;
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
+        border-radius: 8px;
       }
       
       .btn-primary {
@@ -118,15 +139,12 @@
         color: #000;
         font-weight: 600;
         padding: 0.875rem 1.5rem;
-        border-radius: 12px;
+        border-radius: 8px;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 12px rgba(207, 217, 22, 0.3);
       }
       
       .btn-primary:hover {
         background: #B8C214;
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(207, 217, 22, 0.4);
       }
       
       .btn-secondary {
@@ -134,43 +152,28 @@
         color: #374151;
         font-weight: 500;
         padding: 0.875rem 1.5rem;
-        border-radius: 12px;
-        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
         transition: all 0.3s ease;
       }
       
       .btn-secondary:hover {
-        border-color: #CFD916;
-        background: #fafafa;
+        border-color: #d1d5db;
+        background: #f9fafb;
       }
       
       .progress-bar {
         height: 8px;
-        background: rgba(0, 0, 0, 0.1);
+        background: #e5e7eb;
         border-radius: 9999px;
         overflow: hidden;
       }
       
       .progress-fill {
         height: 100%;
-        background: #000;
+        background: #CFD916;
         border-radius: 9999px;
         transition: width 0.5s ease;
-      }
-      
-      .image-container {
-        position: relative;
-        overflow: hidden;
-        border-radius: 16px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-      }
-      
-      .image-container img {
-        transition: transform 0.5s ease;
-      }
-      
-      .image-container:hover img {
-        transform: scale(1.05);
       }
       
       @media (max-width: 1024px) {
@@ -194,12 +197,7 @@
       }
       
       .counter-btn:hover {
-        background: #CFD916;
-        color: #000;
-      }
-      
-      .counter-btn:active {
-        transform: scale(0.95);
+        background: #e5e7eb;
       }
       
       input[type="number"]::-webkit-inner-spin-button,
@@ -265,31 +263,29 @@
           <!-- Bagian Kiri: Gambar dan Info Utama -->
           <div class="w-full lg:w-2/3 space-y-6">
             <!-- Image Card -->
-            <div class="card p-4">
-              <div class="image-container">
-                <img src="{{ asset('storage/' . $promo->image) }}" alt="{{ $promo->name }}" class="w-full h-72 sm:h-96 object-cover">
-              </div>
+            <div class="card overflow-hidden">
+              <img src="{{ asset('storage/' . $promo->image) }}" alt="{{ $promo->name }}" class="w-full h-72 sm:h-96 object-cover">
             </div>
             
-            <!-- Description Card -->
+            <!-- Combined Description & Terms Card -->
             <div class="card p-6 sm:p-8">
-              <div class="flex items-center gap-3 mb-4">
-                <div class="w-1 h-8 bg-primary rounded-full"></div>
-                <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">Deskripsi Promo</h2>
+              <!-- Deskripsi Promo -->
+              <div class="mb-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">Deskripsi Promo</h2>
+                <div class="prose max-w-none text-gray-700">
+                  {!! nl2br(e($promo->description)) !!}
+                </div>
               </div>
-              <div class="prose max-w-none text-gray-700 leading-relaxed">
-                {!! nl2br(e($promo->description)) !!}
-              </div>
-            </div>
-            
-            <!-- Terms & Conditions Card -->
-            <div class="card p-6 sm:p-8">
-              <div class="flex items-center gap-3 mb-4">
-                <div class="w-1 h-8 bg-primary rounded-full"></div>
-                <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">Syarat dan Ketentuan</h2>
-              </div>
-              <div class="prose max-w-none text-gray-700 leading-relaxed">
-                {!! nl2br(e($promo->terms_conditions)) !!}
+              
+              <!-- Divider -->
+              <div class="border-t border-gray-200 my-6"></div>
+              
+              <!-- Syarat dan Ketentuan -->
+              <div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">Syarat dan Ketentuan</h2>
+                <div class="prose max-w-none text-gray-700">
+                  {!! nl2br(e($promo->terms_conditions)) !!}
+                </div>
               </div>
             </div>
           </div>
@@ -300,12 +296,10 @@
               <!-- Badges -->
               <div class="flex items-center gap-2 flex-wrap">
                 <span class="badge bg-primary bg-opacity-20 text-primary">
-                  <i data-feather="tag" class="w-4 h-4 mr-1"></i>
                   {{ ucfirst($promo->category) }}
                 </span>
                 @if($promo->featured)
-                <span class="badge bg-gradient-to-r from-yellow-400 to-yellow-500 text-white">
-                  <i data-feather="star" class="w-4 h-4 mr-1"></i>
+                <span class="badge bg-yellow-500 text-white">
                   Unggulan
                 </span>
                 @endif
@@ -316,56 +310,56 @@
                 <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">{{ $promo->name }}</h1>
               </div>
               
-              <!-- Price Card -->
-              <div class="price-card">
-                <div class="flex items-center justify-between mb-3">
+              <!-- Price Section -->
+              <div class="bg-primary bg-opacity-10 p-5 rounded-lg">
+                <div class="flex items-center justify-between mb-2">
                   <div>
-                    <p class="text-sm text-black opacity-60 mb-1">Harga Normal</p>
-                    <span class="text-black text-lg line-through font-medium">Rp {{ number_format($promo->original_price, 0, ',', '.') }}</span>
+                    <p class="text-sm text-gray-500 mb-1">Harga Normal</p>
+                    <span class="text-gray-400 text-lg line-through">Rp {{ number_format($promo->original_price, 0, ',', '.') }}</span>
                   </div>
-                  <div class="bg-black bg-opacity-20 rounded-xl px-4 py-2">
+                  <div class="bg-primary rounded-lg px-4 py-2">
                     <span class="text-black font-bold text-lg">{{ $promo->discount_percent }}%</span>
                   </div>
                 </div>
-                <div class="flex items-baseline gap-2">
-                  <span class="text-sm text-black opacity-80 font-medium">Harga Promo</span>
+                <div class="mt-3">
+                  <p class="text-sm text-gray-600 mb-1">Harga Promo</p>
+                  <div class="text-3xl font-bold text-primary">Rp {{ number_format($promo->promo_price, 0, ',', '.') }}</div>
                 </div>
-                <div class="text-4xl font-bold text-black">Rp {{ number_format($promo->promo_price, 0, ',', '.') }}</div>
               </div>
               
               <!-- Info Details -->
               <div class="space-y-3">
                 <div class="info-item">
-                  <i data-feather="calendar" class="w-5 h-5 mr-3 text-primary"></i>
+                  <i data-feather="calendar" class="w-5 h-5 mr-3 text-primary flex-shrink-0"></i>
                   <div class="flex-1">
-                    <p class="text-xs text-gray-500 mb-0.5">Periode Mulai</p>
+                    <p class="text-xs text-gray-500">Periode Mulai</p>
                     <p class="font-semibold text-gray-900">{{ \Carbon\Carbon::parse($promo->start_date)->format('d M Y') }}</p>
                   </div>
                 </div>
                 
                 @if($promo->end_date)
                 <div class="info-item">
-                  <i data-feather="calendar" class="w-5 h-5 mr-3 text-primary"></i>
+                  <i data-feather="calendar" class="w-5 h-5 mr-3 text-primary flex-shrink-0"></i>
                   <div class="flex-1">
-                    <p class="text-xs text-gray-500 mb-0.5">Periode Berakhir</p>
+                    <p class="text-xs text-gray-500">Periode Berakhir</p>
                     <p class="font-semibold text-gray-900">{{ \Carbon\Carbon::parse($promo->end_date)->format('d M Y') }}</p>
                   </div>
                 </div>
                 @endif
                 
                 <div class="info-item">
-                  <i data-feather="users" class="w-5 h-5 mr-3 text-primary"></i>
+                  <i data-feather="users" class="w-5 h-5 mr-3 text-primary flex-shrink-0"></i>
                   <div class="flex-1">
-                    <p class="text-xs text-gray-500 mb-0.5">Total Terjual</p>
+                    <p class="text-xs text-gray-500">Total Terjual</p>
                     <p class="font-semibold text-gray-900">{{ $promo->actual_sold_count }} Tiket</p>
                   </div>
                 </div>
                 
                 @if($promo->quota)
                 <div class="info-item">
-                  <i data-feather="box" class="w-5 h-5 mr-3 text-primary"></i>
+                  <i data-feather="box" class="w-5 h-5 mr-3 text-primary flex-shrink-0"></i>
                   <div class="flex-1">
-                    <p class="text-xs text-gray-500 mb-0.5">Kuota Tersedia</p>
+                    <p class="text-xs text-gray-500">Kuota Tersedia</p>
                     <p class="font-semibold text-gray-900">{{ $promo->quota }} Tiket</p>
                   </div>
                 </div>
@@ -386,21 +380,18 @@
               @endif
               
               <!-- Action Buttons -->
-              <div class="space-y-3 pt-4">
+              <div class="space-y-3">
                 @if($promo->quota && $promo->sold_count >= $promo->quota)
-                  <button class="w-full bg-gray-400 text-white py-4 rounded-xl font-semibold cursor-not-allowed flex items-center justify-center gap-2">
-                    <i data-feather="x-circle" class="w-5 h-5"></i>
+                  <button class="w-full bg-gray-400 text-white py-3 rounded-lg font-semibold cursor-not-allowed">
                     Promo Habis
                   </button>
                 @else
-                  <button id="checkout-btn" class="btn-primary w-full flex items-center justify-center gap-2">
-                    <i data-feather="shopping-bag" class="w-5 h-5"></i>
+                  <button id="checkout-btn" class="btn-primary w-full">
                     Checkout Sekarang
                   </button>
                 @endif
                 
-                <a href="/#menu" class="btn-secondary w-full flex items-center justify-center gap-2">
-                  <i data-feather="arrow-left" class="w-5 h-5"></i>
+                <a href="/#menu" class="btn-secondary w-full block text-center">
                   Kembali ke Promo
                 </a>
               </div>
@@ -417,9 +408,9 @@
       <div class="modal-container bg-white w-11/12 md:max-w-2xl mx-auto rounded-2xl shadow-2xl z-50 overflow-y-auto max-h-[90vh]">
         <div class="modal-content">
           <!-- Modal Header -->
-          <div class="flex justify-between items-center p-6 border-b border-gray-200 bg-gradient-to-r from-primary to-yellow-400">
-            <h3 class="text-2xl font-bold text-black">Form Pemesanan Tiket</h3>
-            <button id="modal-close" class="text-black hover:text-gray-700 transition-colors">
+          <div class="flex justify-between items-center p-6 border-b border-gray-200">
+            <h3 class="text-2xl font-bold text-text-dark">Form Pemesanan Tiket</h3>
+            <button id="modal-close" class="text-gray-500 hover:text-gray-700 transition-colors">
               <i data-feather="x" class="w-6 h-6"></i>
             </button>
           </div>
@@ -507,24 +498,23 @@
               </div>
               
               <!-- Informasi Harga -->
-              <div class="bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-xl border-2 border-gray-200">
-                <div class="flex justify-between items-center mb-3 pb-3 border-b border-gray-300">
-                  <span class="text-gray-600 font-medium">Harga per tiket:</span>
-                  <span class="font-bold text-lg" id="price-per-ticket">Rp {{ number_format($promo->promo_price, 0, ',', '.') }}</span>
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <div class="flex justify-between mb-2">
+                  <span class="text-gray-600">Harga per tiket:</span>
+                  <span class="font-medium" id="price-per-ticket">Rp {{ number_format($promo->promo_price, 0, ',', '.') }}</span>
                 </div>
-                <div class="flex justify-between items-center">
-                  <span class="text-lg font-bold text-gray-900">Total Harga:</span>
-                  <span class="text-3xl font-bold text-primary" id="total-price">Rp {{ number_format($promo->promo_price, 0, ',', '.') }}</span>
+                <div class="flex justify-between font-bold text-lg">
+                  <span>Total Harga:</span>
+                  <span class="text-primary" id="total-price">Rp {{ number_format($promo->promo_price, 0, ',', '.') }}</span>
                 </div>
               </div>
               
               <!-- Modal Footer -->
-              <div class="flex flex-col sm:flex-row justify-end gap-3 pt-6 border-t border-gray-200">
-                <button id="cancel-btn" type="button" class="px-8 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all font-semibold">
+              <div class="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t">
+                <button id="cancel-btn" type="button" class="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors">
                   Batal
                 </button>
-                <button type="submit" class="btn-primary flex items-center justify-center gap-2">
-                  <i data-feather="check-circle" class="w-5 h-5"></i>
+                <button type="submit" class="px-6 py-2 bg-primary text-black rounded-lg hover:bg-yellow-500 transition-colors font-semibold">
                   Beli Sekarang
                 </button>
               </div>
@@ -534,56 +524,55 @@
       </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="bg-gradient-to-br from-gray-900 to-black text-white pt-12 pb-8">
+    <footer class="bg-black text-white pt-8 sm:pt-12 pb-6 sm:pb-8">
       <div class="container mx-auto px-4 sm:px-6">
-        <div class="flex flex-col md:flex-row justify-between items-center mb-12">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8 sm:mb-12">
           <!-- Brand -->
-          <div class="mb-8 md:mb-0 text-center md:text-left">
-            <h3 class="text-3xl font-bold italic mb-4">
-              Mesta<span class="text-primary">Kara</span>.
+          <div class="mb-6 sm:mb-8 md:mb-0 text-center md:text-left">
+            <h3 class="text-2xl sm:text-3xl font-bold italic mb-3 sm:mb-4">
+              Mesta<span class="text-white">Kara</span>.
             </h3>
-            <p class="max-w-xs text-base opacity-90 leading-relaxed">
+            <p class="max-w-xs text-base sm:text-lg opacity-90">
               Menyajikan wahana menyenangkan dengan keseruan yang tak terlupakan.
             </p>
           </div>
           
           <!-- Quick Links -->
-          <div class="mb-8 md:mb-0">
-            <h4 class="text-xl font-semibold mb-6 text-center md:text-left">Tautan Cepat</h4>
+          <div class="mb-6 sm:mb-8 md:mb-0">
+            <h4 class="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-center md:text-left">Tautan Cepat</h4>
             <div class="flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-8">
-              <a href="/#home" class="hover:text-primary transition-colors duration-300 text-base font-medium">Home</a>
-              <a href="/#about" class="hover:text-primary transition-colors duration-300 text-base font-medium">Tentang Kami</a>
-              <a href="/#menu" class="hover:text-primary transition-colors duration-300 text-base font-medium">Promo</a>
+              <a href="/#home" class="hover:text-gray-300 transition-colors duration-300 text-base sm:text-lg">Home</a>
+              <a href="/#about" class="hover:text-gray-300 transition-colors duration-300 text-base sm:text-lg">Tentang Kami</a>
+              <a href="/#menu" class="hover:text-gray-300 transition-colors duration-300 text-base sm:text-lg">Promo</a>
             </div>
           </div>
           
           <!-- Social Media -->
           <div>
-            <h4 class="text-xl font-semibold mb-6 text-center md:text-left">Ikuti Kami</h4>
-            <div class="flex justify-center md:justify-start space-x-4">
-              <a href="https://www.instagram.com/wisataagro8/?hl=id" class="bg-white bg-opacity-10 p-3 rounded-full hover:bg-primary hover:bg-opacity-100 transition-all duration-300 group">
-                <i data-feather="instagram" class="w-6 h-6 group-hover:text-black"></i>
+            <h4 class="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-center md:text-left">Ikuti Kami</h4>
+            <div class="flex justify-center md:justify-start space-x-4 sm:space-x-6">
+              <a href="https://www.instagram.com/wisataagro8/?hl=id" class="bg-white bg-opacity-20 p-2 sm:p-3 rounded-full hover:bg-opacity-30 transition-all duration-300">
+                <i data-feather="instagram" class="w-5 h-5 sm:w-6 sm:h-6"></i>
               </a>
-              <a href="https://twitter.com/agrowisata_n8" class="bg-white bg-opacity-10 p-3 rounded-full hover:bg-primary hover:bg-opacity-100 transition-all duration-300 group">
-                <i data-feather="twitter" class="w-6 h-6 group-hover:text-black"></i>
+              <a href="https://twitter.com/agrowisata_n8" class="bg-white bg-opacity-20 p-2 sm:p-3 rounded-full hover:bg-opacity-30 transition-all duration-300">
+                <i data-feather="twitter" class="w-5 h-5 sm:w-6 sm:h-6"></i>
               </a>
-              <a href="https://www.facebook.com/AgrowisataN8/" class="bg-white bg-opacity-10 p-3 rounded-full hover:bg-primary hover:bg-opacity-100 transition-all duration-300 group">
-                <i data-feather="facebook" class="w-6 h-6 group-hover:text-black"></i>
+              <a href="https://www.facebook.com/AgrowisataN8/" class="bg-white bg-opacity-20 p-2 sm:p-3 rounded-full hover:bg-opacity-30 transition-all duration-300">
+                <i data-feather="facebook" class="w-5 h-5 sm:w-6 sm:h-6"></i>
               </a>
             </div>
           </div>
         </div>
         
-        <div class="border-t border-white border-opacity-20 my-8"></div>
+        <div class="border-t border-white border-opacity-30 my-6 sm:my-8"></div>
         
         <!-- Copyright -->
         <div class="flex flex-col md:flex-row justify-between items-center text-center md:text-left">
-          <p class="text-sm opacity-80 mb-3 md:mb-0">
+          <p class="text-xs sm:text-sm md:text-base opacity-80 mb-3 md:mb-0">
             &copy; 2025 Tiketmas. All rights reserved.
           </p>
-          <p class="text-sm opacity-80">
-            Created by <a href="#" class="font-bold hover:text-primary transition-colors">Mestakara</a>
+          <p class="text-xs sm:text-sm md:text-base opacity-80">
+            Created by <a href="#" class="font-bold hover:underline">Mestakara</a>
           </p>
         </div>
       </div>
@@ -821,46 +810,6 @@
           calculateTotalPrice();
         }
         feather.replace();
-      });
-
-      // Navbar scroll effect
-      let lastScroll = 0;
-      const navbar = document.querySelector('nav');
-      
-      window.addEventListener('scroll', () => {
-        const currentScroll = window.pageYOffset;
-        
-        if (currentScroll <= 0) {
-          navbar.classList.remove('shadow-md');
-          navbar.classList.add('shadow-sm');
-        } else {
-          navbar.classList.remove('shadow-sm');
-          navbar.classList.add('shadow-md');
-        }
-        
-        lastScroll = currentScroll;
-      });
-
-      // Add animation on scroll for cards
-      const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-      };
-
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.style.opacity = '1';
-            entry.target.style.transform = 'translateY(0)';
-          }
-        });
-      }, observerOptions);
-
-      document.querySelectorAll('.card').forEach(card => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(20px)';
-        card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-        observer.observe(card);
       });
     </script>
   </body>
