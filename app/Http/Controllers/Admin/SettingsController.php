@@ -250,4 +250,59 @@ class SettingsController extends Controller
             'message' => 'Wahana images reordered successfully!'
         ]);
     }
+
+    public function updateAdminCredentials(Request $request)
+    {
+        $admin = Auth::guard('admin')->user();
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'username' => 'required|string|max:255|unique:admins,username,' . $admin->id,
+            'email' => 'nullable|email|unique:admins,email,' . $admin->id,
+            'current_password' => 'required',
+            'new_password' => 'nullable|min:6|confirmed',
+        ]);
+
+        // Verify current password
+        if (!Hash::check($validated['current_password'], $admin->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Current password is incorrect!'
+            ], 422);
+        }
+
+        // Update admin data
+        $admin->name = $validated['name'];
+        $admin->username = $validated['username'];
+        
+        if (!empty($validated['email'])) {
+            $admin->email = $validated['email'];
+        }
+
+        // Update password if provided
+        if (!empty($validated['new_password'])) {
+            $admin->password = Hash::make($validated['new_password']);
+        }
+
+        $admin->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Admin credentials updated successfully!'
+        ]);
+    }
+
+    public function getAdminData()
+    {
+        $admin = Auth::guard('admin')->user();
+        
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'name' => $admin->name,
+                'username' => $admin->username,
+                'email' => $admin->email ?? '',
+            ]
+        ]);
+    }
 }

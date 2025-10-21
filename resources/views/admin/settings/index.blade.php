@@ -49,34 +49,11 @@
             width: 150px; height: 150px; border-radius: 8px;
             object-fit: cover; border: 2px solid #e5e7eb;
         }
-        .wahana-card {
-            position: relative; border: 2px solid #e5e7eb; border-radius: 12px;
-            padding: 16px; margin-bottom: 16px; transition: all 0.3s; cursor: move;
-            background: white;
-        }
-        .wahana-card:hover { border-color: #CFD916; box-shadow: 0 4px 12px rgba(207, 217, 22, 0.2); }
-        .wahana-card.dragging { opacity: 0.5; cursor: grabbing; }
-        .wahana-card.drag-over { border-color: #CFD916; background-color: #fefce8; }
-        .modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 999; align-items: center; justify-content: center;
-        }
-        .modal.show { display: flex; }
-        .modal-content {
-            background: white; border-radius: 12px; max-width: 600px; width: 90%;
-            max-height: 90vh; overflow-y: auto; padding: 24px;
-        }
         @keyframes spin {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
         .animate-spin { animation: spin 1s linear infinite; }
-        .line-clamp-2 {
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -103,6 +80,9 @@
                 </div>
                 <div class="nav-tab" data-tab="website">
                     <i data-feather="globe" class="w-4 h-4 inline mr-2"></i>Website
+                </div>
+                <div class="nav-tab" data-tab="admin-account">
+                    <i data-feather="user" class="w-4 h-4 inline mr-2"></i>Admin Account
                 </div>
             </div>
         </div>
@@ -249,39 +229,6 @@
             </form>
         </div>
 
-        <!-- WAHANA IMAGES TAB -->
-        <div class="tab-content" id="wahana">
-            <div class="section-card p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <div>
-                        <h2 class="text-xl font-semibold">Wahana Carousel Images</h2>
-                        <p class="text-sm text-gray-600 mt-1">Manage images shown in the About section carousel</p>
-                    </div>
-                    <button onclick="openAddWahanaModal()" class="px-4 py-2 bg-primary text-black rounded-lg hover:bg-yellow-500 font-medium flex items-center">
-                        <i data-feather="plus" class="w-4 h-4 mr-2"></i>
-                        Add Image
-                    </button>
-                </div>
-
-                <div id="wahana-list" class="space-y-4">
-                    <!-- Wahana cards will be loaded here via JavaScript -->
-                    <div class="text-center py-8 text-gray-500">
-                        <i data-feather="loader" class="w-8 h-8 mx-auto animate-spin mb-2"></i>
-                        <p>Loading wahana images...</p>
-                    </div>
-                </div>
-
-                <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <div class="flex items-start">
-                        <i data-feather="info" class="w-5 h-5 text-blue-600 mr-3 flex-shrink-0 mt-0.5"></i>
-                        <div class="text-sm text-blue-800">
-                            <strong>Tips:</strong> Drag cards to reorder them. Changes are saved automatically. Only active images will appear in the carousel.
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- WEBSITE SETTINGS -->
         <div class="tab-content" id="website">
             <form id="website-form">
@@ -334,8 +281,109 @@
                 </div>
             </form>
         </div>
+
+        <!-- ADMIN ACCOUNT SETTINGS -->
+        <div class="tab-content" id="admin-account">
+            <form id="admin-form">
+                @csrf
+                <div class="section-card p-6">
+                    <div class="flex items-center mb-6">
+                        <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mr-4">
+                            <i data-feather="user" class="w-8 h-8 text-black"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-semibold">Admin Account</h2>
+                            <p class="text-sm text-gray-600">Manage your admin credentials and security</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6">
+                        <!-- Profile Information -->
+                        <div class="border-b pb-6">
+                            <h3 class="text-lg font-semibold mb-4">Profile Information</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Full Name</label>
+                                    <input type="text" id="admin-name" name="name" 
+                                           class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary"
+                                           placeholder="Administrator">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Email (Optional)</label>
+                                    <input type="email" id="admin-email" name="email" 
+                                           class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary"
+                                           placeholder="admin@example.com">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Login Credentials -->
+                        <div class="border-b pb-6">
+                            <h3 class="text-lg font-semibold mb-4">Login Credentials</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Username</label>
+                                    <input type="text" id="admin-username" name="username" 
+                                           class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary"
+                                           placeholder="admin">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Change Password -->
+                        <div>
+                            <h3 class="text-lg font-semibold mb-4">Change Password</h3>
+                            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                                <div class="flex items-start">
+                                    <i data-feather="alert-triangle" class="w-5 h-5 text-yellow-600 mr-3 flex-shrink-0 mt-0.5"></i>
+                                    <div class="text-sm text-yellow-800">
+                                        <strong>Security Notice:</strong> Leave password fields empty if you don't want to change your password.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Current Password *</label>
+                                    <input type="password" name="current_password" 
+                                           class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary"
+                                           placeholder="Enter current password" required>
+                                    <p class="text-xs text-gray-500 mt-1">Required to verify your identity</p>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">New Password</label>
+                                        <input type="password" id="new-password" name="new_password" 
+                                               class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary"
+                                               placeholder="Enter new password">
+                                        <p class="text-xs text-gray-500 mt-1">Minimum 6 characters</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Confirm New Password</label>
+                                        <input type="password" name="new_password_confirmation" 
+                                               class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary"
+                                               placeholder="Confirm new password">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex items-center justify-between pt-6 border-t">
+                        <div class="text-sm text-gray-600">
+                            <i data-feather="shield" class="w-4 h-4 inline mr-1"></i>
+                            Your credentials are encrypted and secure
+                        </div>
+                        <button type="submit" class="px-6 py-2 bg-primary text-black rounded-lg hover:bg-yellow-500 font-medium flex items-center">
+                            <i data-feather="save" class="w-4 h-4 mr-2"></i>
+                            Update Account
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
 
     <script>
         feather.replace();
@@ -375,7 +423,10 @@
                 tab.classList.add('active');
                 const tabId = tab.getAttribute('data-tab');
                 document.getElementById(tabId).classList.add('active');
-                if (tabId === 'wahana') loadWahanaImages();
+                
+                // Load specific data when admin-account tab is opened
+                if (tabId === 'admin-account') loadAdminData();
+                
                 feather.replace();
             });
         });
@@ -454,10 +505,72 @@
                 showToast('Error saving website settings', 'error');
             }
         });
+
+        // Admin Account Form Submission
+        document.getElementById('admin-form')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            
+            // Validate password confirmation
+            const newPassword = formData.get('new_password');
+            const confirmPassword = formData.get('new_password_confirmation');
+            
+            if (newPassword && newPassword !== confirmPassword) {
+                showToast('Password confirmation does not match', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('{{ route("admin.settings.admin.update") }}', {
+                    method: 'POST',
+                    headers: { 
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    // Clear password fields
+                    e.target.querySelector('[name="current_password"]').value = '';
+                    e.target.querySelector('[name="new_password"]').value = '';
+                    e.target.querySelector('[name="new_password_confirmation"]').value = '';
+                } else {
+                    showToast(data.message, 'error');
+                }
+            } catch (error) {
+                showToast('Error updating admin account', 'error');
+            }
+        });
+
+        // Load Admin Data when tab is opened
+        async function loadAdminData() {
+            try {
+                const response = await fetch('{{ route("admin.settings.admin.get") }}', {
+                    headers: { 
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    }
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    document.getElementById('admin-name').value = result.data.name || '';
+                    document.getElementById('admin-username').value = result.data.username || '';
+                    document.getElementById('admin-email').value = result.data.email || '';
+                }
+            } catch (error) {
+                console.error('Error loading admin data:', error);
+            }
+        }
         
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', () => {
             feather.replace();
+            loadAdminData(); // Load admin data on page load
         });
     </script>
 </body>

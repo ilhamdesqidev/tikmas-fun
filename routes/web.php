@@ -153,7 +153,9 @@ Route::prefix('settings')->name('settings.')->group(function () {
     Route::post('/general', [SettingsController::class, 'updateGeneral'])->name('general.update');
     Route::post('/hero', [SettingsController::class, 'updateHero'])->name('hero.update');
     Route::post('/about', [SettingsController::class, 'updateAbout'])->name('about.update');
-    Route::post('/website', [SettingsController::class, 'updateWebsite'])->name('website.update');
+    Route::post('/website', [SettingsController::class, 'updateWebsite'])->name('website.update'); 
+    Route::get('/admin-credentials', [SettingsController::class, 'getAdminData'])->name('admin.get');
+    Route::post('/admin-credentials', [SettingsController::class, 'updateAdminCredentials'])->name('admin.update');
     
     // Wahana Images Routes (DIPERBAIKI - hapus /settings/)
     Route::get('/wahana-images', [SettingsController::class, 'getWahanaImages'])->name('wahana.index');
