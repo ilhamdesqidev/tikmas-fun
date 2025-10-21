@@ -1,389 +1,384 @@
-@php
-    use App\Models\Setting;
-    
-    // Get login customization settings
-    $loginLogoText = Setting::get('login_logo_text', 'MestaKara');
-    $loginTagline = Setting::get('login_tagline', 'Admin Panel');
-    $loginWelcomeTitle = Setting::get('login_welcome_title', 'Welcome Back!');
-    $loginWelcomeSubtitle = Setting::get('login_welcome_subtitle', 'Please login to your account');
-    $loginFooterText = Setting::get('login_footer_text', '© 2025 MestaKara. All rights reserved.');
-    $loginBackgroundPath = Setting::get('login_background_path');
-    $loginPrimaryColor = Setting::get('login_primary_color', '#CFD916');
-    
-    $backgroundImage = $loginBackgroundPath 
-        ? asset('storage/' . $loginBackgroundPath) 
-        : 'https://images.unsplash.com/photo-1557683316-973673baf926?w=1200';
-@endphp
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login - {{ $loginLogoText }}</title>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Admin Login - {{ \App\Models\Setting::get('login_logo_text', 'MestaKara') }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,300;0,400;0,500;0,600;0,700;1,700&display=swap" rel="stylesheet" />
     <script src="https://unpkg.com/feather-icons"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: { 
-                        primary: '{{ $loginPrimaryColor }}' 
-                    },
-                    fontFamily: { 
-                        'poppins': ['Poppins', 'sans-serif'] 
-                    }
-                }
-            }
+      const primaryColor = '{{ \App\Models\Setting::get("login_primary_color", "#CFD916") }}';
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: primaryColor,
+              'text-dark': '#333333',
+            },
+            fontFamily: {
+              'poppins': ['Poppins', 'sans-serif'],
+            },
+          }
         }
+      }
     </script>
     <style>
-        body { 
-            font-family: 'Poppins', sans-serif; 
+      .login-bg {
+        @php
+          $bgPath = \App\Models\Setting::get('login_background_path');
+          $bgUrl = $bgPath 
+            ? asset('storage/' . $bgPath) 
+            : 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80';
+        @endphp
+        background-image: url('{{ $bgUrl }}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        position: relative;
+        overflow: hidden;
+        min-height: 100vh;
+      }
+      
+      .login-bg::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        backdrop-filter: blur(8px);
+        z-index: 1;
+      }
+      
+      .login-bg::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><defs><radialGradient id="a" cx="50%" cy="50%"><stop offset="0%" stop-color="%23ffffff" stop-opacity="0.1"/><stop offset="100%" stop-color="%23ffffff" stop-opacity="0"/></radialGradient></defs><circle cx="250" cy="250" r="200" fill="url(%23a)"/><circle cx="750" cy="750" r="300" fill="url(%23a)"/><circle cx="800" cy="200" r="150" fill="url(%23a)"/></svg>') repeat;
+        animation: float 20s ease-in-out infinite;
+        opacity: 0.5;
+        z-index: 1;
+      }
+      
+      @keyframes float {
+        0%, 100% { transform: translate(-20px, -20px) rotate(0deg); }
+        33% { transform: translate(20px, -30px) rotate(120deg); }
+        66% { transform: translate(-30px, 20px) rotate(240deg); }
+      }
+      
+      @media (max-width: 768px) {
+        .login-bg::after {
+          display: none;
         }
         
-        .password-wrapper { 
-            position: relative; 
+        .login-bg::before {
+          backdrop-filter: blur(4px);
+        }
+      }
+      
+      .glass-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+      
+      .input-group {
+        position: relative;
+      }
+      
+      .floating-label {
+        position: absolute;
+        top: 12px;
+        left: 16px;
+        color: #6b7280;
+        transition: all 0.3s ease;
+        pointer-events: none;
+        font-size: 16px;
+      }
+      
+      .form-input:focus + .floating-label,
+      .form-input:not(:placeholder-shown) + .floating-label {
+        top: -8px;
+        left: 12px;
+        font-size: 12px;
+        color: {{ \App\Models\Setting::get('login_primary_color', '#CFD916') }};
+        background: white;
+        padding: 0 4px;
+      }
+      
+      .form-input {
+        background: transparent;
+        border: 2px solid #e5e7eb;
+        transition: all 0.3s ease;
+      }
+      
+      .form-input:focus {
+        border-color: {{ \App\Models\Setting::get('login_primary_color', '#CFD916') }};
+        box-shadow: 0 0 0 3px {{ \App\Models\Setting::get('login_primary_color', '#CFD916') }}1a;
+        outline: none;
+      }
+      
+      .login-btn {
+        background: linear-gradient(135deg, {{ \App\Models\Setting::get('login_primary_color', '#CFD916') }} 0%, {{ \App\Models\Setting::get('login_primary_color', '#CFD916') }}dd 100%);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .login-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+      }
+      
+      .login-btn:hover::before {
+        left: 100%;
+      }
+      
+      .login-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px {{ \App\Models\Setting::get('login_primary_color', '#CFD916') }}4d;
+      }
+      
+      .error-alert {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        border-left: 4px solid #ef4444;
+        animation: slideDown 0.3s ease-out;
+      }
+      
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      
+      .tea-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, {{ \App\Models\Setting::get('login_primary_color', '#CFD916') }} 0%, {{ \App\Models\Setting::get('login_primary_color', '#CFD916') }}cc 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        box-shadow: 0 8px 25px {{ \App\Models\Setting::get('login_primary_color', '#CFD916') }}33;
+      }
+      
+      .login-bg > * {
+        position: relative;
+        z-index: 2;
+      }
+      
+      .login-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        width: 100%;
+      }
+      
+      @media (max-width: 768px) {
+        .login-container {
+          padding: 16px;
+          align-items: flex-start;
+          padding-top: 40px;
         }
         
-        .password-toggle {
-            position: absolute; 
-            right: 12px; 
-            top: 50%;
-            transform: translateY(-50%); 
-            cursor: pointer;
-            color: #6b7280; 
-            transition: color 0.2s;
+        .glass-card {
+          margin-top: 0;
         }
-        
-        .password-toggle:hover { 
-            color: {{ $loginPrimaryColor }}; 
-        }
-        
-        .bg-image {
-            background-image: url('{{ $backgroundImage }}');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-        }
-        
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-        }
-        
-        @media (max-width: 768px) {
-            .login-container {
-                padding: 1rem;
-            }
-        }
+      }
     </style>
 </head>
-<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen flex items-center justify-center p-4 bg-image">
-    
-    <!-- Overlay -->
-    <div class="absolute inset-0 bg-black bg-opacity-40"></div>
-    
-    <!-- Login Container -->
-    <div class="relative z-10 w-full max-w-md login-container">
-        
-        <!-- Card -->
-        <div class="glass-effect rounded-2xl shadow-2xl overflow-hidden">
-            
-            <!-- Header -->
-            <div class="bg-primary p-6 text-center">
-                <div class="w-16 h-16 bg-white rounded-full mx-auto mb-3 flex items-center justify-center shadow-lg">
-                    <i data-feather="user" class="w-8 h-8 text-gray-800"></i>
-                </div>
-                <h1 class="text-2xl font-bold text-gray-800">{{ $loginLogoText }}</h1>
-                <p class="text-sm text-gray-700 mt-1">{{ $loginTagline }}</p>
-            </div>
-
-            <!-- Welcome Section -->
-            <div class="px-8 pt-6 pb-4 text-center border-b border-gray-200">
-                <h2 class="text-xl font-semibold text-gray-800">{{ $loginWelcomeTitle }}</h2>
-                <p class="text-sm text-gray-600 mt-1">{{ $loginWelcomeSubtitle }}</p>
-            </div>
-
-            <!-- Form -->
-            <div class="p-8">
-                
-                <!-- Success Message (after password reset) -->
-                @if (session('status'))
-                    <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg animate-fade-in">
-                        <div class="flex items-start">
-                            <i data-feather="check-circle" class="w-5 h-5 text-green-600 mr-3 flex-shrink-0 mt-0.5"></i>
-                            <p class="text-sm text-green-800">{{ session('status') }}</p>
-                        </div>
+<body class="font-poppins">
+    <div class="login-bg">
+        <div class="login-container">
+            <div class="w-full max-w-md">
+                <!-- Logo/Brand -->
+                <div class="text-center mb-8">
+                    <div class="tea-icon">
+                        <i data-feather="coffee" class="w-8 h-8 text-white"></i>
                     </div>
-                @endif
-
-                <!-- Error Messages -->
-                @if ($errors->any())
-                    <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg animate-fade-in">
-                        <div class="flex items-start">
-                            <i data-feather="alert-circle" class="w-5 h-5 text-red-600 mr-3 flex-shrink-0 mt-0.5"></i>
-                            <div class="flex-1">
-                                @foreach ($errors->all() as $error)
-                                    <p class="text-sm text-red-800">{{ $error }}</p>
-                                @endforeach
+                    <h1 class="text-3xl font-bold text-white mb-2">
+                        {{ \App\Models\Setting::get('login_logo_text', 'MestaKara') }}
+                    </h1>
+                    <p class="text-white/90 text-lg">{{ \App\Models\Setting::get('login_tagline', 'Admin Portal') }}</p>
+                </div>
+                
+                <!-- Login Card -->
+                <div class="glass-card rounded-2xl shadow-2xl p-6 md:p-8">
+                    <div class="text-center mb-8">
+                        <h2 class="text-2xl font-semibold text-gray-800 mb-2">
+                            {{ \App\Models\Setting::get('login_welcome_title', 'Welcome Back') }}
+                        </h2>
+                        <p class="text-gray-600">
+                            {{ \App\Models\Setting::get('login_welcome_subtitle', 'Please sign in to your admin account') }}
+                        </p>
+                    </div>
+                    
+                    <!-- Error Messages -->
+                    @if ($errors->any())
+                        <div class="error-alert rounded-xl p-4 mb-6">
+                            <div class="flex items-center">
+                                <i data-feather="alert-circle" class="w-5 h-5 text-red-600 mr-2 flex-shrink-0"></i>
+                                <div>
+                                    <p class="font-semibold text-red-800 text-sm">Please fix the following errors:</p>
+                                    <ul class="list-disc list-inside text-red-700 text-sm mt-1">
+                                        @foreach ($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                @endif
+                    @endif
 
-                <!-- Login Form -->
-                <form method="POST" action="{{ route('admin.login') }}" id="loginForm">
-                    @csrf
-                    
-                    <div class="space-y-6">
+                    <!-- Login Form -->
+                    <form method="POST" action="{{ route('admin.login') }}" class="space-y-6">
+                        @csrf
                         
                         <!-- Username Field -->
-                        <div>
-                            <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
+                        <div class="input-group">
+                            <input 
+                                type="text" 
+                                class="form-input w-full px-4 py-3 rounded-xl text-gray-700 text-base"
+                                id="username" 
+                                name="username" 
+                                value="{{ old('username') }}" 
+                                placeholder=" "
+                                required 
+                                autofocus
+                            >
+                            <label for="username" class="floating-label font-medium">
+                                <i data-feather="user" class="w-4 h-4 inline mr-1"></i>
                                 Username
                             </label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i data-feather="user" class="w-5 h-5 text-gray-400"></i>
-                                </div>
-                                <input 
-                                    id="username" 
-                                    type="text" 
-                                    name="username" 
-                                    value="{{ old('username') }}" 
-                                    required 
-                                    autofocus
-                                    class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200"
-                                    placeholder="Enter your username">
-                            </div>
                         </div>
-
+                        
                         <!-- Password Field -->
-                        <div>
-                            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                        <div class="input-group">
+                            <input 
+                                type="password" 
+                                class="form-input w-full px-4 py-3 rounded-xl text-gray-700 text-base"
+                                id="password" 
+                                name="password" 
+                                placeholder=" "
+                                required
+                            >
+                            <label for="password" class="floating-label font-medium">
+                                <i data-feather="lock" class="w-4 h-4 inline mr-1"></i>
                                 Password
                             </label>
-                            <div class="password-wrapper">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i data-feather="lock" class="w-5 h-5 text-gray-400"></i>
-                                </div>
-                                <input 
-                                    id="password" 
-                                    type="password" 
-                                    name="password" 
-                                    required
-                                    class="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200"
-                                    placeholder="Enter your password">
-                                <span class="password-toggle" onclick="togglePassword('password')">
-                                    <i data-feather="eye" class="w-5 h-5"></i>
-                                </span>
-                            </div>
                         </div>
-
-                        <!-- Remember Me & Forgot Password -->
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center">
-                                <input 
-                                    id="remember" 
-                                    name="remember" 
-                                    type="checkbox" 
-                                    {{ old('remember') ? 'checked' : '' }}
-                                    class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded cursor-pointer">
-                                <label for="remember" class="ml-2 block text-sm text-gray-700 cursor-pointer select-none">
-                                    Remember me
-                                </label>
-                            </div>
-                            <a href="{{ route('admin.password.request') }}" class="text-sm text-primary hover:text-yellow-600 font-medium transition duration-200">
-                                Forgot password?
-                            </a>
-                        </div>
-
-                        <!-- Submit Button -->
+                        
+                        <!-- Login Button -->
                         <button 
                             type="submit" 
-                            id="submitBtn"
-                            class="w-full bg-primary hover:bg-yellow-500 text-black font-medium py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-                            <i data-feather="log-in" class="w-5 h-5 mr-2"></i>
-                            <span id="btnText">Login</span>
-                            <svg id="btnLoader" class="hidden animate-spin h-5 w-5 ml-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
+                            class="login-btn w-full py-3 px-6 rounded-xl text-white font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 relative z-10"
+                        >
+                            <span class="flex items-center justify-center">
+                                <i data-feather="log-in" class="w-5 h-5 mr-2"></i>
+                                Sign In
+                            </span>
                         </button>
-                        
-                    </div>
-                </form>
-
-                <!-- Security Notice -->
-                <div class="mt-6 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                    <div class="flex items-start text-xs text-blue-800">
-                        <i data-feather="shield" class="w-4 h-4 mr-2 flex-shrink-0 mt-0.5"></i>
-                        <p>Your credentials are encrypted and secure. For security reasons, please do not share your login information.</p>
+                    </form>
+                    
+                    <!-- Footer -->
+                    <div class="text-center mt-8 pt-6 border-t border-gray-200">
+                        <p class="text-gray-500 text-sm">
+                            {{ \App\Models\Setting::get('login_footer_text', 'Protected by MestaKara Security') }}
+                        </p>
                     </div>
                 </div>
-
+                
+                <!-- Back to Website -->
+                <div class="text-center mt-6">
+                    <a href="/" class="inline-flex items-center text-white/90 hover:text-white transition-colors duration-300">
+                        <i data-feather="arrow-left" class="w-4 h-4 mr-2"></i>
+                        Back to Website
+                    </a>
+                </div>
             </div>
         </div>
-
-        <!-- Footer -->
-        <div class="mt-6 text-center">
-            <p class="text-sm text-white drop-shadow-lg">{{ $loginFooterText }}</p>
-        </div>
-
-        <!-- Help Link -->
-        <div class="mt-3 text-center">
-            <a href="mailto:support@mestakara.com" class="text-sm text-white hover:text-primary transition duration-200 drop-shadow-lg flex items-center justify-center">
-                <i data-feather="help-circle" class="w-4 h-4 mr-1"></i>
-                Need help? Contact support
-            </a>
-        </div>
-        
     </div>
 
-    <!-- Scripts -->
     <script>
-        // Initialize Feather Icons
+        // Initialize Feather icons
         feather.replace();
-
-        // Toggle Password Visibility
-        function togglePassword(inputId) {
-            const input = document.getElementById(inputId);
-            const icon = input.nextElementSibling.querySelector('i');
-            
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.setAttribute('data-feather', 'eye-off');
-            } else {
-                input.type = 'password';
-                icon.setAttribute('data-feather', 'eye');
-            }
-            feather.replace();
-        }
-
-        // Form Submit Handler with Loading State
-        document.getElementById('loginForm').addEventListener('submit', function() {
-            const submitBtn = document.getElementById('submitBtn');
-            const btnText = document.getElementById('btnText');
-            const btnLoader = document.getElementById('btnLoader');
-            
-            // Disable button and show loading
-            submitBtn.disabled = true;
-            submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
-            btnText.textContent = 'Logging in...';
-            btnLoader.classList.remove('hidden');
-            
-            // Re-enable Feather icons
-            feather.replace();
-        });
-
-        // Auto-hide success message after 5 seconds
-        @if (session('status'))
-            setTimeout(function() {
-                const successMsg = document.querySelector('.bg-green-50');
-                if (successMsg) {
-                    successMsg.style.transition = 'opacity 0.5s ease-out';
-                    successMsg.style.opacity = '0';
-                    setTimeout(() => successMsg.remove(), 500);
-                }
-            }, 5000);
-        @endif
-
-        // Add fade-in animation
-        document.addEventListener('DOMContentLoaded', function() {
-            const card = document.querySelector('.glass-effect');
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(20px)';
-            
-            setTimeout(() => {
-                card.style.transition = 'all 0.5s ease-out';
-                card.style.opacity = '1';
-                card.style.transform = 'translateY(0)';
-            }, 100);
-        });
-
-        // Keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            // Alt + F for forgot password
-            if (e.altKey && e.key === 'f') {
-                e.preventDefault();
-                window.location.href = '{{ route("admin.password.request") }}';
-            }
-        });
-
-        // Focus management
-        const usernameInput = document.getElementById('username');
-        const passwordInput = document.getElementById('password');
         
-        usernameInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                passwordInput.focus();
+        // Add some interactive effects
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = document.querySelectorAll('.form-input');
+            
+            inputs.forEach(input => {
+                // Add focus/blur effects
+                input.addEventListener('focus', function() {
+                    this.parentElement.classList.add('focused');
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.parentElement.classList.remove('focused');
+                });
+                
+                // Check if input has value on load
+                if (input.value) {
+                    input.classList.add('has-value');
+                }
+                
+                input.addEventListener('input', function() {
+                    if (this.value) {
+                        this.classList.add('has-value');
+                    } else {
+                        this.classList.remove('has-value');
+                    }
+                });
+            });
+            
+            // Form submission effect
+            const form = document.querySelector('form');
+            const submitBtn = document.querySelector('.login-btn');
+            
+            if (form && submitBtn) {
+                form.addEventListener('submit', function() {
+                    submitBtn.innerHTML = '<i data-feather="loader" class="w-5 h-5 mr-2 animate-spin"></i>Signing In...';
+                    submitBtn.disabled = true;
+                    feather.replace();
+                });
             }
+            
+            // Adjust layout for mobile
+            function adjustLayout() {
+                const isMobile = window.innerWidth <= 768;
+                const container = document.querySelector('.login-container');
+                
+                if (isMobile) {
+                    document.body.style.minHeight = '100vh';
+                    document.body.style.overflow = 'auto';
+                } else {
+                    document.body.style.minHeight = '100vh';
+                }
+            }
+            
+            adjustLayout();
+            window.addEventListener('resize', adjustLayout);
         });
     </script>
-
-    <style>
-        @keyframes fade-in {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .animate-fade-in {
-            animation: fade-in 0.3s ease-out;
-        }
-
-        /* Loading animation */
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .animate-spin {
-            animation: spin 1s linear infinite;
-        }
-
-        /* Smooth transitions */
-        input:focus {
-            outline: none;
-        }
-
-        /* Button hover effect */
-        button[type="submit"]:hover:not(:disabled) {
-            transform: translateY(-2px);
-        }
-
-        button[type="submit"]:active:not(:disabled) {
-            transform: translateY(0);
-        }
-
-        /* Custom scrollbar for mobile */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: {{ $loginPrimaryColor }};
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #b8b814;
-        }
-    </style>
-
 </body>
 </html>
