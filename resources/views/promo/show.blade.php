@@ -83,7 +83,7 @@
   </head>
   <body class="font-poppins bg-gray-50 text-text-dark">
     <!-- Navbar -->
-    <nav class="w-full py-3 sm:py-5 px-4 sm:px-7 flex items-center justify-between bg-white border-b border-gray-400 fixed top-0 left-0 right-0 z-50" style="border-bottom: 1px solid #597336;">
+    <div class="w-full py-3 sm:py-5 px-4 sm:px-7 flex items-center justify-between bg-white border-b border-gray-400 fixed top-0 left-0 right-0 z-50" style="border-bottom: 1px solid #597336;">
       <a href="/" class="text-2xl sm:text-3xl font-bold text-black italic">
         Mesta<span class="text-primary">Kara</span>.
       </a>
@@ -107,7 +107,9 @@
           <span class="absolute left-0 bottom-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
         </a>
       </div>
-      
+
+    </div>
+
     </nav>
 
     <!-- Main Content -->
