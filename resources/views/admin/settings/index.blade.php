@@ -54,6 +54,23 @@
             to { transform: rotate(360deg); }
         }
         .animate-spin { animation: spin 1s linear infinite; }
+        
+        /* Password Toggle Styles */
+        .password-wrapper {
+            position: relative;
+        }
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #6b7280;
+            transition: color 0.2s;
+        }
+        .password-toggle:hover {
+            color: #CFD916;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -80,9 +97,6 @@
                 </div>
                 <div class="nav-tab" data-tab="website">
                     <i data-feather="globe" class="w-4 h-4 inline mr-2"></i>Website
-                </div>
-                <div class="nav-tab" data-tab="login-page">
-                    <i data-feather="log-in" class="w-4 h-4 inline mr-2"></i>Login Page
                 </div>
                 <div class="nav-tab" data-tab="admin-account">
                     <i data-feather="user" class="w-4 h-4 inline mr-2"></i>Admin Account
@@ -348,25 +362,40 @@
                             <div class="space-y-4">
                                 <div>
                                     <label class="block text-sm font-medium mb-2">Current Password *</label>
-                                    <input type="password" name="current_password" 
-                                           class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary"
-                                           placeholder="Enter current password" required>
+                                    <div class="password-wrapper">
+                                        <input type="password" id="current-password" name="current_password" 
+                                               class="w-full px-3 py-2 pr-10 border rounded-lg focus:ring-2 focus:ring-primary"
+                                               placeholder="Enter current password" required>
+                                        <span class="password-toggle" onclick="togglePassword('current-password')">
+                                            <i data-feather="eye" class="w-5 h-5"></i>
+                                        </span>
+                                    </div>
                                     <p class="text-xs text-gray-500 mt-1">Required to verify your identity</p>
                                 </div>
 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
                                         <label class="block text-sm font-medium mb-2">New Password</label>
-                                        <input type="password" id="new-password" name="new_password" 
-                                               class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary"
-                                               placeholder="Enter new password">
+                                        <div class="password-wrapper">
+                                            <input type="password" id="new-password" name="new_password" 
+                                                   class="w-full px-3 py-2 pr-10 border rounded-lg focus:ring-2 focus:ring-primary"
+                                                   placeholder="Enter new password">
+                                            <span class="password-toggle" onclick="togglePassword('new-password')">
+                                                <i data-feather="eye" class="w-5 h-5"></i>
+                                            </span>
+                                        </div>
                                         <p class="text-xs text-gray-500 mt-1">Minimum 6 characters</p>
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium mb-2">Confirm New Password</label>
-                                        <input type="password" name="new_password_confirmation" 
-                                               class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary"
-                                               placeholder="Confirm new password">
+                                        <div class="password-wrapper">
+                                            <input type="password" id="confirm-password" name="new_password_confirmation" 
+                                                   class="w-full px-3 py-2 pr-10 border rounded-lg focus:ring-2 focus:ring-primary"
+                                                   placeholder="Confirm new password">
+                                            <span class="password-toggle" onclick="togglePassword('confirm-password')">
+                                                <i data-feather="eye" class="w-5 h-5"></i>
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -393,6 +422,21 @@
 
         // CSRF Token Setup
         const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+        // Password Toggle Function
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const icon = input.nextElementSibling.querySelector('i');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.setAttribute('data-feather', 'eye-off');
+            } else {
+                input.type = 'password';
+                icon.setAttribute('data-feather', 'eye');
+            }
+            feather.replace();
+        }
 
         // Toast Notification
         function showToast(message, type = 'success') {
@@ -538,9 +582,17 @@
                 if (data.success) {
                     showToast(data.message, 'success');
                     // Clear password fields
-                    e.target.querySelector('[name="current_password"]').value = '';
-                    e.target.querySelector('[name="new_password"]').value = '';
-                    e.target.querySelector('[name="new_password_confirmation"]').value = '';
+                    document.getElementById('current-password').value = '';
+                    document.getElementById('new-password').value = '';
+                    document.getElementById('confirm-password').value = '';
+                    
+                    // Reset password fields to password type
+                    document.getElementById('current-password').type = 'password';
+                    document.getElementById('new-password').type = 'password';
+                    document.getElementById('confirm-password').type = 'password';
+                    
+                    // Reset icons to eye
+                    feather.replace();
                 } else {
                     showToast(data.message, 'error');
                 }
