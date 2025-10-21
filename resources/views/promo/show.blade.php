@@ -107,12 +107,7 @@
           <span class="absolute left-0 bottom-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
         </a>
       </div>
-
-      <!-- Navbar Extra -->
-      <div class="flex items-center">
-        <a href="#" class="text-black mx-1 sm:mx-2 hover:text-primary transition-all duration-500 p-2"><i data-feather="search" class="w-5 h-5 sm:w-6 sm:h-6"></i></a>
-        <a href="#" class="text-black mx-1 sm:mx-2 hover:text-primary transition-all duration-500 p-2"><i data-feather="shopping-cart" class="w-5 h-5 sm:w-6 sm:h-6"></i></a>
-      </div>
+      
     </nav>
 
     <!-- Main Content -->
