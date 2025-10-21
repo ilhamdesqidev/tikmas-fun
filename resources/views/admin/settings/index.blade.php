@@ -101,9 +101,6 @@
                 <div class="nav-tab" data-tab="admin-account">
                     <i data-feather="user" class="w-4 h-4 inline mr-2"></i>Admin Account
                 </div>
-                <div class="nav-tab" data-tab="email">
-                    <i data-feather="mail" class="w-4 h-4 inline mr-2"></i>Email Settings
-                </div>
             </div>
         </div>
     </div>
