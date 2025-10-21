@@ -6,6 +6,7 @@ use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\Admin\PromoController as AdminPromoController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\AdminPasswordResetController;
 use App\Http\Controllers\PromoController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\Admin\FacilityController;
@@ -61,17 +62,31 @@ Route::get('/payment/checkout/{order_id}', [PaymentController::class, 'showCheck
 Route::get('/invoice/{order_id}', [PaymentController::class, 'showInvoice'])->name('payment.invoice');
 Route::get('/invoice/{order_id}/download', [PaymentController::class, 'showInvoice'])->name('payment.invoice.download');
 Route::get('/invoice/{order_id}/autodownload', [PaymentController::class, 'autoDownloadInvoice'])->name('payment.invoice.autodownload');
+
 // Admin Routes
 Route::prefix('admin')->name('admin.')->group(function () {
     
-    // Public routes (bisa diakses tanpa login)
+    // Public routes (accessible without login)
     Route::get('/login', [AdminAuthController::class, 'showLoginForm'])
         ->name('login')
         ->middleware('redirect.admin');
     
     Route::post('/login', [AdminAuthController::class, 'login']);
 
-    // Protected routes (harus login sebagai admin)
+    // Password Reset Routes (DITAMBAHKAN)
+    Route::get('/forgot-password', [AdminPasswordResetController::class, 'showForgotForm'])
+        ->name('password.request');
+    
+    Route::post('/forgot-password', [AdminPasswordResetController::class, 'sendResetLink'])
+        ->name('password.email');
+    
+    Route::get('/reset-password/{token}', [AdminPasswordResetController::class, 'showResetForm'])
+        ->name('password.reset');
+    
+    Route::post('/reset-password', [AdminPasswordResetController::class, 'reset'])
+        ->name('password.update');
+
+    // Protected routes (require admin authentication)
     Route::middleware('admin')->group(function () {
 
         Route::prefix('staff/verification')->name('staff.verification.')->group(function () {
@@ -93,11 +108,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Dashboard
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::get('/dashboard/revenue-chart', [AdminDashboardController::class, 'getRevenueChart'])->name('dashboard.revenue');
-         // Tambahkan route lainnya
-    Route::get('/promo', function () { return 'Promo Page'; })->name('promo.index');
-    Route::get('/tickets', function () { return 'Tickets Page'; })->name('tickets.index');
-    Route::get('/customers', function () { return 'Customers Page'; })->name('customers.index');
-    Route::get('/reports', function () { return 'Reports Page'; })->name('reports.index');
+        
+        // Tambahkan route lainnya
+        Route::get('/promo', function () { return 'Promo Page'; })->name('promo.index');
+        Route::get('/tickets', function () { return 'Tickets Page'; })->name('tickets.index');
+        Route::get('/customers', function () { return 'Customers Page'; })->name('customers.index');
+        Route::get('/reports', function () { return 'Reports Page'; })->name('reports.index');
         
         // Profile
         Route::get('/profile', [AdminDashboardController::class, 'profile'])->name('profile');
@@ -130,41 +146,46 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::delete('/{facility}', [FacilityController::class, 'destroy'])->name('destroy');
         });
 
-    // Tickets Management Routes (PERBAIKI URUTAN)
-Route::prefix('tickets')->name('tickets.')->group(function () {
-    Route::get('/', [TicketController::class, 'index'])->name('index');
-    
-    // PENTING: Route spesifik HARUS di atas route dengan parameter
-    Route::get('/export', [TicketController::class, 'export'])->name('export');
-    Route::get('/export-all', [TicketController::class, 'exportAll'])->name('exportAll');
-    
-    // Route dengan parameter di bawah
-    Route::get('/{order_id}', [TicketController::class, 'show'])->name('show');
-    Route::post('/{order_id}/status', [TicketController::class, 'updateStatus'])->name('update-status');
-    Route::delete('/{order_id}', [TicketController::class, 'destroy'])->name('destroy');
-});
+        // Tickets Management Routes (PERBAIKI URUTAN)
+        Route::prefix('tickets')->name('tickets.')->group(function () {
+            Route::get('/', [TicketController::class, 'index'])->name('index');
+            
+            // PENTING: Route spesifik HARUS di atas route dengan parameter
+            Route::get('/export', [TicketController::class, 'export'])->name('export');
+            Route::get('/export-all', [TicketController::class, 'exportAll'])->name('exportAll');
+            
+            // Route dengan parameter di bawah
+            Route::get('/{order_id}', [TicketController::class, 'show'])->name('show');
+            Route::post('/{order_id}/status', [TicketController::class, 'updateStatus'])->name('update-status');
+            Route::delete('/{order_id}', [TicketController::class, 'destroy'])->name('destroy');
+        });
         
-        
-   // Settings Routes
-Route::prefix('settings')->name('settings.')->group(function () {
-    Route::get('/', [SettingsController::class, 'index'])->name('index');
-    
-    // Update settings
-    Route::post('/general', [SettingsController::class, 'updateGeneral'])->name('general.update');
-    Route::post('/hero', [SettingsController::class, 'updateHero'])->name('hero.update');
-    Route::post('/about', [SettingsController::class, 'updateAbout'])->name('about.update');
-    Route::post('/website', [SettingsController::class, 'updateWebsite'])->name('website.update'); 
-    Route::get('/admin-credentials', [SettingsController::class, 'getAdminData'])->name('admin.get');
-    Route::post('/admin-credentials', [SettingsController::class, 'updateAdminCredentials'])->name('admin.update');
-    Route::post('/login-customization', [SettingsController::class, 'updateLoginCustomization'])->name('login.update');
-    
-    // Wahana Images Routes (DIPERBAIKI - hapus /settings/)
-    Route::get('/wahana-images', [SettingsController::class, 'getWahanaImages'])->name('wahana.index');
-    Route::post('/wahana-images', [SettingsController::class, 'storeWahanaImage'])->name('wahana.store');
-    Route::post('/wahana-images/{id}', [SettingsController::class, 'updateWahanaImage'])->name('wahana.update');
-    Route::delete('/wahana-images/{id}', [SettingsController::class, 'deleteWahanaImage'])->name('wahana.delete');
-    Route::post('/wahana-images/reorder', [SettingsController::class, 'reorderWahanaImages'])->name('wahana.reorder');
-});
+        // Settings Routes (DIPERBAIKI dengan menambahkan route email)
+        Route::prefix('settings')->name('settings.')->group(function () {
+            Route::get('/', [SettingsController::class, 'index'])->name('index');
+            
+            // Update settings
+            Route::post('/general', [SettingsController::class, 'updateGeneral'])->name('general.update');
+            Route::post('/hero', [SettingsController::class, 'updateHero'])->name('hero.update');
+            Route::post('/about', [SettingsController::class, 'updateAbout'])->name('about.update');
+            Route::post('/website', [SettingsController::class, 'updateWebsite'])->name('website.update'); 
+            
+            // Email settings (DITAMBAHKAN)
+            Route::post('/email', [SettingsController::class, 'updateEmail'])->name('email.update');
+            Route::post('/email/test', [SettingsController::class, 'testEmail'])->name('email.test');
+            
+            // Admin credentials
+            Route::get('/admin-credentials', [SettingsController::class, 'getAdminData'])->name('admin.get');
+            Route::post('/admin-credentials', [SettingsController::class, 'updateAdminCredentials'])->name('admin.update');
+            Route::post('/login-customization', [SettingsController::class, 'updateLoginCustomization'])->name('login.update');
+            
+            // Wahana Images Routes (DIPERBAIKI - hapus /settings/)
+            Route::get('/wahana-images', [SettingsController::class, 'getWahanaImages'])->name('wahana.index');
+            Route::post('/wahana-images', [SettingsController::class, 'storeWahanaImage'])->name('wahana.store');
+            Route::post('/wahana-images/{id}', [SettingsController::class, 'updateWahanaImage'])->name('wahana.update');
+            Route::delete('/wahana-images/{id}', [SettingsController::class, 'deleteWahanaImage'])->name('wahana.delete');
+            Route::post('/wahana-images/reorder', [SettingsController::class, 'reorderWahanaImages'])->name('wahana.reorder');
+        });
         
         // Customers Routes (placeholder untuk pengembangan selanjutnya)
         Route::prefix('customers')->name('customers.')->group(function () {

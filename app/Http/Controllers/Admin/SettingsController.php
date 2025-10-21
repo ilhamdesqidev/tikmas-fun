@@ -353,4 +353,92 @@ class SettingsController extends Controller
             'message' => 'Wahana images reordered successfully!'
         ]);
     }
+
+    public function updateEmail(Request $request)
+    {
+        $validated = $request->validate([
+            'mail_mailer' => 'required|string',
+            'mail_host' => 'required|string',
+            'mail_port' => 'required|numeric',
+            'mail_username' => 'required|string',
+            'mail_password' => 'required|string',
+            'mail_encryption' => 'required|string',
+            'mail_from_address' => 'required|email',
+            'mail_from_name' => 'required|string',
+        ]);
+
+        foreach ($validated as $key => $value) {
+            $type = $key === 'mail_password' ? 'password' : 'text';
+            Setting::set($key, $value, $type, 'email');
+        }
+
+        // Update config dynamically
+        config([
+            'mail.default' => $validated['mail_mailer'],
+            'mail.mailers.smtp.host' => $validated['mail_host'],
+            'mail.mailers.smtp.port' => $validated['mail_port'],
+            'mail.mailers.smtp.username' => $validated['mail_username'],
+            'mail.mailers.smtp.password' => $validated['mail_password'],
+            'mail.mailers.smtp.encryption' => $validated['mail_encryption'],
+            'mail.from.address' => $validated['mail_from_address'],
+            'mail.from.name' => $validated['mail_from_name'],
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Email settings updated successfully!'
+        ]);
+    }
+
+    public function testEmail(Request $request)
+    {
+        $validated = $request->validate([
+            'test_email' => 'required|email'
+        ]);
+
+        try {
+            // Update mail config with current settings
+            $this->updateMailConfig();
+
+            $admin = Admin::where('email', $validated['test_email'])->first();
+            
+            if (!$admin) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Email not found in admin records.'
+                ], 404);
+            }
+
+            // Send test email
+            $token = \Illuminate\Support\Str::random(64);
+            $admin->sendPasswordResetNotification($token);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Test email sent successfully! Please check your inbox.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to send email: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Update mail configuration from database settings
+     */
+    private function updateMailConfig()
+    {
+        config([
+            'mail.default' => Setting::get('mail_mailer', 'smtp'),
+            'mail.mailers.smtp.host' => Setting::get('mail_host', 'smtp.gmail.com'),
+            'mail.mailers.smtp.port' => Setting::get('mail_port', '587'),
+            'mail.mailers.smtp.username' => Setting::get('mail_username', ''),
+            'mail.mailers.smtp.password' => Setting::get('mail_password', ''),
+            'mail.mailers.smtp.encryption' => Setting::get('mail_encryption', 'tls'),
+            'mail.from.address' => Setting::get('mail_from_address', ''),
+            'mail.from.name' => Setting::get('mail_from_name', 'MestaKara'),
+        ]);
+    }
 }
