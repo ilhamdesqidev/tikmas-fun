@@ -3,23 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login - MestaKara</title>
+    <title>Admin Login - {{ \App\Models\Setting::get('login_logo_text', 'MestaKara') }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,300;0,400;0,500;0,600;0,700;1,700&display=swap"
-      rel="stylesheet"
-    />
-    <!-- feather icon -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,300;0,400;0,500;0,600;0,700;1,700&display=swap" rel="stylesheet" />
     <script src="https://unpkg.com/feather-icons"></script>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
+      const primaryColor = '{{ \App\Models\Setting::get("login_primary_color", "#CFD916") }}';
       tailwind.config = {
         theme: {
           extend: {
             colors: {
-              primary: '#CFD916',
+              primary: primaryColor,
               'text-dark': '#333333',
             },
             fontFamily: {
@@ -31,7 +27,13 @@
     </script>
     <style>
       .login-bg {
-        background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80');
+        @php
+          $bgPath = \App\Models\Setting::get('login_background_path');
+          $bgUrl = $bgPath 
+            ? asset('storage/' . $bgPath) 
+            : 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80';
+        @endphp
+        background-image: url('{{ $bgUrl }}');
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
@@ -40,7 +42,6 @@
         min-height: 100vh;
       }
       
-      /* Efek blur pada background */
       .login-bg::before {
         content: '';
         position: absolute;
@@ -52,7 +53,6 @@
         z-index: 1;
       }
       
-      /* Efek floating untuk desktop */
       .login-bg::after {
         content: '';
         position: absolute;
@@ -72,14 +72,13 @@
         66% { transform: translate(-30px, 20px) rotate(240deg); }
       }
       
-      /* Hilangkan efek floating di mobile untuk menghindari gambar double */
       @media (max-width: 768px) {
         .login-bg::after {
           display: none;
         }
         
         .login-bg::before {
-          backdrop-filter: blur(4px); /* Kurangi blur di mobile */
+          backdrop-filter: blur(4px);
         }
       }
       
@@ -108,7 +107,7 @@
         top: -8px;
         left: 12px;
         font-size: 12px;
-        color: #CFD916;
+        color: {{ \App\Models\Setting::get('login_primary_color', '#CFD916') }};
         background: white;
         padding: 0 4px;
       }
@@ -120,13 +119,13 @@
       }
       
       .form-input:focus {
-        border-color: #CFD916;
-        box-shadow: 0 0 0 3px rgba(207, 217, 22, 0.1);
+        border-color: {{ \App\Models\Setting::get('login_primary_color', '#CFD916') }};
+        box-shadow: 0 0 0 3px {{ \App\Models\Setting::get('login_primary_color', '#CFD916') }}1a;
         outline: none;
       }
       
       .login-btn {
-        background: linear-gradient(135deg, #CFD916 0%, #b8c71a 100%);
+        background: linear-gradient(135deg, {{ \App\Models\Setting::get('login_primary_color', '#CFD916') }} 0%, {{ \App\Models\Setting::get('login_primary_color', '#CFD916') }}dd 100%);
         transition: all 0.3s ease;
         position: relative;
         overflow: hidden;
@@ -149,7 +148,7 @@
       
       .login-btn:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(207, 217, 22, 0.3);
+        box-shadow: 0 8px 25px {{ \App\Models\Setting::get('login_primary_color', '#CFD916') }}4d;
       }
       
       .error-alert {
@@ -172,22 +171,20 @@
       .tea-icon {
         width: 60px;
         height: 60px;
-        background: linear-gradient(135deg, #CFD916 0%, #a8c332 100%);
+        background: linear-gradient(135deg, {{ \App\Models\Setting::get('login_primary_color', '#CFD916') }} 0%, {{ \App\Models\Setting::get('login_primary_color', '#CFD916') }}cc 100%);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         margin: 0 auto 20px;
-        box-shadow: 0 8px 25px rgba(207, 217, 22, 0.2);
+        box-shadow: 0 8px 25px {{ \App\Models\Setting::get('login_primary_color', '#CFD916') }}33;
       }
       
-      /* Memastikan konten di atas efek blur */
       .login-bg > * {
         position: relative;
         z-index: 2;
       }
       
-      /* Container untuk memastikan konten tidak kepotong di desktop */
       .login-container {
         min-height: 100vh;
         display: flex;
@@ -197,7 +194,6 @@
         width: 100%;
       }
       
-      /* Atur tinggi maksimum untuk konten di mobile */
       @media (max-width: 768px) {
         .login-container {
           padding: 16px;
@@ -221,16 +217,20 @@
                         <i data-feather="coffee" class="w-8 h-8 text-white"></i>
                     </div>
                     <h1 class="text-3xl font-bold text-white mb-2">
-                        Mesta<span class="text-black">Kara</span>
+                        {{ \App\Models\Setting::get('login_logo_text', 'MestaKara') }}
                     </h1>
-                    <p class="text-white/90 text-lg">Admin Portal</p>
+                    <p class="text-white/90 text-lg">{{ \App\Models\Setting::get('login_tagline', 'Admin Portal') }}</p>
                 </div>
                 
                 <!-- Login Card -->
                 <div class="glass-card rounded-2xl shadow-2xl p-6 md:p-8">
                     <div class="text-center mb-8">
-                        <h2 class="text-2xl font-semibold text-gray-800 mb-2">Welcome Back</h2>
-                        <p class="text-gray-600">Please sign in to your admin account</p>
+                        <h2 class="text-2xl font-semibold text-gray-800 mb-2">
+                            {{ \App\Models\Setting::get('login_welcome_title', 'Welcome Back') }}
+                        </h2>
+                        <p class="text-gray-600">
+                            {{ \App\Models\Setting::get('login_welcome_subtitle', 'Please sign in to your admin account') }}
+                        </p>
                     </div>
                     
                     <!-- Error Messages -->
@@ -303,7 +303,7 @@
                     <!-- Footer -->
                     <div class="text-center mt-8 pt-6 border-t border-gray-200">
                         <p class="text-gray-500 text-sm">
-                            Protected by <span class="font-semibold text-primary">MestaKara Security</span>
+                            {{ \App\Models\Setting::get('login_footer_text', 'Protected by MestaKara Security') }}
                         </p>
                     </div>
                 </div>
@@ -369,16 +369,13 @@
                 const container = document.querySelector('.login-container');
                 
                 if (isMobile) {
-                    // For mobile, ensure content fits well
                     document.body.style.minHeight = '100vh';
                     document.body.style.overflow = 'auto';
                 } else {
-                    // For desktop, center everything properly
                     document.body.style.minHeight = '100vh';
                 }
             }
             
-            // Call on load and resize
             adjustLayout();
             window.addEventListener('resize', adjustLayout);
         });

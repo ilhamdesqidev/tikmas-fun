@@ -81,6 +81,9 @@
                 <div class="nav-tab" data-tab="website">
                     <i data-feather="globe" class="w-4 h-4 inline mr-2"></i>Website
                 </div>
+                <div class="nav-tab" data-tab="login-page">
+                    <i data-feather="log-in" class="w-4 h-4 inline mr-2"></i>Login Page
+                </div>
                 <div class="nav-tab" data-tab="admin-account">
                     <i data-feather="user" class="w-4 h-4 inline mr-2"></i>Admin Account
                 </div>
