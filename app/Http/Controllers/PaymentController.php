@@ -16,14 +16,26 @@ use Picqer\Barcode\BarcodeGeneratorPNG;
 
 class PaymentController extends Controller
 {
-    public function __construct()
+     public function __construct()
     {
-        // Set Midtrans configuration
-        Config::$serverKey = env('MIDTRANS_SERVER_KEY');
-        Config::$clientKey = env('MIDTRANS_CLIENT_KEY');
-        Config::$isProduction = env('MIDTRANS_IS_PRODUCTION', false);
-        Config::$isSanitized = true;
-        Config::$is3ds = true;
+        // Ambil dari config agar aman terhadap config cache
+        $serverKey = config('midtrans.server_key');
+        $clientKey = config('midtrans.client_key');
+
+        \Midtrans\Config::$serverKey  = $serverKey;
+        \Midtrans\Config::$clientKey  = $clientKey;
+        \Midtrans\Config::$isProduction = filter_var(config('midtrans.is_production', false), FILTER_VALIDATE_BOOLEAN);
+        \Midtrans\Config::$isSanitized  = filter_var(config('midtrans.is_sanitized', true), FILTER_VALIDATE_BOOLEAN);
+        \Midtrans\Config::$is3ds       = filter_var(config('midtrans.is_3ds', true), FILTER_VALIDATE_BOOLEAN);
+
+        // Log bila ada yang kosong untuk debugging
+        if (empty($serverKey) || empty($clientKey)) {
+            \Log::error('Midtrans keys missing in config', [
+                'server_key_set' => !empty($serverKey),
+                'client_key_set' => !empty($clientKey),
+                'env_midtrans_server' => env('MIDTRANS_SERVER_KEY') ? 'present' : 'missing',
+            ]);
+        }
     }
 
     // Method untuk menampilkan form checkout
