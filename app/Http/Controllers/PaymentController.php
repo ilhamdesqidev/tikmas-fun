@@ -16,7 +16,7 @@ use Picqer\Barcode\BarcodeGeneratorPNG;
 
 class PaymentController extends Controller
 {
-     public function __construct()
+    public function __construct()
     {
         // Ambil dari config agar aman terhadap config cache
         $serverKey = config('midtrans.server_key');
@@ -57,6 +57,33 @@ class PaymentController extends Controller
             'visit_date'      => 'required|date',
             'ticket_quantity' => 'required|integer|min:1',
         ]);
+
+        // VALIDASI KUOTA - Cek sisa kuota
+        if ($promo->quota) {
+            $remainingQuota = $promo->quota - $promo->sold_count;
+            
+            // Jika jumlah tiket yang dipesan melebihi sisa kuota
+            if ($request->ticket_quantity > $remainingQuota) {
+                return back()->with('error', "Maaf, kuota hanya tersisa {$remainingQuota} tiket.")
+                             ->withInput();
+            }
+            
+            // Jika kuota sudah habis
+            if ($remainingQuota <= 0) {
+                return back()->with('error', 'Maaf, kuota promo sudah habis.')
+                             ->withInput();
+            }
+        }
+
+        // Validasi tanggal kunjungan dalam periode promo
+        $visitDate = \Carbon\Carbon::parse($request->visit_date);
+        $startDate = \Carbon\Carbon::parse($promo->start_date);
+        $endDate = \Carbon\Carbon::parse($promo->end_date);
+        
+        if ($visitDate->lt($startDate) || $visitDate->gt($endDate)) {
+            return back()->with('error', 'Tanggal kunjungan harus dalam periode promo.')
+                         ->withInput();
+        }
 
         // Generate order number
         $orderNumber = 'MK' . date('Ymd') . Str::random(4);
@@ -155,7 +182,7 @@ class PaymentController extends Controller
         ]);
     }
 
-     public function paymentFinish(Request $request)
+    public function paymentFinish(Request $request)
     {
         $orderId = $request->order_id;
         $order = Order::where('order_number', $orderId)->firstOrFail();
@@ -398,7 +425,7 @@ class PaymentController extends Controller
     /**
      * Method untuk menampilkan invoice dan auto download
      */
-     public function showInvoice($order_id)
+    public function showInvoice($order_id)
     {
         $order = Order::where('order_number', $order_id)->firstOrFail();
         $promo = Promo::findOrFail($order->promo_id);
@@ -458,28 +485,28 @@ class PaymentController extends Controller
     }
 
     private function generateAsciiBarcode($text)
-{
-    $barcode = '';
-    $chars = str_split($text);
-    
-    foreach ($chars as $char) {
-        // Convert character to binary-like pattern
-        $ascii = ord($char);
-        $binary = decbin($ascii);
+    {
+        $barcode = '';
+        $chars = str_split($text);
         
-        // Convert binary to barcode pattern
-        for ($i = 0; $i < strlen($binary); $i++) {
-            if ($binary[$i] === '1') {
-                $barcode .= '█';
-            } else {
-                $barcode .= '▒';
+        foreach ($chars as $char) {
+            // Convert character to binary-like pattern
+            $ascii = ord($char);
+            $binary = decbin($ascii);
+            
+            // Convert binary to barcode pattern
+            for ($i = 0; $i < strlen($binary); $i++) {
+                if ($binary[$i] === '1') {
+                    $barcode .= '█';
+                } else {
+                    $barcode .= '▒';
+                }
             }
+            $barcode .= '░'; // Separator
         }
-        $barcode .= '░'; // Separator
+        
+        return $barcode;
     }
-    
-    return $barcode;
-}
 
     /**
      * Convert binary pattern to barcode bars for HTML/CSS
@@ -500,7 +527,7 @@ class PaymentController extends Controller
     /**
      * Method untuk download invoice PDF - FIXED VERSION dengan Barcode
      */
-     public function downloadInvoice($order, $promo)
+    public function downloadInvoice($order, $promo)
     {
         $invoiceNumber = $order->invoice_number;
         
@@ -538,7 +565,7 @@ class PaymentController extends Controller
     /**
      * Method khusus untuk auto download setelah pembayaran sukses
      */
-   public function autoDownloadInvoice($order_id)
+    public function autoDownloadInvoice($order_id)
     {
         $order = Order::where('order_number', $order_id)->firstOrFail();
         $promo = Promo::findOrFail($order->promo_id);
@@ -578,13 +605,34 @@ class PaymentController extends Controller
     {
         $visitDate = $request->visit_date;
         $quantity = $request->ticket_quantity;
+        $promoId = $request->promo_id;
 
-        // Logic untuk cek ketersediaan tiket
-        $available = true; // Ganti dengan logic sebenarnya
+        $promo = Promo::find($promoId);
+        
+        if (!$promo) {
+            return response()->json([
+                'available' => false,
+                'message' => 'Promo tidak ditemukan'
+            ]);
+        }
+
+        // Cek kuota
+        if ($promo->quota) {
+            $remainingQuota = $promo->quota - $promo->sold_count;
+            
+            if ($quantity > $remainingQuota) {
+                return response()->json([
+                    'available' => false,
+                    'message' => "Tiket tidak tersedia. Kuota hanya tersisa {$remainingQuota} tiket",
+                    'remaining_quota' => $remainingQuota
+                ]);
+            }
+        }
 
         return response()->json([
-            'available' => $available,
-            'message' => $available ? 'Tiket tersedia' : 'Tiket tidak tersedia untuk tanggal tersebut'
+            'available' => true,
+            'message' => 'Tiket tersedia untuk tanggal tersebut',
+            'remaining_quota' => $promo->quota ? ($promo->quota - $promo->sold_count) : null
         ]);
     }
 
@@ -616,7 +664,7 @@ class PaymentController extends Controller
         return $filename;
     }
 
-        public function downloadInvoiceWithBarcodeFile($order, $promo)
+    public function downloadInvoiceWithBarcodeFile($order, $promo)
     {
         $invoiceNumber = $order->invoice_number;
         
