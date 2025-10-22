@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Daftar Fasilitas')
-@section('page-title', 'Manajemen Fasilitas')
-@section('page-description', 'Kelola semua fasilitas dan wahana')
+@section('title', 'Daftar Wahana')
+@section('page-title', 'Manajemen Wahana')
+@section('page-description', 'Kelola semua Wisata dan wahana')
 
 @section('content')
 <div class="bg-white rounded-lg shadow-sm">
@@ -10,14 +10,14 @@
     <div class="px-6 py-4 border-b border-gray-200">
         <div class="flex justify-between items-center">
             <div>
-                <h2 class="text-lg font-semibold text-gray-800">Daftar Fasilitas</h2>
-                <p class="text-sm text-gray-600">Total {{ $facilities->total() }} fasilitas ditemukan</p>
+                <h2 class="text-lg font-semibold text-gray-800">Daftar Wisata</h2>
+                <p class="text-sm text-gray-600">Total {{ $facilities->total() }} Wisata ditemukan</p>
             </div>
             <a href="{{ route('admin.facilities.create') }}" class="bg-primary hover:bg-opacity-90 text-black font-medium py-2 px-4 rounded-lg transition-all duration-200 flex items-center">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
-                Tambah Fasilitas
+                Tambah Wisata
             </a>
         </div>
     </div>

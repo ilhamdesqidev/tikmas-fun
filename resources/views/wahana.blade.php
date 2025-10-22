@@ -193,19 +193,6 @@
                     </div>
                 </div>
 
-                <!-- Category Filter Pills -->
-                <div class="flex flex-wrap gap-2 mt-4" id="categoryFilter">
-                    <button onclick="filterCategory('all')" class="filter-btn active px-4 py-2 rounded-full text-sm font-medium bg-gray-100 hover:bg-gray-200 transition-all" data-category="all">
-                        Semua
-                    </button>
-                    <button onclick="filterCategory('wahana')" class="filter-btn px-4 py-2 rounded-full text-sm font-medium bg-gray-100 hover:bg-gray-200 transition-all" data-category="wahana">
-                        Wahana
-                    </button>
-                    <button onclick="filterCategory('fasilitas')" class="filter-btn px-4 py-2 rounded-full text-sm font-medium bg-gray-100 hover:bg-gray-200 transition-all" data-category="fasilitas">
-                        Fasilitas
-                    </button>
-                </div>
-
                 <!-- Results Info -->
                 <div class="mt-4 flex items-center justify-between text-sm">
                     <span id="resultsCount" class="text-gray-600">Menampilkan semua wahana</span>
