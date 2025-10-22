@@ -133,9 +133,6 @@
                             <button onclick="switchTab('deskripsi')" class="tab-button px-4 py-3 font-medium text-sm sm:text-base border-b-2 border-primary text-primary whitespace-nowrap" data-tab="deskripsi">
                                 Deskripsi
                             </button>
-                            <button onclick="switchTab('fasilitas')" class="tab-button px-4 py-3 font-medium text-sm sm:text-base border-b-2 border-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap" data-tab="fasilitas">
-                                Fasilitas
-                            </button>
                             <button onclick="switchTab('ketentuan')" class="tab-button px-4 py-3 font-medium text-sm sm:text-base border-b-2 border-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap" data-tab="ketentuan">
                                 Ketentuan
                             </button>
