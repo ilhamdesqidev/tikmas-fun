@@ -6,7 +6,7 @@
     <title>{{ $settings['site_name'] ?? 'MestaKara' }} - Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,300;0,400;0,700;1,700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,300;0,400;0,600;0,700;1,700&display=swap" rel="stylesheet" />
     <script src="https://unpkg.com/feather-icons"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -39,16 +39,58 @@
         max-width: 100vw;
         font-family: 'Poppins', sans-serif;
       }
+
+      /* ==================== SCROLL PROGRESS BAR ==================== */
+      .scroll-progress {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 0%;
+        height: 4px;
+        background: linear-gradient(90deg, {{ $settings['primary_color'] ?? '#CFD916' }} 0%, #a8b012 100%);
+        z-index: 9999;
+        transition: width 0.1s ease;
+        box-shadow: 0 2px 10px rgba(207, 217, 22, 0.5);
+      }
+
+      /* ==================== NAVBAR WITH BLUR EFFECT ==================== */
+      nav {
+        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.95);
+        transition: all 0.3s ease;
+      }
+
+      nav.scrolled {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      }
       
-      /* ==================== HERO SECTION ==================== */
+      /* ==================== HERO SECTION WITH PARALLAX ==================== */
       .hero-bg {
         background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
           url("{{ isset($settings['hero_background_path']) ? asset('storage/' . $settings['hero_background_path']) : '/assets/img/mainimg.jpg' }}");
         background-size: cover;
         background-position: center;
         background-attachment: fixed;
+        position: relative;
+        overflow: hidden;
       }
-      
+
+      .hero-bg::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at 30% 50%, rgba(207, 217, 22, 0.1) 0%, transparent 50%);
+        animation: pulse 8s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% { opacity: 0.3; }
+        50% { opacity: 0.6; }
+      }
+
       @media (max-width: 768px) {
         .hero-bg {
           background-attachment: scroll;
@@ -57,14 +99,121 @@
       
       .hero h1 {
         text-shadow: 2px 2px 4px rgba(1, 1, 3, 0.7);
+        animation: fadeInUp 1s ease-out;
       }
       
       .hero p {
         text-shadow: 1px 1px 3px rgba(1, 1, 3, 0.5);
+        animation: fadeInUp 1.2s ease-out;
       }
       
       .hero .cta {
-        box-shadow: 1px 1px 3px rgba(1, 1, 3, 0.5);
+        box-shadow: 0 4px 20px rgba(207, 217, 22, 0.4);
+        animation: fadeInUp 1.4s ease-out, float 3s ease-in-out infinite;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .hero .cta::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+      }
+
+      .hero .cta:hover::before {
+        width: 300px;
+        height: 300px;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+      }
+
+      /* ==================== FLOATING STATS ==================== */
+      .floating-stats {
+        position: absolute;
+        bottom: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 2rem;
+        flex-wrap: wrap;
+        justify-content: center;
+        animation: fadeInUp 1.6s ease-out;
+      }
+
+      .stat-card {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 1.5rem 2rem;
+        border-radius: 1rem;
+        text-align: center;
+        min-width: 140px;
+        transition: all 0.3s ease;
+      }
+
+      .stat-card:hover {
+        background: rgba(255, 255, 255, 0.25);
+        transform: translateY(-5px);
+      }
+
+      .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: {{ $settings['primary_color'] ?? '#CFD916' }};
+        display: block;
+      }
+
+      .stat-label {
+        font-size: 0.875rem;
+        color: white;
+        opacity: 0.9;
+      }
+
+      @media (max-width: 768px) {
+        .floating-stats {
+          bottom: 40px;
+          gap: 1rem;
+        }
+        .stat-card {
+          padding: 1rem 1.5rem;
+          min-width: 100px;
+        }
+        .stat-number {
+          font-size: 1.5rem;
+        }
+      }
+
+      /* ==================== SECTION ANIMATIONS ==================== */
+      .fade-in-section {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+      }
+
+      .fade-in-section.visible {
+        opacity: 1;
+        transform: translateY(0);
       }
 
       /* ==================== FACILITY CAROUSEL STYLES ==================== */
@@ -72,14 +221,14 @@
         position: relative;
         overflow: hidden;
         border-radius: 1rem;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
         max-width: 100%;
       }
 
       .facility-images {
         display: flex;
         transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        width: {{ $facilities->count() * 100 }}%;
+        width: {{ $facilities->count() > 0 ? ($facilities->count() * 100) : 100 }}%;
       }
 
       .facility-slide {
@@ -89,7 +238,7 @@
 
       .facility-image {
         width: 100%;
-        height: 400px;
+        height: 450px;
         object-fit: cover;
         display: block;
       }
@@ -99,35 +248,35 @@
         bottom: 0;
         left: 0;
         right: 0;
-        background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
-        padding: 2rem 1.5rem 1rem;
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.85));
+        padding: 2.5rem 2rem 1.5rem;
         color: white;
       }
 
       .facility-title {
-        font-size: 1.5rem;
+        font-size: 1.75rem;
         font-weight: bold;
         margin-bottom: 0.5rem;
         text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
       }
 
       .facility-description {
-        font-size: 1rem;
+        font-size: 1.05rem;
         opacity: 0.95;
         text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-        line-height: 1.4;
+        line-height: 1.5;
       }
 
       .carousel-indicators {
         display: flex;
-        gap: 8px;
+        gap: 10px;
         justify-content: center;
-        margin-top: 1rem;
+        margin-top: 1.5rem;
       }
 
       .indicator {
-        width: 10px;
-        height: 10px;
+        width: 12px;
+        height: 12px;
         border-radius: 50%;
         background: #d1d5db;
         cursor: pointer;
@@ -136,18 +285,19 @@
 
       .indicator.active {
         background: {{ $settings['primary_color'] ?? '#CFD916' }};
-        transform: scale(1.3);
+        transform: scale(1.4);
+        box-shadow: 0 0 10px rgba(207, 217, 22, 0.5);
       }
 
       @media (max-width: 1024px) {
         .facility-image {
-          height: 350px;
+          height: 380px;
         }
       }
 
       @media (max-width: 768px) {
         .facility-image {
-          height: 280px;
+          height: 320px;
         }
         
         .facility-title {
@@ -165,7 +315,7 @@
 
       @media (max-width: 480px) {
         .facility-image {
-          height: 240px;
+          height: 260px;
         }
         
         .facility-title {
@@ -177,17 +327,18 @@
         }
       }
 
-      /* ==================== PROMO SLIDER STYLES ==================== */
+      /* ==================== PROMO SLIDER WITH 3D EFFECT ==================== */
       .promo-slider {
         overflow: hidden;
         position: relative;
-        padding: 2rem 0;
+        padding: 3rem 0;
         max-width: 100%;
+        perspective: 1500px;
       }
 
       .promo-container {
         display: flex;
-        transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         gap: 2rem;
         padding: 0 calc(50% - 175px);
       }
@@ -196,27 +347,28 @@
         min-width: 350px;
         max-width: 350px;
         background: white;
-        border-radius: 1rem;
+        border-radius: 1.25rem;
         overflow: hidden;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        transition: all 0.5s ease;
+        box-shadow: 0 15px 45px rgba(0, 0, 0, 0.12);
+        transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         position: relative;
         margin-bottom: 10px;
-        transform: scale(0.85);
+        transform: scale(0.85) rotateY(15deg);
         filter: blur(2px);
         opacity: 0.6;
         flex-shrink: 0;
       }
 
       .promo-card.active {
-        transform: scale(1);
+        transform: scale(1) rotateY(0deg);
         filter: blur(0px);
         opacity: 1;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
+        z-index: 10;
       }
 
       .promo-card.clickable:hover {
-        transform: scale(1.02);
+        transform: scale(1.03) translateY(-5px);
         cursor: pointer;
       }
 
@@ -247,44 +399,56 @@
         position: absolute;
         top: 15px;
         right: 15px;
-        padding: 6px 12px;
-        border-radius: 6px;
+        padding: 8px 14px;
+        border-radius: 8px;
         font-weight: bold;
         font-size: 12px;
         z-index: 10;
+        backdrop-filter: blur(10px);
       }
 
       .badge-coming-soon {
-        background: #3b82f6;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
       }
 
       .badge-expired {
-        background: #6b7280;
+        background: rgba(107, 114, 128, 0.9);
         color: white;
       }
 
       .badge-sold-out {
-        background: #dc2626;
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
         color: white;
       }
 
       .badge-discount {
-        background: {{ $settings['primary_color'] ?? '#CFD916' }};
+        background: linear-gradient(135deg, {{ $settings['primary_color'] ?? '#CFD916' }} 0%, #a8b012 100%);
         color: #000;
+        box-shadow: 0 4px 15px rgba(207, 217, 22, 0.4);
       }
 
       .featured-badge {
         position: absolute;
         top: 15px;
         left: 15px;
-        background: #ff4757;
+        background: linear-gradient(135deg, #ff4757 0%, #ff6348 100%);
         color: white;
-        padding: 6px 12px;
-        border-radius: 6px;
+        padding: 8px 14px;
+        border-radius: 8px;
         font-weight: bold;
         font-size: 12px;
         z-index: 10;
+        animation: pulse-badge 2s ease-in-out infinite;
+      }
+
+      @keyframes pulse-badge {
+        0%, 100% {
+          box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7);
+        }
+        50% {
+          box-shadow: 0 0 0 10px rgba(255, 71, 87, 0);
+        }
       }
 
       .promo-image {
@@ -297,11 +461,11 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
-        transition: transform 0.3s ease;
+        transition: transform 0.4s ease;
       }
 
       .promo-card.clickable:hover .promo-image img {
-        transform: scale(1.05);
+        transform: scale(1.08);
       }
 
       .nav-button {
@@ -310,8 +474,8 @@
         transform: translateY(-50%);
         background: rgba(255, 255, 255, 0.95);
         border: 2px solid {{ $settings['primary_color'] ?? '#CFD916' }};
-        width: 50px;
-        height: 50px;
+        width: 55px;
+        height: 55px;
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -320,12 +484,14 @@
         transition: all 0.3s ease;
         z-index: 20;
         backdrop-filter: blur(10px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
       }
 
       .nav-button:hover {
         background: {{ $settings['primary_color'] ?? '#CFD916' }};
         color: #000;
-        transform: translateY(-50%) scale(1.1);
+        transform: translateY(-50%) scale(1.15);
+        box-shadow: 0 6px 20px rgba(207, 217, 22, 0.4);
       }
 
       .nav-button.prev {
@@ -350,25 +516,135 @@
       .dots-container {
         display: flex;
         justify-content: center;
-        gap: 10px;
-        margin-top: 2rem;
+        gap: 12px;
+        margin-top: 2.5rem;
         flex-wrap: wrap;
       }
 
       .dot {
-        width: 12px;
-        height: 12px;
+        width: 14px;
+        height: 14px;
         border-radius: 50%;
         background: #ddd;
         cursor: pointer;
         transition: all 0.3s ease;
+        border: 2px solid transparent;
       }
 
       .dot.active {
         background: {{ $settings['primary_color'] ?? '#CFD916' }};
-        transform: scale(1.2);
+        transform: scale(1.3);
+        border-color: {{ $settings['primary_color'] ?? '#CFD916' }};
+        box-shadow: 0 0 10px rgba(207, 217, 22, 0.5);
       }
 
+      .dot:hover {
+        background: #a8b012;
+      }
+
+      /* ==================== SEARCH & FILTER ==================== */
+      .search-filter-container {
+        max-width: 800px;
+        margin: 0 auto 3rem;
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        justify-content: center;
+        padding: 0 1rem;
+      }
+
+      .search-box {
+        flex: 1;
+        min-width: 250px;
+        position: relative;
+      }
+
+      .search-input {
+        width: 100%;
+        padding: 1rem 1rem 1rem 3rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.75rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: white;
+      }
+
+      .search-input:focus {
+        outline: none;
+        border-color: {{ $settings['primary_color'] ?? '#CFD916' }};
+        box-shadow: 0 0 0 3px rgba(207, 217, 22, 0.1);
+      }
+
+      .search-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9ca3af;
+      }
+
+      .filter-buttons {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .filter-btn {
+        padding: 0.75rem 1.5rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.75rem;
+        background: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: #6b7280;
+      }
+
+      .filter-btn:hover {
+        border-color: {{ $settings['primary_color'] ?? '#CFD916' }};
+        color: #000;
+      }
+
+      .filter-btn.active {
+        background: {{ $settings['primary_color'] ?? '#CFD916' }};
+        border-color: {{ $settings['primary_color'] ?? '#CFD916' }};
+        color: #000;
+        box-shadow: 0 4px 15px rgba(207, 217, 22, 0.3);
+      }
+
+      /* ==================== BACK TO TOP BUTTON ==================== */
+      .back-to-top {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 55px;
+        height: 55px;
+        background: {{ $settings['primary_color'] ?? '#CFD916' }};
+        color: #000;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        z-index: 1000;
+        box-shadow: 0 4px 20px rgba(207, 217, 22, 0.4);
+      }
+
+      .back-to-top.visible {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .back-to-top:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 25px rgba(207, 217, 22, 0.5);
+      }
+
+      /* ==================== RESPONSIVE ADJUSTMENTS ==================== */
       @media (max-width: 1024px) {
         .promo-container {
           padding: 0 calc(50% - 165px);
@@ -387,8 +663,8 @@
         }
 
         .nav-button {
-          width: 40px;
-          height: 40px;
+          width: 45px;
+          height: 45px;
         }
 
         .nav-button.prev {
@@ -406,6 +682,13 @@
         
         .promo-image {
           height: 200px;
+        }
+
+        .back-to-top {
+          width: 50px;
+          height: 50px;
+          bottom: 20px;
+          right: 20px;
         }
       }
 
@@ -439,11 +722,14 @@
     </style>
   </head>
   <body class="font-poppins bg-white text-text-dark">
+    <!-- Scroll Progress Bar -->
+    <div class="scroll-progress" id="scrollProgress"></div>
+
     <!-- Overlay -->
     <div id="overlay" class="hidden fixed top-0 left-0 w-full h-screen bg-black bg-opacity-50 z-40 transition-opacity duration-300"></div>
 
     <!-- Navbar -->
-    <nav class="w-full py-3 sm:py-4 lg:py-5 px-4 sm:px-6 lg:px-7 flex items-center justify-between bg-white border-b border-gray-400 fixed top-0 left-0 right-0 z-50" style="border-bottom: 1px solid #597336;">
+    <nav id="navbar" class="w-full py-3 sm:py-4 lg:py-5 px-4 sm:px-6 lg:px-7 flex items-center justify-between fixed top-0 left-0 right-0 z-50" style="border-bottom: 1px solid rgba(89, 115, 54, 0.2);">
       <a href="#" class="text-xl sm:text-2xl lg:text-3xl font-bold text-black italic">
         {{ $settings['site_name'] ?? 'MestaKara' }}<span class="text-primary">.</span>
       </a>
@@ -492,21 +778,37 @@
 
     <!-- Hero Section -->
     <section id="home" class="hero min-h-screen flex items-center hero-bg relative px-4 sm:px-6 lg:px-7 text-white pt-16">
-      <main class="max-w-4xl w-full">
+      <main class="max-w-4xl w-full relative z-10">
         <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl text-white leading-tight mb-4 sm:mb-6">
           {{ $settings['hero_title'] ?? 'Berlibur Dengan' }}<span class="text-primary"> {{ $settings['hero_subtitle'] ?? 'Wahana' }}</span>
         </h1>
         <p class="text-base sm:text-lg md:text-xl lg:text-2xl mt-3 sm:mt-4 leading-relaxed font-medium text-white max-w-3xl">
           {{ $settings['hero_description'] ?? 'Mari Berlibur dan Nikmati Berbagai Wahana Seru di Agrowisata Gunung Mas Bersama Keluarga Tercinta Dengan Harga Tiket Masuk yang Terjangkau dan Dapatkan Berbagai Promo Menarik Setiap Bulannya' }}
         </p>
-        <a href="#menu" class="cta inline-block mt-6 sm:mt-8 px-6 sm:px-8 lg:px-12 py-3 sm:py-4 text-base sm:text-lg lg:text-xl text-black font-semibold bg-primary rounded-lg hover:bg-yellow-500 transition-colors duration-300 touch-manipulation">
+        <a href="#menu" class="cta inline-block mt-6 sm:mt-8 px-6 sm:px-8 lg:px-12 py-3 sm:py-4 text-base sm:text-lg lg:text-xl text-black font-semibold bg-primary rounded-lg hover:bg-yellow-500 transition-colors duration-300 touch-manipulation relative z-10">
           {{ $settings['hero_cta_text'] ?? 'Dapatkan Promo' }}
         </a>
       </main>
+
+      <!-- Floating Stats -->
+      <div class="floating-stats">
+        <div class="stat-card">
+          <span class="stat-number" data-count="{{ $facilities->count() ?? 20 }}">0</span>
+          <span class="stat-label">Wahana</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number" data-count="{{ $promos->count() ?? 10 }}">0</span>
+          <span class="stat-label">Promo</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number" data-count="1000">0</span>
+          <span class="stat-label">Pengunjung</span>
+        </div>
+      </div>
     </section>
 
     <!-- About Section -->
-    <section id="about" class="py-12 sm:py-16 md:py-24 lg:py-32 px-4 sm:px-6 lg:px-7">
+    <section id="about" class="py-12 sm:py-16 md:py-24 lg:py-32 px-4 sm:px-6 lg:px-7 fade-in-section">
       <h2 class="text-center text-2xl sm:text-3xl lg:text-4xl mb-6 sm:mb-8 lg:mb-12 text-text-dark">
         <span class="text-primary">{{ $settings['about_title'] ?? 'Tentang' }}</span> {{ $settings['about_subtitle'] ?? 'Kami' }}
       </h2>
@@ -528,7 +830,7 @@
             </div>
           </div>
           
-          <!-- Indicators di luar gambar -->
+          <!-- Indicators -->
           <div class="carousel-indicators" id="carouselIndicators"></div>
           @else
           <div class="bg-gray-100 rounded-xl p-12 text-center">
@@ -540,7 +842,7 @@
           <!-- Tombol Lihat Lebih Banyak -->
           <div class="text-center mt-6">
             <button onclick="window.location='wahana'"
-                    class="inline-flex items-center px-6 py-3 bg-primary text-black font-semibold rounded-lg hover:bg-yellow-500 transition-colors duration-300 group">
+                    class="inline-flex items-center px-6 py-3 bg-primary text-black font-semibold rounded-lg hover:bg-yellow-500 transition-all duration-300 group hover:shadow-lg">
               Lihat Lebih Banyak
               <i data-feather="chevron-down"
                 class="w-5 h-5 ml-2 group-hover:transform group-hover:translate-y-1 transition-transform duration-300"></i>
@@ -549,7 +851,7 @@
         </div>
         
         <div class="flex-1 w-full lg:min-w-96 px-0 lg:px-8">
-          <h3 class="text-xl sm:text-2xl lg:text-3xl mb-3 sm:mb-4 text-text-dark">
+          <h3 class="text-xl sm:text-2xl lg:text-3xl mb-3 sm:mb-4 text-text-dark font-semibold">
             {{ $settings['about_question'] ?? 'Kenapa memilih Wahana kami?' }}
           </h3>
           <p class="mb-3 sm:mb-4 text-sm sm:text-base lg:text-lg font-medium leading-relaxed text-text-dark">
@@ -566,15 +868,29 @@
     </section>
 
     <!-- Promo Section -->
-    <section id="menu" class="py-6">
+    <section id="menu" class="py-12 fade-in-section">
       <h2 class="text-center text-3xl sm:text-4xl mb-4 text-text-dark">
         <span class="text-primary">Promo</span> Kami
       </h2>
-      <p class="text-center max-w-lg mx-auto font-medium leading-relaxed text-text-dark mb-12 sm:mb-20 text-base sm:text-lg">
+      <p class="text-center max-w-lg mx-auto font-medium leading-relaxed text-text-dark mb-8 text-base sm:text-lg">
         Nikmati berbagai pilihan promo menarik untuk pengalaman liburan yang tak terlupakan
       </p>
-      
+
       @if($promos->count() > 0)
+        <!-- Search & Filter -->
+        <div class="search-filter-container">
+          <div class="search-box">
+            <i data-feather="search" class="search-icon w-5 h-5"></i>
+            <input type="text" id="searchInput" class="search-input" placeholder="Cari promo...">
+          </div>
+          <div class="filter-buttons">
+            <button class="filter-btn active" data-filter="all">Semua</button>
+            <button class="filter-btn" data-filter="paket">Paket</button>
+            <button class="filter-btn" data-filter="tiket">Tiket</button>
+            <button class="filter-btn" data-filter="makanan">Makanan</button>
+          </div>
+        </div>
+
         <div class="relative promo-slider">
           <!-- Navigation Buttons -->
           <button class="nav-button prev" id="prevBtn">
@@ -594,6 +910,8 @@
               @endphp
               
               <div class="promo-card block hover:no-underline {{ $isClickable ? 'clickable' : 'non-clickable promo-disabled' }}" 
+                   data-category="{{ strtolower($promo->category) }}"
+                   data-name="{{ strtolower($promo->name) }}"
                    @if($isClickable) onclick="window.location.href='{{ route('promo.show', $promo->id) }}'" @endif>
                    
                 @if($promo->featured && $isClickable)
@@ -741,10 +1059,50 @@
       </div>
     </footer>
 
+    <!-- Back to Top Button -->
+    <div class="back-to-top" id="backToTop">
+      <i data-feather="arrow-up" class="w-6 h-6"></i>
+    </div>
+
     <!-- ==================== JAVASCRIPT ==================== -->
     <script>
       // Initialize Feather icons
       feather.replace();
+
+      // ==================== SCROLL PROGRESS BAR ====================
+      window.addEventListener('scroll', () => {
+        const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+        const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const scrolled = (winScroll / height) * 100;
+        document.getElementById('scrollProgress').style.width = scrolled + '%';
+      });
+
+      // ==================== NAVBAR SCROLL EFFECT ====================
+      const navbar = document.getElementById('navbar');
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+          navbar.classList.add('scrolled');
+        } else {
+          navbar.classList.remove('scrolled');
+        }
+      });
+
+      // ==================== BACK TO TOP BUTTON ====================
+      const backToTop = document.getElementById('backToTop');
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) {
+          backToTop.classList.add('visible');
+        } else {
+          backToTop.classList.remove('visible');
+        }
+      });
+
+      backToTop.addEventListener('click', () => {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      });
 
       // ==================== MOBILE MENU TOGGLE ====================
       const navbarNav = document.getElementById('mobile-nav');
@@ -814,10 +1172,56 @@
           }
           closeMobileMenu();
         });
+      });
 
-        anchor.addEventListener('touchend', function (e) {
-          this.click();
+      // ==================== ANIMATED COUNTER ====================
+      function animateCounter(element, target, duration = 2000) {
+        let start = 0;
+        const increment = target / (duration / 16);
+        const timer = setInterval(() => {
+          start += increment;
+          if (start >= target) {
+            element.textContent = target;
+            clearInterval(timer);
+          } else {
+            element.textContent = Math.floor(start);
+          }
+        }, 16);
+      }
+
+      // Start counters when hero section is visible
+      const statNumbers = document.querySelectorAll('.stat-number');
+      let countersStarted = false;
+
+      function startCounters() {
+        if (!countersStarted) {
+          statNumbers.forEach(stat => {
+            const target = parseInt(stat.getAttribute('data-count'));
+            animateCounter(stat, target);
+          });
+          countersStarted = true;
+        }
+      }
+
+      // Trigger counter on page load after small delay
+      setTimeout(startCounters, 500);
+
+      // ==================== SECTION FADE IN ANIMATION ====================
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
         });
+      }, observerOptions);
+
+      document.querySelectorAll('.fade-in-section').forEach(section => {
+        observer.observe(section);
       });
 
       // ==================== FACILITY CAROUSEL ====================
@@ -833,6 +1237,7 @@
         }
 
         init() {
+          if (this.totalSlides === 0) return;
           this.createIndicators();
           this.startAutoPlay();
           this.bindEvents();
@@ -933,12 +1338,15 @@
       class PromoSlider {
         constructor() {
           this.container = document.getElementById('promoContainer');
-          this.cards = this.container ? this.container.querySelectorAll('.promo-card') : [];
+          this.cards = this.container ? Array.from(this.container.querySelectorAll('.promo-card')) : [];
+          this.allCards = [...this.cards];
           this.totalCards = this.cards.length;
           this.dotsContainer = document.getElementById('dotsContainer');
           this.currentIndex = 0;
           this.prevBtn = document.getElementById('prevBtn');
           this.nextBtn = document.getElementById('nextBtn');
+          this.searchInput = document.getElementById('searchInput');
+          this.filterBtns = document.querySelectorAll('.filter-btn');
           this.init();
         }
 
@@ -948,6 +1356,8 @@
           this.bindEvents();
           this.updateSlider();
           this.autoPlay();
+          this.initSearch();
+          this.initFilter();
         }
 
         createDots() {
@@ -1005,6 +1415,57 @@
             }
             this.resumeAutoPlay();
           });
+        }
+
+        initSearch() {
+          if (!this.searchInput) return;
+          this.searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            this.filterCards(searchTerm);
+          });
+        }
+
+        initFilter() {
+          this.filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+              this.filterBtns.forEach(b => b.classList.remove('active'));
+              btn.classList.add('active');
+              const filter = btn.getAttribute('data-filter');
+              this.filterByCategory(filter);
+            });
+          });
+        }
+
+        filterCards(searchTerm) {
+          this.cards.forEach(card => {
+            const name = card.getAttribute('data-name') || '';
+            if (name.includes(searchTerm)) {
+              card.style.display = 'block';
+            } else {
+              card.style.display = 'none';
+            }
+          });
+          this.updateVisibleCards();
+        }
+
+        filterByCategory(category) {
+          this.cards.forEach(card => {
+            const cardCategory = card.getAttribute('data-category');
+            if (category === 'all' || cardCategory === category) {
+              card.style.display = 'block';
+            } else {
+              card.style.display = 'none';
+            }
+          });
+          this.updateVisibleCards();
+        }
+
+        updateVisibleCards() {
+          const visibleCards = this.cards.filter(card => card.style.display !== 'none');
+          this.totalCards = visibleCards.length;
+          this.currentIndex = 0;
+          this.createDots();
+          this.updateSlider();
         }
 
         handleResize() {
