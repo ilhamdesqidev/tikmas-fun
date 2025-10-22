@@ -79,22 +79,6 @@
         margin-top: 0.25rem;
         display: none;
       }
-      
-      /* Alert animation */
-      @keyframes slideDown {
-        from {
-          opacity: 0;
-          transform: translateY(-20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-      
-      .alert-animate {
-        animation: slideDown 0.3s ease-out;
-      }
     </style>
   </head>
   <body class="font-poppins bg-gray-50 text-text-dark">
@@ -128,35 +112,6 @@
     <!-- Main Content -->
     <main class="pt-24 pb-16 px-4 sm:px-7">
       <div class="max-w-6xl mx-auto">
-        
-        <!-- Alert Error -->
-        @if(session('error'))
-        <div class="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative alert-animate" role="alert">
-          <strong class="font-bold">Error!</strong>
-          <span class="block sm:inline ml-2">{{ session('error') }}</span>
-          <span class="absolute top-0 bottom-0 right-0 px-4 py-3 cursor-pointer" onclick="this.parentElement.remove()">
-            <svg class="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-              <title>Close</title>
-              <path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/>
-            </svg>
-          </span>
-        </div>
-        @endif
-
-        <!-- Alert Success -->
-        @if(session('success'))
-        <div class="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative alert-animate" role="alert">
-          <strong class="font-bold">Sukses!</strong>
-          <span class="block sm:inline ml-2">{{ session('success') }}</span>
-          <span class="absolute top-0 bottom-0 right-0 px-4 py-3 cursor-pointer" onclick="this.parentElement.remove()">
-            <svg class="fill-current h-6 w-6 text-green-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-              <title>Close</title>
-              <path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/>
-            </svg>
-          </span>
-        </div>
-        @endif
-        
         <!-- Breadcrumb -->
         <nav class="mb-6">
           <ol class="flex items-center space-x-2 text-sm text-gray-600">
@@ -247,7 +202,7 @@
               <div class="mb-6">
                 <div class="flex justify-between text-sm text-gray-600 mb-1">
                   <span>Tersisa</span>
-                  <span class="font-semibold">{{ $promo->quota - $promo->sold_count }} dari {{ $promo->quota }}</span>
+                  <span>{{ $promo->quota - $promo->sold_count }} dari {{ $promo->quota }}</span>
                 </div>
                 <div class="w-full bg-gray-200 rounded-full h-2">
                   <div class="bg-primary h-2 rounded-full" style="width: {{ min(100, ($promo->sold_count / $promo->quota) * 100) }}%"></div>
@@ -305,7 +260,7 @@
               <!-- Nama Pemesan -->
               <div>
                 <label for="customer-name" class="block text-sm font-medium text-gray-700 mb-1">Nama Pemesan <span class="text-red-500">*</span></label>
-                <input type="text" id="customer-name" name="customer_name" value="{{ old('customer_name') }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" required>
+                <input type="text" id="customer-name" name="customer_name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" required>
               </div>
               
               <!-- No WhatsApp -->
@@ -319,7 +274,7 @@
                   </span>
                   <input type="text" id="whatsapp-display"
                     class="w-full px-4 py-2 border border-gray-300 rounded-r-lg focus:ring-primary focus:border-primary"
-                    placeholder="81234567890" pattern="[1-9][0-9]{8,11}" inputmode="numeric" value="{{ old('whatsapp_number') ? substr(old('whatsapp_number'), 2) : '' }}" required>
+                    placeholder="81234567890" pattern="[1-9][0-9]{8,11}" inputmode="numeric" required>
                   <!-- Hidden input yang akan dikirim ke server dengan format 62xxx -->
                   <input type="hidden" id="whatsapp-number" name="whatsapp_number">
                 </div>
@@ -336,7 +291,7 @@
               <!-- Tanggal Kunjungan -->
               <div>
                 <label for="visit-date" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Kunjungan <span class="text-red-500">*</span></label>
-                <input type="date" id="visit-date" name="visit_date" value="{{ old('visit_date') }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" required>
+                <input type="date" id="visit-date" name="visit_date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" required>
                 <p class="text-xs text-gray-500 mt-1">Pilih tanggal antara {{ \Carbon\Carbon::parse($promo->start_date)->format('d M Y') }} - {{ \Carbon\Carbon::parse($promo->end_date)->format('d M Y') }}</p>
                 <p id="date-error" class="error-message">Tanggal yang dipilih harus dalam periode promo.</p>
               </div>
@@ -350,29 +305,22 @@
                 <!-- Counter di kanan -->
                 <div class="flex items-center gap-2">
                   <button type="button" id="decrement" 
-                    class="w-9 h-9 flex items-center justify-center rounded-md bg-gray-200 hover:bg-gray-300 font-bold transition-colors">-</button>
+                    class="w-9 h-9 flex items-center justify-center rounded-md bg-gray-200 hover:bg-gray-300 font-bold">-</button>
 
                   <input 
                     type="number" 
                     id="ticket-quantity" 
                     name="ticket_quantity" 
                     min="1" 
-                    @if($promo->quota)
-                    max="{{ $promo->quota - $promo->sold_count }}"
-                    @endif
-                    value="{{ old('ticket_quantity', 1) }}" 
+                    value="1" 
                     class="w-14 text-center border rounded-md"
                     required
                   >
 
                   <button type="button" id="increment" 
-                    class="w-9 h-9 flex items-center justify-center rounded-md bg-gray-200 hover:bg-gray-300 font-bold transition-colors">+</button>
+                    class="w-9 h-9 flex items-center justify-center rounded-md bg-gray-200 hover:bg-gray-300 font-bold">+</button>
                 </div>
               </div>
-              
-              @if($promo->quota)
-              <p class="text-xs text-gray-500 text-right">Maksimal {{ $promo->quota - $promo->sold_count }} tiket</p>
-              @endif
               
               <!-- Informasi Harga -->
               <div class="bg-gray-50 p-4 rounded-lg">
@@ -471,7 +419,10 @@
         const month = (now.getMonth() + 1).toString().padStart(2, '0');
         const day = now.getDate().toString().padStart(2, '0');
         
+        // Format counter dengan 2 digit (01, 02, ...)
         const sequentialNum = orderCounter.toString().padStart(2, '0');
+        
+        // Increment counter
         orderCounter++;
         
         return `MK${year}${month}${day}${sequentialNum}`;
@@ -491,11 +442,6 @@
       const whatsappInput = document.getElementById('whatsapp-number');
       const pricePerTicket = {{ $promo->promo_price }};
       
-      // Data kuota dari PHP
-      const promoQuota = {{ $promo->quota ?? 'null' }};
-      const promoSoldCount = {{ $promo->sold_count }};
-      const remainingQuota = promoQuota ? promoQuota - promoSoldCount : null;
-      
       // Format number to Rupiah
       function formatRupiah(amount) {
         return new Intl.NumberFormat('id-ID', { 
@@ -507,8 +453,32 @@
       
       // Validasi input WhatsApp - hanya angka dan tidak bisa diawali 0
       whatsappDisplay.addEventListener('input', function(e) {
+        // Hapus semua karakter non-digit
         let value = e.target.value.replace(/\D/g, '');
         
+        // Jika diawali 0, hapus 0 tersebut
+        if (value.startsWith('0')) {
+          value = value.substring(1);
+        }
+        
+        // Update display input value
+        e.target.value = value;
+        
+        // Update hidden input dengan format 62 + nomor (ini yang akan dikirim ke server)
+        if (value) {
+          whatsappInput.value = '62' + value;
+        } else {
+          whatsappInput.value = '';
+        }
+      });
+      
+      // Prevent paste dengan angka 0 di depan
+      whatsappDisplay.addEventListener('paste', function(e) {
+        e.preventDefault();
+        let pastedText = (e.clipboardData || window.clipboardData).getData('text');
+        let cleanedText = pastedText.replace(/\D/g, '');
+        
+        // Hapus 0 di depan jika ada
         if (cleanedText.startsWith('0')) {
           cleanedText = cleanedText.substring(1);
         }
@@ -519,9 +489,11 @@
       
       // Set min and max date for visit date based on promo period
       function setVisitDateRange() {
+        // Get promo dates from PHP variables
         const startDate = new Date('{{ $promo->start_date }}');
         const endDate = new Date('{{ $promo->end_date }}');
         
+        // Format dates to YYYY-MM-DD for input[type="date"]
         const formatDate = (date) => {
           const year = date.getFullYear();
           const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -529,9 +501,11 @@
           return `${year}-${month}-${day}`;
         };
         
+        // Set min and max attributes
         visitDateField.min = formatDate(startDate);
         visitDateField.max = formatDate(endDate);
         
+        // Set default value to today if within range, otherwise set to start date
         const today = new Date();
         if (today >= startDate && today <= endDate) {
           visitDateField.value = formatDate(today);
@@ -546,6 +520,7 @@
         const startDate = new Date('{{ $promo->start_date }}');
         const endDate = new Date('{{ $promo->end_date }}');
         
+        // Reset end of day for endDate to include the entire last day
         endDate.setHours(23, 59, 59, 999);
         
         if (selectedDate < startDate || selectedDate > endDate) {
@@ -557,26 +532,6 @@
           visitDateField.classList.remove('border-red-500');
           return true;
         }
-      }
-      
-      // Validasi kuota tiket
-      function validateTicketQuantity() {
-        const quantity = parseInt(ticketQuantity.value) || 1;
-        
-        // Jika promo tidak ada kuota (unlimited), return true
-        if (remainingQuota === null) {
-          return true;
-        }
-        
-        // Cek jika melebihi sisa kuota
-        if (quantity > remainingQuota) {
-          alert(`Maaf, kuota hanya tersisa ${remainingQuota} tiket. Silakan kurangi jumlah tiket.`);
-          ticketQuantity.value = remainingQuota > 0 ? remainingQuota : 1;
-          calculateTotalPrice();
-          return false;
-        }
-        
-        return true;
       }
       
       // Calculate total price
@@ -617,11 +572,8 @@
         if (e.target === modal) hideModal();
       });
       
-      // Update total price when quantity changes dengan validasi kuota
-      ticketQuantity.addEventListener('input', function() {
-        validateTicketQuantity();
-        calculateTotalPrice();
-      });
+      // Update total price when quantity changes
+      ticketQuantity.addEventListener('input', calculateTotalPrice);
       
       // Validate date when changed
       visitDateField.addEventListener('change', validateVisitDate);
@@ -635,12 +587,6 @@
           return;
         }
         
-        // Validate ticket quantity
-        if (!validateTicketQuantity()) {
-          e.preventDefault();
-          return;
-        }
-        
         // Validate WhatsApp number
         const whatsappValue = whatsappDisplay.value;
         if (!whatsappValue || whatsappValue.length < 9) {
@@ -649,6 +595,8 @@
           whatsappDisplay.focus();
           return;
         }
+        
+        // Form akan di-submit secara normal ke action yang telah ditentukan
       });
 
       // Smooth scrolling untuk anchor links
@@ -676,16 +624,7 @@
       const decrementBtn = document.getElementById('decrement');
 
       incrementBtn.addEventListener('click', () => {
-        let current = parseInt(ticketQuantity.value);
-        
-        // Cek kuota sebelum increment
-        if (remainingQuota !== null && current >= remainingQuota) {
-          alert(`Maaf, kuota hanya tersisa ${remainingQuota} tiket.`);
-          return;
-        }
-        
-        ticketQuantity.value = current + 1;
-        validateTicketQuantity();
+        ticketQuantity.value = parseInt(ticketQuantity.value) + 1;
         calculateTotalPrice();
       });
 
