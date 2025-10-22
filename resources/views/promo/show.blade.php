@@ -95,6 +95,12 @@
       .alert-animate {
         animation: slideDown 0.3s ease-out;
       }
+
+      /* Loading state */
+      .loading {
+        opacity: 0.7;
+        pointer-events: none;
+      }
     </style>
   </head>
   <body class="font-poppins bg-gray-50 text-text-dark">
@@ -391,7 +397,7 @@
                 <button id="cancel-btn" type="button" class="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors">
                   Batal
                 </button>
-                <button type="submit" class="px-6 py-2 bg-primary text-black rounded-lg hover:bg-yellow-500 transition-colors font-semibold">
+                <button type="submit" id="submit-btn" class="px-6 py-2 bg-primary text-black rounded-lg hover:bg-yellow-500 transition-colors font-semibold">
                   Beli Sekarang
                 </button>
               </div>
@@ -462,19 +468,19 @@
       // Initialize Feather icons
       feather.replace();
 
-      // Generate order number function dengan urutan
-      let orderCounter = 1;
-      
+      // Generate order number function yang lebih unik
       function generateOrderNumber() {
         const now = new Date();
         const year = now.getFullYear().toString().substr(-2);
         const month = (now.getMonth() + 1).toString().padStart(2, '0');
         const day = now.getDate().toString().padStart(2, '0');
+        const hours = now.getHours().toString().padStart(2, '0');
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        const seconds = now.getSeconds().toString().padStart(2, '0');
         
-        const sequentialNum = orderCounter.toString().padStart(2, '0');
-        orderCounter++;
+        const randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
         
-        return `MK${year}${month}${day}${sequentialNum}`;
+        return `MK${year}${month}${day}${hours}${minutes}${seconds}${randomNum}`;
       }
 
       // Modal functionality
@@ -489,6 +495,7 @@
       const dateError = document.getElementById('date-error');
       const whatsappDisplay = document.getElementById('whatsapp-display');
       const whatsappInput = document.getElementById('whatsapp-number');
+      const submitBtn = document.getElementById('submit-btn');
       const pricePerTicket = {{ $promo->promo_price }};
       
       // Data kuota dari PHP
@@ -509,12 +516,13 @@
       whatsappDisplay.addEventListener('input', function(e) {
         let value = e.target.value.replace(/\D/g, '');
         
-        if (cleanedText.startsWith('0')) {
-          cleanedText = cleanedText.substring(1);
+        // Hapus angka 0 di depan jika ada
+        if (value.startsWith('0')) {
+          value = value.substring(1);
         }
         
-        e.target.value = cleanedText;
-        whatsappInput.value = cleanedText ? '62' + cleanedText : '';
+        e.target.value = value;
+        whatsappInput.value = value ? '62' + value : '';
       });
       
       // Set min and max date for visit date based on promo period
@@ -626,8 +634,10 @@
       // Validate date when changed
       visitDateField.addEventListener('change', validateVisitDate);
       
-      // Form submission handler
+      // Form submission handler - FIXED VERSION
       document.getElementById('checkout-form').addEventListener('submit', function(e) {
+        console.log('Form submission started...');
+        
         // Validate date first
         if (!validateVisitDate()) {
           e.preventDefault();
@@ -649,6 +659,28 @@
           whatsappDisplay.focus();
           return;
         }
+        
+        // Pastikan WhatsApp number sudah diformat dengan benar
+        whatsappInput.value = '62' + whatsappValue;
+        
+        // Show loading state
+        submitBtn.innerHTML = '<span class="flex items-center justify-center"><svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Memproses...</span>';
+        submitBtn.disabled = true;
+        
+        // Add loading class to form
+        this.classList.add('loading');
+        
+        console.log('Form validation passed, submitting...');
+        console.log('Form data:', {
+            customer_name: document.getElementById('customer-name').value,
+            whatsapp_number: '62' + whatsappValue,
+            visit_date: document.getElementById('visit-date').value,
+            ticket_quantity: document.getElementById('ticket-quantity').value,
+            branch: document.getElementById('branch').value
+        });
+        
+        // Form akan di-submit secara normal ke server
+        // Tidak ada e.preventDefault() jadi form akan lanjut submit
       });
 
       // Smooth scrolling untuk anchor links
@@ -696,6 +728,40 @@
           calculateTotalPrice();
         }
       });
+
+      // Handle page load - set initial values
+      document.addEventListener('DOMContentLoaded', function() {
+        console.log('Page loaded successfully');
+        console.log('Promo Price:', pricePerTicket);
+        console.log('Remaining Quota:', remainingQuota);
+        
+        // Set initial WhatsApp value jika ada dari old input
+        const initialWhatsapp = whatsappDisplay.value;
+        if (initialWhatsapp) {
+          whatsappInput.value = '62' + initialWhatsapp;
+        }
+      });
+
+      // Debug: Log ketika modal terbuka
+      checkoutBtn?.addEventListener('click', function() {
+        console.log('Checkout button clicked, opening modal...');
+      });
+
+      // Debug: Log ketika form di-submit
+      document.getElementById('checkout-form').addEventListener('submit', function() {
+        console.log('Form is being submitted to:', this.action);
+      });
     </script>
+
+    <!-- Debug Section (Hapus di production) -->
+    @if(app()->environment('local'))
+    <div class="fixed bottom-4 right-4 bg-blue-100 border border-blue-400 rounded-lg p-4 text-sm max-w-xs">
+      <h4 class="font-bold text-blue-800">Debug Info:</h4>
+      <p><strong>Route:</strong> {{ route('checkout.process', $promo->id) }}</p>
+      <p><strong>Promo ID:</strong> {{ $promo->id }}</p>
+      <p><strong>Form Action:</strong> {{ url("/promo/{$promo->id}/process-checkout") }}</p>
+      <p><strong>Remaining Quota:</strong> {{ $promo->quota ? $promo->quota - $promo->sold_count : 'Unlimited' }}</p>
+    </div>
+    @endif
   </body>
 </html>
