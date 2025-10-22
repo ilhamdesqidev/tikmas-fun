@@ -16,127 +16,430 @@
             }
         }
     </script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+        .gallery-item {
+            transition: all 0.3s ease;
+        }
+        .gallery-item:hover {
+            transform: scale(1.05);
+        }
+        .sticky-nav {
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.95);
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
 </head>
 <body class="bg-gray-50">
-    <!-- Navbar -->
-    <nav class="w-full py-3 sm:py-5 px-4 sm:px-7 flex items-center justify-between bg-white border-b border-gray-400 fixed top-0 left-0 right-0 z-50" style="border-bottom: 1px solid #597336;">
+    <!-- Enhanced Navbar with Blur Effect -->
+    <nav class="w-full py-3 sm:py-4 px-4 sm:px-7 flex items-center justify-between sticky-nav border-b border-gray-200 fixed top-0 left-0 right-0 z-50 shadow-sm">
         <a href="#" class="text-xl sm:text-3xl font-bold text-black italic">
             Mesta<span class="text-primary">Kara</span>.
         </a>
         
-        <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
-            <a href="{{ route('wahana.index') }}" class="bg-gray-200 text-black px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg hover:bg-gray-300 transition-colors duration-300 font-medium text-xs sm:text-base text-center">
-                ← Kembali
+        <div class="flex items-center space-x-2 sm:space-x-4">
+            <a href="{{ route('wahana.index') }}" class="bg-gray-100 text-gray-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg hover:bg-gray-200 transition-all duration-300 font-medium text-xs sm:text-base flex items-center gap-1 sm:gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+                <span class="hidden sm:inline">Kembali</span>
             </a>
-            <a href="{{ route('home') }}" class="bg-primary text-black px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg hover:bg-yellow-500 transition-colors duration-300 font-medium text-xs sm:text-base text-center">
+            <a href="{{ route('home') }}" class="bg-primary text-black px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg hover:bg-yellow-500 transition-all duration-300 font-medium text-xs sm:text-base shadow-sm">
                 Dashboard
             </a>
         </div>
     </nav>
 
     <!-- Main Content -->
-    <main class="pt-24 sm:pt-28 px-4 sm:px-7 pb-8 sm:pb-12">
-        <div class="max-w-4xl mx-auto">
-            <!-- Breadcrumb -->
-            <nav class="mb-4 sm:mb-8 overflow-x-auto">
-                <ol class="flex items-center space-x-2 text-xs sm:text-sm text-gray-600 whitespace-nowrap">
-                    <li><a href="{{ route('home') }}" class="hover:text-primary">Dashboard</a></li>
-                    <li>→</li>
-                    <li><a href="{{ route('wahana.index') }}" class="hover:text-primary">Wahana</a></li>
-                    <li>→</li>
-                    <li class="text-gray-900 font-medium truncate max-w-[150px] sm:max-w-none">{{ $facility->name }}</li>
+    <main class="pt-20 sm:pt-24 px-4 sm:px-7 pb-8 sm:pb-12">
+        <div class="max-w-6xl mx-auto">
+            <!-- Enhanced Breadcrumb -->
+            <nav class="mb-4 sm:mb-6 fade-in">
+                <ol class="flex items-center space-x-2 text-xs sm:text-sm text-gray-500 bg-white px-4 py-2 rounded-lg shadow-sm">
+                    <li><a href="{{ route('home') }}" class="hover:text-primary transition-colors">Dashboard</a></li>
+                    <li><svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg></li>
+                    <li><a href="{{ route('wahana.index') }}" class="hover:text-primary transition-colors">Wahana</a></li>
+                    <li><svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg></li>
+                    <li class="text-gray-900 font-medium">{{ $facility->name }}</li>
                 </ol>
             </nav>
 
-            <!-- Gambar Utama -->
-            <div class="mb-6 sm:mb-8">
-                <img src="{{ asset('storage/' . $facility->image) }}" 
-                     alt="{{ $facility->name }}" 
-                     class="w-full h-64 sm:h-96 object-cover rounded-lg shadow-md">
-            </div>
-
-             <!-- Gallery -->
-            @if($facility->gallery_images && count($facility->gallery_images) > 0)
-            <div class="mt-6 sm:mt-8 bg-white rounded-lg shadow-sm p-4 sm:p-8">
-                <h3 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-4 sm:mb-6">Gallery {{ $facility->name }}</h3>
-                <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4">
-                    @foreach($facility->gallery_images as $index => $galleryImage)
-                    <div class="aspect-w-16 aspect-h-9">
-                        <img src="{{ asset('storage/' . $galleryImage) }}" 
-                             alt="{{ $facility->name }} - View {{ $index + 1 }}" 
-                             class="w-full h-24 sm:h-32 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-                             onclick="openModal('{{ asset('storage/' . $galleryImage) }}')">
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-            @endif
-
-            <!-- Konten Detail -->
-            <div class="bg-white rounded-lg shadow-sm p-4 sm:p-8 mt-6 sm:mt-0">
-                <div class="mb-4 sm:mb-6">
-                    <span class="inline-block bg-primary bg-opacity-20 text-primary text-xs sm:text-sm font-medium px-2 sm:px-3 py-1 rounded-full mb-3 sm:mb-4">
-                        {{ ucfirst($facility->category) }} Unggulan
-                    </span>
-                    <h1 class="text-2xl sm:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">{{ $facility->name }}</h1>
-                </div>
-
-                <!-- Deskripsi Lengkap -->
-                <div class="prose max-w-none">
-                    <h2 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-3 sm:mb-4">Deskripsi {{ ucfirst($facility->category) }}</h2>
-                    <div class="text-gray-700 leading-relaxed text-base sm:text-lg">
-                        {!! nl2br(e($facility->description)) !!}
-                    </div>
-                </div>
-
-                <!-- Informasi Tambahan -->
-                <div class="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-200">
-                    <h3 class="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4">Informasi</h3>
-                    <div class="grid grid-cols-1 gap-3 sm:gap-4">
-                        <div class="flex items-center">
-                            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-primary mr-2 sm:mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
-                            </svg>
-                            <span class="text-gray-700 text-sm sm:text-base">Durasi: {{ $facility->duration }}</span>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Left Column - Image & Gallery -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- Main Image with Badge Overlay -->
+                    <div class="relative fade-in">
+                        <img src="{{ asset('storage/' . $facility->image) }}" 
+                             alt="{{ $facility->name }}" 
+                             class="w-full h-64 sm:h-96 object-cover rounded-xl shadow-lg">
+                        <div class="absolute top-4 left-4">
+                            <span class="bg-primary text-black text-xs sm:text-sm font-bold px-3 py-1.5 rounded-full shadow-lg">
+                                {{ ucfirst($facility->category) }} Unggulan
+                            </span>
                         </div>
-                        <div class="flex items-center">
-                            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-primary mr-2 sm:mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                        <button onclick="openModal('{{ asset('storage/' . $facility->image) }}')" class="absolute bottom-4 right-4 bg-white bg-opacity-90 text-gray-800 px-3 py-2 rounded-lg text-sm font-medium hover:bg-opacity-100 transition-all shadow-lg flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
                             </svg>
-                            <span class="text-gray-700 text-sm sm:text-base">{{ $facility->age_range }}</span>
+                            Perbesar
+                        </button>
+                    </div>
+
+                    <!-- Gallery Grid -->
+                    @if($facility->gallery_images && count($facility->gallery_images) > 0)
+                    <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6 fade-in">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg sm:text-xl font-bold text-gray-800 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"/>
+                                </svg>
+                                Gallery Foto
+                            </h3>
+                            <span class="text-sm text-gray-500">{{ count($facility->gallery_images) }} foto</span>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            @foreach($facility->gallery_images as $index => $galleryImage)
+                            <div class="gallery-item relative group cursor-pointer overflow-hidden rounded-lg" onclick="openModal('{{ asset('storage/' . $galleryImage) }}')">
+                                <img src="{{ asset('storage/' . $galleryImage) }}" 
+                                     alt="{{ $facility->name }} - View {{ $index + 1 }}" 
+                                     class="w-full h-32 sm:h-40 object-cover">
+                                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center">
+                                    <svg class="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            @endforeach
                         </div>
                     </div>
+                    @endif
+
+                    <!-- Tabbed Content Section -->
+                    <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6 fade-in">
+                        <!-- Tabs -->
+                        <div class="flex border-b border-gray-200 mb-6 overflow-x-auto">
+                            <button onclick="switchTab('deskripsi')" class="tab-button px-4 py-3 font-medium text-sm sm:text-base border-b-2 border-primary text-primary whitespace-nowrap" data-tab="deskripsi">
+                                Deskripsi
+                            </button>
+                            <button onclick="switchTab('fasilitas')" class="tab-button px-4 py-3 font-medium text-sm sm:text-base border-b-2 border-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap" data-tab="fasilitas">
+                                Fasilitas
+                            </button>
+                            <button onclick="switchTab('ketentuan')" class="tab-button px-4 py-3 font-medium text-sm sm:text-base border-b-2 border-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap" data-tab="ketentuan">
+                                Ketentuan
+                            </button>
+                        </div>
+
+                        <!-- Tab Content -->
+                        <div id="deskripsi" class="tab-content active">
+                            <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4">Tentang {{ $facility->name }}</h2>
+                            <div class="text-gray-700 leading-relaxed text-sm sm:text-base">
+                                {!! nl2br(e($facility->description)) !!}
+                            </div>
+                        </div>
+
+                        <div id="fasilitas" class="tab-content">
+                            <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4">Fasilitas yang Tersedia</h2>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                    <svg class="w-5 h-5 text-primary flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span class="text-sm sm:text-base text-gray-700">Area Tunggu Nyaman</span>
+                                </div>
+                                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                    <svg class="w-5 h-5 text-primary flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span class="text-sm sm:text-base text-gray-700">Toilet Bersih</span>
+                                </div>
+                                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                    <svg class="w-5 h-5 text-primary flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span class="text-sm sm:text-base text-gray-700">Operator Berpengalaman</span>
+                                </div>
+                                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                    <svg class="w-5 h-5 text-primary flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span class="text-sm sm:text-base text-gray-700">Area Parkir Luas</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="ketentuan" class="tab-content">
+                            <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4">Ketentuan & Peraturan</h2>
+                            <div class="space-y-3">
+                                <div class="flex gap-3 p-3 bg-red-50 rounded-lg border-l-4 border-red-500">
+                                    <svg class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span class="text-sm sm:text-base text-gray-700">Pengunjung wajib mengikuti instruksi operator</span>
+                                </div>
+                                <div class="flex gap-3 p-3 bg-yellow-50 rounded-lg border-l-4 border-yellow-500">
+                                    <svg class="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span class="text-sm sm:text-base text-gray-700">Perhatikan batasan usia dan tinggi badan</span>
+                                </div>
+                                <div class="flex gap-3 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                                    <svg class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span class="text-sm sm:text-base text-gray-700">Dilarang membawa makanan dan minuman ke area wahana</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column - Info Card -->
+                <div class="lg:col-span-1">
+                    <div class="sticky top-24 space-y-6">
+                        <!-- Quick Info Card -->
+                        <div class="bg-white rounded-xl shadow-lg p-6 fade-in">
+                            <h3 class="text-lg font-bold text-gray-800 mb-4 pb-3 border-b border-gray-200">Informasi Wahana</h3>
+                            
+                            <div class="space-y-4">
+                                <div class="flex items-start gap-3">
+                                    <div class="p-2 bg-primary bg-opacity-20 rounded-lg">
+                                        <svg class="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-gray-500 font-medium mb-1">Durasi</p>
+                                        <p class="text-sm font-semibold text-gray-800">{{ $facility->duration }}</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-start gap-3">
+                                    <div class="p-2 bg-primary bg-opacity-20 rounded-lg">
+                                        <svg class="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-gray-500 font-medium mb-1">Batasan Usia</p>
+                                        <p class="text-sm font-semibold text-gray-800">{{ $facility->age_range }}</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-start gap-3">
+                                    <div class="p-2 bg-primary bg-opacity-20 rounded-lg">
+                                        <svg class="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-gray-500 font-medium mb-1">Kategori</p>
+                                        <p class="text-sm font-semibold text-gray-800">{{ ucfirst($facility->category) }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Rating & Review Card -->
+                        <div class="bg-gradient-to-br from-primary to-yellow-400 rounded-xl shadow-lg p-6 text-black fade-in">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-bold">Rating Pengunjung</h3>
+                                <div class="flex items-center gap-1">
+                                    <svg class="w-6 h-6 fill-current" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                    </svg>
+                                    <span class="text-2xl font-bold">4.8</span>
+                                </div>
+                            </div>
+                            <div class="flex gap-1 mb-2">
+                                <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                <svg class="w-5 h-5 fill-current opacity-30" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                            </div>
+                            <p class="text-sm opacity-90">Berdasarkan 1,234 ulasan</p>
+                        </div>
+
+                        <!-- Share Button -->
+                        <button onclick="shareWahana()" class="w-full bg-white text-gray-800 px-6 py-3 rounded-xl hover:shadow-lg transition-all duration-300 font-medium flex items-center justify-center gap-2 shadow-md fade-in">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+                            </svg>
+                            Bagikan Wahana
+                        </button>
+
+                        <!-- Contact Card -->
+                        <div class="bg-white rounded-xl shadow-lg p-6 fade-in">
+                            <h3 class="text-lg font-bold text-gray-800 mb-4">Butuh Bantuan?</h3>
+                            <p class="text-sm text-gray-600 mb-4">Hubungi kami untuk informasi lebih lanjut atau reservasi khusus.</p>
+                            <a href="tel:+62123456789" class="w-full bg-primary text-black px-6 py-3 rounded-lg hover:bg-yellow-500 transition-all duration-300 font-medium flex items-center justify-center gap-2 shadow-sm">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                                </svg>
+                                Hubungi Kami
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-           
         </div>
     </main>
 
-    <!-- Modal untuk gambar gallery -->
-    <div id="imageModal" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 flex items-center justify-center p-4">
-        <div class="max-w-4xl max-h-full relative">
-            <img id="modalImage" src="" alt="" class="max-w-full max-h-[90vh] object-contain">
-            <button onclick="closeModal()" class="absolute -top-2 -right-2 sm:top-4 sm:right-4 text-white text-2xl sm:text-3xl bg-black bg-opacity-50 rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center hover:bg-opacity-75 transition-all">
-                ×
+    <!-- Enhanced Modal with Navigation -->
+    <div id="imageModal" class="fixed inset-0 bg-black bg-opacity-90 hidden z-50 flex items-center justify-center p-4">
+        <div class="max-w-5xl max-h-full relative w-full">
+            <img id="modalImage" src="" alt="" class="max-w-full max-h-[85vh] object-contain mx-auto rounded-lg">
+            
+            <!-- Close Button -->
+            <button onclick="closeModal()" class="absolute top-2 right-2 sm:top-4 sm:right-4 text-white bg-black bg-opacity-60 rounded-full w-10 h-10 flex items-center justify-center hover:bg-opacity-80 transition-all shadow-lg">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+
+            <!-- Download Button -->
+            <button onclick="downloadImage()" class="absolute bottom-4 right-4 bg-primary text-black px-4 py-2 rounded-lg font-medium hover:bg-yellow-500 transition-all shadow-lg flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                </svg>
+                Download
             </button>
         </div>
     </div>
 
+    <!-- Floating Action Button for Quick Actions -->
+    <div class="fixed bottom-6 right-6 z-40 flex flex-col gap-3">
+        <button onclick="scrollToTop()" class="bg-primary text-black p-3 rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+            </svg>
+        </button>
+    </div>
+
     <script>
+        let currentImageSrc = '';
+
         function openModal(imageSrc) {
+            currentImageSrc = imageSrc;
             document.getElementById('modalImage').src = imageSrc;
             document.getElementById('imageModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
         }
 
         function closeModal() {
             document.getElementById('imageModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
         }
 
-        // Tutup modal ketika klik di luar gambar
+        function downloadImage() {
+            const link = document.createElement('a');
+            link.href = currentImageSrc;
+            link.download = 'mestakara-wahana-' + Date.now() + '.jpg';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active state from all buttons
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('border-primary', 'text-primary');
+                button.classList.add('border-transparent', 'text-gray-500');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active state to clicked button
+            const activeButton = document.querySelector(`[data-tab="${tabName}"]`);
+            activeButton.classList.remove('border-transparent', 'text-gray-500');
+            activeButton.classList.add('border-primary', 'text-primary');
+        }
+
+        function shareWahana() {
+            if (navigator.share) {
+                navigator.share({
+                    title: '{{ $facility->name }} - Mestakara',
+                    text: 'Lihat wahana menarik ini di Mestakara!',
+                    url: window.location.href
+                }).catch(err => console.log('Error sharing:', err));
+            } else {
+                // Fallback: copy to clipboard
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    alert('Link berhasil disalin ke clipboard!');
+                });
+            }
+        }
+
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        // Close modal when clicking outside
         document.getElementById('imageModal').addEventListener('click', function(e) {
             if (e.target.id === 'imageModal') {
                 closeModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Add fade-in animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+            observer.observe(el);
+        });
+
+        // Show/hide scroll to top button
+        window.addEventListener('scroll', function() {
+            const scrollButton = document.querySelector('.fixed.bottom-6');
+            if (window.scrollY > 300) {
+                scrollButton.style.opacity = '1';
+                scrollButton.style.pointerEvents = 'auto';
+            } else {
+                scrollButton.style.opacity = '0';
+                scrollButton.style.pointerEvents = 'none';
             }
         });
     </script>
