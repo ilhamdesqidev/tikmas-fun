@@ -37,6 +37,7 @@
         .slider-container {
             position: relative;
             overflow: hidden;
+            border-radius: 0.75rem;
         }
         .slider-track {
             display: flex;
@@ -73,6 +74,60 @@
         .slider-item img {
             pointer-events: auto;
         }
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1001;
+        }
+        .modal-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 15px;
+            cursor: pointer;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+        }
+        .modal-nav:hover {
+            background-color: rgba(255, 255, 255, 0.4);
+        }
+        .modal-prev {
+            left: 20px;
+        }
+        .modal-next {
+            right: 20px;
+        }
     </style>
 </head>
 <body class="bg-gray-50" oncontextmenu="return false;">
@@ -97,7 +152,7 @@
 
     <!-- Main Content -->
     <main class="pt-20 sm:pt-24 px-4 sm:px-7 pb-8 sm:pb-12">
-    <div class="max-w-6xl mx-auto">
+        <div class="max-w-6xl mx-auto">
             <!-- Enhanced Breadcrumb -->
             <nav class="mb-4 sm:mb-6 fade-in">
                 <ol class="flex items-center space-x-2 text-xs sm:text-sm text-gray-500 bg-white px-4 py-2 rounded-lg shadow-sm">
@@ -112,52 +167,98 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- Left Column - Image & Gallery -->
                 <div class="lg:col-span-2 space-y-6">
-                    <!-- Main Image with Badge Overlay -->
-                    <div class="relative fade-in">
-                        <img src="{{ asset('storage/' . $facility->image) }}" 
-                             alt="{{ $facility->name }}" 
-                             class="w-full h-64 sm:h-96 object-cover rounded-xl shadow-lg">
-                        <div class="absolute top-4 left-4">
-                            <span class="bg-primary text-black text-xs sm:text-sm font-bold px-3 py-1.5 rounded-full shadow-lg">
-                                {{ ucfirst($facility->category) }} Unggulan
-                            </span>
-                        </div>
-                        <button onclick="openModal('{{ asset('storage/' . $facility->image) }}')" class="absolute bottom-4 right-4 bg-white bg-opacity-90 text-gray-800 px-3 py-2 rounded-lg text-sm font-medium hover:bg-opacity-100 transition-all shadow-lg flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
-                            </svg>
-                            Perbesar
-                        </button>
-                    </div>
-
-                    <!-- Gallery Grid -->
-                    @if($facility->gallery_images && count($facility->gallery_images) > 0)
-                    <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6 fade-in">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg sm:text-xl font-bold text-gray-800 flex items-center gap-2">
-                                <svg class="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"/>
-                                </svg>
-                                Gallery Foto
-                            </h3>
-                            <span class="text-sm text-gray-500">{{ count($facility->gallery_images) }} foto</span>
-                        </div>
-                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                            @foreach($facility->gallery_images as $index => $galleryImage)
-                            <div class="gallery-item relative group cursor-pointer overflow-hidden rounded-lg" onclick="openModal('{{ asset('storage/' . $galleryImage) }}')">
-                                <img src="{{ asset('storage/' . $galleryImage) }}" 
-                                     alt="{{ $facility->name }} - View {{ $index + 1 }}" 
-                                     class="w-full h-32 sm:h-40 object-cover">
-                                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center">
-                                    <svg class="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
-                                    </svg>
+                    <!-- Main Image Slider -->
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden fade-in">
+                        <div class="slider-container relative">
+                            <div class="slider-track" id="sliderTrack">
+                                <!-- Main Image -->
+                                <div class="slider-item relative">
+                                    <img src="{{ asset('storage/' . $facility->image) }}" 
+                                         alt="{{ $facility->name }}" 
+                                         class="w-full h-64 sm:h-96 object-cover">
+                                    <div class="absolute top-4 left-4">
+                                        <span class="bg-primary text-black text-xs sm:text-sm font-bold px-3 py-1.5 rounded-full shadow-lg">
+                                            {{ ucfirst($facility->category) }} Unggulan
+                                        </span>
+                                    </div>
+                                    <button onclick="openModal('{{ asset('storage/' . $facility->image) }}', 0)" class="absolute bottom-4 right-4 bg-white bg-opacity-90 text-gray-800 px-3 py-2 rounded-lg text-sm font-medium hover:bg-opacity-100 transition-all shadow-lg flex items-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                                        </svg>
+                                        Perbesar
+                                    </button>
                                 </div>
+                                
+                                <!-- Gallery Images -->
+                                @if($facility->gallery_images && count($facility->gallery_images) > 0)
+                                    @foreach($facility->gallery_images as $index => $galleryImage)
+                                    <div class="slider-item relative">
+                                        <img src="{{ asset('storage/' . $galleryImage) }}" 
+                                             alt="{{ $facility->name }} - View {{ $index + 1 }}" 
+                                             class="w-full h-64 sm:h-96 object-cover">
+                                        <div class="absolute top-4 left-4">
+                                            <span class="bg-primary text-black text-xs sm:text-sm font-bold px-3 py-1.5 rounded-full shadow-lg">
+                                                Gallery {{ $index + 1 }}
+                                            </span>
+                                        </div>
+                                        <button onclick="openModal('{{ asset('storage/' . $galleryImage) }}', {{ $index + 1 }})" class="absolute bottom-4 right-4 bg-white bg-opacity-90 text-gray-800 px-3 py-2 rounded-lg text-sm font-medium hover:bg-opacity-100 transition-all shadow-lg flex items-center gap-2">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                                            </svg>
+                                            Perbesar
+                                        </button>
+                                    </div>
+                                    @endforeach
+                                @endif
                             </div>
-                            @endforeach
+                            
+                            <!-- Navigation Buttons -->
+                            <button onclick="previousSlide()" class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 text-gray-800 p-2 rounded-full hover:bg-opacity-100 transition-all shadow-lg">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                </svg>
+                            </button>
+                            <button onclick="nextSlide()" class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 text-gray-800 p-2 rounded-full hover:bg-opacity-100 transition-all shadow-lg">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </button>
+                            
+                            <!-- Slide Counter -->
+                            <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
+                                <span id="currentSlide">1</span> / <span id="totalSlides">
+                                    @if($facility->gallery_images && count($facility->gallery_images) > 0)
+                                        {{ count($facility->gallery_images) + 1 }}
+                                    @else
+                                        1
+                                    @endif
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Thumbnails -->
+                        <div class="p-4 bg-gray-50">
+                            <div class="flex space-x-2 overflow-x-auto pb-2">
+                                <!-- Main Image Thumbnail -->
+                                <div class="thumbnail flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 border-primary active" onclick="goToSlide(0)">
+                                    <img src="{{ asset('storage/' . $facility->image) }}" 
+                                         alt="{{ $facility->name }}" 
+                                         class="w-full h-full object-cover">
+                                </div>
+                                
+                                <!-- Gallery Thumbnails -->
+                                @if($facility->gallery_images && count($facility->gallery_images) > 0)
+                                    @foreach($facility->gallery_images as $index => $galleryImage)
+                                    <div class="thumbnail flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 border-gray-300" onclick="goToSlide({{ $index + 1 }})">
+                                        <img src="{{ asset('storage/' . $galleryImage) }}" 
+                                             alt="{{ $facility->name }} - View {{ $index + 1 }}" 
+                                             class="w-full h-full object-cover">
+                                    </div>
+                                    @endforeach
+                                @endif
+                            </div>
                         </div>
                     </div>
-                    @endif
 
                     <!-- Tabbed Content Section -->
                     <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6 fade-in">
@@ -297,6 +398,14 @@
         </div>
     </main>
 
+    <!-- Image Modal -->
+    <div id="imageModal" class="modal">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <button class="modal-nav modal-prev" onclick="modalPrev()">&#10094;</button>
+        <button class="modal-nav modal-next" onclick="modalNext()">&#10095;</button>
+        <img class="modal-content" id="modalImage" src="">
+    </div>
+
     <!-- Floating Action Button for Quick Actions -->
     <div class="fixed bottom-6 right-6 z-40 flex flex-col gap-3" style="opacity: 0; pointer-events: none; transition: opacity 0.3s;">
         <button onclick="scrollToTop()" class="bg-primary text-black p-3 rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300">
@@ -307,10 +416,20 @@
     </div>
 
     <script>
+        // Slider functionality
         let currentSlide = 0;
-        const totalSlides = 5;
+        let totalSlides = document.querySelectorAll('.slider-item').length;
         const sliderTrack = document.getElementById('sliderTrack');
         const thumbnails = document.querySelectorAll('.thumbnail');
+        let modalCurrentIndex = 0;
+        const allImages = [
+            '{{ asset('storage/' . $facility->image) }}',
+            @if($facility->gallery_images && count($facility->gallery_images) > 0)
+                @foreach($facility->gallery_images as $galleryImage)
+                    '{{ asset('storage/' . $galleryImage) }}',
+                @endforeach
+            @endif
+        ];
 
         // Disable right-click
         document.addEventListener('contextmenu', function(e) {
@@ -375,7 +494,7 @@
         function shareWahana() {
             if (navigator.share) {
                 navigator.share({
-                    title: 'Roller Coaster Extreme - Mestakara',
+                    title: '{{ $facility->name }} - Mestakara',
                     text: 'Lihat wahana menarik ini di Mestakara!',
                     url: window.location.href
                 }).catch(err => console.log('Error sharing:', err));
@@ -392,6 +511,49 @@
                 behavior: 'smooth'
             });
         }
+
+        // Modal functionality
+        function openModal(imageSrc, index) {
+            modalCurrentIndex = index;
+            document.getElementById('modalImage').src = imageSrc;
+            document.getElementById('imageModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('imageModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        function modalNext() {
+            modalCurrentIndex = (modalCurrentIndex + 1) % allImages.length;
+            document.getElementById('modalImage').src = allImages[modalCurrentIndex];
+        }
+
+        function modalPrev() {
+            modalCurrentIndex = (modalCurrentIndex - 1 + allImages.length) % allImages.length;
+            document.getElementById('modalImage').src = allImages[modalCurrentIndex];
+        }
+
+        // Close modal when clicking outside the image
+        document.getElementById('imageModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Keyboard navigation for modal
+        document.addEventListener('keydown', function(e) {
+            if (document.getElementById('imageModal').style.display === 'flex') {
+                if (e.key === 'Escape') {
+                    closeModal();
+                } else if (e.key === 'ArrowRight') {
+                    modalNext();
+                } else if (e.key === 'ArrowLeft') {
+                    modalPrev();
+                }
+            }
+        });
 
         // Auto slide every 5 seconds
         let autoSlideInterval = setInterval(nextSlide, 5000);
