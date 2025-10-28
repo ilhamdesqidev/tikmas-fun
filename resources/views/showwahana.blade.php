@@ -24,12 +24,6 @@
         .fade-in {
             animation: fadeIn 0.6s ease-out forwards;
         }
-        .gallery-item {
-            transition: all 0.3s ease;
-        }
-        .gallery-item:hover {
-            transform: scale(1.05);
-        }
         .sticky-nav {
             backdrop-filter: blur(10px);
             background-color: rgba(255, 255, 255, 0.95);
@@ -40,9 +34,48 @@
         .tab-content.active {
             display: block;
         }
+        .slider-container {
+            position: relative;
+            overflow: hidden;
+        }
+        .slider-track {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+        }
+        .slider-item {
+            min-width: 100%;
+            flex-shrink: 0;
+        }
+        .thumbnail {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0.6;
+        }
+        .thumbnail.active {
+            opacity: 1;
+            border-color: #CFD916;
+        }
+        .thumbnail:hover {
+            opacity: 1;
+        }
+        /* Disable image download */
+        img {
+            pointer-events: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-user-drag: none;
+            -khtml-user-drag: none;
+            -moz-user-drag: none;
+            -o-user-drag: none;
+        }
+        .slider-item img {
+            pointer-events: auto;
+        }
     </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50" oncontextmenu="return false;">
     <!-- Enhanced Navbar with Blur Effect -->
     <nav class="w-full py-3 sm:py-4 px-4 sm:px-7 flex items-center justify-between sticky-nav border-b border-gray-200 fixed top-0 left-0 right-0 z-50 shadow-sm">
         <a href="#" class="text-xl sm:text-3xl font-bold text-black italic">
@@ -50,13 +83,13 @@
         </a>
         
         <div class="flex items-center space-x-2 sm:space-x-4">
-            <a href="{{ route('wahana.index') }}" class="bg-gray-100 text-gray-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg hover:bg-gray-200 transition-all duration-300 font-medium text-xs sm:text-base flex items-center gap-1 sm:gap-2">
+            <a href="#" class="bg-gray-100 text-gray-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg hover:bg-gray-200 transition-all duration-300 font-medium text-xs sm:text-base flex items-center gap-1 sm:gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                 </svg>
                 <span class="hidden sm:inline">Kembali</span>
             </a>
-            <a href="{{ route('home') }}" class="bg-primary text-black px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg hover:bg-yellow-500 transition-all duration-300 font-medium text-xs sm:text-base shadow-sm">
+            <a href="#" class="bg-primary text-black px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg hover:bg-yellow-500 transition-all duration-300 font-medium text-xs sm:text-base shadow-sm">
                 Dashboard
             </a>
         </div>
@@ -68,63 +101,104 @@
             <!-- Enhanced Breadcrumb -->
             <nav class="mb-4 sm:mb-6 fade-in">
                 <ol class="flex items-center space-x-2 text-xs sm:text-sm text-gray-500 bg-white px-4 py-2 rounded-lg shadow-sm">
-                    <li><a href="{{ route('home') }}" class="hover:text-primary transition-colors">Dashboard</a></li>
+                    <li><a href="#" class="hover:text-primary transition-colors">Dashboard</a></li>
                     <li><svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg></li>
-                    <li><a href="{{ route('wahana.index') }}" class="hover:text-primary transition-colors">Wahana</a></li>
+                    <li><a href="#" class="hover:text-primary transition-colors">Wahana</a></li>
                     <li><svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg></li>
-                    <li class="text-gray-900 font-medium">{{ $facility->name }}</li>
+                    <li class="text-gray-900 font-medium">Roller Coaster Extreme</li>
                 </ol>
             </nav>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Left Column - Image & Gallery -->
+                <!-- Left Column - Image Slider & Gallery -->
                 <div class="lg:col-span-2 space-y-6">
-                    <!-- Main Image with Badge Overlay -->
-                    <div class="relative fade-in">
-                        <img src="{{ asset('storage/' . $facility->image) }}" 
-                             alt="{{ $facility->name }}" 
-                             class="w-full h-64 sm:h-96 object-cover rounded-xl shadow-lg">
-                        <div class="absolute top-4 left-4">
-                            <span class="bg-primary text-black text-xs sm:text-sm font-bold px-3 py-1.5 rounded-full shadow-lg">
-                                {{ ucfirst($facility->category) }} Unggulan
-                            </span>
-                        </div>
-                        <button onclick="openModal('{{ asset('storage/' . $facility->image) }}')" class="absolute bottom-4 right-4 bg-white bg-opacity-90 text-gray-800 px-3 py-2 rounded-lg text-sm font-medium hover:bg-opacity-100 transition-all shadow-lg flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
-                            </svg>
-                            Perbesar
-                        </button>
-                    </div>
-
-                    <!-- Gallery Grid -->
-                    @if($facility->gallery_images && count($facility->gallery_images) > 0)
-                    <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6 fade-in">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg sm:text-xl font-bold text-gray-800 flex items-center gap-2">
-                                <svg class="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"/>
-                                </svg>
-                                Gallery Foto
-                            </h3>
-                            <span class="text-sm text-gray-500">{{ count($facility->gallery_images) }} foto</span>
-                        </div>
-                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                            @foreach($facility->gallery_images as $index => $galleryImage)
-                            <div class="gallery-item relative group cursor-pointer overflow-hidden rounded-lg" onclick="openModal('{{ asset('storage/' . $galleryImage) }}')">
-                                <img src="{{ asset('storage/' . $galleryImage) }}" 
-                                     alt="{{ $facility->name }} - View {{ $index + 1 }}" 
-                                     class="w-full h-32 sm:h-40 object-cover">
-                                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center">
-                                    <svg class="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
-                                    </svg>
+                    <!-- Image Slider -->
+                    <div class="relative fade-in bg-white rounded-xl shadow-lg p-4">
+                        <div class="slider-container rounded-xl overflow-hidden relative">
+                            <div class="slider-track" id="sliderTrack">
+                                <!-- Main Image -->
+                                <div class="slider-item">
+                                    <img src="https://images.unsplash.com/photo-1594818379496-da1e345b0ded?w=800&h=600&fit=crop" 
+                                         alt="Roller Coaster Extreme" 
+                                         class="w-full h-64 sm:h-96 object-cover">
+                                </div>
+                                <!-- Gallery Images -->
+                                <div class="slider-item">
+                                    <img src="https://images.unsplash.com/photo-1509048191080-d2984bad6ae5?w=800&h=600&fit=crop" 
+                                         alt="View 1" 
+                                         class="w-full h-64 sm:h-96 object-cover">
+                                </div>
+                                <div class="slider-item">
+                                    <img src="https://images.unsplash.com/photo-159562791473-c8f7bbb94eb1?w=800&h=600&fit=crop" 
+                                         alt="View 2" 
+                                         class="w-full h-64 sm:h-96 object-cover">
+                                </div>
+                                <div class="slider-item">
+                                    <img src="https://images.unsplash.com/photo-1572819267751-29c2b8f1e0e7?w=800&h=600&fit=crop" 
+                                         alt="View 3" 
+                                         class="w-full h-64 sm:h-96 object-cover">
+                                </div>
+                                <div class="slider-item">
+                                    <img src="https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=800&h=600&fit=crop" 
+                                         alt="View 4" 
+                                         class="w-full h-64 sm:h-96 object-cover">
                                 </div>
                             </div>
-                            @endforeach
+                            
+                            <!-- Badge Overlay -->
+                            <div class="absolute top-4 left-4 z-10">
+                                <span class="bg-primary text-black text-xs sm:text-sm font-bold px-3 py-1.5 rounded-full shadow-lg">
+                                    Wahana Unggulan
+                                </span>
+                            </div>
+
+                            <!-- Navigation Buttons -->
+                            <button onclick="previousSlide()" class="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition-all z-10">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                </svg>
+                            </button>
+                            <button onclick="nextSlide()" class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition-all z-10">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </button>
+
+                            <!-- Slide Counter -->
+                            <div class="absolute bottom-4 right-4 bg-black bg-opacity-60 text-white px-3 py-1 rounded-full text-sm z-10">
+                                <span id="currentSlide">1</span> / <span id="totalSlides">5</span>
+                            </div>
+                        </div>
+
+                        <!-- Thumbnail Navigation -->
+                        <div class="mt-4 flex gap-2 overflow-x-auto pb-2" id="thumbnailContainer">
+                            <div class="thumbnail active border-2 border-primary rounded-lg overflow-hidden flex-shrink-0" onclick="goToSlide(0)">
+                                <img src="https://images.unsplash.com/photo-1594818379496-da1e345b0ded?w=150&h=100&fit=crop" 
+                                     alt="Thumbnail 1" 
+                                     class="w-20 sm:w-24 h-14 sm:h-16 object-cover">
+                            </div>
+                            <div class="thumbnail border-2 border-gray-300 rounded-lg overflow-hidden flex-shrink-0" onclick="goToSlide(1)">
+                                <img src="https://images.unsplash.com/photo-1509048191080-d2984bad6ae5?w=150&h=100&fit=crop" 
+                                     alt="Thumbnail 2" 
+                                     class="w-20 sm:w-24 h-14 sm:h-16 object-cover">
+                            </div>
+                            <div class="thumbnail border-2 border-gray-300 rounded-lg overflow-hidden flex-shrink-0" onclick="goToSlide(2)">
+                                <img src="https://images.unsplash.com/photo-1595627891473-c8f7bbb94eb1?w=150&h=100&fit=crop" 
+                                     alt="Thumbnail 3" 
+                                     class="w-20 sm:w-24 h-14 sm:h-16 object-cover">
+                            </div>
+                            <div class="thumbnail border-2 border-gray-300 rounded-lg overflow-hidden flex-shrink-0" onclick="goToSlide(3)">
+                                <img src="https://images.unsplash.com/photo-1572819267751-29c2b8f1e0e7?w=150&h=100&fit=crop" 
+                                     alt="Thumbnail 4" 
+                                     class="w-20 sm:w-24 h-14 sm:h-16 object-cover">
+                            </div>
+                            <div class="thumbnail border-2 border-gray-300 rounded-lg overflow-hidden flex-shrink-0" onclick="goToSlide(4)">
+                                <img src="https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=150&h=100&fit=crop" 
+                                     alt="Thumbnail 5" 
+                                     class="w-20 sm:w-24 h-14 sm:h-16 object-cover">
+                            </div>
                         </div>
                     </div>
-                    @endif
 
                     <!-- Tabbed Content Section -->
                     <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6 fade-in">
@@ -140,9 +214,11 @@
 
                         <!-- Tab Content -->
                         <div id="deskripsi" class="tab-content active">
-                            <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4">Tentang {{ $facility->name }}</h2>
+                            <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4">Tentang Roller Coaster Extreme</h2>
                             <div class="text-gray-700 leading-relaxed text-sm sm:text-base">
-                                {!! nl2br(e($facility->description)) !!}
+                                <p class="mb-4">Rasakan sensasi adrenalin yang luar biasa dengan Roller Coaster Extreme! Wahana ini adalah salah satu roller coaster tercepat dan tertinggi di Indonesia.</p>
+                                <p class="mb-4">Dengan kecepatan maksimal 120 km/jam dan ketinggian 45 meter, anda akan merasakan pengalaman yang tidak terlupakan. Dilengkapi dengan 3 loop vertikal dan 2 corkscrew, wahana ini dijamin membuat jantung anda berdebar kencang!</p>
+                                <p>Cocok untuk pecinta tantangan yang mencari pengalaman ekstrem dan menantang.</p>
                             </div>
                         </div>
 
@@ -188,7 +264,7 @@
                                     </div>
                                     <div>
                                         <p class="text-xs text-gray-500 font-medium mb-1">Durasi</p>
-                                        <p class="text-sm font-semibold text-gray-800">{{ $facility->duration }}</p>
+                                        <p class="text-sm font-semibold text-gray-800">3-5 Menit</p>
                                     </div>
                                 </div>
 
@@ -200,7 +276,7 @@
                                     </div>
                                     <div>
                                         <p class="text-xs text-gray-500 font-medium mb-1">Batasan Usia</p>
-                                        <p class="text-sm font-semibold text-gray-800">{{ $facility->age_range }}</p>
+                                        <p class="text-sm font-semibold text-gray-800">12+ Tahun</p>
                                     </div>
                                 </div>
 
@@ -212,7 +288,7 @@
                                     </div>
                                     <div>
                                         <p class="text-xs text-gray-500 font-medium mb-1">Kategori</p>
-                                        <p class="text-sm font-semibold text-gray-800">{{ ucfirst($facility->category) }}</p>
+                                        <p class="text-sm font-semibold text-gray-800">Wahana</p>
                                     </div>
                                 </div>
                             </div>
@@ -264,30 +340,8 @@
         </div>
     </main>
 
-    <!-- Enhanced Modal with Navigation -->
-    <div id="imageModal" class="fixed inset-0 bg-black bg-opacity-90 hidden z-50 flex items-center justify-center p-4">
-        <div class="max-w-5xl max-h-full relative w-full">
-            <img id="modalImage" src="" alt="" class="max-w-full max-h-[85vh] object-contain mx-auto rounded-lg">
-            
-            <!-- Close Button -->
-            <button onclick="closeModal()" class="absolute top-2 right-2 sm:top-4 sm:right-4 text-white bg-black bg-opacity-60 rounded-full w-10 h-10 flex items-center justify-center hover:bg-opacity-80 transition-all shadow-lg">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </button>
-
-            <!-- Download Button -->
-            <button onclick="downloadImage()" class="absolute bottom-4 right-4 bg-primary text-black px-4 py-2 rounded-lg font-medium hover:bg-yellow-500 transition-all shadow-lg flex items-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                </svg>
-                Download
-            </button>
-        </div>
-    </div>
-
     <!-- Floating Action Button for Quick Actions -->
-    <div class="fixed bottom-6 right-6 z-40 flex flex-col gap-3">
+    <div class="fixed bottom-6 right-6 z-40 flex flex-col gap-3" style="opacity: 0; pointer-events: none; transition: opacity 0.3s;">
         <button onclick="scrollToTop()" class="bg-primary text-black p-3 rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
@@ -296,45 +350,66 @@
     </div>
 
     <script>
-        let currentImageSrc = '';
+        let currentSlide = 0;
+        const totalSlides = 5;
+        const sliderTrack = document.getElementById('sliderTrack');
+        const thumbnails = document.querySelectorAll('.thumbnail');
 
-        function openModal(imageSrc) {
-            currentImageSrc = imageSrc;
-            document.getElementById('modalImage').src = imageSrc;
-            document.getElementById('imageModal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
+        // Disable right-click
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        // Disable keyboard shortcuts for saving images
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && (e.key === 's' || e.key === 'S')) {
+                e.preventDefault();
+            }
+        });
+
+        function updateSlider() {
+            sliderTrack.style.transform = `translateX(-${currentSlide * 100}%)`;
+            document.getElementById('currentSlide').textContent = currentSlide + 1;
+            
+            // Update thumbnails
+            thumbnails.forEach((thumb, index) => {
+                if (index === currentSlide) {
+                    thumb.classList.add('active', 'border-primary');
+                    thumb.classList.remove('border-gray-300');
+                } else {
+                    thumb.classList.remove('active', 'border-primary');
+                    thumb.classList.add('border-gray-300');
+                }
+            });
         }
 
-        function closeModal() {
-            document.getElementById('imageModal').classList.add('hidden');
-            document.body.style.overflow = 'auto';
+        function nextSlide() {
+            currentSlide = (currentSlide + 1) % totalSlides;
+            updateSlider();
         }
 
-        function downloadImage() {
-            const link = document.createElement('a');
-            link.href = currentImageSrc;
-            link.download = 'mestakara-wahana-' + Date.now() + '.jpg';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+        function previousSlide() {
+            currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+            updateSlider();
+        }
+
+        function goToSlide(index) {
+            currentSlide = index;
+            updateSlider();
         }
 
         function switchTab(tabName) {
-            // Hide all tabs
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');
             });
             
-            // Remove active state from all buttons
             document.querySelectorAll('.tab-button').forEach(button => {
                 button.classList.remove('border-primary', 'text-primary');
                 button.classList.add('border-transparent', 'text-gray-500');
             });
             
-            // Show selected tab
             document.getElementById(tabName).classList.add('active');
             
-            // Add active state to clicked button
             const activeButton = document.querySelector(`[data-tab="${tabName}"]`);
             activeButton.classList.remove('border-transparent', 'text-gray-500');
             activeButton.classList.add('border-primary', 'text-primary');
@@ -343,12 +418,11 @@
         function shareWahana() {
             if (navigator.share) {
                 navigator.share({
-                    title: '{{ $facility->name }} - Mestakara',
+                    title: 'Roller Coaster Extreme - Mestakara',
                     text: 'Lihat wahana menarik ini di Mestakara!',
                     url: window.location.href
                 }).catch(err => console.log('Error sharing:', err));
             } else {
-                // Fallback: copy to clipboard
                 navigator.clipboard.writeText(window.location.href).then(() => {
                     alert('Link berhasil disalin ke clipboard!');
                 });
@@ -362,17 +436,48 @@
             });
         }
 
-        // Close modal when clicking outside
-        document.getElementById('imageModal').addEventListener('click', function(e) {
-            if (e.target.id === 'imageModal') {
-                closeModal();
-            }
+        // Auto slide every 5 seconds
+        let autoSlideInterval = setInterval(nextSlide, 5000);
+
+        // Pause auto slide on hover
+        sliderTrack.addEventListener('mouseenter', () => {
+            clearInterval(autoSlideInterval);
         });
 
-        // Close modal with Escape key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeModal();
+        sliderTrack.addEventListener('mouseleave', () => {
+            autoSlideInterval = setInterval(nextSlide, 5000);
+        });
+
+        // Touch/Swipe support for mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        sliderTrack.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+            clearInterval(autoSlideInterval);
+        });
+
+        sliderTrack.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+            autoSlideInterval = setInterval(nextSlide, 5000);
+        });
+
+        function handleSwipe() {
+            if (touchEndX < touchStartX - 50) {
+                nextSlide();
+            }
+            if (touchEndX > touchStartX + 50) {
+                previousSlide();
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                previousSlide();
+            } else if (e.key === 'ArrowRight') {
+                nextSlide();
             }
         });
 
@@ -409,6 +514,9 @@
                 scrollButton.style.pointerEvents = 'none';
             }
         });
+
+        // Initialize total slides
+        document.getElementById('totalSlides').textContent = totalSlides;
     </script>
 </body>
 </html>
