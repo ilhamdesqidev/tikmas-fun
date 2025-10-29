@@ -13,6 +13,7 @@ use App\Http\Controllers\TicketController;
 use App\Http\Controllers\ScannerController;
 use App\Http\Controllers\WahanaController;
 use App\Http\Controllers\Admin\StaffVerificationController;
+use App\Http\Controllers\Admin\VoucherController;
 
 /*
 |--------------------------------------------------------------------------
@@ -238,4 +239,4 @@ Route::prefix('scanner')->name('scanner.')->group(function () {
 });
 
 // Route untuk halaman voucher management di admin
-Route::get('/admin/vouchers', [App\Http\Controllers\Admin\VoucherController::class, 'index'])->name('admin.vouchers.index');
+Route::get('/admin/vouchers', [App\Http\Controllers\Admin\VoucherController::class, 'index'])->name('admin.voucher.index');
