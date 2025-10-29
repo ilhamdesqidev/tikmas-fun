@@ -171,13 +171,14 @@
 
               <li>
                     <a href="{{ route('admin.voucher.index') }}" class="nav-link flex items-center px-4 py-3 text-gray-300 rounded-lg hover:bg-sidebar-hover hover:text-white transition-all duration-200">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h1.586a1 1 0 00.707-.293l1.414-1.414A2 2 0 0110.414 5h3.172a2 2 0 011.414.586l1.414 1.414A1 1 0 0017.414 7H19a2 2 0 012 2v2.586a1 1 0 01-.293.707l-1.414 1.414A2 2 0 0019 15.586V17a2 2 0 01-2 2h-1.586a1 1 0 00-.707.293l-1.414 1.414A2 2 0 0113.586 21h-3.172a2 2 0 01-1.414-.586l-1.414-1.414A1 1 0 006.586 19H5a2 2 0 01-2-2v-1.586a1 1 0 00-.293-.707L1.293 13A2 2 0 011 12V9z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 14l6-6m-4.5 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm6 6a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                        <svg class="w-5 h-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 10a2 2 0 012-2h2a1 1 0 001-1V5a2 2 0 012-2h4a2 2 0 012 2v2a1 1 0 001 1h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a1 1 0 00-1 1v2a2 2 0 01-2 2h-4a2 2 0 01-2-2v-2a1 1 0 00-1-1H5a2 2 0 01-2-2v-4z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 15l6-6m-4 0a1 1 0 11-2 0 1 1 0 012 0zm6 6a1 1 0 11-2 0 1 1 0 012 0z" />
                         </svg>
                         Voucher
                     </a>
                 </li>
+
 
                 
                 <li>
