@@ -94,11 +94,11 @@
           Home
           <span class="absolute left-0 bottom-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
         </a>
-        <a href="/#about" class="text-black inline-block text-xl ml-0 px-4 hover:text-primary transition-all duration-500 relative group">
+        <a href="/dashboard" class="text-black inline-block text-xl ml-0 px-4 hover:text-primary transition-all duration-500 relative group">
           Tentang Kami
           <span class="absolute left-0 bottom-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
         </a>
-        <a href="/#menu" class="text-black inline-block text-xl ml-0 px-4 hover:text-primary transition-all duration-500 relative group">
+        <a href="/dashboard" class="text-black inline-block text-xl ml-0 px-4 hover:text-primary transition-all duration-500 relative group">
           Promo
           <span class="absolute left-0 bottom-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
         </a>
@@ -117,7 +117,7 @@
           <ol class="flex items-center space-x-2 text-sm text-gray-600">
             <li><a href="/dashboard" class="hover:text-primary transition-colors">Home</a></li>
             <li><i data-feather="chevron-right" class="w-4 h-4"></i></li>
-            <li><a href="/#menu" class="hover:text-primary transition-colors">Promo</a></li>
+            <li><a href="/dashboard" class="hover:text-primary transition-colors">Promo</a></li>
             <li><i data-feather="chevron-right" class="w-4 h-4"></i></li>
             <li class="text-text-dark">{{ Str::limit($promo->name, 30) }}</li>
           </ol>
