@@ -236,3 +236,6 @@ Route::prefix('scanner')->name('scanner.')->group(function () {
     // API untuk mobile app (opsional)
     Route::post('/api/check', [ScannerController::class, 'checkTicket'])->name('api.check');
 });
+
+// Route untuk halaman voucher management di admin
+Route::get('/admin/vouchers', [App\Http\Controllers\Admin\VoucherController::class, 'index'])->name('admin.vouchers.index');
