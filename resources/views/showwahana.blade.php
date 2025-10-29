@@ -138,13 +138,13 @@
         </a>
         
         <div class="flex items-center space-x-2 sm:space-x-4">
-            <a href="#" class="bg-gray-100 text-gray-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg hover:bg-gray-200 transition-all duration-300 font-medium text-xs sm:text-base flex items-center gap-1 sm:gap-2">
+            <a href="wahana.index" class="bg-gray-100 text-gray-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg hover:bg-gray-200 transition-all duration-300 font-medium text-xs sm:text-base flex items-center gap-1 sm:gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                 </svg>
                 <span class="hidden sm:inline">Kembali</span>
             </a>
-            <a href="#" class="bg-primary text-black px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg hover:bg-yellow-500 transition-all duration-300 font-medium text-xs sm:text-base shadow-sm">
+            <a href="home" class="bg-primary text-black px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg hover:bg-yellow-500 transition-all duration-300 font-medium text-xs sm:text-base shadow-sm">
                 Dashboard
             </a>
         </div>
