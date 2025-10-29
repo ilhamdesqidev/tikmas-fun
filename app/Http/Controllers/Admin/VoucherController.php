@@ -21,7 +21,7 @@ class VoucherController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'status' => 'required|in:aktif,tidak_aktif,kadaluarsa',
-            'image' => 'required|image|mimes:jpeg,png,jpg|max:2048', // max 2MB
+            'image' => 'required|image|mimes:jpeg,png,jpg|max:10024', // max 10MB
         ], [
             'name.required' => 'Nama voucher wajib diisi',
             'name.max' => 'Nama voucher maksimal 255 karakter',
@@ -30,7 +30,7 @@ class VoucherController extends Controller
             'image.required' => 'Gambar voucher wajib diupload',
             'image.image' => 'File harus berupa gambar',
             'image.mimes' => 'Format gambar harus jpeg, png, atau jpg',
-            'image.max' => 'Ukuran gambar maksimal 2MB',
+            'image.max' => 'Ukuran gambar maksimal 10MB',
         ]);
 
         try {
@@ -63,7 +63,7 @@ class VoucherController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'status' => 'required|in:aktif,tidak_aktif,kadaluarsa',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // optional saat update
+            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:10024', // optional saat update
         ], [
             'name.required' => 'Nama voucher wajib diisi',
             'name.max' => 'Nama voucher maksimal 255 karakter',
@@ -71,7 +71,7 @@ class VoucherController extends Controller
             'status.in' => 'Status tidak valid',
             'image.image' => 'File harus berupa gambar',
             'image.mimes' => 'Format gambar harus jpeg, png, atau jpg',
-            'image.max' => 'Ukuran gambar maksimal 2MB',
+            'image.max' => 'Ukuran gambar maksimal 10MB',
         ]);
 
         try {
