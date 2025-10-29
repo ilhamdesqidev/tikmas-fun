@@ -64,7 +64,10 @@
                     <tr>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $index + 1 }}</td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <img src="{{ asset('storage/' . $voucher->image) }}" alt="{{ $voucher->name }}" class="h-16 w-16 object-cover rounded">
+                            @php
+                                $imageUrl = asset('storage_laravel/app/public/' . $voucher->image);
+                            @endphp
+                            <img src="{{ $imageUrl }}" alt="{{ $voucher->name }}" class="h-16 w-16 object-cover rounded" onerror="this.src='https://via.placeholder.com/64?text=No+Image'">
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $voucher->name }}</td>
                         <td class="px-6 py-4 whitespace-nowrap">
@@ -84,7 +87,7 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $voucher->created_at->format('d M Y') }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <button onclick="openEditModal({{ $voucher->id }}, '{{ addslashes($voucher->name) }}', '{{ $voucher->status }}', '{{ asset('storage/' . $voucher->image) }}')" class="text-blue-600 hover:text-blue-900 mr-3">
+                            <button onclick="openEditModal({{ $voucher->id }}, '{{ addslashes($voucher->name) }}', '{{ $voucher->status }}', '{{ $voucher->image }}')" class="text-blue-600 hover:text-blue-900 mr-3">
                                 Edit
                             </button>
                             <button onclick="confirmDelete({{ $voucher->id }}, '{{ addslashes($voucher->name) }}')" class="text-red-600 hover:text-red-900">
@@ -355,10 +358,12 @@ function previewCreateImage(event) {
 }
 
 // Edit Modal Functions
-function openEditModal(id, name, status, imageUrl) {
+function openEditModal(id, name, status, imagePath) {
     document.getElementById('editVoucherModal').classList.remove('hidden');
     document.getElementById('edit_name').value = name;
     document.getElementById('edit_status').value = status;
+    // Buat URL lengkap untuk gambar
+    const imageUrl = `/storage_laravel/app/public/${imagePath}`;
     document.getElementById('currentImage').src = imageUrl;
     document.getElementById('editForm').action = `/admin/voucher/${id}`;
     document.getElementById('editImagePreview').classList.add('hidden');

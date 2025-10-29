@@ -21,7 +21,7 @@ class VoucherController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'status' => 'required|in:aktif,tidak_aktif,kadaluarsa',
-            'image' => 'required|image|mimes:jpeg,png,jpg|max:10024', // max 10MB
+            'image' => 'required|image|mimes:jpeg,png,jpg|max:10240', // max 10MB
         ], [
             'name.required' => 'Nama voucher wajib diisi',
             'name.max' => 'Nama voucher maksimal 255 karakter',
@@ -34,8 +34,12 @@ class VoucherController extends Controller
         ]);
 
         try {
-            // Upload image
-            $imagePath = $request->file('image')->store('vouchers', 'public');
+            // Upload image ke folder storage_laravel/app/public/vouchers
+            $image = $request->file('image');
+            $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+            
+            // Simpan ke storage_laravel/app/public/vouchers
+            $imagePath = $image->storeAs('vouchers', $imageName, 'public');
 
             // Simpan data voucher
             Voucher::create([
@@ -53,7 +57,7 @@ class VoucherController extends Controller
             }
 
             return redirect()->route('admin.voucher.index')
-                           ->with('error', 'Gagal menambahkan voucher. Silakan coba lagi.');
+                           ->with('error', 'Gagal menambahkan voucher: ' . $e->getMessage());
         }
     }
 
@@ -63,7 +67,7 @@ class VoucherController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'status' => 'required|in:aktif,tidak_aktif,kadaluarsa',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:10024', // optional saat update
+            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // optional saat update
         ], [
             'name.required' => 'Nama voucher wajib diisi',
             'name.max' => 'Nama voucher maksimal 255 karakter',
@@ -84,8 +88,11 @@ class VoucherController extends Controller
 
             // Jika ada image baru
             if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+                
                 // Upload image baru
-                $imagePath = $request->file('image')->store('vouchers', 'public');
+                $imagePath = $image->storeAs('vouchers', $imageName, 'public');
                 $voucher->image = $imagePath;
 
                 // Hapus image lama
@@ -105,7 +112,7 @@ class VoucherController extends Controller
             }
 
             return redirect()->route('admin.voucher.index')
-                           ->with('error', 'Gagal mengupdate voucher. Silakan coba lagi.');
+                           ->with('error', 'Gagal mengupdate voucher: ' . $e->getMessage());
         }
     }
 
@@ -126,7 +133,7 @@ class VoucherController extends Controller
                            ->with('success', 'Voucher berhasil dihapus!');
         } catch (\Exception $e) {
             return redirect()->route('admin.voucher.index')
-                           ->with('error', 'Gagal menghapus voucher. Silakan coba lagi.');
+                           ->with('error', 'Gagal menghapus voucher: ' . $e->getMessage());
         }
     }
 }
