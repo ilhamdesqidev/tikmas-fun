@@ -31,11 +31,13 @@ class VoucherController extends Controller
         // Validasi input
         $request->validate([
             'name' => 'required|string|max:255',
+            'deskripsi' => 'required|string',
             'status' => 'required|in:aktif,tidak_aktif,kadaluarsa',
             'image' => 'required|image|mimes:jpeg,png,jpg|max:10240', // max 10MB
         ], [
             'name.required' => 'Nama voucher wajib diisi',
             'name.max' => 'Nama voucher maksimal 255 karakter',
+            'deskripsi.required' => 'Deskripsi voucher wajib diisi',
             'status.required' => 'Status voucher wajib dipilih',
             'status.in' => 'Status tidak valid',
             'image.required' => 'Gambar voucher wajib diupload',
@@ -59,6 +61,7 @@ class VoucherController extends Controller
             // Simpan data voucher
             $voucher = Voucher::create([
                 'name' => $request->name,
+                'deskripsi' => $request->deskripsi,
                 'status' => $request->status,
                 'image' => $imagePath,
             ]);
@@ -88,11 +91,13 @@ class VoucherController extends Controller
         // Validasi input
         $request->validate([
             'name' => 'required|string|max:255',
+            'deskripsi' => 'required|string',
             'status' => 'required|in:aktif,tidak_aktif,kadaluarsa',
             'image' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // optional saat update
         ], [
             'name.required' => 'Nama voucher wajib diisi',
             'name.max' => 'Nama voucher maksimal 255 karakter',
+            'deskripsi.required' => 'Deskripsi voucher wajib diisi',
             'status.required' => 'Status voucher wajib dipilih',
             'status.in' => 'Status tidak valid',
             'image.image' => 'File harus berupa gambar',
@@ -106,6 +111,7 @@ class VoucherController extends Controller
 
             // Update data
             $voucher->name = $request->name;
+            $voucher->deskripsi = $request->deskripsi;
             $voucher->status = $request->status;
 
             // Jika ada image baru

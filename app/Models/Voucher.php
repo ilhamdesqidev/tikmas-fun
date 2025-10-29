@@ -11,6 +11,7 @@ class Voucher extends Model
 
     protected $fillable = [
         'name',
+        'deskripsi',
         'status',
         'image',
     ];

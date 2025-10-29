@@ -54,6 +54,7 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gambar</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Voucher</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Deskripsi</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Dibuat</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
@@ -67,6 +68,11 @@
                             <img src="{{ $voucher->image_url }}" alt="{{ $voucher->name }}" class="h-16 w-16 object-cover rounded" onerror="this.src='https://via.placeholder.com/64?text=No+Image'">
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $voucher->name }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-900 max-w-xs">
+                            <div class="truncate" title="{{ $voucher->deskripsi }}">
+                                {{ Str::limit($voucher->deskripsi, 50) }}
+                            </div>
+                        </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             @if($voucher->status === 'aktif')
                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
@@ -84,7 +90,7 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $voucher->created_at->format('d M Y') }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <button onclick="openEditModal({{ $voucher->id }}, '{{ addslashes($voucher->name) }}', '{{ $voucher->status }}', '{{ $voucher->image }}')" class="text-blue-600 hover:text-blue-900 mr-3">
+                            <button onclick="openEditModal({{ $voucher->id }}, '{{ addslashes($voucher->name) }}', '{{ addslashes($voucher->deskripsi) }}', '{{ $voucher->status }}', '{{ $voucher->image }}')" class="text-blue-600 hover:text-blue-900 mr-3">
                                 Edit
                             </button>
                             <button onclick="confirmDelete({{ $voucher->id }}, '{{ addslashes($voucher->name) }}')" class="text-red-600 hover:text-red-900">
@@ -94,7 +100,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                        <td colspan="7" class="px-6 py-8 text-center text-gray-500">
                             Belum ada voucher yang tersedia
                         </td>
                     </tr>
@@ -133,6 +139,21 @@
                        placeholder="Contoh: Diskon 50% Hari Kemerdekaan"
                        required>
                 @error('name')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Deskripsi -->
+            <div class="mb-4">
+                <label for="create_deskripsi" class="block text-sm font-medium text-gray-700 mb-2">Deskripsi Voucher <span class="text-red-500">*</span></label>
+                <textarea 
+                    id="create_deskripsi" 
+                    name="deskripsi" 
+                    rows="4"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 @error('deskripsi') border-red-500 @enderror" 
+                    placeholder="Deskripsi detail tentang voucher, syarat dan ketentuan, dll."
+                    required>{{ old('deskripsi') }}</textarea>
+                @error('deskripsi')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
             </div>
@@ -228,6 +249,18 @@
                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
                        placeholder="Contoh: Diskon 50% Hari Kemerdekaan"
                        required>
+            </div>
+
+            <!-- Deskripsi -->
+            <div class="mb-4">
+                <label for="edit_deskripsi" class="block text-sm font-medium text-gray-700 mb-2">Deskripsi Voucher <span class="text-red-500">*</span></label>
+                <textarea 
+                    id="edit_deskripsi" 
+                    name="deskripsi" 
+                    rows="4"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                    placeholder="Deskripsi detail tentang voucher, syarat dan ketentuan, dll."
+                    required></textarea>
             </div>
 
             <!-- Status -->
@@ -355,9 +388,10 @@ function previewCreateImage(event) {
 }
 
 // Edit Modal Functions
-function openEditModal(id, name, status, imagePath) {
+function openEditModal(id, name, deskripsi, status, imagePath) {
     document.getElementById('editVoucherModal').classList.remove('hidden');
     document.getElementById('edit_name').value = name;
+    document.getElementById('edit_deskripsi').value = deskripsi;
     document.getElementById('edit_status').value = status;
     // Buat URL lengkap untuk gambar
     const imageUrl = `/storage_laravel/app/public/${imagePath}`;
