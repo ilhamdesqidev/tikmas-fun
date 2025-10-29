@@ -68,10 +68,11 @@
                             <img src="{{ $voucher->image_url }}" alt="{{ $voucher->name }}" class="h-16 w-16 object-cover rounded" onerror="this.src='https://via.placeholder.com/64?text=No+Image'">
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $voucher->name }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-900 max-w-xs">
-                            <div class="truncate" title="{{ $voucher->deskripsi }}">
-                                {{ Str::limit($voucher->deskripsi, 50) }}
-                            </div>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <button onclick="openDescriptionModal('{{ addslashes($voucher->name) }}', '{{ addslashes($voucher->deskripsi) }}')" 
+                                    class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs transition duration-200">
+                                Lihat Deskripsi
+                            </button>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             @if($voucher->status === 'aktif')
@@ -90,10 +91,12 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $voucher->created_at->format('d M Y') }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <button onclick="openEditModal({{ $voucher->id }}, '{{ addslashes($voucher->name) }}', '{{ addslashes($voucher->deskripsi) }}', '{{ $voucher->status }}', '{{ $voucher->image }}')" class="text-blue-600 hover:text-blue-900 mr-3">
+                            <button onclick="openEditModal({{ $voucher->id }}, '{{ addslashes($voucher->name) }}', '{{ addslashes($voucher->deskripsi) }}', '{{ $voucher->status }}', '{{ $voucher->image }}')" 
+                                    class="text-blue-600 hover:text-blue-900 mr-3">
                                 Edit
                             </button>
-                            <button onclick="confirmDelete({{ $voucher->id }}, '{{ addslashes($voucher->name) }}')" class="text-red-600 hover:text-red-900">
+                            <button onclick="confirmDelete({{ $voucher->id }}, '{{ addslashes($voucher->name) }}')" 
+                                    class="text-red-600 hover:text-red-900">
                                 Hapus
                             </button>
                         </td>
@@ -328,6 +331,37 @@
     </div>
 </div>
 
+<!-- Modal Deskripsi Voucher -->
+<div id="descriptionModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+        <!-- Modal Header -->
+        <div class="flex justify-between items-center pb-3 border-b">
+            <h3 class="text-xl font-semibold text-gray-900" id="descriptionTitle">Deskripsi Voucher</h3>
+            <button type="button" onclick="closeDescriptionModal()" class="text-gray-400 hover:text-gray-500">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="mt-4">
+            <div class="bg-gray-50 rounded-lg p-4">
+                <p id="descriptionContent" class="text-gray-700 whitespace-pre-wrap"></p>
+            </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="flex justify-end pt-4 border-t">
+            <button type="button" 
+                    onclick="closeDescriptionModal()" 
+                    class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-200">
+                Tutup
+            </button>
+        </div>
+    </div>
+</div>
+
 <!-- Modal Delete Confirmation -->
 <div id="deleteModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
     <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
@@ -416,6 +450,17 @@ function previewEditImage(event) {
     }
 }
 
+// Description Modal Functions
+function openDescriptionModal(name, deskripsi) {
+    document.getElementById('descriptionModal').classList.remove('hidden');
+    document.getElementById('descriptionTitle').textContent = `Deskripsi: ${name}`;
+    document.getElementById('descriptionContent').textContent = deskripsi;
+}
+
+function closeDescriptionModal() {
+    document.getElementById('descriptionModal').classList.add('hidden');
+}
+
 // Delete Modal Functions
 function confirmDelete(id, name) {
     document.getElementById('deleteModal').classList.remove('hidden');
@@ -437,6 +482,12 @@ document.getElementById('createVoucherModal').addEventListener('click', function
 document.getElementById('editVoucherModal').addEventListener('click', function(e) {
     if (e.target === this) {
         closeEditModal();
+    }
+});
+
+document.getElementById('descriptionModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeDescriptionModal();
     }
 });
 
