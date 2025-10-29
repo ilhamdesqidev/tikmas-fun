@@ -171,12 +171,14 @@
 
               <li>
                     <a href="{{ route('admin.voucher.index') }}" class="nav-link flex items-center px-4 py-3 text-gray-300 rounded-lg hover:bg-sidebar-hover hover:text-white transition-all duration-200">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path>
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h1.586a1 1 0 00.707-.293l1.414-1.414A2 2 0 0110.414 5h3.172a2 2 0 011.414.586l1.414 1.414A1 1 0 0017.414 7H19a2 2 0 012 2v2.586a1 1 0 01-.293.707l-1.414 1.414A2 2 0 0019 15.586V17a2 2 0 01-2 2h-1.586a1 1 0 00-.707.293l-1.414 1.414A2 2 0 0113.586 21h-3.172a2 2 0 01-1.414-.586l-1.414-1.414A1 1 0 006.586 19H5a2 2 0 01-2-2v-1.586a1 1 0 00-.293-.707L1.293 13A2 2 0 011 12V9z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 14l6-6m-4.5 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm6 6a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
                         </svg>
                         Voucher
                     </a>
                 </li>
+
                 
                 <li>
                     <a href="{{ route('admin.facilities.index') }}" class="nav-link flex items-center px-4 py-3 text-gray-300 rounded-lg hover:bg-sidebar-hover hover:text-white transition-all duration-200 {{ request()->routeIs('admin.facilities.*') ? 'active bg-sidebar-hover text-white' : '' }}">
