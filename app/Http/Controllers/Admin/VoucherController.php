@@ -6,17 +6,28 @@ use App\Http\Controllers\Controller;
 use App\Models\Voucher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class VoucherController extends Controller
 {
     public function index()
     {
-        $vouchers = Voucher::latest()->get();
-        return view('admin.voucher.index', compact('vouchers'));
+        try {
+            Log::info('Voucher index called');
+            $vouchers = Voucher::latest()->get();
+            Log::info('Vouchers loaded: ' . $vouchers->count());
+            
+            return view('admin.voucher.index', compact('vouchers'));
+        } catch (\Exception $e) {
+            Log::error('Error loading vouchers: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
+        }
     }
 
     public function store(Request $request)
     {
+        Log::info('Store voucher called', $request->all());
+        
         // Validasi input
         $request->validate([
             'name' => 'required|string|max:255',
@@ -38,19 +49,28 @@ class VoucherController extends Controller
             $image = $request->file('image');
             $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
             
+            Log::info('Uploading image: ' . $imageName);
+            
             // Simpan ke storage_laravel/app/public/vouchers
             $imagePath = $image->storeAs('vouchers', $imageName, 'public');
+            
+            Log::info('Image uploaded to: ' . $imagePath);
 
             // Simpan data voucher
-            Voucher::create([
+            $voucher = Voucher::create([
                 'name' => $request->name,
                 'status' => $request->status,
                 'image' => $imagePath,
             ]);
 
+            Log::info('Voucher created: ' . $voucher->id);
+
             return redirect()->route('admin.voucher.index')
                            ->with('success', 'Voucher berhasil ditambahkan!');
         } catch (\Exception $e) {
+            Log::error('Error creating voucher: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
+            
             // Hapus image jika gagal menyimpan data
             if (isset($imagePath)) {
                 Storage::disk('public')->delete($imagePath);
@@ -63,6 +83,8 @@ class VoucherController extends Controller
 
     public function update(Request $request, $id)
     {
+        Log::info('Update voucher called: ' . $id, $request->all());
+        
         // Validasi input
         $request->validate([
             'name' => 'required|string|max:255',
@@ -91,6 +113,8 @@ class VoucherController extends Controller
                 $image = $request->file('image');
                 $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
                 
+                Log::info('Uploading new image: ' . $imageName);
+                
                 // Upload image baru
                 $imagePath = $image->storeAs('vouchers', $imageName, 'public');
                 $voucher->image = $imagePath;
@@ -98,14 +122,19 @@ class VoucherController extends Controller
                 // Hapus image lama
                 if ($oldImage) {
                     Storage::disk('public')->delete($oldImage);
+                    Log::info('Deleted old image: ' . $oldImage);
                 }
             }
 
             $voucher->save();
+            Log::info('Voucher updated: ' . $voucher->id);
 
             return redirect()->route('admin.voucher.index')
                            ->with('success', 'Voucher berhasil diupdate!');
         } catch (\Exception $e) {
+            Log::error('Error updating voucher: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
+            
             // Hapus image baru jika gagal update
             if (isset($imagePath)) {
                 Storage::disk('public')->delete($imagePath);
@@ -119,19 +148,24 @@ class VoucherController extends Controller
     public function destroy($id)
     {
         try {
+            Log::info('Delete voucher called: ' . $id);
+            
             $voucher = Voucher::findOrFail($id);
             
             // Hapus image
             if ($voucher->image) {
                 Storage::disk('public')->delete($voucher->image);
+                Log::info('Deleted image: ' . $voucher->image);
             }
 
             // Hapus data
             $voucher->delete();
+            Log::info('Voucher deleted: ' . $id);
 
             return redirect()->route('admin.voucher.index')
                            ->with('success', 'Voucher berhasil dihapus!');
         } catch (\Exception $e) {
+            Log::error('Error deleting voucher: ' . $e->getMessage());
             return redirect()->route('admin.voucher.index')
                            ->with('error', 'Gagal menghapus voucher: ' . $e->getMessage());
         }

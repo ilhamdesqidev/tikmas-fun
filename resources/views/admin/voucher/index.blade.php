@@ -64,10 +64,7 @@
                     <tr>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $index + 1 }}</td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            @php
-                                $imageUrl = asset('storage_laravel/app/public/' . $voucher->image);
-                            @endphp
-                            <img src="{{ $imageUrl }}" alt="{{ $voucher->name }}" class="h-16 w-16 object-cover rounded" onerror="this.src='https://via.placeholder.com/64?text=No+Image'">
+                            <img src="{{ $voucher->image_url }}" alt="{{ $voucher->name }}" class="h-16 w-16 object-cover rounded" onerror="this.src='https://via.placeholder.com/64?text=No+Image'">
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $voucher->name }}</td>
                         <td class="px-6 py-4 whitespace-nowrap">
