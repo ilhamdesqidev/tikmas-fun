@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('admin.layouts')
 
 @section('title', 'Management Voucher')
 
