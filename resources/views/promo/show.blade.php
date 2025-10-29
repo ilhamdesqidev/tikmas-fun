@@ -222,7 +222,7 @@
                   </button>
                 @endif
                 
-                <a href="/#menu" class="block w-full text-center text-gray-700 border border-gray-300 py-3 rounded-lg hover:bg-gray-50 transition-colors duration-300">
+                <a href="/dashboard" class="block w-full text-center text-gray-700 border border-gray-300 py-3 rounded-lg hover:bg-gray-50 transition-colors duration-300">
                   Kembali ke Promo
                 </a>
               </div>
