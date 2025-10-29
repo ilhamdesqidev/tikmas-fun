@@ -238,5 +238,10 @@ Route::prefix('scanner')->name('scanner.')->group(function () {
     Route::post('/api/check', [ScannerController::class, 'checkTicket'])->name('api.check');
 });
 
-// Route untuk halaman voucher management di admin
-Route::get('/admin/vouchers', [App\Http\Controllers\Admin\VoucherController::class, 'index'])->name('admin.voucher.index');
+// Voucher Management Routes
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/voucher', [VoucherController::class, 'index'])->name('voucher.index');
+    Route::post('/voucher', [VoucherController::class, 'store'])->name('voucher.store');
+    Route::put('/voucher/{id}', [VoucherController::class, 'update'])->name('voucher.update');
+    Route::delete('/voucher/{id}', [VoucherController::class, 'destroy'])->name('voucher.destroy');
+});
