@@ -19,6 +19,8 @@ class VoucherClaim extends Model
 
     protected $casts = [
         'is_used' => 'boolean',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     public function voucher()
