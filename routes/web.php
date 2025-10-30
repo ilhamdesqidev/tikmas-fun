@@ -240,10 +240,10 @@ Route::prefix('scanner')->name('scanner.')->group(function () {
     Route::post('/api/check', [ScannerController::class, 'checkTicket'])->name('api.check');
 });
 
-// Voucher Management Routes
-Route::prefix('admin')->name('admin.')->group(function () {
-    Route::resource('voucher', VoucherController::class);
-});
-
-Route::get('/vouchers', [App\Http\Controllers\UserVoucherController::class, 'index'])->name('vouchers.index');
+Route::get('/vouchers', [VoucherClaimController::class, 'index'])->name('vouchers.index');
 Route::post('/vouchers/claim', [VoucherClaimController::class, 'claim'])->name('vouchers.claim');
+
+// Route untuk admin
+Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
+    Route::resource('voucher', AdminVoucherController::class);
+});
