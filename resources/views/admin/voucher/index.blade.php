@@ -54,9 +54,10 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gambar</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Voucher</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kode Unik</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Deskripsi</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Dibuat</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Kadaluarsa</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                     </tr>
                 </thead>
@@ -68,6 +69,9 @@
                             <img src="{{ $voucher->image_url }}" alt="{{ $voucher->name }}" class="h-16 w-16 object-cover rounded" onerror="this.src='https://via.placeholder.com/64?text=No+Image'">
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $voucher->name }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <span class="px-2 py-1 bg-gray-100 rounded font-mono text-xs">{{ $voucher->unik_code }}</span>
+                        </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             <button onclick="openDescriptionModal('{{ addslashes($voucher->name) }}', '{{ addslashes($voucher->deskripsi) }}')" 
                                     class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs transition duration-200">
@@ -89,9 +93,11 @@
                                 </span>
                             @endif
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $voucher->created_at->format('d M Y') }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ \Carbon\Carbon::parse($voucher->expiry_date)->format('d M Y') }}
+                        </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <button onclick="openEditModal({{ $voucher->id }}, '{{ addslashes($voucher->name) }}', '{{ addslashes($voucher->deskripsi) }}', '{{ $voucher->status }}', '{{ $voucher->image }}')" 
+                            <button onclick="openEditModal({{ $voucher->id }}, '{{ addslashes($voucher->name) }}', '{{ addslashes($voucher->deskripsi) }}', '{{ $voucher->status }}', '{{ $voucher->image }}', '{{ $voucher->expiry_date }}', '{{ addslashes($voucher->unik_code) }}')" 
                                     class="text-blue-600 hover:text-blue-900 mr-3">
                                 Edit
                             </button>
@@ -103,7 +109,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+                        <td colspan="8" class="px-6 py-8 text-center text-gray-500">
                             Belum ada voucher yang tersedia
                         </td>
                     </tr>
@@ -146,6 +152,22 @@
                 @enderror
             </div>
 
+            <!-- Kode Unik -->
+            <div class="mb-4">
+                <label for="create_unik_code" class="block text-sm font-medium text-gray-700 mb-2">Kode Unik Voucher <span class="text-red-500">*</span></label>
+                <input type="text" 
+                       id="create_unik_code" 
+                       name="unik_code" 
+                       value="{{ old('unik_code') }}"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 @error('unik_code') border-red-500 @enderror" 
+                       placeholder="Contoh: DISC50MERDEKA"
+                       required>
+                <p class="mt-1 text-xs text-gray-500">Kode unik untuk redeem voucher</p>
+                @error('unik_code')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
             <!-- Deskripsi -->
             <div class="mb-4">
                 <label for="create_deskripsi" class="block text-sm font-medium text-gray-700 mb-2">Deskripsi Voucher <span class="text-red-500">*</span></label>
@@ -174,6 +196,20 @@
                     <option value="kadaluarsa" {{ old('status') == 'kadaluarsa' ? 'selected' : '' }}>Kadaluarsa</option>
                 </select>
                 @error('status')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Tanggal Kadaluarsa -->
+            <div class="mb-4">
+                <label for="create_expiry_date" class="block text-sm font-medium text-gray-700 mb-2">Tanggal Kadaluarsa <span class="text-red-500">*</span></label>
+                <input type="date" 
+                       id="create_expiry_date" 
+                       name="expiry_date" 
+                       value="{{ old('expiry_date') }}"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 @error('expiry_date') border-red-500 @enderror" 
+                       required>
+                @error('expiry_date')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
             </div>
@@ -254,6 +290,18 @@
                        required>
             </div>
 
+            <!-- Kode Unik -->
+            <div class="mb-4">
+                <label for="edit_unik_code" class="block text-sm font-medium text-gray-700 mb-2">Kode Unik Voucher <span class="text-red-500">*</span></label>
+                <input type="text" 
+                       id="edit_unik_code" 
+                       name="unik_code" 
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                       placeholder="Contoh: DISC50MERDEKA"
+                       required>
+                <p class="mt-1 text-xs text-gray-500">Kode unik untuk redeem voucher</p>
+            </div>
+
             <!-- Deskripsi -->
             <div class="mb-4">
                 <label for="edit_deskripsi" class="block text-sm font-medium text-gray-700 mb-2">Deskripsi Voucher <span class="text-red-500">*</span></label>
@@ -277,6 +325,16 @@
                     <option value="tidak_aktif">Tidak Aktif</option>
                     <option value="kadaluarsa">Kadaluarsa</option>
                 </select>
+            </div>
+
+            <!-- Tanggal Kadaluarsa -->
+            <div class="mb-4">
+                <label for="edit_expiry_date" class="block text-sm font-medium text-gray-700 mb-2">Tanggal Kadaluarsa <span class="text-red-500">*</span></label>
+                <input type="date" 
+                       id="edit_expiry_date" 
+                       name="expiry_date" 
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                       required>
             </div>
 
             <!-- Upload Image -->
@@ -422,11 +480,13 @@ function previewCreateImage(event) {
 }
 
 // Edit Modal Functions
-function openEditModal(id, name, deskripsi, status, imagePath) {
+function openEditModal(id, name, deskripsi, status, imagePath, expiryDate, unikCode) {
     document.getElementById('editVoucherModal').classList.remove('hidden');
     document.getElementById('edit_name').value = name;
     document.getElementById('edit_deskripsi').value = deskripsi;
     document.getElementById('edit_status').value = status;
+    document.getElementById('edit_expiry_date').value = expiryDate;
+    document.getElementById('edit_unik_code').value = unikCode;
     // Buat URL lengkap untuk gambar
     const imageUrl = `/storage_laravel/app/public/${imagePath}`;
     document.getElementById('currentImage').src = imageUrl;
@@ -497,7 +557,6 @@ document.getElementById('deleteModal').addEventListener('click', function(e) {
     }
 });
 
-// Show create modal if there are validation errors
 @if($errors->any())
     openCreateModal();
 @endif

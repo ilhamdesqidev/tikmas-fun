@@ -34,6 +34,8 @@ class VoucherController extends Controller
             'deskripsi' => 'required|string',
             'status' => 'required|in:aktif,tidak_aktif,kadaluarsa',
             'image' => 'required|image|mimes:jpeg,png,jpg|max:10240', // max 10MB
+            'expiry_date' => 'required|date',
+            'unik_code' => 'required|string|unique:vouchers,unik_code',
         ], [
             'name.required' => 'Nama voucher wajib diisi',
             'name.max' => 'Nama voucher maksimal 255 karakter',
@@ -44,6 +46,10 @@ class VoucherController extends Controller
             'image.image' => 'File harus berupa gambar',
             'image.mimes' => 'Format gambar harus jpeg, png, atau jpg',
             'image.max' => 'Ukuran gambar maksimal 10MB',
+            'expiry_date.required' => 'Tanggal kadaluarsa wajib diisi',
+            'expiry_date.date' => 'Tanggal kadaluarsa tidak valid',
+            'unik_code.required' => 'Kode unik voucher wajib diisi',
+            'unik_code.unique' => 'Kode unik voucher sudah digunakan',
         ]);
 
         try {
@@ -64,6 +70,8 @@ class VoucherController extends Controller
                 'deskripsi' => $request->deskripsi,
                 'status' => $request->status,
                 'image' => $imagePath,
+                'expiry_date' => $request->expiry_date,
+                'unik_code' => $request->unik_code,
             ]);
 
             Log::info('Voucher created: ' . $voucher->id);
@@ -94,6 +102,8 @@ class VoucherController extends Controller
             'deskripsi' => 'required|string',
             'status' => 'required|in:aktif,tidak_aktif,kadaluarsa',
             'image' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // optional saat update
+            'expiry_date' => 'required|date',
+            'unik_code' => 'required|string|unique:vouchers,unik_code,' . $id,
         ], [
             'name.required' => 'Nama voucher wajib diisi',
             'name.max' => 'Nama voucher maksimal 255 karakter',
@@ -103,6 +113,10 @@ class VoucherController extends Controller
             'image.image' => 'File harus berupa gambar',
             'image.mimes' => 'Format gambar harus jpeg, png, atau jpg',
             'image.max' => 'Ukuran gambar maksimal 10MB',
+            'expiry_date.required' => 'Tanggal kadaluarsa wajib diisi',
+            'expiry_date.date' => 'Tanggal kadaluarsa tidak valid',
+            'unik_code.required' => 'Kode unik voucher wajib diisi',
+            'unik_code.unique' => 'Kode unik voucher sudah digunakan',
         ]);
 
         try {

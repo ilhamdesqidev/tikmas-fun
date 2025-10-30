@@ -14,6 +14,8 @@ class Voucher extends Model
         'deskripsi',
         'status',
         'image',
+        'expiry_date',
+        'unik_code',
     ];
 
     protected $casts = [

@@ -16,6 +16,9 @@ return new class extends Migration
             $table->string('name');
             $table->enum('status', ['aktif', 'tidak_aktif', 'kadaluarsa'])->default('aktif');
             $table->string('image');
+            $table->date('expiry_date');
+            $table->string('unik_code')->unique();
+            $table->text('deskripsi');
             $table->timestamps();
         });
     }
