@@ -14,6 +14,6 @@ class VoucherController extends Controller
                           ->latest()
                           ->get();
         
-        return view('vouchers', compact('vouchers'));
+        return view('voucher', compact('voucher'));
     }
 }

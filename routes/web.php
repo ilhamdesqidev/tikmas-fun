@@ -247,4 +247,4 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::delete('/voucher/{id}', [VoucherController::class, 'destroy'])->name('voucher.destroy');
 });
 
-Route::get('/vouchers', [\App\Http\Controllers\VoucherController::class, 'index'])->name('vouchers.index');
+Route::get('/voucher', [\App\Http\Controllers\VoucherController::class, 'index'])->name('vouchers');
