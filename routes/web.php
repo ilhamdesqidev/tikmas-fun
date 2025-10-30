@@ -241,10 +241,10 @@ Route::prefix('scanner')->name('scanner.')->group(function () {
 
 // Voucher Management Routes
 Route::prefix('admin')->name('admin.')->group(function () {
-    Route::get('/voucher', [VoucherController::class, 'index'])->name('voucher.index');
-    Route::post('/voucher', [VoucherController::class, 'store'])->name('voucher.store');
-    Route::put('/voucher/{id}', [VoucherController::class, 'update'])->name('voucher.update');
-    Route::delete('/voucher/{id}', [VoucherController::class, 'destroy'])->name('voucher.destroy');
+    Route::get('/voucher', [AdminVoucherController::class, 'index'])->name('voucher.index');
+    Route::post('/voucher', [AdminVoucherController::class, 'store'])->name('voucher.store');
+    Route::put('/voucher/{id}', [AdminVoucherController::class, 'update'])->name('voucher.update');
+    Route::delete('/voucher/{id}', [AdminVoucherController::class, 'destroy'])->name('voucher.destroy');
 });
 
 Route::get('/vouchers', [App\Http\Controllers\UserVoucherController::class, 'index'])->name('vouchers.index');
