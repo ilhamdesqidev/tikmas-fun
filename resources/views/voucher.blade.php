@@ -68,28 +68,32 @@
 </head>
 <body class="bg-gray-50">
     <!-- Header with Back Button -->
-    <header class="gradient-bg shadow-lg">
-        <div class="container mx-auto px-4 py-6">
-            <div class="flex items-center justify-between mb-4">
-                <a href="/" class="flex items-center text-gray-800 hover:text-gray-900 transition-all duration-300 group">
-                    <svg class="w-6 h-6 mr-2 transform group-hover:-translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+    <header class="bg-white border-b-2 border-gray-100">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <a href="/" class="flex items-center text-gray-700 hover:text-gray-900 transition-colors duration-200 group">
+                    <svg class="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                     </svg>
-                    <span class="font-semibold text-lg">Kembali ke Dashboard</span>
+                    <span class="font-medium">Kembali ke Dashboard</span>
                 </a>
-                <div class="hidden md:flex items-center space-x-2 bg-white/30 backdrop-blur-sm px-4 py-2 rounded-full">
-                    <svg class="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path>
+                <div class="flex items-center space-x-2 text-gray-600">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
                     </svg>
-                    <span class="text-gray-800 font-medium">{{ $vouchers->count() }} Voucher Tersedia</span>
+                    <span class="text-sm font-medium">{{ $vouchers->count() }} Voucher</span>
                 </div>
-            </div>
-            <div class="text-center">
-                <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">🎁 Voucher & Promo</h1>
-                <p class="text-gray-700 text-lg">Dapatkan penawaran terbaik untuk Anda!</p>
             </div>
         </div>
     </header>
+
+    <!-- Title Section -->
+    <section class="bg-gradient-to-r from-[#CFD916] to-[#B5C91A] py-8">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">Voucher & Promo</h1>
+            <p class="text-gray-700">Dapatkan penawaran terbaik untuk Anda</p>
+        </div>
+    </section>
 
     <!-- Main Content -->
     <main class="container mx-auto px-4 py-12">
