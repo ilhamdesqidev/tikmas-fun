@@ -15,6 +15,7 @@ use App\Http\Controllers\WahanaController;
 use App\Http\Controllers\Admin\StaffVerificationController;
 use App\Http\Controllers\Admin\VoucherController as AdminVoucherController;
 use App\Http\Controllers\VoucherController;
+use App\Http\Controllers\VoucherClaimController;
 
 /*
 |--------------------------------------------------------------------------
@@ -241,10 +242,8 @@ Route::prefix('scanner')->name('scanner.')->group(function () {
 
 // Voucher Management Routes
 Route::prefix('admin')->name('admin.')->group(function () {
-    Route::get('/voucher', [AdminVoucherController::class, 'index'])->name('voucher.index');
-    Route::post('/voucher', [AdminVoucherController::class, 'store'])->name('voucher.store');
-    Route::put('/voucher/{id}', [AdminVoucherController::class, 'update'])->name('voucher.update');
-    Route::delete('/voucher/{id}', [AdminVoucherController::class, 'destroy'])->name('voucher.destroy');
+    Route::resource('voucher', VoucherController::class);
 });
 
 Route::get('/vouchers', [App\Http\Controllers\UserVoucherController::class, 'index'])->name('vouchers.index');
+Route::post('/vouchers/claim', [VoucherClaimController::class, 'claim'])->name('vouchers.claim');

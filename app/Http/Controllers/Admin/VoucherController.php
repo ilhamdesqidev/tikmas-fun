@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Voucher;
+use App\Models\VoucherClaim;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
@@ -14,10 +15,17 @@ class VoucherController extends Controller
     {
         try {
             Log::info('Voucher index called');
-            $vouchers = Voucher::latest()->get();
-            Log::info('Vouchers loaded: ' . $vouchers->count());
             
-            return view('admin.voucher.index', compact('vouchers'));
+            // Load vouchers dengan count claims
+            $vouchers = Voucher::withCount('claims')->latest()->get();
+            
+            // Load semua claims dengan voucher terkait
+            $claims = VoucherClaim::with('voucher')->latest()->get();
+            
+            Log::info('Vouchers loaded: ' . $vouchers->count());
+            Log::info('Claims loaded: ' . $claims->count());
+            
+            return view('admin.voucher.index', compact('vouchers', 'claims'));
         } catch (\Exception $e) {
             Log::error('Error loading vouchers: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
@@ -28,65 +36,40 @@ class VoucherController extends Controller
     {
         Log::info('Store voucher called', $request->all());
         
-        // Validasi input
         $request->validate([
             'name' => 'required|string|max:255',
             'deskripsi' => 'required|string',
             'status' => 'required|in:aktif,tidak_aktif,kadaluarsa',
-            'image' => 'required|image|mimes:jpeg,png,jpg|max:10240', // max 10MB
+            'image' => 'required|image|mimes:jpeg,png,jpg|max:10240',
             'expiry_date' => 'required|date',
-            'unik_code' => 'required|string|unique:vouchers,unik_code',
         ], [
             'name.required' => 'Nama voucher wajib diisi',
-            'name.max' => 'Nama voucher maksimal 255 karakter',
             'deskripsi.required' => 'Deskripsi voucher wajib diisi',
             'status.required' => 'Status voucher wajib dipilih',
-            'status.in' => 'Status tidak valid',
             'image.required' => 'Gambar voucher wajib diupload',
-            'image.image' => 'File harus berupa gambar',
-            'image.mimes' => 'Format gambar harus jpeg, png, atau jpg',
-            'image.max' => 'Ukuran gambar maksimal 10MB',
             'expiry_date.required' => 'Tanggal kadaluarsa wajib diisi',
-            'expiry_date.date' => 'Tanggal kadaluarsa tidak valid',
-            'unik_code.required' => 'Kode unik voucher wajib diisi',
-            'unik_code.unique' => 'Kode unik voucher sudah digunakan',
         ]);
 
         try {
-            // Upload image ke folder storage_laravel/app/public/vouchers
             $image = $request->file('image');
             $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-            
-            Log::info('Uploading image: ' . $imageName);
-            
-            // Simpan ke storage_laravel/app/public/vouchers
             $imagePath = $image->storeAs('vouchers', $imageName, 'public');
-            
-            Log::info('Image uploaded to: ' . $imagePath);
 
-            // Simpan data voucher
-            $voucher = Voucher::create([
+            Voucher::create([
                 'name' => $request->name,
                 'deskripsi' => $request->deskripsi,
                 'status' => $request->status,
                 'image' => $imagePath,
                 'expiry_date' => $request->expiry_date,
-                'unik_code' => $request->unik_code,
             ]);
-
-            Log::info('Voucher created: ' . $voucher->id);
 
             return redirect()->route('admin.voucher.index')
                            ->with('success', 'Voucher berhasil ditambahkan!');
         } catch (\Exception $e) {
             Log::error('Error creating voucher: ' . $e->getMessage());
-            Log::error($e->getTraceAsString());
-            
-            // Hapus image jika gagal menyimpan data
             if (isset($imagePath)) {
                 Storage::disk('public')->delete($imagePath);
             }
-
             return redirect()->route('admin.voucher.index')
                            ->with('error', 'Gagal menambahkan voucher: ' . $e->getMessage());
         }
@@ -96,70 +79,40 @@ class VoucherController extends Controller
     {
         Log::info('Update voucher called: ' . $id, $request->all());
         
-        // Validasi input
         $request->validate([
             'name' => 'required|string|max:255',
             'deskripsi' => 'required|string',
             'status' => 'required|in:aktif,tidak_aktif,kadaluarsa',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // optional saat update
+            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:10240',
             'expiry_date' => 'required|date',
-            'unik_code' => 'required|string|unique:vouchers,unik_code,' . $id,
-        ], [
-            'name.required' => 'Nama voucher wajib diisi',
-            'name.max' => 'Nama voucher maksimal 255 karakter',
-            'deskripsi.required' => 'Deskripsi voucher wajib diisi',
-            'status.required' => 'Status voucher wajib dipilih',
-            'status.in' => 'Status tidak valid',
-            'image.image' => 'File harus berupa gambar',
-            'image.mimes' => 'Format gambar harus jpeg, png, atau jpg',
-            'image.max' => 'Ukuran gambar maksimal 10MB',
-            'expiry_date.required' => 'Tanggal kadaluarsa wajib diisi',
-            'expiry_date.date' => 'Tanggal kadaluarsa tidak valid',
-            'unik_code.required' => 'Kode unik voucher wajib diisi',
-            'unik_code.unique' => 'Kode unik voucher sudah digunakan',
         ]);
 
         try {
             $voucher = Voucher::findOrFail($id);
             $oldImage = $voucher->image;
 
-            // Update data
             $voucher->name = $request->name;
             $voucher->deskripsi = $request->deskripsi;
             $voucher->status = $request->status;
+            $voucher->expiry_date = $request->expiry_date;
 
-            // Jika ada image baru
             if ($request->hasFile('image')) {
                 $image = $request->file('image');
                 $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-                
-                Log::info('Uploading new image: ' . $imageName);
-                
-                // Upload image baru
                 $imagePath = $image->storeAs('vouchers', $imageName, 'public');
                 $voucher->image = $imagePath;
 
-                // Hapus image lama
                 if ($oldImage) {
                     Storage::disk('public')->delete($oldImage);
-                    Log::info('Deleted old image: ' . $oldImage);
                 }
             }
 
             $voucher->save();
-            Log::info('Voucher updated: ' . $voucher->id);
 
             return redirect()->route('admin.voucher.index')
                            ->with('success', 'Voucher berhasil diupdate!');
         } catch (\Exception $e) {
             Log::error('Error updating voucher: ' . $e->getMessage());
-            Log::error($e->getTraceAsString());
-            
-            // Hapus image baru jika gagal update
-            if (isset($imagePath)) {
-                Storage::disk('public')->delete($imagePath);
-            }
-
             return redirect()->route('admin.voucher.index')
                            ->with('error', 'Gagal mengupdate voucher: ' . $e->getMessage());
         }
@@ -168,19 +121,13 @@ class VoucherController extends Controller
     public function destroy($id)
     {
         try {
-            Log::info('Delete voucher called: ' . $id);
-            
             $voucher = Voucher::findOrFail($id);
             
-            // Hapus image
             if ($voucher->image) {
                 Storage::disk('public')->delete($voucher->image);
-                Log::info('Deleted image: ' . $voucher->image);
             }
 
-            // Hapus data
             $voucher->delete();
-            Log::info('Voucher deleted: ' . $id);
 
             return redirect()->route('admin.voucher.index')
                            ->with('success', 'Voucher berhasil dihapus!');

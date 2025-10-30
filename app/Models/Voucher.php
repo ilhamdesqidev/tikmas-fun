@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Voucher extends Model
 {
@@ -15,45 +16,25 @@ class Voucher extends Model
         'status',
         'image',
         'expiry_date',
-        'unik_code',
     ];
 
     protected $casts = [
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
+        'expiry_date' => 'date',
     ];
 
-    // Accessor untuk URL gambar
+    protected $appends = ['image_url'];
+
     public function getImageUrlAttribute()
     {
-        if (!$this->image) {
-            return asset('images/placeholder.jpg'); // atau URL placeholder lainnya
+        if ($this->image) {
+            return Storage::url($this->image);
         }
-        
-        return asset('storage_laravel/app/public/' . $this->image);
+        return 'https://via.placeholder.com/400x300?text=No+Image';
     }
 
-    // Accessor untuk status text
-    public function getStatusTextAttribute()
+    // Relationship dengan claims
+    public function claims()
     {
-        $statuses = [
-            'aktif' => 'Aktif',
-            'tidak_aktif' => 'Tidak Aktif',
-            'kadaluarsa' => 'Kadaluarsa',
-        ];
-        
-        return $statuses[$this->status] ?? $this->status;
-    }
-
-    // Accessor untuk status color
-    public function getStatusColorAttribute()
-    {
-        $colors = [
-            'aktif' => 'bg-green-500',
-            'tidak_aktif' => 'bg-gray-500',
-            'kadaluarsa' => 'bg-red-500',
-        ];
-        
-        return $colors[$this->status] ?? 'bg-gray-500';
+        return $this->hasMany(VoucherClaim::class);
     }
 }
