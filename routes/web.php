@@ -13,7 +13,8 @@ use App\Http\Controllers\TicketController;
 use App\Http\Controllers\ScannerController;
 use App\Http\Controllers\WahanaController;
 use App\Http\Controllers\Admin\StaffVerificationController;
-use App\Http\Controllers\Admin\VoucherController;
+use App\Http\Controllers\Admin\VoucherController as AdminVoucherController;
+use App\Http\Controllers\VoucherController;
 
 /*
 |--------------------------------------------------------------------------
@@ -246,4 +247,4 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::delete('/voucher/{id}', [VoucherController::class, 'destroy'])->name('voucher.destroy');
 });
 
-Route::get('/vouchers', [App\Http\Controllers\VoucherController::class, 'index'])->name('vouchers.index');
+Route::get('/vouchers', [\App\Http\Controllers\VoucherController::class, 'index'])->name('vouchers.index');
