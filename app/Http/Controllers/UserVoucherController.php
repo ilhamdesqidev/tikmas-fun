@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Voucher;
 
-class VoucherController extends Controller
+class UserVoucherController extends Controller
 {
     public function index()
     {
@@ -14,6 +14,6 @@ class VoucherController extends Controller
                           ->latest()
                           ->get();
         
-        return view('voucher', compact('voucher'));
+        return view('voucher', compact('vouchers'));
     }
 }
