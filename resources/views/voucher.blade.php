@@ -69,24 +69,24 @@
 <body class="bg-gray-50">
     <!-- Header with Back Button -->
     <header class="bg-white border-b border-black">
-        <div class="container mx-auto px-4 py-6">
-            <div class="flex items-center justify-between">
-                <a href="/" class="flex items-center bg-[#CFD916] hover:bg-[#B5C91A] text-gray-800 px-5 py-2.5 rounded-lg transition-all duration-200 font-medium group shadow-sm">
-                    <svg class="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="container mx-auto px-4 py-5">
+            <div class="flex items-center justify-between mb-6">
+                <a href="/" class="flex items-center bg-[#CFD916] hover:bg-[#B5C91A] text-gray-800 px-4 py-2 rounded-lg transition-all duration-200 font-medium group shadow-sm">
+                    <svg class="w-4 h-4 mr-2 transform group-hover:-translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                     </svg>
-                    <span>Kembali ke Dashboard</span>
+                    <span class="text-sm">Kembali ke Dashboard</span>
                 </a>
                 <div class="flex items-center space-x-2 text-gray-600">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
                     </svg>
-                    <span class="font-medium">{{ $vouchers->count() }} Voucher</span>
+                    <span class="text-sm font-medium">{{ $vouchers->count() }} Voucher</span>
                 </div>
             </div>
-            <div class="text-center mt-8">
-                <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">Voucher & Promo</h1>
-                <p class="text-gray-600">Dapatkan penawaran terbaik untuk Anda</p>
+            <div class="text-center">
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-1">Voucher & Promo</h1>
+                <p class="text-sm text-gray-600">Dapatkan penawaran terbaik untuk Anda</p>
             </div>
         </div>
     </header>
@@ -155,7 +155,7 @@
                     </div>
                     <h3 class="text-2xl font-bold text-gray-800 mb-3">Belum Ada Voucher</h3>
                     <p class="text-gray-500 mb-6">Saat ini belum ada voucher yang tersedia. Silakan cek kembali nanti!</p>
-                    <a href="home" class="btn-primary inline-block text-gray-800 px-6 py-3 rounded-xl font-bold">
+                    <a href="/" class="btn-primary inline-block text-gray-800 px-6 py-3 rounded-xl font-bold">
                         Kembali ke Beranda
                     </a>
                 </div>
