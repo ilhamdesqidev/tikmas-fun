@@ -930,25 +930,13 @@
       </div>
     </footer>
 
-<!-- Required Libraries -->
+<!-- Required Libraries - HARUS DI ATAS -->
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-<style>
-@keyframes slideUp { 
-  from { opacity: 0; transform: translateY(100px) scale(0.9); } 
-  to { opacity: 1; transform: translateY(0) scale(1); } 
-}
-.animate-slide-up { animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
-
-@keyframes slideInFromTop {
-  from { opacity: 0; transform: translate(-50%, -100%); }
-  to { opacity: 1; transform: translate(-50%, 0); }
-}
-.notification-enter { animation: slideInFromTop 0.4s ease-out forwards; }
-</style>
-
+<!-- Main JavaScript -->
 <script>
+// Paste semua kode dari artifact "dashboard-fixed-script" di sini
 // ==================== INITIALIZE ALL ====================
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize Feather icons
@@ -1299,7 +1287,7 @@ let currentVoucher = null;
 
 // Show Claim Form
 function showClaimForm(voucher) {
-  console.log('Show claim form called', voucher); // Debug
+  console.log('Show claim form called', voucher);
   currentVoucher = voucher;
   
   const expiryDate = voucher.expiry_date 
@@ -1417,7 +1405,6 @@ if (document.getElementById('claimForm')) {
 
         hideClaimForm();
         
-        // Success notification
         const notification = document.createElement('div');
         notification.className = 'fixed top-4 left-1/2 -translate-x-1/2 bg-green-500 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-xl shadow-2xl z-[100] notification-enter w-[calc(100%-2rem)] sm:w-auto max-w-md';
         notification.innerHTML = `
@@ -1444,7 +1431,7 @@ if (document.getElementById('claimForm')) {
   });
 }
 
-// Tab Switching untuk Promo & Voucher
+// Tab Switching
 function switchPromoTab(tab) {
   const promoTab = document.getElementById('tabPromo');
   const voucherTab = document.getElementById('tabVoucher');
@@ -1477,7 +1464,7 @@ function switchPromoTab(tab) {
   
   feather.replace();
 }
-
 </script>
+
   </body>
 </html>
