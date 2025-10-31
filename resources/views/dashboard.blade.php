@@ -603,11 +603,43 @@
     </div>
   </div>
   
+ <!-- Promo & Voucher Section -->
+<section id="menu" class="py-6">
+  <h2 class="text-center text-3xl sm:text-4xl mb-4 text-text-dark">
+    <span class="text-primary">Promo & Voucher</span> Kami
+  </h2>
+  <p class="text-center max-w-lg mx-auto font-medium leading-relaxed text-text-dark mb-8 text-base sm:text-lg">
+    Nikmati berbagai pilihan promo dan voucher menarik untuk pengalaman liburan yang tak terlupakan
+  </p>
+  
+  <!-- Tab Navigation -->
+  <div class="flex justify-center mb-8">
+    <div class="inline-flex rounded-lg border border-gray-300 bg-white p-1 shadow-sm">
+      <button onclick="switchPromoTab('promo')" id="tabPromo" 
+              class="px-6 py-2.5 text-sm font-semibold rounded-md transition-all duration-200 bg-primary text-black">
+        <div class="flex items-center">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+          </svg>
+          Promo
+        </div>
+      </button>
+      <button onclick="switchPromoTab('voucher')" id="tabVoucher" 
+              class="px-6 py-2.5 text-sm font-semibold rounded-md transition-all duration-200 text-gray-600 hover:bg-gray-100">
+        <div class="flex items-center">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
+          </svg>
+          Voucher
+        </div>
+      </button>
+    </div>
+  </div>
+  
   <!-- Promo Content -->
   <div id="promoContent">
     @if($promos->count() > 0)
       <div class="relative promo-slider">
-        <!-- Navigation Buttons -->
         <button class="nav-button prev" id="prevPromoBtn">
           <i data-feather="chevron-left" class="w-6 h-6"></i>
         </button>
@@ -616,7 +648,6 @@
           <i data-feather="chevron-right" class="w-6 h-6"></i>
         </button>
 
-        <!-- Slider Container -->
         <div class="promo-container" id="promoContainer">
           @foreach($promos as $promo)
             @php
@@ -707,7 +738,6 @@
           @endforeach
         </div>
 
-        <!-- Dots Indicator -->
         <div class="dots-container" id="promoDotsContainer"></div>
       </div>
     @else
@@ -725,7 +755,6 @@
   <div id="voucherContent" class="hidden">
     @if($vouchers->count() > 0)
       <div class="relative promo-slider">
-        <!-- Navigation Buttons -->
         <button class="nav-button prev" id="prevVoucherBtn">
           <i data-feather="chevron-left" class="w-6 h-6"></i>
         </button>
@@ -734,10 +763,9 @@
           <i data-feather="chevron-right" class="w-6 h-6"></i>
         </button>
 
-        <!-- Slider Container -->
         <div class="promo-container" id="voucherContainer">
           @foreach($vouchers as $voucher)
-            <div class="promo-card clickable" onclick="window.location.href='/vouchers'">
+            <div class="promo-card clickable" onclick="event.stopPropagation(); showClaimForm(@json($voucher))">
               @if($voucher->status === 'aktif')
                 <span class="featured-badge">Tersedia</span>
               @endif
@@ -776,14 +804,13 @@
                 </div>
                 
                 <div class="w-full text-center font-semibold py-3 rounded-lg transition-colors duration-300 bg-primary text-black hover:bg-yellow-500">
-                  Klaim Voucher
+                  🎉 Klaim Sekarang
                 </div>
               </div>
             </div>
           @endforeach
         </div>
 
-        <!-- Dots Indicator -->
         <div class="dots-container" id="voucherDotsContainer"></div>
       </div>
     @else
@@ -798,7 +825,93 @@
   </div>
 </section>
 
- <!-- Footer -->
+<!-- Claim Form Pop-up -->
+<div id="claimOverlay" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4">
+  <div id="claimCard" class="bg-white rounded-2xl sm:rounded-3xl shadow-2xl max-w-md w-full animate-slide-up overflow-hidden max-h-[95vh] overflow-y-auto">
+    <!-- Card Header -->
+    <div class="gradient-bg p-5 sm:p-6 text-center" style="background: linear-gradient(135deg, #CFD916 0%, #9DB91C 100%);">
+      <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-3 sm:mb-4 bg-white rounded-full flex items-center justify-center shadow-lg">
+        <svg class="w-8 h-8 sm:w-10 sm:h-10 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+        </svg>
+      </div>
+      <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-2">Claim Voucher</h2>
+      <p class="text-sm text-gray-700 px-2" id="claimVoucherName"></p>
+      <p class="text-xs text-gray-600 mt-1">Berlaku hingga: <span id="claimExpiryDate"></span></p>
+    </div>
+
+    <!-- Form -->
+    <form id="claimForm" class="p-5 sm:p-6">
+      <input type="hidden" id="voucherId">
+      
+      <div class="mb-4 sm:mb-5">
+        <label for="userName" class="block text-xs sm:text-sm font-bold text-gray-700 mb-2">
+          📝 Nama Lengkap <span class="text-red-500">*</span>
+        </label>
+        <input type="text" 
+               id="userName" 
+               required
+               class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#CFD916] focus:border-transparent transition-all" 
+               placeholder="Masukkan nama lengkap Anda">
+      </div>
+
+      <div class="mb-5 sm:mb-6">
+        <label for="userPhone" class="block text-xs sm:text-sm font-bold text-gray-700 mb-2">
+          📱 Nomor Telepon <span class="text-red-500">*</span>
+        </label>
+        <input type="tel" 
+               id="userPhone" 
+               required
+               pattern="[0-9]{10,13}"
+               class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#CFD916] focus:border-transparent transition-all" 
+               placeholder="08xxxxxxxxxx">
+        <p class="mt-1.5 text-xs text-gray-500">💡 Format: 08xxxxxxxxxx (10-13 digit)</p>
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-3">
+        <button type="button" 
+                onclick="hideClaimForm()"
+                class="w-full sm:flex-1 px-5 sm:px-6 py-2.5 sm:py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-all duration-300 font-bold text-sm sm:text-base">
+          Batal
+        </button>
+        <button type="submit" 
+                id="submitBtn"
+                class="w-full sm:flex-1 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl font-bold shadow-lg text-sm sm:text-base transition-all duration-300"
+                style="background: #CFD916; color: #1f2937;">
+          Claim & Download 🎁
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Hidden Template for Voucher Download -->
+<div id="voucherTemplate" style="position: absolute; left: -9999px; width: 800px; background: white;">
+  <div style="padding: 40px; font-family: Arial, sans-serif;">
+    <div style="background: linear-gradient(135deg, #CFD916 0%, #9DB91C 100%); padding: 30px; border-radius: 20px; margin-bottom: 20px;">
+      <h1 style="color: #1f2937; font-size: 32px; font-weight: bold; margin: 0 0 10px 0;" id="templateTitle"></h1>
+      <p style="color: #374151; font-size: 16px; margin: 0;">🎉 Voucher Berhasil Di-claim!</p>
+    </div>
+    
+    <div style="background: #f9fafb; padding: 25px; border-radius: 15px; margin-bottom: 20px;">
+      <p style="margin: 0 0 8px 0; color: #6b7280; font-size: 14px;"><strong>Nama:</strong> <span id="templateName"></span></p>
+      <p style="margin: 0 0 8px 0; color: #6b7280; font-size: 14px;"><strong>No. Telepon:</strong> <span id="templatePhone"></span></p>
+      <p style="margin: 0; color: #6b7280; font-size: 14px;"><strong>Berlaku hingga:</strong> <span id="templateExpiry"></span></p>
+    </div>
+
+    <div style="text-align: center; background: white; padding: 30px; border: 3px dashed #CFD916; border-radius: 15px;">
+      <p style="color: #1f2937; font-weight: bold; margin: 0 0 15px 0; font-size: 18px;">Kode Voucher:</p>
+      <svg id="templateBarcode"></svg>
+      <p style="margin: 15px 0 0 0; color: #6b7280; font-size: 12px;">Tunjukkan barcode ini saat melakukan pembayaran</p>
+    </div>
+
+    <div style="margin-top: 25px; padding: 20px; background: #fef3c7; border-radius: 10px; border-left: 4px solid #CFD916;">
+      <p style="margin: 0; color: #92400e; font-size: 13px; line-height: 1.6;" id="templateDesc"></p>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
     <footer class="bg-black text-white pt-8 sm:pt-10 lg:pt-12 pb-6 sm:pb-8">
       <div class="container mx-auto px-4 sm:px-6">
         <div class="flex flex-col md:flex-row justify-between items-center gap-6 sm:gap-8 mb-8 sm:mb-10 lg:mb-12">
@@ -849,7 +962,169 @@
       </div>
     </footer>
 
+<!-- Required Libraries -->
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<style>
+@keyframes slideUp { 
+  from { opacity: 0; transform: translateY(100px) scale(0.9); } 
+  to { opacity: 1; transform: translateY(0) scale(1); } 
+}
+.animate-slide-up { animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+
+@keyframes slideInFromTop {
+  from { opacity: 0; transform: translate(-50%, -100%); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+.notification-enter { animation: slideInFromTop 0.4s ease-out forwards; }
+</style>
+
 <script>
+let currentVoucher = null;
+
+// Show Claim Form
+function showClaimForm(voucher) {
+  currentVoucher = voucher;
+  
+  const expiryDate = voucher.expiry_date 
+    ? new Date(voucher.expiry_date).toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      })
+    : 'Tidak terbatas';
+
+  document.getElementById('voucherId').value = voucher.id;
+  document.getElementById('claimVoucherName').textContent = voucher.name;
+  document.getElementById('claimExpiryDate').textContent = expiryDate;
+  document.getElementById('claimOverlay').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+// Hide Claim Form
+function hideClaimForm() {
+  document.getElementById('claimOverlay').classList.add('hidden');
+  document.getElementById('claimForm').reset();
+  document.body.style.overflow = 'auto';
+}
+
+// Close on overlay click
+document.getElementById('claimOverlay').addEventListener('click', function(e) {
+  if (e.target === this) {
+    hideClaimForm();
+  }
+});
+
+// Close on ESC key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    hideClaimForm();
+  }
+});
+
+// Handle form submission
+document.getElementById('claimForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  const submitBtn = document.getElementById('submitBtn');
+  const originalText = submitBtn.innerHTML;
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '⏳ Memproses...';
+
+  const userName = document.getElementById('userName').value;
+  const userPhone = document.getElementById('userPhone').value;
+  const voucherId = document.getElementById('voucherId').value;
+
+  try {
+    const response = await fetch('/vouchers/claim', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+      },
+      body: JSON.stringify({
+        voucher_id: voucherId,
+        user_name: userName,
+        user_phone: userPhone
+      })
+    });
+
+    const result = await response.json();
+
+    if (!result.success) {
+      throw new Error(result.message);
+    }
+
+    const uniqueCode = result.data.unique_code;
+    const expiryDate = currentVoucher.expiry_date 
+      ? new Date(currentVoucher.expiry_date).toLocaleDateString('id-ID', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric'
+        })
+      : 'Tidak terbatas';
+
+    document.getElementById('templateTitle').textContent = currentVoucher.name;
+    document.getElementById('templateName').textContent = userName;
+    document.getElementById('templatePhone').textContent = userPhone;
+    document.getElementById('templateExpiry').textContent = expiryDate;
+    document.getElementById('templateDesc').textContent = currentVoucher.deskripsi;
+
+    JsBarcode("#templateBarcode", uniqueCode, {
+      format: "CODE128",
+      width: 2,
+      height: 80,
+      displayValue: true,
+      fontSize: 16,
+      margin: 10
+    });
+
+    const template = document.getElementById('voucherTemplate');
+    const canvas = await html2canvas(template, {
+      scale: 2,
+      backgroundColor: '#ffffff',
+      logging: false
+    });
+
+    canvas.toBlob(function(blob) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Voucher-${uniqueCode}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      hideClaimForm();
+      
+      // Success notification
+      const notification = document.createElement('div');
+      notification.className = 'fixed top-4 left-1/2 -translate-x-1/2 bg-green-500 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-xl shadow-2xl z-[100] notification-enter w-[calc(100%-2rem)] sm:w-auto max-w-md';
+      notification.innerHTML = `
+        <div class="flex items-center space-x-3">
+          <svg class="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          <div>
+            <p class="font-bold text-sm sm:text-base">Berhasil!</p>
+            <p class="text-xs sm:text-sm">Voucher telah di-download</p>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(notification);
+      setTimeout(() => notification.remove(), 5000);
+    });
+  } catch (error) {
+    console.error('Error claiming voucher:', error);
+    alert('❌ Terjadi kesalahan: ' + error.message);
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = originalText;
+  }
+});
+
 // Tab Switching untuk Promo & Voucher
 function switchPromoTab(tab) {
   const promoTab = document.getElementById('tabPromo');
@@ -865,7 +1140,6 @@ function switchPromoTab(tab) {
     promoContent.classList.remove('hidden');
     voucherContent.classList.add('hidden');
     
-    // Re-initialize promo slider
     if (window.promoSlider) {
       setTimeout(() => window.promoSlider.updateSlider(), 100);
     }
@@ -877,17 +1151,15 @@ function switchPromoTab(tab) {
     voucherContent.classList.remove('hidden');
     promoContent.classList.add('hidden');
     
-    // Initialize voucher slider
     if (window.voucherSlider) {
       setTimeout(() => window.voucherSlider.updateSlider(), 100);
     }
   }
   
-  // Re-render feather icons
   feather.replace();
 }
 
-// Update PromoSlider class untuk mendukung multiple sliders
+// Update PromoSlider class
 class PromoSlider {
   constructor(containerSelector, dotsSelector, prevBtnSelector, nextBtnSelector) {
     this.container = document.querySelector(containerSelector);
