@@ -182,6 +182,25 @@
                             @endif
                         </td>
                         <td class="px-6 py-4">
+                            <div class="flex flex-wrap gap-1">
+                                @if($staff->canScanTickets())
+                                <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">
+                                    🎫 Tiket
+                                </span>
+                                @endif
+                                @if($staff->canScanVouchers())
+                                <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded">
+                                    🏷️ Voucher
+                                </span>
+                                @endif
+                                @if(!$staff->canScanTickets() && !$staff->canScanVouchers())
+                                <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded">
+                                    - Tidak ada -
+                                </span>
+                                @endif
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
                             <span class="px-3 py-1 text-xs font-medium rounded-full 
                                 {{ $staff->role == 'admin' ? 'bg-purple-100 text-purple-800' : '' }}
                                 {{ $staff->role == 'supervisor' ? 'bg-blue-100 text-blue-800' : '' }}
@@ -367,6 +386,44 @@
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
                         placeholder="Deskripsi tambahan (opsional)"></textarea>
                     <p class="text-xs text-gray-500 mt-1">Informasi tambahan tentang staff (maksimal 255 karakter)</p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Akses Scanner <span class="text-red-500">*</span>
+                    </label>
+                    <div class="space-y-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <div class="flex items-start space-x-3">
+                            <input type="checkbox" 
+                                id="access_tickets" 
+                                name="access_permissions[tickets]" 
+                                value="1"
+                                class="mt-1 rounded border-gray-300 text-primary focus:ring-primary">
+                            <div class="flex-1">
+                                <label for="access_tickets" class="text-sm font-medium text-gray-900 cursor-pointer">
+                                    Scan Tiket
+                                </label>
+                                <p class="text-xs text-gray-500 mt-0.5">Akses untuk scan barcode tiket masuk pengunjung</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-3">
+                            <input type="checkbox" 
+                                id="access_vouchers" 
+                                name="access_permissions[vouchers]" 
+                                value="1"
+                                class="mt-1 rounded border-gray-300 text-primary focus:ring-primary">
+                            <div class="flex-1">
+                                <label for="access_vouchers" class="text-sm font-medium text-gray-900 cursor-pointer">
+                                    Scan Voucher
+                                </label>
+                                <p class="text-xs text-gray-500 mt-0.5">Akses untuk scan barcode voucher/promo</p>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">
+                        ⚠️ Pilih minimal satu akses untuk staff scanner
+                    </p>
                 </div>
             </div>
 
@@ -593,6 +650,12 @@ function openEditModal(staff) {
     document.getElementById('name').value = staff.name;
     document.getElementById('role').value = staff.role;
     document.getElementById('description').value = staff.description || '';
+    
+    // Handle access permissions
+    const permissions = staff.access_permissions || {};
+    document.getElementById('access_tickets').checked = permissions.tickets || false;
+    document.getElementById('access_vouchers').checked = permissions.vouchers || false;
+    
     document.getElementById('modalError').classList.add('hidden');
     document.getElementById('codeValidation').classList.add('hidden');
     document.getElementById('staffModal').classList.remove('hidden');
@@ -847,6 +910,8 @@ function validateForm(event) {
     const code = document.getElementById('code').value.trim();
     const name = document.getElementById('name').value.trim();
     const role = document.getElementById('role').value;
+    const ticketsAccess = document.getElementById('access_tickets').checked;
+    const vouchersAccess = document.getElementById('access_vouchers').checked;
     
     if (!code) {
         showModalError('Kode staff wajib diisi');
@@ -874,6 +939,13 @@ function validateForm(event) {
     
     if (!role) {
         showModalError('Role wajib dipilih');
+        event.preventDefault();
+        return false;
+    }
+    
+    // Validate at least one access permission is selected
+    if (!ticketsAccess && !vouchersAccess) {
+        showModalError('Pilih minimal satu akses scanner (Tiket atau Voucher)');
         event.preventDefault();
         return false;
     }

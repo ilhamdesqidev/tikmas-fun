@@ -6,226 +6,222 @@ use App\Http\Controllers\Controller;
 use App\Models\StaffCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 
 class StaffVerificationController extends Controller
 {
     public function index()
     {
         $staffCodes = StaffCode::orderBy('created_at', 'desc')->get();
-        
-        return view('admin.staff-verification.index', compact('staffCodes'));
+        return view('admin.staff-verification', compact('staffCodes'));
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'code' => 'required|string|unique:staff_codes,code|max:20',
+        $request->validate([
+            'code' => 'required|string|min:3|max:20|unique:staff_codes,code|regex:/^[A-Z0-9]+$/',
             'name' => 'required|string|max:100',
-            'role' => ['required', 'string', Rule::in(['scanner', 'admin', 'supervisor'])],
-            'description' => 'nullable|string|max:255'
+            'role' => 'required|in:admin,supervisor,scanner',
+            'description' => 'nullable|string|max:255',
+            'access_permissions' => 'nullable|array',
+            'access_permissions.tickets' => 'nullable|boolean',
+            'access_permissions.vouchers' => 'nullable|boolean',
         ], [
             'code.required' => 'Kode staff wajib diisi',
             'code.unique' => 'Kode staff sudah digunakan',
+            'code.regex' => 'Kode staff hanya boleh huruf kapital dan angka',
             'name.required' => 'Nama staff wajib diisi',
             'role.required' => 'Role wajib dipilih',
-            'role.in' => 'Role tidak valid',
         ]);
+
+        // Process access permissions
+        $accessPermissions = [
+            'tickets' => $request->input('access_permissions.tickets', false) ? true : false,
+            'vouchers' => $request->input('access_permissions.vouchers', false) ? true : false,
+        ];
 
         StaffCode::create([
-            'code' => strtoupper($validated['code']),
-            'name' => $validated['name'],
-            'role' => $validated['role'],
-            'description' => $validated['description'] ?? null,
+            'code' => strtoupper($request->code),
+            'name' => $request->name,
+            'role' => $request->role,
+            'description' => $request->description,
             'is_active' => true,
-            'usage_count' => 0,
+            'access_permissions' => $accessPermissions,
         ]);
 
-        return redirect()->back()->with('success', 'Kode staff berhasil ditambahkan!');
+        return redirect()->route('admin.staff.verification.index')
+            ->with('success', 'Kode staff berhasil ditambahkan!');
     }
 
-    public function generateCode()
+    public function update(Request $request, StaffCode $staffCode)
     {
-        do {
-            $code = 'STAFF' . strtoupper(Str::random(6));
-        } while (StaffCode::where('code', $code)->exists());
-
-        return response()->json(['code' => $code]);
-    }
-
-    public function update(Request $request, $id)
-    {
-        $staffCode = StaffCode::findOrFail($id);
-
-        $validated = $request->validate([
-            'code' => ['required', 'string', 'max:20', Rule::unique('staff_codes')->ignore($id)],
+        $request->validate([
+            'code' => 'required|string|min:3|max:20|regex:/^[A-Z0-9]+$/|unique:staff_codes,code,' . $staffCode->id,
             'name' => 'required|string|max:100',
-            'role' => ['required', 'string', Rule::in(['scanner', 'admin', 'supervisor'])],
-            'description' => 'nullable|string|max:255'
-        ], [
-            'code.required' => 'Kode staff wajib diisi',
-            'code.unique' => 'Kode staff sudah digunakan',
-            'name.required' => 'Nama staff wajib diisi',
-            'role.required' => 'Role wajib dipilih',
+            'role' => 'required|in:admin,supervisor,scanner',
+            'description' => 'nullable|string|max:255',
+            'access_permissions' => 'nullable|array',
+            'access_permissions.tickets' => 'nullable|boolean',
+            'access_permissions.vouchers' => 'nullable|boolean',
         ]);
+
+        // Process access permissions
+        $accessPermissions = [
+            'tickets' => $request->input('access_permissions.tickets', false) ? true : false,
+            'vouchers' => $request->input('access_permissions.vouchers', false) ? true : false,
+        ];
 
         $staffCode->update([
-            'code' => strtoupper($validated['code']),
-            'name' => $validated['name'],
-            'role' => $validated['role'],
-            'description' => $validated['description'] ?? null,
+            'code' => strtoupper($request->code),
+            'name' => $request->name,
+            'role' => $request->role,
+            'description' => $request->description,
+            'access_permissions' => $accessPermissions,
         ]);
 
-        return redirect()->back()->with('success', 'Kode staff berhasil diupdate!');
+        return redirect()->route('admin.staff.verification.index')
+            ->with('success', 'Kode staff berhasil diupdate!');
     }
 
-    public function toggleStatus($id)
+    public function toggle(StaffCode $staffCode)
     {
-        $staffCode = StaffCode::findOrFail($id);
-        $staffCode->update(['is_active' => !$staffCode->is_active]);
+        $staffCode->update([
+            'is_active' => !$staffCode->is_active
+        ]);
 
         $status = $staffCode->is_active ? 'diaktifkan' : 'dinonaktifkan';
         
-        return redirect()->back()->with('success', "Kode staff berhasil {$status}!");
+        return redirect()->route('admin.staff.verification.index')
+            ->with('success', "Kode staff berhasil {$status}!");
     }
 
-    public function destroy($id)
+    public function destroy(StaffCode $staffCode)
     {
-        try {
-            $staffCode = StaffCode::findOrFail($id);
-            
-            // Cek apakah kode pernah digunakan
-            if ($staffCode->usage_count > 0) {
-                return redirect()->back()->with('warning', 'Kode staff ini pernah digunakan. Sebaiknya nonaktifkan daripada menghapus.');
-            }
-            
-            $staffCode->delete();
-
-            return redirect()->back()->with('success', 'Kode staff berhasil dihapus!');
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal menghapus kode staff: ' . $e->getMessage());
-        }
+        $staffCode->delete();
+        
+        return redirect()->route('admin.staff.verification.index')
+            ->with('success', 'Kode staff berhasil dihapus!');
     }
 
-    public function bulkAction(Request $request)
+    public function bulk(Request $request)
     {
-        $validated = $request->validate([
-            'action' => ['required', Rule::in(['activate', 'deactivate', 'delete'])],
-            'ids' => 'required|array|min:1',
+        $request->validate([
+            'action' => 'required|in:activate,deactivate,delete',
+            'ids' => 'required|array',
             'ids.*' => 'exists:staff_codes,id'
-        ], [
-            'action.required' => 'Pilih aksi yang akan dilakukan',
-            'ids.required' => 'Pilih minimal satu kode staff',
-            'ids.min' => 'Pilih minimal satu kode staff',
         ]);
 
-        $staffCodes = StaffCode::whereIn('id', $validated['ids']);
+        $count = 0;
 
-        try {
-            switch ($validated['action']) {
-                case 'activate':
-                    $staffCodes->update(['is_active' => true]);
-                    $message = 'Kode staff berhasil diaktifkan!';
-                    break;
-                    
-                case 'deactivate':
-                    $staffCodes->update(['is_active' => false]);
-                    $message = 'Kode staff berhasil dinonaktifkan!';
-                    break;
-                    
-                case 'delete':
-                    $count = $staffCodes->count();
-                    $staffCodes->delete();
-                    $message = "{$count} kode staff berhasil dihapus!";
-                    break;
-            }
-
-            return redirect()->back()->with('success', $message);
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal melakukan bulk action: ' . $e->getMessage());
+        switch ($request->action) {
+            case 'activate':
+                $count = StaffCode::whereIn('id', $request->ids)->update(['is_active' => true]);
+                $message = "{$count} kode staff berhasil diaktifkan";
+                break;
+                
+            case 'deactivate':
+                $count = StaffCode::whereIn('id', $request->ids)->update(['is_active' => false]);
+                $message = "{$count} kode staff berhasil dinonaktifkan";
+                break;
+                
+            case 'delete':
+                $count = StaffCode::whereIn('id', $request->ids)->delete();
+                $message = "{$count} kode staff berhasil dihapus";
+                break;
         }
+
+        return redirect()->route('admin.staff.verification.index')
+            ->with('success', $message);
+    }
+
+    public function checkCode(Request $request)
+    {
+        $request->validate([
+            'code' => 'required|string'
+        ]);
+
+        $exists = StaffCode::where('code', strtoupper($request->code))->exists();
+
+        return response()->json([
+            'available' => !$exists
+        ]);
     }
 
     public function generateCustomCode(Request $request)
     {
         $request->validate([
-            'prefix' => 'nullable|string|max:10|regex:/^[A-Z0-9]*$/',
+            'prefix' => 'nullable|string|max:10',
             'format' => 'required|in:random,sequential,custom',
-            'length' => 'nullable|integer|min:3|max:10'
+            'length' => 'required|integer|min:3|max:10'
         ]);
 
-        $prefix = strtoupper($request->prefix ?? 'STAFF');
-        $format = $request->format ?? 'random';
-        $length = $request->length ?? 6;
+        $prefix = strtoupper($request->prefix ?? '');
+        $format = $request->format;
+        $length = $request->length;
 
-        do {
-            switch ($format) {
-                case 'sequential':
-                    // Cari kode terakhir dengan prefix yang sama
-                    $lastCode = StaffCode::where('code', 'like', $prefix . '%')
-                        ->orderBy('code', 'desc')
-                        ->first();
-                    
-                    if ($lastCode) {
-                        // Extract nomor dari kode terakhir
-                        $lastNumber = intval(preg_replace('/[^0-9]/', '', substr($lastCode->code, strlen($prefix))));
-                        $nextNumber = $lastNumber + 1;
-                    } else {
-                        $nextNumber = 1;
+        $code = '';
+
+        switch ($format) {
+            case 'random':
+                do {
+                    $code = $prefix . strtoupper(Str::random($length));
+                    $code = preg_replace('/[^A-Z0-9]/', '', $code);
+                } while (StaffCode::where('code', $code)->exists());
+                break;
+
+            case 'sequential':
+                $lastCode = StaffCode::where('code', 'LIKE', $prefix . '%')
+                    ->orderBy('code', 'desc')
+                    ->first();
+                
+                if ($lastCode) {
+                    $lastNumber = (int) preg_replace('/[^0-9]/', '', substr($lastCode->code, strlen($prefix)));
+                    $nextNumber = $lastNumber + 1;
+                } else {
+                    $nextNumber = 1;
+                }
+                
+                $code = $prefix . str_pad($nextNumber, $length, '0', STR_PAD_LEFT);
+                break;
+
+            case 'custom':
+                // Generate random alphanumeric
+                do {
+                    $randomPart = '';
+                    for ($i = 0; $i < $length; $i++) {
+                        $randomPart .= (rand(0, 1) === 0) 
+                            ? chr(rand(65, 90))  // A-Z
+                            : rand(0, 9);         // 0-9
                     }
-                    
-                    $code = $prefix . str_pad($nextNumber, $length, '0', STR_PAD_LEFT);
-                    break;
-
-                case 'random':
-                    $code = $prefix . strtoupper(Str::random($length));
-                    break;
-
-                case 'custom':
-                    // Generate kode random sebagai saran
-                    $code = $prefix . strtoupper(Str::random($length));
-                    break;
-            }
-        } while (StaffCode::where('code', $code)->exists());
+                    $code = $prefix . $randomPart;
+                } while (StaffCode::where('code', $code)->exists());
+                break;
+        }
 
         return response()->json([
             'success' => true,
-            'code' => $code,
-            'message' => 'Kode berhasil di-generate'
+            'code' => $code
         ]);
     }
 
-    public function checkCode(Request $request)
+    public function suggestions(Request $request)
     {
-        $code = strtoupper($request->code);
-        $exists = StaffCode::where('code', $code)->exists();
-
-        return response()->json([
-            'exists' => $exists,
-            'available' => !$exists,
-            'message' => $exists ? 'Kode sudah digunakan' : 'Kode tersedia'
-        ]);
-    }
-    
-    public function getCodeSuggestions(Request $request)
-    {
-        $prefix = strtoupper($request->prefix ?? '');
+        $role = $request->query('role', 'scanner');
+        
+        $prefixes = [
+            'admin' => 'ADMIN',
+            'supervisor' => 'SUPER',
+            'scanner' => 'SCAN'
+        ];
+        
+        $prefix = $prefixes[$role] ?? 'STAFF';
         $suggestions = [];
 
-        // Suggestion berdasarkan role
-        $rolePrefixes = [
-            'admin' => ['ADMIN', 'ADM', 'MANAGER'],
-            'supervisor' => ['SUPER', 'SUP', 'SPV'],
-            'scanner' => ['SCAN', 'SCN', 'GATE']
-        ];
-
-        $role = $request->role ?? 'scanner';
-        $prefixes = $rolePrefixes[$role] ?? ['STAFF'];
-
-        foreach ($prefixes as $pfx) {
+        // Generate 6 suggestions
+        for ($i = 0; $i < 6; $i++) {
             do {
-                $code = $pfx . str_pad(rand(1, 999), 3, '0', STR_PAD_LEFT);
-            } while (StaffCode::where('code', $code)->exists());
+                $random = rand(100, 999);
+                $code = $prefix . $random;
+            } while (in_array($code, $suggestions) || StaffCode::where('code', $code)->exists());
             
             $suggestions[] = $code;
         }

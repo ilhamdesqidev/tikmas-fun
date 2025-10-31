@@ -43,8 +43,23 @@ class ScannerController extends Controller
             Session::put('staff_role', $staffCode->role);
             Session::put('staff_id', $staffCode->id);
             
-            return redirect()->route('scanner.dashboard')
-                ->with('success', "Verifikasi berhasil! Selamat datang, {$staffCode->name}.");
+            // Redirect based on access permissions
+            $permissions = $staffCode->access_permissions ?? [];
+            
+            // Priority: Tickets > Vouchers
+            if ($permissions['tickets'] ?? false) {
+                return redirect()->route('scanner.dashboard')
+                    ->with('success', "Verifikasi berhasil! Selamat datang, {$staffCode->name}.");
+            } elseif ($permissions['vouchers'] ?? false) {
+                return redirect()->route('voucher.scanner.dashboard')
+                    ->with('success', "Verifikasi berhasil! Selamat datang, {$staffCode->name}.");
+            } else {
+                // No access
+                Session::forget(['scanner_verified', 'staff_code', 'staff_name', 'staff_role', 'staff_id']);
+                return redirect()->back()
+                    ->with('error', 'Kode staff tidak memiliki akses scanner!')
+                    ->withInput();
+            }
         }
 
         return redirect()->back()
@@ -60,6 +75,20 @@ class ScannerController extends Controller
             return redirect()->route('scanner.verification');
         }
 
+        // Check if staff has ticket scan access
+        $staffId = Session::get('staff_id');
+        $staff = StaffCode::find($staffId);
+        
+        if (!$staff || !$staff->canScanTickets()) {
+            // If has voucher access, redirect there
+            if ($staff && $staff->canScanVouchers()) {
+                return redirect()->route('voucher.scanner.dashboard');
+            }
+            
+            return redirect()->route('scanner.verification')
+                ->with('error', 'Anda tidak memiliki akses untuk scan tiket!');
+        }
+
         $today = Carbon::today();
         
         // Get today's statistics
@@ -68,8 +97,7 @@ class ScannerController extends Controller
             ->sum('ticket_quantity');
             
         $todayTotal = Order::whereDate('visit_date', $today)
-            ->where('status', 'success')
-            ->orWhere('status', 'used')
+            ->whereIn('status', ['success', 'used'])
             ->sum('ticket_quantity');
 
         // Get recent scans
@@ -83,8 +111,18 @@ class ScannerController extends Controller
         // Get staff info
         $staffName = Session::get('staff_name', 'Petugas');
         $staffRole = Session::get('staff_role', 'scanner');
+        
+        // Check if staff also has voucher access
+        $hasVoucherAccess = $staff->canScanVouchers();
 
-        return view('scanner.dashboard', compact('todayUsed', 'todayTotal', 'recentScans', 'staffName', 'staffRole'));
+        return view('scanner.dashboard', compact(
+            'todayUsed', 
+            'todayTotal', 
+            'recentScans', 
+            'staffName', 
+            'staffRole',
+            'hasVoucherAccess'
+        ));
     }
 
     // Method untuk scan barcode
