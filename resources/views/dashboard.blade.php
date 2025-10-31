@@ -798,6 +798,57 @@
   </div>
 </section>
 
+ <!-- Footer -->
+    <footer class="bg-black text-white pt-8 sm:pt-10 lg:pt-12 pb-6 sm:pb-8">
+      <div class="container mx-auto px-4 sm:px-6">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-6 sm:gap-8 mb-8 sm:mb-10 lg:mb-12">
+          <div class="text-center md:text-left">
+            <h3 class="text-2xl sm:text-3xl font-bold italic mb-3 sm:mb-4">
+              {{ $settings['site_name'] ?? 'MestaKara' }}<span class="text-white">.</span>
+            </h3>
+            <p class="max-w-xs text-sm sm:text-base lg:text-lg opacity-90">
+              {{ $settings['website_description'] ?? 'Menyajikan wahana menyenangkan dengan keseruan yang tak terlupakan.' }}
+            </p>
+          </div>
+          
+          <div>
+            <h4 class="text-base sm:text-lg lg:text-xl font-semibold mb-4 sm:mb-5 lg:mb-6 text-center md:text-left">Tautan Cepat</h4>
+            <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-6 lg:space-x-8">
+              <a href="#home" class="hover:text-gray-300 transition-colors duration-300 text-sm sm:text-base lg:text-lg touch-manipulation text-center md:text-left">Home</a>
+              <a href="#about" class="hover:text-gray-300 transition-colors duration-300 text-sm sm:text-base lg:text-lg touch-manipulation text-center md:text-left">Tentang Kami</a>
+              <a href="#menu" class="hover:text-gray-300 transition-colors duration-300 text-sm sm:text-base lg:text-lg touch-manipulation text-center md:text-left">Promo</a>
+            </div>
+          </div>
+          
+          <div>
+            <h4 class="text-base sm:text-lg lg:text-xl font-semibold mb-4 sm:mb-5 lg:mb-6 text-center md:text-left">Ikuti Kami</h4>
+            <div class="flex justify-center md:justify-start space-x-3 sm:space-x-4 lg:space-x-6">
+              <a href="https://www.instagram.com/wisataagro8/?hl=id" class="bg-white bg-opacity-20 p-2 sm:p-2.5 lg:p-3 rounded-full hover:bg-opacity-30 transition-all duration-300 touch-manipulation">
+                <i data-feather="instagram" class="w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-6"></i>
+              </a>
+              <a href="https://twitter.com/agrowisata_n8" class="bg-white bg-opacity-20 p-2 sm:p-2.5 lg:p-3 rounded-full hover:bg-opacity-30 transition-all duration-300 touch-manipulation">
+                <i data-feather="twitter" class="w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-6"></i>
+              </a>
+              <a href="https://www.facebook.com/AgrowisataN8/" class="bg-white bg-opacity-20 p-2 sm:p-2.5 lg:p-3 rounded-full hover:bg-opacity-30 transition-all duration-300 touch-manipulation">
+                <i data-feather="facebook" class="w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-6"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+        
+        <div class="border-t border-white border-opacity-30 my-6 sm:my-7 lg:my-8"></div>
+        
+        <div class="flex flex-col md:flex-row justify-between items-center gap-3 text-center md:text-left">
+          <p class="text-xs sm:text-sm lg:text-base opacity-80">
+            {{ $settings['footer_text'] ?? '© 2025 Tiketmas. All rights reserved.' }}
+          </p>
+          <p class="text-xs sm:text-sm lg:text-base opacity-80">
+            Created by <a href="#" class="font-bold hover:underline">{{ $settings['site_name'] ?? 'Mestakara' }}</a>
+          </p>
+        </div>
+      </div>
+    </footer>
+
 <script>
 // Tab Switching untuk Promo & Voucher
 function switchPromoTab(tab) {
