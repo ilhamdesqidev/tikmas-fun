@@ -574,7 +574,7 @@
     <!-- Promo & Voucher Section -->
     <section id="menu" class="py-6">
       <h2 class="text-center text-3xl sm:text-4xl mb-4 text-text-dark">
-        <span class="text-primary">Promo & Voucher</span> Kami
+        <span class="text-primary">Promo & Voucher</span>
       </h2>
       <p class="text-center max-w-lg mx-auto font-medium leading-relaxed text-text-dark mb-8 text-base sm:text-lg">
         Nikmati berbagai pilihan promo dan voucher menarik untuk pengalaman liburan yang tak terlupakan
