@@ -20,167 +20,70 @@
         @keyframes slideUp { from { opacity: 0; transform: translateY(100px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
         .animate-fade-in { animation: fadeInUp 0.6s ease-out forwards; }
         .animate-slide-up { animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
-        .ribbon { 
-            position: absolute; 
-            top: 10px; 
-            right: -5px; 
-            background: #CFD916; 
-            color: #1f2937; 
-            padding: 4px 12px; 
-            font-weight: bold; 
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            font-size: 10px;
-        }
-        .ribbon:before { 
-            content: ''; 
-            position: absolute; 
-            right: 0; 
-            bottom: -8px; 
-            border-left: 8px solid transparent; 
-            border-right: 8px solid #9DB91C; 
-            border-top: 8px solid #9DB91C; 
-        }
-        
-        /* Mobile optimizations */
-        @media (max-width: 640px) {
-            .voucher-card:active { transform: scale(0.98); }
-            .ribbon { 
-                padding: 3px 10px; 
-                font-size: 9px;
-                top: 8px;
-            }
-            .ribbon:before { 
-                border-left: 6px solid transparent; 
-                border-right: 6px solid #9DB91C; 
-                border-top: 6px solid #9DB91C;
-                bottom: -6px;
-            }
-        }
-        
-        /* Prevent horizontal scroll */
-        body { overflow-x: hidden; }
-        
-        /* Touch-friendly buttons */
-        button, a { -webkit-tap-highlight-color: transparent; }
-        
-        /* Smooth scrolling */
-        html { scroll-behavior: smooth; }
-        
-        /* Better image loading */
-        img { object-position: center; }
-        
-        /* Fix modal on mobile */
-        @media (max-width: 640px) {
-            #claimCard { 
-                margin: auto;
-                max-height: 90vh;
-            }
-        }
-        
-        /* Notification responsive */
-        @keyframes slideInFromTop {
-            from { opacity: 0; transform: translate(-50%, -100%); }
-            to { opacity: 1; transform: translate(-50%, 0); }
-        }
-        
-        .notification-enter {
-            animation: slideInFromTop 0.4s ease-out forwards;
-        }
+        .ribbon { position: absolute; top: 15px; right: -5px; background: #CFD916; color: #1f2937; padding: 5px 15px; font-weight: bold; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+        .ribbon:before { content: ''; position: absolute; right: 0; bottom: -10px; border-left: 10px solid transparent; border-right: 10px solid #9DB91C; border-top: 10px solid #9DB91C; }
     </style>
 </head>
 <body class="bg-gray-50">
-    <!-- Header - Responsive -->
-    <header class="bg-white sticky top-0 z-40 shadow-sm">
-        <!-- Mobile Layout (< 640px) -->
-        <div class="sm:hidden">
-            <!-- Top Bar dengan Background Gradient -->
-            <div class="gradient-bg px-4 py-3">
-                <div class="flex items-center justify-between">
-                    <a href="{{ route('home') }}" class="flex items-center bg-white/20 backdrop-blur-sm hover:bg-white/30 text-gray-800 px-3 py-1.5 rounded-lg transition-all duration-200 font-medium group">
-                        <svg class="w-4 h-4 mr-1 transform group-hover:-translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                        </svg>
-                        <span class="text-xs font-semibold">Kembali</span>
-                    </a>
-                    
-                    <div class="flex items-center space-x-1.5 bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-lg">
-                        <svg class="w-4 h-4 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-                        </svg>
-                        <span class="text-xs font-bold text-gray-800">{{ $vouchers->count() }} Voucher</span>
-                    </div>
+    <header class="bg-white border-b border-black">
+        <div class="container mx-auto px-4 py-5">
+            <div class="flex items-center justify-between">
+                <a href="{{ route('home') }}" class="flex items-center bg-[#CFD916] hover:bg-[#B5C91A] text-gray-800 px-4 py-2 rounded-lg transition-all duration-200 font-medium group shadow-sm">
+                    <svg class="w-4 h-4 mr-2 transform group-hover:-translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    <span class="text-sm">Kembali ke Dashboard</span>
+                </a>
+                
+                <div class="text-center flex-1 px-4">
+                    <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Voucher & Promo</h1>
+                    <p class="text-xs text-gray-600">Dapatkan penawaran terbaik untuk Anda</p>
                 </div>
-            </div>
-            
-            <!-- Title Section -->
-            <div class="bg-white px-4 py-4 border-b border-gray-200">
-                <h1 class="text-xl font-bold text-gray-800 mb-1">Voucher & Promo</h1>
-                <p class="text-xs text-gray-600">Dapatkan penawaran terbaik untuk Anda</p>
-            </div>
-        </div>
-        
-        <!-- Desktop Layout (>= 640px) -->
-        <div class="hidden sm:block border-b border-gray-200">
-            <div class="container mx-auto px-4 py-5">
-                <div class="flex items-center justify-between">
-                    <a href="{{ route('home') }}" class="flex items-center bg-[#CFD916] hover:bg-[#B5C91A] text-gray-800 px-4 py-2 rounded-lg transition-all duration-200 font-medium group shadow-sm">
-                        <svg class="w-4 h-4 mr-2 transform group-hover:-translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                        </svg>
-                        <span class="text-sm">Kembali ke Dashboard</span>
-                    </a>
-                    
-                    <div class="text-center flex-1 px-4">
-                        <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Voucher & Promo</h1>
-                        <p class="text-xs text-gray-600">Dapatkan penawaran terbaik untuk Anda</p>
-                    </div>
-                    
-                    <div class="flex items-center space-x-2 text-gray-600">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-                        </svg>
-                        <span class="text-sm font-medium">{{ $vouchers->count() }} Voucher</span>
-                    </div>
+                
+                <div class="flex items-center space-x-2 text-gray-600">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                    </svg>
+                    <span class="text-sm font-medium">{{ $vouchers->count() }} Voucher</span>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Main Content - Responsive -->
-    <main class="container mx-auto px-3 sm:px-4 py-6 sm:py-12">
+    <main class="container mx-auto px-4 py-12">
         @if($vouchers->count() > 0)
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 @foreach($vouchers as $index => $voucher)
-                <div class="voucher-card bg-white rounded-xl sm:rounded-2xl shadow-lg overflow-hidden animate-fade-in" style="animation-delay: {{ $index * 0.1 }}s">
-                    <div class="relative h-40 sm:h-48 md:h-56 gradient-card">
+                <div class="voucher-card bg-white rounded-2xl shadow-lg overflow-hidden animate-fade-in" style="animation-delay: {{ $index * 0.1 }}s">
+                    <div class="relative h-56 gradient-card">
                         <img src="{{ $voucher->image_url }}" 
                              alt="{{ $voucher->name }}" 
                              class="w-full h-full object-cover"
                              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                        <div class="absolute inset-0 flex items-center justify-center text-gray-800 text-lg sm:text-xl md:text-2xl font-bold px-4 text-center" style="display: none;">
+                        <div class="absolute inset-0 flex items-center justify-center text-gray-800 text-2xl font-bold px-4 text-center" style="display: none;">
                             {{ $voucher->name }}
                         </div>
                         
-                        <div class="ribbon uppercase tracking-wider">✓ {{ $voucher->status_text }}</div>
-                        <div class="absolute bottom-0 left-0 w-0 h-0 border-l-[30px] sm:border-l-[40px] border-l-white border-t-[30px] sm:border-t-[40px] border-t-transparent"></div>
+                        <div class="ribbon text-xs font-bold uppercase tracking-wider">✓ {{ $voucher->status_text }}</div>
+                        <div class="absolute bottom-0 left-0 w-0 h-0 border-l-[40px] border-l-white border-t-[40px] border-t-transparent"></div>
                     </div>
 
-                    <div class="p-4 sm:p-5 md:p-6">
-                        <h3 class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-2 sm:mb-3 line-clamp-2 min-h-[3.5rem] sm:min-h-[4rem]">{{ $voucher->name }}</h3>
+                    <div class="p-6">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-3 line-clamp-2 min-h-[4rem]">{{ $voucher->name }}</h3>
                         
-                        <p class="text-gray-600 text-xs sm:text-sm mb-4 sm:mb-6 line-clamp-3 min-h-[3.5rem] sm:min-h-[4.5rem]">
+                        <p class="text-gray-600 text-sm mb-6 line-clamp-3 min-h-[4.5rem]">
                             {{ Str::limit($voucher->deskripsi, 120) }}
                         </p>
 
-                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-3 sm:pt-4 border-t-2 border-gray-100">
+                        <div class="flex items-center justify-between pt-4 border-t-2 border-gray-100">
                             <div class="flex items-center text-xs text-gray-500">
-                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                 </svg>
                                 <span class="font-medium">{{ $voucher->created_at->format('d M Y') }}</span>
                             </div>
                             <button onclick='showClaimForm(@json($voucher))' 
-                                    class="w-full sm:w-auto btn-primary text-gray-800 px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wide shadow-md">
+                                    class="btn-primary text-gray-800 px-5 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wide shadow-md">
                                 🎉 Claim Sekarang
                             </button>
                         </div>
@@ -189,16 +92,16 @@
                 @endforeach
             </div>
         @else
-            <div class="flex flex-col items-center justify-center py-12 sm:py-20 animate-fade-in">
-                <div class="bg-white rounded-3xl shadow-xl p-8 sm:p-12 text-center max-w-md mx-auto">
-                    <div class="w-24 h-24 sm:w-32 sm:h-32 mx-auto mb-4 sm:mb-6 bg-gray-100 rounded-full flex items-center justify-center">
-                        <svg class="w-12 h-12 sm:w-16 sm:h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="flex flex-col items-center justify-center py-20 animate-fade-in">
+                <div class="bg-white rounded-3xl shadow-xl p-12 text-center max-w-md">
+                    <div class="w-32 h-32 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
+                        <svg class="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl sm:text-2xl font-bold text-gray-800 mb-2 sm:mb-3">Belum Ada Voucher</h3>
-                    <p class="text-sm sm:text-base text-gray-500 mb-4 sm:mb-6">Saat ini belum ada voucher yang tersedia. Silakan cek kembali nanti!</p>
-                    <a href="/" class="btn-primary inline-block text-gray-800 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl font-bold text-sm sm:text-base">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-3">Belum Ada Voucher</h3>
+                    <p class="text-gray-500 mb-6">Saat ini belum ada voucher yang tersedia. Silakan cek kembali nanti!</p>
+                    <a href="/" class="btn-primary inline-block text-gray-800 px-6 py-3 rounded-xl font-bold">
                         Kembali ke Beranda
                     </a>
                 </div>
@@ -206,58 +109,58 @@
         @endif
     </main>
 
-    <!-- Claim Form Pop-up - Responsive -->
-    <div id="claimOverlay" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4">
-        <div id="claimCard" class="bg-white rounded-2xl sm:rounded-3xl shadow-2xl max-w-md w-full animate-slide-up overflow-hidden max-h-[95vh] overflow-y-auto">
+    <!-- Claim Form Pop-up Card -->
+    <div id="claimOverlay" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div id="claimCard" class="bg-white rounded-3xl shadow-2xl max-w-md w-full animate-slide-up overflow-hidden">
             <!-- Card Header -->
-            <div class="gradient-bg p-5 sm:p-6 text-center">
-                <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-3 sm:mb-4 bg-white rounded-full flex items-center justify-center shadow-lg">
-                    <svg class="w-8 h-8 sm:w-10 sm:h-10 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="gradient-bg p-6 text-center">
+                <div class="w-20 h-20 mx-auto mb-4 bg-white rounded-full flex items-center justify-center shadow-lg">
+                    <svg class="w-10 h-10 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
                     </svg>
                 </div>
-                <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-2">Claim Voucher</h2>
-                <p class="text-sm text-gray-700 px-2" id="claimVoucherName"></p>
-                <p class="text-xs text-gray-600 mt-1">Berlaku hingga: <span id="claimExpiryDate"></span></p>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Claim Voucher</h2>
+                <p class="text-gray-700 text-sm" id="claimVoucherName"></p>
+                <p class="text-gray-600 text-xs mt-1">Berlaku hingga: <span id="claimExpiryDate"></span></p>
             </div>
 
             <!-- Form -->
-            <form id="claimForm" class="p-5 sm:p-6">
+            <form id="claimForm" class="p-6">
                 <input type="hidden" id="voucherId">
                 
-                <div class="mb-4 sm:mb-5">
-                    <label for="userName" class="block text-xs sm:text-sm font-bold text-gray-700 mb-2">
+                <div class="mb-5">
+                    <label for="userName" class="block text-sm font-bold text-gray-700 mb-2">
                         📝 Nama Lengkap <span class="text-red-500">*</span>
                     </label>
                     <input type="text" 
                            id="userName" 
                            required
-                           class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#CFD916] focus:border-transparent transition-all" 
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#CFD916] focus:border-transparent transition-all" 
                            placeholder="Masukkan nama lengkap Anda">
                 </div>
 
-                <div class="mb-5 sm:mb-6">
-                    <label for="userPhone" class="block text-xs sm:text-sm font-bold text-gray-700 mb-2">
+                <div class="mb-6">
+                    <label for="userPhone" class="block text-sm font-bold text-gray-700 mb-2">
                         📱 Nomor Telepon <span class="text-red-500">*</span>
                     </label>
                     <input type="tel" 
                            id="userPhone" 
                            required
                            pattern="[0-9]{10,13}"
-                           class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#CFD916] focus:border-transparent transition-all" 
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#CFD916] focus:border-transparent transition-all" 
                            placeholder="08xxxxxxxxxx">
                     <p class="mt-1.5 text-xs text-gray-500">💡 Format: 08xxxxxxxxxx (10-13 digit)</p>
                 </div>
 
-                <div class="flex flex-col sm:flex-row gap-3">
+                <div class="flex space-x-3">
                     <button type="button" 
                             onclick="hideClaimForm()"
-                            class="w-full sm:flex-1 px-5 sm:px-6 py-2.5 sm:py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-all duration-300 font-bold text-sm sm:text-base">
+                            class="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-all duration-300 font-bold">
                         Batal
                     </button>
                     <button type="submit" 
                             id="submitBtn"
-                            class="w-full sm:flex-1 btn-primary text-gray-800 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl font-bold shadow-lg text-sm sm:text-base">
+                            class="flex-1 btn-primary text-gray-800 px-6 py-3 rounded-xl font-bold shadow-lg">
                         Claim & Download 🎁
                     </button>
                 </div>
@@ -266,27 +169,58 @@
     </div>
 
     <!-- Hidden Template -->
-    <div id="voucherTemplate" style="position: absolute; left: -9999px; width: 800px; background: white;">
-        <div style="padding: 40px; font-family: Arial, sans-serif;">
-            <div style="background: linear-gradient(135deg, #CFD916 0%, #9DB91C 100%); padding: 30px; border-radius: 20px; margin-bottom: 20px;">
-                <h1 style="color: #1f2937; font-size: 32px; font-weight: bold; margin: 0 0 10px 0;" id="templateTitle"></h1>
-                <p style="color: #374151; font-size: 16px; margin: 0;">🎉 Voucher Berhasil Di-claim!</p>
-            </div>
-            
-            <div style="background: #f9fafb; padding: 25px; border-radius: 15px; margin-bottom: 20px;">
-                <p style="margin: 0 0 8px 0; color: #6b7280; font-size: 14px;"><strong>Nama:</strong> <span id="templateName"></span></p>
-                <p style="margin: 0 0 8px 0; color: #6b7280; font-size: 14px;"><strong>No. Telepon:</strong> <span id="templatePhone"></span></p>
-                <p style="margin: 0; color: #6b7280; font-size: 14px;"><strong>Berlaku hingga:</strong> <span id="templateExpiry"></span></p>
-            </div>
+    <div id="voucherTemplate" style="position: absolute; left: -9999px; width: 1000px; background: white;">
+        <div style="padding: 0; font-family: Arial, sans-serif; position: relative;">
+            <!-- Background Voucher Design -->
+            <div style="background: linear-gradient(135deg, #CFD916 0%, #9DB91C 100%); padding: 60px 50px; border-radius: 30px; position: relative; overflow: hidden;">
+                <!-- Decorative Elements -->
+                <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%;"></div>
+                <div style="position: absolute; bottom: -30px; left: -30px; width: 150px; height: 150px; background: rgba(255,255,255,0.1); border-radius: 50%;"></div>
+                
+                <!-- Header Section -->
+                <div style="text-align: center; margin-bottom: 40px; position: relative; z-index: 2;">
+                    <div style="display: inline-block; background: rgba(255,255,255,0.95); padding: 30px 50px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+                        <h1 style="color: #1f2937; font-size: 36px; font-weight: bold; margin: 0 0 10px 0; text-transform: uppercase;" id="templateTitle"></h1>
+                        <p style="color: #374151; font-size: 18px; margin: 0; font-weight: 600;">🎉 Voucher Berhasil Di-claim!</p>
+                    </div>
+                </div>
 
-            <div style="text-align: center; background: white; padding: 30px; border: 3px dashed #CFD916; border-radius: 15px;">
-                <p style="color: #1f2937; font-weight: bold; margin: 0 0 15px 0; font-size: 18px;">Kode Voucher:</p>
-                <svg id="templateBarcode"></svg>
-                <p style="margin: 15px 0 0 0; color: #6b7280; font-size: 12px;">Tunjukkan barcode ini saat melakukan pembayaran</p>
-            </div>
+                <!-- Barcode Section - Overlaying Design -->
+                <div style="text-align: center; background: white; padding: 30px; border-radius: 20px; margin: 0 auto 40px; max-width: 600px; box-shadow: 0 15px 40px rgba(0,0,0,0.25); position: relative; z-index: 3;">
+                    <p style="color: #1f2937; font-weight: bold; margin: 0 0 20px 0; font-size: 20px; text-transform: uppercase; letter-spacing: 1px;">Kode Voucher</p>
+                    <div style="background: #f9fafb; padding: 20px; border-radius: 15px; display: inline-block;">
+                        <svg id="templateBarcode"></svg>
+                    </div>
+                    <p style="margin: 20px 0 0 0; color: #6b7280; font-size: 13px; font-style: italic;">📱 Tunjukkan barcode ini saat melakukan pembayaran</p>
+                </div>
 
-            <div style="margin-top: 25px; padding: 20px; background: #fef3c7; border-radius: 10px; border-left: 4px solid #CFD916;">
-                <p style="margin: 0; color: #92400e; font-size: 13px; line-height: 1.6;" id="templateDesc"></p>
+                <!-- User Info Section -->
+                <div style="background: rgba(255,255,255,0.95); padding: 30px; border-radius: 20px; margin-bottom: 30px; position: relative; z-index: 2; box-shadow: 0 8px 20px rgba(0,0,0,0.15);">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+                        <div style="text-align: center; padding: 15px; background: #f9fafb; border-radius: 12px;">
+                            <p style="margin: 0 0 8px 0; color: #9ca3af; font-size: 12px; text-transform: uppercase; font-weight: 600;">Nama Pemegang</p>
+                            <p style="margin: 0; color: #1f2937; font-size: 16px; font-weight: bold;" id="templateName"></p>
+                        </div>
+                        <div style="text-align: center; padding: 15px; background: #f9fafb; border-radius: 12px;">
+                            <p style="margin: 0 0 8px 0; color: #9ca3af; font-size: 12px; text-transform: uppercase; font-weight: 600;">No. Telepon</p>
+                            <p style="margin: 0; color: #1f2937; font-size: 16px; font-weight: bold;" id="templatePhone"></p>
+                        </div>
+                        <div style="text-align: center; padding: 15px; background: #f9fafb; border-radius: 12px;">
+                            <p style="margin: 0 0 8px 0; color: #9ca3af; font-size: 12px; text-transform: uppercase; font-weight: 600;">Berlaku Hingga</p>
+                            <p style="margin: 0; color: #1f2937; font-size: 16px; font-weight: bold;" id="templateExpiry"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Description Section -->
+                <div style="background: rgba(254, 243, 199, 0.95); padding: 25px; border-radius: 15px; border-left: 6px solid #CFD916; position: relative; z-index: 2; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                    <p style="margin: 0; color: #92400e; font-size: 14px; line-height: 1.8; font-weight: 500;" id="templateDesc"></p>
+                </div>
+
+                <!-- Footer -->
+                <div style="text-align: center; margin-top: 30px; position: relative; z-index: 2;">
+                    <p style="color: rgba(31, 41, 55, 0.6); font-size: 12px; margin: 0;">Terima kasih telah menggunakan layanan kami</p>
+                </div>
             </div>
         </div>
     </div>
@@ -393,7 +327,7 @@
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = Voucher-${uniqueCode}.png;
+                    a.download = `Voucher-${uniqueCode}.png`;
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
@@ -403,15 +337,15 @@
                     
                     // Success notification
                     const notification = document.createElement('div');
-                    notification.className = 'fixed top-4 left-1/2 -translate-x-1/2 bg-green-500 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-xl shadow-2xl z-[100] notification-enter w-[calc(100%-2rem)] sm:w-auto max-w-md';
+                    notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-4 rounded-xl shadow-2xl z-[100] animate-slide-up';
                     notification.innerHTML = `
                         <div class="flex items-center space-x-3">
-                            <svg class="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                             </svg>
                             <div>
-                                <p class="font-bold text-sm sm:text-base">Berhasil!</p>
-                                <p class="text-xs sm:text-sm">Voucher telah di-download</p>
+                                <p class="font-bold">Berhasil!</p>
+                                <p class="text-sm">Voucher telah di-download</p>
                             </div>
                         </div>
                     `;
