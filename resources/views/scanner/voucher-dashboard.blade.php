@@ -2,27 +2,21 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Voucher Scanner Dashboard - MestaKara</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
-        * {
-            -webkit-tap-highlight-color: transparent;
-        }
-        
         .gradient-bg {
             background: linear-gradient(135deg, #CFD916 0%, #9DB91C 100%);
         }
-        
         .scanner-container {
             position: relative;
             background: #000;
-            border-radius: 0.75rem;
+            border-radius: 12px;
             overflow: hidden;
-            max-height: 400px;
         }
-        
         .scanner-overlay {
             position: absolute;
             top: 0;
@@ -35,185 +29,111 @@
             justify-content: center;
             flex-direction: column;
         }
-        
         .scanner-line {
-            width: min(200px, 60vw);
+            width: 200px;
             height: 3px;
             background: #CFD916;
             animation: scan 2s infinite;
         }
-        
         @keyframes scan {
             0% { transform: translateY(-100px); }
             50% { transform: translateY(100px); }
             100% { transform: translateY(-100px); }
         }
-        
         .shake {
             animation: shake 0.5s;
         }
-        
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-5px); }
             75% { transform: translateX(5px); }
         }
-        
-        .btn-primary {
-            min-height: 44px;
-            touch-action: manipulation;
-        }
-        
-        .stat-card {
-            min-height: 100px;
-        }
-        
-        @media (max-width: 640px) {
-            .scanner-container {
-                max-height: 300px;
-            }
-            
-            .stat-card {
-                min-height: 80px;
-            }
-        }
-        
-        /* Prevent zoom on input focus for iOS */
-        input[type="text"] {
-            font-size: 16px;
-        }
-        
-        .modal-content {
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        
-        /* Better scrollbar */
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 10px;
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-        
-        .voucher-detail-card {
-            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-        }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
     <!-- Header -->
-    <header class="gradient-bg text-gray-800 shadow-lg sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-3 py-3 sm:px-4 sm:py-4">
-            <div class="flex items-center justify-between gap-2">
-                <div class="flex items-center gap-2 sm:gap-3 min-w-0">
-                    <div class="w-9 h-9 sm:w-10 sm:h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center flex-shrink-0">
-                        <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-                        </svg>
-                    </div>
-                    <div class="min-w-0">
-                        <h1 class="text-sm sm:text-lg md:text-xl font-bold truncate">Voucher Scanner</h1>
-                        <p class="text-xs opacity-90 truncate">Staff Petugas</p>
-                    </div>
+    <header class="gradient-bg text-gray-800 p-3 sm:p-4 shadow-lg">
+        <div class="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-3">
+            <div class="flex items-center space-x-2 sm:space-x-4">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                    </svg>
                 </div>
-                
-                <div class="flex items-center gap-2 flex-shrink-0">
-                    <button onclick="toggleMenu()" class="lg:hidden bg-white bg-opacity-20 p-2 rounded-lg">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                        </svg>
-                    </button>
-                    
-                    <div class="hidden lg:flex items-center gap-2">
-                        <a href="#dashboard" class="bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-white">
-                            Dashboard Tiket
-                        </a>
-                        <a href="#logout" class="bg-red-500 hover:bg-red-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-white">
-                            Logout
-                        </a>
-                    </div>
+                <div>
+                    <h1 class="text-base sm:text-xl font-bold">Voucher Scanner</h1>
+                    <p class="text-xs sm:text-sm opacity-90">{{ $staffName }}</p>
                 </div>
             </div>
-        </div>
-        
-        <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden lg:hidden border-t border-white border-opacity-20">
-            <div class="px-3 py-2 space-y-2">
-                <a href="#dashboard" class="block bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-medium text-center text-white">
+            <div class="flex items-center space-x-2 sm:space-x-4">
+                <div class="text-right hidden sm:block">
+                    <p class="text-sm opacity-90">Status: Online</p>
+                    <p class="text-xs opacity-75" id="current-time"></p>
+                </div>
+                <a href="{{ route('scanner.dashboard') }}" 
+                   class="bg-blue-600 hover:bg-blue-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors text-white">
                     Dashboard Tiket
                 </a>
-                <a href="#logout" class="block bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg text-sm font-medium text-center text-white">
+                <a href="{{ route('scanner.logout') }}" 
+                   class="bg-red-500 hover:bg-red-600 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors text-white">
                     Logout
                 </a>
             </div>
         </div>
     </header>
 
-    <div class="max-w-7xl mx-auto px-3 py-4 sm:px-4 sm:py-6">
+    <div class="max-w-7xl mx-auto p-3 sm:p-4">
         <!-- Stats Cards -->
-        <div class="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
-            <div class="bg-white rounded-xl shadow-md p-4 stat-card">
-                <div class="flex items-center gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 mb-6 sm:mb-8">
+            <div class="bg-white rounded-xl shadow-md p-4 sm:p-6">
+                <div class="flex items-center">
                     <div class="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
                         <svg class="w-5 h-5 sm:w-6 sm:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                     </div>
-                    <div class="min-w-0">
-                        <p class="text-xs sm:text-sm font-medium text-gray-600 truncate">Voucher Digunakan</p>
-                        <p class="text-xl sm:text-2xl font-bold text-gray-900" id="today-scanned">0</p>
+                    <div class="ml-3 sm:ml-4">
+                        <p class="text-xs sm:text-sm font-medium text-gray-600">Voucher Digunakan Hari Ini</p>
+                        <p class="text-xl sm:text-2xl font-bold text-gray-900" id="today-scanned">{{ $todayScanned }}</p>
                     </div>
                 </div>
             </div>
             
-            <div class="bg-white rounded-xl shadow-md p-4 stat-card">
-                <div class="flex items-center gap-3">
+            <div class="bg-white rounded-xl shadow-md p-4 sm:p-6">
+                <div class="flex items-center">
                     <div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
                         <svg class="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
                         </svg>
                     </div>
-                    <div class="min-w-0">
-                        <p class="text-xs sm:text-sm font-medium text-gray-600 truncate">Total Claim</p>
-                        <p class="text-xl sm:text-2xl font-bold text-gray-900">25</p>
+                    <div class="ml-3 sm:ml-4">
+                        <p class="text-xs sm:text-sm font-medium text-gray-600">Total Claim Hari Ini</p>
+                        <p class="text-xl sm:text-2xl font-bold text-gray-900">{{ $todayTotal }}</p>
                     </div>
                 </div>
             </div>
             
-            <div class="bg-white rounded-xl shadow-md p-4 stat-card xs:col-span-2 lg:col-span-1">
-                <div class="flex items-center gap-3">
+            <div class="bg-white rounded-xl shadow-md p-4 sm:p-6">
+                <div class="flex items-center">
                     <div class="w-10 h-10 sm:w-12 sm:h-12 bg-yellow-100 rounded-lg flex items-center justify-center flex-shrink-0">
                         <svg class="w-5 h-5 sm:w-6 sm:h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                         </svg>
                     </div>
-                    <div class="min-w-0">
-                        <p class="text-xs sm:text-sm font-medium text-gray-600 truncate">Tingkat Penggunaan</p>
-                        <p class="text-xl sm:text-2xl font-bold text-gray-900">0%</p>
+                    <div class="ml-3 sm:ml-4">
+                        <p class="text-xs sm:text-sm font-medium text-gray-600">Tingkat Penggunaan</p>
+                        <p class="text-xl sm:text-2xl font-bold text-gray-900">{{ $todayTotal > 0 ? round(($todayScanned / $todayTotal) * 100) : 0 }}%</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8">
             <!-- Scanner Section -->
             <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6">
                 <div class="flex items-center justify-between mb-4 sm:mb-6">
-                    <h2 class="text-base sm:text-lg md:text-xl font-bold text-gray-900">Voucher Scanner</h2>
-                    <div class="flex items-center gap-2">
+                    <h2 class="text-lg sm:text-xl font-bold text-gray-900">Voucher Scanner</h2>
+                    <div class="flex items-center space-x-2">
                         <div class="w-2 h-2 sm:w-3 sm:h-3 bg-green-400 rounded-full animate-pulse"></div>
                         <span class="text-xs sm:text-sm text-green-600 font-medium">Ready</span>
                     </div>
@@ -224,19 +144,19 @@
                     <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                         Input Kode Voucher
                     </label>
-                    <div class="flex gap-2">
+                    <div class="flex space-x-2">
                         <input 
                             type="text" 
                             id="manual-barcode"
-                            class="flex-1 px-3 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-base uppercase"
+                            class="flex-1 px-3 py-2 sm:px-4 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-sm uppercase"
                             placeholder="Scan/ketik kode voucher"
                             autocomplete="off"
                         >
                         <button 
                             onclick="scanManualBarcode()"
-                            class="btn-primary bg-yellow-600 hover:bg-yellow-700 text-white px-4 rounded-lg font-medium transition-colors flex-shrink-0"
+                            class="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg font-medium transition-colors flex-shrink-0"
                         >
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                             </svg>
                         </button>
@@ -252,7 +172,7 @@
                         <button 
                             id="toggle-camera"
                             onclick="toggleCamera()"
-                            class="btn-primary bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors"
+                            class="bg-gray-600 hover:bg-gray-700 text-white px-2 py-1 sm:px-3 sm:py-1 rounded text-xs sm:text-sm font-medium transition-colors"
                         >
                             Start Camera
                         </button>
@@ -260,8 +180,10 @@
                     
                     <div class="scanner-container aspect-video" id="scanner-container" style="display: none;">
                         <video id="camera" autoplay playsinline class="w-full h-full object-cover"></video>
+                        <div id="quagga-overlay"></div>
+                        
                         <div class="scanner-overlay">
-                            <div class="scanner-line"></div>
+                            <div class="scanner-line" id="barcode-overlay"></div>
                         </div>
                     </div>
                     
@@ -271,55 +193,55 @@
                 </div>
 
                 <!-- Scan Status -->
-                <div id="scan-status" class="hidden p-3 rounded-lg text-sm"></div>
+                <div id="scan-status" class="hidden p-2 sm:p-3 rounded-lg mb-4 text-sm"></div>
             </div>
 
             <!-- Voucher Detail Section -->
             <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6">
-                <h2 class="text-base sm:text-lg md:text-xl font-bold text-gray-900 mb-4 sm:mb-6">Detail Voucher</h2>
+                <h2 class="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">Detail Voucher</h2>
                 
                 <div id="voucher-detail" class="hidden">
-                    <div class="border rounded-lg p-4 voucher-detail-card custom-scrollbar" style="max-height: 500px; overflow-y: auto;">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
-                            <div class="sm:col-span-2">
-                                <p class="text-gray-600 text-xs">Kode Voucher</p>
-                                <p class="font-mono font-bold text-base sm:text-lg break-all" id="detail-code">-</p>
+                    <div class="border rounded-lg p-3 sm:p-4 bg-gradient-to-br from-yellow-50 to-yellow-100">
+                        <div class="grid grid-cols-2 gap-3 sm:gap-4 text-xs sm:text-sm">
+                            <div class="col-span-2">
+                                <p class="text-gray-600">Kode Voucher</p>
+                                <p class="font-mono font-bold text-lg break-all" id="detail-code">-</p>
                             </div>
-                            <div class="sm:col-span-2">
-                                <p class="text-gray-600 text-xs">Nama Voucher</p>
-                                <p class="font-bold break-words" id="detail-voucher-name">-</p>
+                            <div class="col-span-2">
+                                <p class="text-gray-600">Nama Voucher</p>
+                                <p class="font-bold text-base break-words" id="detail-voucher-name">-</p>
                             </div>
-                            <div class="sm:col-span-2">
-                                <p class="text-gray-600 text-xs">Deskripsi</p>
-                                <p class="break-words" id="detail-description">-</p>
+                            <div class="col-span-2">
+                                <p class="text-gray-600">Deskripsi</p>
+                                <p class="text-sm break-words" id="detail-description">-</p>
                             </div>
                             <div>
-                                <p class="text-gray-600 text-xs">Nama Pelanggan</p>
+                                <p class="text-gray-600">Nama Pelanggan</p>
                                 <p class="font-medium break-words" id="detail-customer-name">-</p>
                             </div>
                             <div>
-                                <p class="text-gray-600 text-xs">No. Telepon</p>
+                                <p class="text-gray-600">No. Telepon</p>
                                 <p class="font-medium" id="detail-phone">-</p>
                             </div>
                             <div>
-                                <p class="text-gray-600 text-xs">Tanggal Claim</p>
+                                <p class="text-gray-600">Tanggal Claim</p>
                                 <p class="font-medium" id="detail-claimed-date">-</p>
                             </div>
                             <div>
-                                <p class="text-gray-600 text-xs">Berlaku Hingga</p>
+                                <p class="text-gray-600">Berlaku Hingga</p>
                                 <p class="font-medium" id="detail-expiry-date">-</p>
                             </div>
-                            <div class="sm:col-span-2">
-                                <p class="text-gray-600 text-xs">Status</p>
+                            <div class="col-span-2">
+                                <p class="text-gray-600">Status</p>
                                 <p class="font-medium" id="detail-status">-</p>
                             </div>
                         </div>
 
-                        <div class="mt-6 pt-4 border-t border-yellow-300">
+                        <div class="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-yellow-300">
                             <button 
                                 id="use-voucher-btn"
                                 onclick="useVoucher()"
-                                class="btn-primary w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 sm:py-3 px-4 rounded-lg transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed text-sm sm:text-base"
                                 disabled
                             >
                                 ✅ Gunakan Voucher
@@ -328,9 +250,9 @@
                     </div>
                 </div>
 
-                <div id="no-voucher" class="text-center py-12">
-                    <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div id="no-voucher" class="text-center py-8 sm:py-12">
+                    <div class="w-12 h-12 sm:w-16 sm:h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-6 h-6 sm:w-8 sm:h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
                         </svg>
                     </div>
@@ -341,44 +263,53 @@
 
         <!-- Recent Scans -->
         <div class="mt-6 sm:mt-8 bg-white rounded-xl shadow-lg p-4 sm:p-6">
-            <h2 class="text-base sm:text-lg md:text-xl font-bold text-gray-900 mb-4 sm:mb-6">Scan Terakhir Hari Ini</h2>
+            <h2 class="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">Scan Terakhir Hari Ini</h2>
             
-            <div class="overflow-x-auto -mx-4 sm:mx-0 custom-scrollbar">
-                <div class="inline-block min-w-full align-middle px-4 sm:px-0">
-                    <table class="w-full">
-                        <thead>
-                            <tr class="bg-gray-50">
-                                <th class="text-left p-2 sm:p-3 text-xs font-medium text-gray-700 whitespace-nowrap">Kode</th>
-                                <th class="text-left p-2 sm:p-3 text-xs font-medium text-gray-700 whitespace-nowrap">Nama</th>
-                                <th class="text-left p-2 sm:p-3 text-xs font-medium text-gray-700 whitespace-nowrap hidden md:table-cell">Voucher</th>
-                                <th class="text-left p-2 sm:p-3 text-xs font-medium text-gray-700 whitespace-nowrap">Waktu</th>
-                            </tr>
-                        </thead>
-                        <tbody id="recent-scans-body">
-                            <tr class="border-b">
-                                <td colspan="4" class="p-6 text-center text-gray-500 text-sm">
-                                    Belum ada voucher yang di-scan hari ini
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+            @if(count($recentScans) > 0)
+            <div class="overflow-x-auto -mx-4 sm:mx-0">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="text-left p-2 sm:p-3 text-xs sm:text-sm font-medium text-gray-700">Kode</th>
+                            <th class="text-left p-2 sm:p-3 text-xs sm:text-sm font-medium text-gray-700">Nama</th>
+                            <th class="text-left p-2 sm:p-3 text-xs sm:text-sm font-medium text-gray-700 hidden sm:table-cell">Voucher</th>
+                            <th class="text-left p-2 sm:p-3 text-xs sm:text-sm font-medium text-gray-700">Waktu</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recent-scans-body">
+                        @foreach($recentScans as $scan)
+                        <tr class="border-b">
+                            <td class="p-2 sm:p-3 text-xs sm:text-sm font-mono">{{ $scan->unique_code }}</td>
+                            <td class="p-2 sm:p-3 text-xs sm:text-sm">{{ $scan->user_name }}</td>
+                            <td class="p-2 sm:p-3 text-xs sm:text-sm hidden sm:table-cell">{{ $scan->voucher ? $scan->voucher->name : 'Unknown' }}</td>
+                            <td class="p-2 sm:p-3 text-xs sm:text-sm">
+                                {{ \Carbon\Carbon::parse($scan->scanned_at)->timezone('Asia/Jakarta')->translatedFormat('d M, H:i') }}
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
+            @else
+            <div class="text-center py-6 sm:py-8">
+                <p class="text-gray-500 text-sm">Belum ada voucher yang di-scan hari ini</p>
+            </div>
+            @endif
         </div>
     </div>
 
     <!-- Success Modal -->
     <div id="success-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-xl p-6 max-w-md w-full modal-content">
+        <div class="bg-white rounded-xl p-4 sm:p-6 max-w-md w-full">
             <div class="text-center">
-                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-12 h-12 sm:w-16 sm:h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-6 h-6 sm:w-8 sm:h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
-                <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-4">Voucher Berhasil Digunakan!</h3>
-                <div id="success-message" class="text-sm sm:text-base mb-6">Selamat menikmati promo!</div>
-                <button onclick="closeSuccessModal()" class="btn-primary w-full bg-green-600 text-white px-6 py-3 rounded-lg font-medium">
+                <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2">Voucher Berhasil Digunakan!</h3>
+                <div id="success-message" class="text-sm sm:text-base">Selamat menikmati promo!</div>
+                <button onclick="closeSuccessModal()" class="mt-4 bg-green-600 text-white px-4 sm:px-6 py-2 rounded-lg font-medium text-sm sm:text-base">
                     Tutup
                 </button>
             </div>
@@ -391,11 +322,15 @@
         let currentCode = null;
         let quaggaInitialized = false;
 
-        function toggleMenu() {
-            const menu = document.getElementById('mobile-menu');
-            menu.classList.toggle('hidden');
+        // Update current time
+        function updateCurrentTime() {
+            const now = new Date();
+            document.getElementById('current-time').textContent = now.toLocaleTimeString('id-ID');
         }
+        setInterval(updateCurrentTime, 1000);
+        updateCurrentTime();
 
+        // Manual barcode scan
         function scanManualBarcode() {
             const barcode = document.getElementById('manual-barcode').value.trim().toUpperCase();
             if (!barcode) {
@@ -405,16 +340,19 @@
             processBarcode(barcode);
         }
 
+        // Enter key untuk manual input
         document.getElementById('manual-barcode').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 scanManualBarcode();
             }
         });
 
+        // Auto uppercase input
         document.getElementById('manual-barcode').addEventListener('input', function(e) {
             e.target.value = e.target.value.toUpperCase();
         });
 
+        // Toggle camera
         async function toggleCamera() {
             const button = document.getElementById('toggle-camera');
             const container = document.getElementById('scanner-container');
@@ -422,7 +360,7 @@
             if (camera) {
                 stopAllScanners();
                 button.textContent = 'Start Camera';
-                button.className = 'btn-primary bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors';
+                button.className = 'bg-gray-600 hover:bg-gray-700 text-white px-2 py-1 sm:px-3 sm:py-1 rounded text-xs sm:text-sm font-medium transition-colors';
                 container.style.display = 'none';
             } else {
                 try {
@@ -440,7 +378,7 @@
                     video.srcObject = camera;
                     
                     button.textContent = 'Stop Camera';
-                    button.className = 'btn-primary bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors';
+                    button.className = 'bg-red-600 hover:bg-red-700 text-white px-2 py-1 sm:px-3 sm:py-1 rounded text-xs sm:text-sm font-medium transition-colors';
                     container.style.display = 'block';
                     
                     scanning = true;
@@ -452,6 +390,7 @@
             }
         }
 
+        // Stop semua scanner
         function stopAllScanners() {
             scanning = false;
             
@@ -470,6 +409,7 @@
             }
         }
 
+        // Start scanner
         function startScanner() {
             if (!scanning || !camera) return;
             
@@ -516,36 +456,50 @@
             }
         }
 
-        function processBarcode(barcode) {
+        // Process barcode
+        async function processBarcode(barcode) {
             barcode = barcode.trim().toUpperCase();
             
-            if (barcode.length < 3) return;
+            if (barcode.length < 3) {
+                return;
+            }
             
             document.getElementById('manual-barcode').value = barcode;
             showScanStatus('Memproses kode voucher...', 'loading');
             
-            // Simulasi proses scan
-            setTimeout(() => {
-                const demoClaim = {
-                    unique_code: barcode,
-                    voucher_name: 'Diskon 50% Tiket Masuk',
-                    voucher_description: 'Nikmati diskon 50% untuk tiket masuk wahana',
-                    user_name: 'Demo User',
-                    user_phone: '081234567890',
-                    claimed_at: '31 Okt 2024, 10:30',
-                    expiry_date: '31 Des 2024',
-                    status: 'valid'
-                };
+            try {
+                const response = await fetch('/voucher-scanner/scan', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({ barcode: barcode })
+                });
                 
-                showVoucherDetail(demoClaim);
-                showScanStatus('✅ Voucher ditemukan dan valid!', 'success');
-                currentCode = demoClaim.unique_code;
-            }, 1000);
+                const result = await response.json();
+                
+                if (result.success && result.claim) {
+                    showVoucherDetail(result.claim);
+                    showScanStatus('✅ ' + result.message, 'success');
+                    currentCode = result.claim.unique_code;
+                } else {
+                    showScanStatus('❌ ' + result.message, 'error');
+                    hideVoucherDetail();
+                    currentCode = null;
+                }
+            } catch (error) {
+                console.error('Scan error:', error);
+                showScanStatus('❌ Terjadi kesalahan saat memproses voucher', 'error');
+                hideVoucherDetail();
+                currentCode = null;
+            }
         }
 
+        // Show scan status
         function showScanStatus(message, type) {
             const statusDiv = document.getElementById('scan-status');
-            statusDiv.className = 'p-3 rounded-lg text-sm mb-4';
+            statusDiv.className = 'p-2 sm:p-3 rounded-lg mb-4 text-sm';
             
             if (type === 'success') {
                 statusDiv.className += ' bg-green-50 text-green-800 border border-green-200';
@@ -561,6 +515,7 @@
             statusDiv.classList.remove('hidden');
         }
 
+        // Show voucher detail
         function showVoucherDetail(claim) {
             document.getElementById('voucher-detail').classList.remove('hidden');
             document.getElementById('no-voucher').classList.add('hidden');
@@ -577,29 +532,30 @@
             const useButton = document.getElementById('use-voucher-btn');
             
             if (claim.status === 'valid') {
-                statusElement.innerHTML = '<span class="inline-flex px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">✓ Valid</span>';
+                statusElement.innerHTML = '<span class="px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">✓ Valid</span>';
                 useButton.disabled = false;
-                useButton.className = 'btn-primary w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition-colors';
-                useButton.textContent = '✅ Gunakan Voucher';
+                useButton.className = 'w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 sm:py-3 px-4 rounded-lg transition-colors text-sm sm:text-base';
             } else if (claim.status === 'used') {
-                statusElement.innerHTML = '<span class="inline-flex px-3 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">✗ Sudah Digunakan</span>';
+                statusElement.innerHTML = '<span class="px-3 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">✗ Sudah Digunakan</span>';
                 useButton.disabled = true;
-                useButton.className = 'btn-primary w-full bg-gray-400 cursor-not-allowed text-white font-bold py-3 px-4 rounded-lg';
+                useButton.className = 'w-full bg-gray-400 cursor-not-allowed text-white font-bold py-2.5 sm:py-3 px-4 rounded-lg text-sm sm:text-base';
                 useButton.textContent = '❌ Voucher Sudah Digunakan';
             } else {
-                statusElement.innerHTML = '<span class="inline-flex px-3 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">✗ ' + claim.status + '</span>';
+                statusElement.innerHTML = '<span class="px-3 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">✗ ' + claim.status + '</span>';
                 useButton.disabled = true;
-                useButton.className = 'btn-primary w-full bg-gray-400 cursor-not-allowed text-white font-bold py-3 px-4 rounded-lg';
+                useButton.className = 'w-full bg-gray-400 cursor-not-allowed text-white font-bold py-2.5 sm:py-3 px-4 rounded-lg text-sm sm:text-base';
                 useButton.textContent = '❌ Voucher Tidak Valid';
             }
         }
 
+        // Hide voucher detail
         function hideVoucherDetail() {
             document.getElementById('voucher-detail').classList.add('hidden');
             document.getElementById('no-voucher').classList.remove('hidden');
         }
 
-        function useVoucher() {
+        // Use voucher
+        async function useVoucher() {
             if (!currentCode) return;
             
             const button = document.getElementById('use-voucher-btn');
@@ -608,59 +564,49 @@
             button.disabled = true;
             button.textContent = 'Memproses...';
             
-            // Simulasi penggunaan voucher
-            setTimeout(() => {
-                document.getElementById('detail-status').innerHTML = '<span class="inline-flex px-3 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">✗ Sudah Digunakan</span>';
-                button.textContent = '❌ Voucher Sudah Digunakan';
-                button.className = 'btn-primary w-full bg-gray-400 cursor-not-allowed text-white font-bold py-3 px-4 rounded-lg';
-                
-                showSuccessModal('Voucher berhasil digunakan! Selamat menikmati promo.');
-                
-                // Update stats
-                const todayScannedElement = document.getElementById('today-scanned');
-                todayScannedElement.textContent = parseInt(todayScannedElement.textContent) + 1;
-                
-                // Add to recent scans
-                addToRecentScans({
-                    unique_code: currentCode,
-                    user_name: 'Demo User',
-                    voucher_name: 'Diskon 50% Tiket Masuk'
+            try {
+                const response = await fetch('/voucher-scanner/use', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({ unique_code: currentCode })
                 });
                 
-                // Clear input
-                document.getElementById('manual-barcode').value = '';
-            }, 1000);
-        }
-
-        function addToRecentScans(claim) {
-            const tbody = document.getElementById('recent-scans-body');
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString('id-ID', { 
-                hour: '2-digit', 
-                minute: '2-digit' 
-            });
-            
-            // Remove "no data" row if exists
-            if (tbody.querySelector('td[colspan]')) {
-                tbody.innerHTML = '';
+                const result = await response.json();
+                
+                if (result.success) {
+                    document.getElementById('detail-status').innerHTML = '<span class="px-3 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">✗ Sudah Digunakan</span>';
+                    button.textContent = '❌ Voucher Sudah Digunakan';
+                    button.className = 'w-full bg-gray-400 cursor-not-allowed text-white font-bold py-2.5 sm:py-3 px-4 rounded-lg text-sm sm:text-base';
+                    
+                    showSuccessModal(result.message);
+                    
+                    // Update stats
+                    const todayScannedElement = document.getElementById('today-scanned');
+                    todayScannedElement.textContent = parseInt(todayScannedElement.textContent) + 1;
+                    
+                    // Add to recent scans table
+                    addToRecentScans(result.claim);
+                    
+                    // Clear manual input
+                    document.getElementById('manual-barcode').value = '';
+                    
+                } else {
+                    showScanStatus(result.message, 'error');
+                    button.disabled = false;
+                    button.textContent = originalText;
+                }
+            } catch (error) {
+                console.error('Use voucher error:', error);
+                showScanStatus('Terjadi kesalahan saat memproses voucher', 'error');
+                button.disabled = false;
+                button.textContent = originalText;
             }
-            
-            const row = document.createElement('tr');
-            row.className = 'border-b bg-green-50';
-            row.innerHTML = `
-                <td class="p-2 sm:p-3 text-xs font-mono">${claim.unique_code}</td>
-                <td class="p-2 sm:p-3 text-xs">${claim.user_name}</td>
-                <td class="p-2 sm:p-3 text-xs hidden md:table-cell">${claim.voucher_name}</td>
-                <td class="p-2 sm:p-3 text-xs">${timeStr}</td>
-            `;
-            
-            tbody.insertBefore(row, tbody.firstChild);
-            
-            setTimeout(() => {
-                row.classList.remove('bg-green-50');
-            }, 3000);
         }
 
+        // Show success modal
         function showSuccessModal(message) {
             const modal = document.getElementById('success-modal');
             const messageElement = document.getElementById('success-message');
@@ -670,6 +616,7 @@
             modal.classList.add('flex');
         }
 
+        // Close success modal
         function closeSuccessModal() {
             document.getElementById('success-modal').classList.add('hidden');
             document.getElementById('success-modal').classList.remove('flex');
@@ -679,27 +626,43 @@
             showScanStatus('Siap untuk scan berikutnya', 'success');
         }
 
+        // Add to recent scans table
+        function addToRecentScans(claim) {
+            const tbody = document.getElementById('recent-scans-body');
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('id-ID', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            
+            const row = document.createElement('tr');
+            row.className = 'border-b bg-green-50';
+            row.innerHTML = `
+                <td class="p-2 sm:p-3 text-xs sm:text-sm font-mono">${claim.unique_code}</td>
+                <td class="p-2 sm:p-3 text-xs sm:text-sm">${claim.user_name}</td>
+                <td class="p-2 sm:p-3 text-xs sm:text-sm hidden sm:table-cell">${claim.voucher_name}</td>
+                <td class="p-2 sm:p-3 text-xs sm:text-sm">${timeStr}</td>
+            `;
+            
+            tbody.insertBefore(row, tbody.firstChild);
+            
+            setTimeout(() => {
+                row.classList.remove('bg-green-50');
+            }, 3000);
+        }
+
         // Auto-focus manual input
         document.getElementById('manual-barcode').focus();
 
-        // Cleanup
+        // Cleanup saat page unload
         window.addEventListener('beforeunload', function() {
             stopAllScanners();
         });
 
+        // Handle page visibility change
         document.addEventListener('visibilitychange', function() {
             if (document.hidden) {
                 stopAllScanners();
-            }
-        });
-
-        // Close mobile menu when clicking outside
-        document.addEventListener('click', function(event) {
-            const menu = document.getElementById('mobile-menu');
-            const button = event.target.closest('button[onclick="toggleMenu()"]');
-            
-            if (!menu.contains(event.target) && !button && !menu.classList.contains('hidden')) {
-                menu.classList.add('hidden');
             }
         });
     </script>
