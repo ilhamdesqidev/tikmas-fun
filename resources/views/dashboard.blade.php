@@ -570,512 +570,418 @@
       </div>
     </section>
 
-    <!-- Promo Section -->
-    <section id="menu" class="py-6">
-      <h2 class="text-center text-3xl sm:text-4xl mb-4 text-text-dark">
-        <span class="text-primary">Promo</span> Kami
-      </h2>
-      <p class="text-center max-w-lg mx-auto font-medium leading-relaxed text-text-dark mb-12 sm:mb-20 text-base sm:text-lg">
-        Nikmati berbagai pilihan promo menarik untuk pengalaman liburan yang tak terlupakan
-      </p>
-      
-      @if($promos->count() > 0)
-        <div class="relative promo-slider">
-          <!-- Navigation Buttons -->
-          <button class="nav-button prev" id="prevBtn">
-            <i data-feather="chevron-left" class="w-6 h-6"></i>
-          </button>
-          
-          <button class="nav-button next" id="nextBtn">
-            <i data-feather="chevron-right" class="w-6 h-6"></i>
-          </button>
+    <!-- Promo & Voucher Section -->
+<section id="menu" class="py-6">
+  <h2 class="text-center text-3xl sm:text-4xl mb-4 text-text-dark">
+    <span class="text-primary">Promo & Voucher</span> Kami
+  </h2>
+  <p class="text-center max-w-lg mx-auto font-medium leading-relaxed text-text-dark mb-8 text-base sm:text-lg">
+    Nikmati berbagai pilihan promo dan voucher menarik untuk pengalaman liburan yang tak terlupakan
+  </p>
+  
+  <!-- Tab Navigation -->
+  <div class="flex justify-center mb-8">
+    <div class="inline-flex rounded-lg border border-gray-300 bg-white p-1 shadow-sm">
+      <button onclick="switchPromoTab('promo')" id="tabPromo" 
+              class="px-6 py-2.5 text-sm font-semibold rounded-md transition-all duration-200 bg-primary text-black">
+        <div class="flex items-center">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+          </svg>
+          Promo
+        </div>
+      </button>
+      <button onclick="switchPromoTab('voucher')" id="tabVoucher" 
+              class="px-6 py-2.5 text-sm font-semibold rounded-md transition-all duration-200 text-gray-600 hover:bg-gray-100">
+        <div class="flex items-center">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
+          </svg>
+          Voucher
+        </div>
+      </button>
+    </div>
+  </div>
+  
+  <!-- Promo Content -->
+  <div id="promoContent">
+    @if($promos->count() > 0)
+      <div class="relative promo-slider">
+        <!-- Navigation Buttons -->
+        <button class="nav-button prev" id="prevPromoBtn">
+          <i data-feather="chevron-left" class="w-6 h-6"></i>
+        </button>
+        
+        <button class="nav-button next" id="nextPromoBtn">
+          <i data-feather="chevron-right" class="w-6 h-6"></i>
+        </button>
 
-          <!-- Slider Container -->
-          <div class="promo-container" id="promoContainer">
-            @foreach($promos as $promo)
-              @php
-                $isClickable = $promo->is_clickable;
-                $buttonStatus = $promo->button_status;
-              @endphp
+        <!-- Slider Container -->
+        <div class="promo-container" id="promoContainer">
+          @foreach($promos as $promo)
+            @php
+              $isClickable = $promo->is_clickable;
+              $buttonStatus = $promo->button_status;
+            @endphp
+            
+            <div class="promo-card block hover:no-underline {{ $isClickable ? 'clickable' : 'non-clickable promo-disabled' }}" 
+                 @if($isClickable) onclick="window.location.href='{{ route('promo.show', $promo->id) }}'" @endif>
+                 
+              @if($promo->featured && $isClickable)
+                <span class="featured-badge">Unggulan</span>
+              @endif
               
-              <div class="promo-card block hover:no-underline {{ $isClickable ? 'clickable' : 'non-clickable promo-disabled' }}" 
-                   @if($isClickable) onclick="window.location.href='{{ route('promo.show', $promo->id) }}'" @endif>
-                   
-                @if($promo->featured && $isClickable)
-                  <span class="featured-badge">Unggulan</span>
-                @endif
+              @if($promo->status_display === 'coming_soon')
+                <span class="badge-coming-soon status-badge">Segera Hadir</span>
+              @elseif($promo->status_display === 'expired')
+                <span class="badge-expired status-badge">Kadaluarsa</span>
+              @elseif($promo->status_display === 'sold_out')
+                <span class="badge-sold-out status-badge">Habis</span>
+              @elseif($promo->status === 'active' && $promo->discount_percent > 0)
+                <span class="badge-discount status-badge">Diskon {{ $promo->discount_percent }}%</span>
+              @endif
+              
+              <div class="promo-image">
+                <img src="{{ $promo->image_url }}" alt="{{ $promo->name }}" loading="lazy">
                 
-                @if($promo->status_display === 'coming_soon')
-                  <span class="badge-coming-soon status-badge">Segera Hadir</span>
-                @elseif($promo->status_display === 'expired')
-                  <span class="badge-expired status-badge">Kadaluarsa</span>
-                @elseif($promo->status_display === 'sold_out')
-                  <span class="badge-sold-out status-badge">Habis</span>
-                @elseif($promo->status === 'active' && $promo->discount_percent > 0)
-                  <span class="badge-discount status-badge">Diskon {{ $promo->discount_percent }}%</span>
-                @endif
-                
-                <div class="promo-image">
-                  <img src="{{ $promo->image_url }}" alt="{{ $promo->name }}" loading="lazy">
-                  
-                  @if(!$isClickable)
-                    <div class="promo-overlay-disabled">
-                      <div class="overlay-content">
-                        @if($promo->status_display === 'coming_soon')
-                          <i data-feather="clock" class="w-8 h-8 mb-2 mx-auto"></i>
-                          <span class="text-sm font-medium">Segera Hadir</span>
-                          <p class="text-xs mt-1">Mulai {{ $promo->start_date->format('d M Y') }}</p>
-                        @elseif($promo->status_display === 'expired')
-                          <i data-feather="x-circle" class="w-8 h-8 mb-2 mx-auto"></i>
-                          <span class="text-sm font-medium">Promo Berakhir</span>
-                        @elseif($promo->status_display === 'sold_out')
-                          <i data-feather="package" class="w-8 h-8 mb-2 mx-auto"></i>
-                          <span class="text-sm font-medium">Kuota Habis</span>
-                        @endif
-                      </div>
+                @if(!$isClickable)
+                  <div class="promo-overlay-disabled">
+                    <div class="overlay-content">
+                      @if($promo->status_display === 'coming_soon')
+                        <i data-feather="clock" class="w-8 h-8 mb-2 mx-auto"></i>
+                        <span class="text-sm font-medium">Segera Hadir</span>
+                        <p class="text-xs mt-1">Mulai {{ $promo->start_date->format('d M Y') }}</p>
+                      @elseif($promo->status_display === 'expired')
+                        <i data-feather="x-circle" class="w-8 h-8 mb-2 mx-auto"></i>
+                        <span class="text-sm font-medium">Promo Berakhir</span>
+                      @elseif($promo->status_display === 'sold_out')
+                        <i data-feather="package" class="w-8 h-8 mb-2 mx-auto"></i>
+                        <span class="text-sm font-medium">Kuota Habis</span>
+                      @endif
                     </div>
+                  </div>
+                @endif
+              </div>
+              
+              <div class="p-6">
+                <h3 class="text-xl font-bold mb-2 text-text-dark">{{ $promo->name }}</h3>
+                <p class="text-gray-600 mb-4">{{ Str::limit($promo->description, 100) }}</p>
+                
+                <div class="flex items-center justify-between mb-4">
+                  <div>
+                    @if($promo->discount_percent > 0)
+                      <span class="text-gray-400 line-through text-sm">Rp {{ number_format($promo->original_price, 0, ',', '.') }}</span>
+                    @endif
+                    <span class="text-primary font-bold text-xl block">Rp {{ number_format($promo->promo_price, 0, ',', '.') }}</span>
+                  </div>
+                  <span class="bg-gray-100 text-gray-700 text-sm font-semibold px-3 py-1 rounded-full capitalize">
+                    {{ $promo->category }}
+                  </span>
+                </div>
+                
+                <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                  <span>
+                    @if($promo->status_display === 'expired')
+                      Berakhir: {{ $promo->end_date ? $promo->end_date->format('d M Y') : '-' }}
+                    @elseif($promo->status_display === 'coming_soon')
+                      Mulai: {{ $promo->start_date->format('d M Y') }}
+                    @else
+                      @if($promo->end_date)
+                        Sampai: {{ $promo->end_date->format('d M Y') }}
+                      @else
+                        Tidak terbatas
+                      @endif
+                    @endif
+                  </span>
+                  @if($promo->quota && $promo->status === 'active')
+                    <span>Tersisa: {{ $promo->quota - $promo->actual_sold_count }}</span>
                   @endif
                 </div>
                 
-                <div class="p-6">
-                  <h3 class="text-xl font-bold mb-2 text-text-dark">{{ $promo->name }}</h3>
-                  <p class="text-gray-600 mb-4">{{ Str::limit($promo->description, 100) }}</p>
-                  
-                  <div class="flex items-center justify-between mb-4">
-                    <div>
-                      @if($promo->discount_percent > 0)
-                        <span class="text-gray-400 line-through text-sm">Rp {{ number_format($promo->original_price, 0, ',', '.') }}</span>
-                      @endif
-                      <span class="text-primary font-bold text-xl block">Rp {{ number_format($promo->promo_price, 0, ',', '.') }}</span>
-                    </div>
-                    <span class="bg-gray-100 text-gray-700 text-sm font-semibold px-3 py-1 rounded-full capitalize">
-                      {{ $promo->category }}
-                    </span>
-                  </div>
-                  
-                  <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
-                    <span>
-                      @if($promo->status_display === 'expired')
-                        Berakhir: {{ $promo->end_date ? $promo->end_date->format('d M Y') : '-' }}
-                      @elseif($promo->status_display === 'coming_soon')
-                        Mulai: {{ $promo->start_date->format('d M Y') }}
-                      @else
-                        @if($promo->end_date)
-                          Sampai: {{ $promo->end_date->format('d M Y') }}
-                        @else
-                          Tidak terbatas
-                        @endif
-                      @endif
-                    </span>
-                    @if($promo->quota && $promo->status === 'active')
-                      <span>Tersisa: {{ $promo->quota - $promo->actual_sold_count }}</span>
-                    @endif
-                  </div>
-                  
-                  <div class="w-full text-center font-semibold py-3 rounded-lg transition-colors duration-300 {{ $buttonStatus['class'] }}"
-                       @if(!$buttonStatus['clickable']) style="cursor: not-allowed;" @endif>
-                    {{ $buttonStatus['text'] }}
-                  </div>
+                <div class="w-full text-center font-semibold py-3 rounded-lg transition-colors duration-300 {{ $buttonStatus['class'] }}"
+                     @if(!$buttonStatus['clickable']) style="cursor: not-allowed;" @endif>
+                  {{ $buttonStatus['text'] }}
                 </div>
               </div>
-            @endforeach
-          </div>
-
-          <!-- Dots Indicator -->
-          <div class="dots-container" id="dotsContainer"></div>
-        </div>
-      @else
-        <div class="text-center py-12">
-          <div class="inline-block p-4 bg-gray-100 rounded-full mb-4">
-            <i data-feather="tag" class="w-12 h-12 text-gray-400"></i>
-          </div>
-          <h3 class="text-xl font-semibold text-gray-600 mb-2">Tidak ada promo saat ini</h3>
-          <p class="text-gray-500">Silakan kembali lagi nanti untuk melihat promo terbaru</p>
-        </div>
-      @endif
-    </section>
-
-    <!-- Footer -->
-    <footer class="bg-black text-white pt-8 sm:pt-10 lg:pt-12 pb-6 sm:pb-8">
-      <div class="container mx-auto px-4 sm:px-6">
-        <div class="flex flex-col md:flex-row justify-between items-center gap-6 sm:gap-8 mb-8 sm:mb-10 lg:mb-12">
-          <div class="text-center md:text-left">
-            <h3 class="text-2xl sm:text-3xl font-bold italic mb-3 sm:mb-4">
-              {{ $settings['site_name'] ?? 'MestaKara' }}<span class="text-white">.</span>
-            </h3>
-            <p class="max-w-xs text-sm sm:text-base lg:text-lg opacity-90">
-              {{ $settings['website_description'] ?? 'Menyajikan wahana menyenangkan dengan keseruan yang tak terlupakan.' }}
-            </p>
-          </div>
-          
-          <div>
-            <h4 class="text-base sm:text-lg lg:text-xl font-semibold mb-4 sm:mb-5 lg:mb-6 text-center md:text-left">Tautan Cepat</h4>
-            <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-6 lg:space-x-8">
-              <a href="#home" class="hover:text-gray-300 transition-colors duration-300 text-sm sm:text-base lg:text-lg touch-manipulation text-center md:text-left">Home</a>
-              <a href="#about" class="hover:text-gray-300 transition-colors duration-300 text-sm sm:text-base lg:text-lg touch-manipulation text-center md:text-left">Tentang Kami</a>
-              <a href="#menu" class="hover:text-gray-300 transition-colors duration-300 text-sm sm:text-base lg:text-lg touch-manipulation text-center md:text-left">Promo</a>
             </div>
-          </div>
-          
-          <div>
-            <h4 class="text-base sm:text-lg lg:text-xl font-semibold mb-4 sm:mb-5 lg:mb-6 text-center md:text-left">Ikuti Kami</h4>
-            <div class="flex justify-center md:justify-start space-x-3 sm:space-x-4 lg:space-x-6">
-              <a href="https://www.instagram.com/wisataagro8/?hl=id" class="bg-white bg-opacity-20 p-2 sm:p-2.5 lg:p-3 rounded-full hover:bg-opacity-30 transition-all duration-300 touch-manipulation">
-                <i data-feather="instagram" class="w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-6"></i>
-              </a>
-              <a href="https://twitter.com/agrowisata_n8" class="bg-white bg-opacity-20 p-2 sm:p-2.5 lg:p-3 rounded-full hover:bg-opacity-30 transition-all duration-300 touch-manipulation">
-                <i data-feather="twitter" class="w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-6"></i>
-              </a>
-              <a href="https://www.facebook.com/AgrowisataN8/" class="bg-white bg-opacity-20 p-2 sm:p-2.5 lg:p-3 rounded-full hover:bg-opacity-30 transition-all duration-300 touch-manipulation">
-                <i data-feather="facebook" class="w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-6"></i>
-              </a>
-            </div>
-          </div>
+          @endforeach
         </div>
-        
-        <div class="border-t border-white border-opacity-30 my-6 sm:my-7 lg:my-8"></div>
-        
-        <div class="flex flex-col md:flex-row justify-between items-center gap-3 text-center md:text-left">
-          <p class="text-xs sm:text-sm lg:text-base opacity-80">
-            {{ $settings['footer_text'] ?? '© 2025 Tiketmas. All rights reserved.' }}
-          </p>
-          <p class="text-xs sm:text-sm lg:text-base opacity-80">
-            Created by <a href="#" class="font-bold hover:underline">{{ $settings['site_name'] ?? 'Mestakara' }}</a>
-          </p>
-        </div>
+
+        <!-- Dots Indicator -->
+        <div class="dots-container" id="promoDotsContainer"></div>
       </div>
-    </footer>
+    @else
+      <div class="text-center py-12">
+        <div class="inline-block p-4 bg-gray-100 rounded-full mb-4">
+          <i data-feather="tag" class="w-12 h-12 text-gray-400"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-600 mb-2">Tidak ada promo saat ini</h3>
+        <p class="text-gray-500">Silakan kembali lagi nanti untuk melihat promo terbaru</p>
+      </div>
+    @endif
+  </div>
+  
+  <!-- Voucher Content -->
+  <div id="voucherContent" class="hidden">
+    @if($vouchers->count() > 0)
+      <div class="relative promo-slider">
+        <!-- Navigation Buttons -->
+        <button class="nav-button prev" id="prevVoucherBtn">
+          <i data-feather="chevron-left" class="w-6 h-6"></i>
+        </button>
+        
+        <button class="nav-button next" id="nextVoucherBtn">
+          <i data-feather="chevron-right" class="w-6 h-6"></i>
+        </button>
 
-    <!-- ==================== JAVASCRIPT ==================== -->
-    <script>
-      // Initialize Feather icons
-      feather.replace();
+        <!-- Slider Container -->
+        <div class="promo-container" id="voucherContainer">
+          @foreach($vouchers as $voucher)
+            <div class="promo-card clickable" onclick="window.location.href='/vouchers'">
+              @if($voucher->status === 'aktif')
+                <span class="featured-badge">Tersedia</span>
+              @endif
+              
+              <div class="promo-image">
+                <img src="{{ $voucher->image_url }}" alt="{{ $voucher->name }}" loading="lazy">
+              </div>
+              
+              <div class="p-6">
+                <h3 class="text-xl font-bold mb-2 text-text-dark">{{ $voucher->name }}</h3>
+                <p class="text-gray-600 mb-4">{{ Str::limit($voucher->deskripsi, 100) }}</p>
+                
+                <div class="flex items-center justify-between mb-4">
+                  <div>
+                    <span class="text-primary font-bold text-xl block">Gratis</span>
+                  </div>
+                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                         {{ $voucher->status === 'aktif' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
+                    {{ $voucher->status === 'aktif' ? 'Aktif' : 'Tidak Aktif' }}
+                  </span>
+                </div>
+                
+                <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                  <span>
+                    @if($voucher->expiry_date)
+                      Sampai: {{ \Carbon\Carbon::parse($voucher->expiry_date)->format('d M Y') }}
+                    @else
+                      Tidak terbatas
+                    @endif
+                  </span>
+                  <span>
+                    <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold">
+                      {{ $voucher->claims_count ?? 0 }} Diklaim
+                    </span>
+                  </span>
+                </div>
+                
+                <div class="w-full text-center font-semibold py-3 rounded-lg transition-colors duration-300 bg-primary text-black hover:bg-yellow-500">
+                  Klaim Voucher
+                </div>
+              </div>
+            </div>
+          @endforeach
+        </div>
 
-      // ==================== MOBILE MENU TOGGLE ====================
-      const navbarNav = document.getElementById('mobile-nav');
-      const menuIcon = document.getElementById('menu-icon');
-      const closeMenu = document.getElementById('close-menu');
-      const overlay = document.getElementById('overlay');
-      let isMenuOpen = false;
+        <!-- Dots Indicator -->
+        <div class="dots-container" id="voucherDotsContainer"></div>
+      </div>
+    @else
+      <div class="text-center py-12">
+        <div class="inline-block p-4 bg-gray-100 rounded-full mb-4">
+          <i data-feather="gift" class="w-12 h-12 text-gray-400"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-600 mb-2">Tidak ada voucher saat ini</h3>
+        <p class="text-gray-500">Silakan kembali lagi nanti untuk melihat voucher terbaru</p>
+      </div>
+    @endif
+  </div>
+</section>
 
-      function openMobileMenu() {
-        if (!isMenuOpen) {
-          navbarNav.style.right = '0';
-          overlay.classList.remove('hidden');
-          document.body.style.overflow = 'hidden';
-          isMenuOpen = true;
+<script>
+// Tab Switching untuk Promo & Voucher
+function switchPromoTab(tab) {
+  const promoTab = document.getElementById('tabPromo');
+  const voucherTab = document.getElementById('tabVoucher');
+  const promoContent = document.getElementById('promoContent');
+  const voucherContent = document.getElementById('voucherContent');
+
+  if (tab === 'promo') {
+    promoTab.classList.add('bg-primary', 'text-black');
+    promoTab.classList.remove('text-gray-600', 'hover:bg-gray-100');
+    voucherTab.classList.remove('bg-primary', 'text-black');
+    voucherTab.classList.add('text-gray-600', 'hover:bg-gray-100');
+    promoContent.classList.remove('hidden');
+    voucherContent.classList.add('hidden');
+    
+    // Re-initialize promo slider
+    if (window.promoSlider) {
+      setTimeout(() => window.promoSlider.updateSlider(), 100);
+    }
+  } else {
+    voucherTab.classList.add('bg-primary', 'text-black');
+    voucherTab.classList.remove('text-gray-600', 'hover:bg-gray-100');
+    promoTab.classList.remove('bg-primary', 'text-black');
+    promoTab.classList.add('text-gray-600', 'hover:bg-gray-100');
+    voucherContent.classList.remove('hidden');
+    promoContent.classList.add('hidden');
+    
+    // Initialize voucher slider
+    if (window.voucherSlider) {
+      setTimeout(() => window.voucherSlider.updateSlider(), 100);
+    }
+  }
+  
+  // Re-render feather icons
+  feather.replace();
+}
+
+// Update PromoSlider class untuk mendukung multiple sliders
+class PromoSlider {
+  constructor(containerSelector, dotsSelector, prevBtnSelector, nextBtnSelector) {
+    this.container = document.querySelector(containerSelector);
+    this.cards = this.container ? this.container.querySelectorAll('.promo-card') : [];
+    this.totalCards = this.cards.length;
+    this.dotsContainer = document.querySelector(dotsSelector);
+    this.currentIndex = 0;
+    this.prevBtn = document.querySelector(prevBtnSelector);
+    this.nextBtn = document.querySelector(nextBtnSelector);
+    this.init();
+  }
+
+  init() {
+    if (!this.container || this.totalCards === 0) return;
+    this.createDots();
+    this.bindEvents();
+    this.updateSlider();
+    this.autoPlay();
+  }
+
+  createDots() {
+    if (!this.dotsContainer) return;
+    this.dotsContainer.innerHTML = '';
+    for (let i = 0; i < this.totalCards; i++) {
+      const dot = document.createElement('div');
+      dot.className = `dot ${i === 0 ? 'active' : ''}`;
+      dot.addEventListener('click', () => this.goToSlide(i));
+      this.dotsContainer.appendChild(dot);
+    }
+    this.dotElements = this.dotsContainer.querySelectorAll('.dot');
+  }
+
+  bindEvents() {
+    if (this.prevBtn) {
+      this.prevBtn.addEventListener('click', () => this.prevSlide());
+    }
+    if (this.nextBtn) {
+      this.nextBtn.addEventListener('click', () => this.nextSlide());
+    }
+
+    if (this.container) {
+      this.container.addEventListener('mouseenter', () => this.pauseAutoPlay());
+      this.container.addEventListener('mouseleave', () => this.resumeAutoPlay());
+    }
+
+    let startX = 0;
+    let currentX = 0;
+    let isDragging = false;
+
+    this.container.addEventListener('touchstart', (e) => {
+      startX = e.touches[0].clientX;
+      isDragging = true;
+      this.pauseAutoPlay();
+    });
+
+    this.container.addEventListener('touchmove', (e) => {
+      if (!isDragging) return;
+      currentX = e.touches[0].clientX;
+    });
+
+    this.container.addEventListener('touchend', () => {
+      if (!isDragging) return;
+      isDragging = false;
+      const diffX = startX - currentX;
+      if (Math.abs(diffX) > 50) {
+        if (diffX > 0) {
+          this.nextSlide();
+        } else {
+          this.prevSlide();
         }
       }
+      this.resumeAutoPlay();
+    });
+  }
 
-      function closeMobileMenu() {
-        if (isMenuOpen) {
-          navbarNav.style.right = '-100%';
-          overlay.classList.add('hidden');
-          document.body.style.overflow = '';
-          isMenuOpen = false;
-        }
-      }
+  updateSlider() {
+    if (!this.container) return;
+    
+    this.cards.forEach((card, idx) => {
+      card.classList.toggle('active', idx === this.currentIndex);
+    });
 
-      menuIcon.addEventListener('click', (e) => {
-        e.stopPropagation();
-        openMobileMenu();
+    if (this.dotElements) {
+      this.dotElements.forEach((dot, idx) => {
+        dot.classList.toggle('active', idx === this.currentIndex);
       });
+    }
 
-      closeMenu.addEventListener('click', (e) => {
-        e.stopPropagation();
-        closeMobileMenu();
-      });
+    const cardWidth = this.cards[0]?.offsetWidth || 350;
+    const gap = window.innerWidth < 768 ? 16 : 32;
+    const offset = -this.currentIndex * (cardWidth + gap);
+    this.container.style.transform = `translateX(${offset}px)`;
+  }
 
-      closeMenu.addEventListener('touchend', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        closeMobileMenu();
-      });
+  nextSlide() {
+    this.currentIndex = (this.currentIndex + 1) % this.totalCards;
+    this.updateSlider();
+  }
 
-      overlay.addEventListener('click', closeMobileMenu);
+  prevSlide() {
+    this.currentIndex = this.currentIndex === 0 ? this.totalCards - 1 : this.currentIndex - 1;
+    this.updateSlider();
+  }
 
-      document.addEventListener('click', (e) => {
-        const isClickInsideNav = e.target.closest('#mobile-nav') !== null;
-        const isClickOnMenuIcon = e.target.closest('#menu-icon') !== null;
-        if (!isClickInsideNav && !isClickOnMenuIcon && isMenuOpen) {
-          closeMobileMenu();
-        }
-      });
+  goToSlide(index) {
+    this.currentIndex = index;
+    this.updateSlider();
+  }
 
-      // ==================== SMOOTH SCROLLING ====================
-      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-          e.preventDefault();
-          const targetId = this.getAttribute('href');
-          if (targetId === '#') return;
-          const target = document.querySelector(targetId);
-          if (target) {
-            const navbarHeight = document.querySelector('nav').offsetHeight;
-            const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - navbarHeight;
-            window.scrollTo({
-              top: targetPosition,
-              behavior: 'smooth'
-            });
-          }
-          closeMobileMenu();
-        });
+  autoPlay() {
+    this.autoPlayInterval = setInterval(() => {
+      this.nextSlide();
+    }, 5000);
+  }
 
-        anchor.addEventListener('touchend', function (e) {
-          this.click();
-        });
-      });
+  pauseAutoPlay() {
+    clearInterval(this.autoPlayInterval);
+  }
 
-      // ==================== FACILITY CAROUSEL ====================
-      class FacilityCarousel {
-        constructor() {
-          this.container = document.getElementById('facilityImages');
-          if (!this.container) return;
-          this.slides = this.container.querySelectorAll('.facility-slide');
-          this.totalSlides = this.slides.length;
-          this.indicators = document.getElementById('carouselIndicators');
-          this.currentIndex = 0;
-          this.init();
-        }
+  resumeAutoPlay() {
+    this.pauseAutoPlay();
+    this.autoPlay();
+  }
+}
 
-        init() {
-          this.createIndicators();
-          this.startAutoPlay();
-          this.bindEvents();
-          this.updateSlide();
-        }
-
-        createIndicators() {
-          if (!this.indicators) return;
-          this.indicators.innerHTML = '';
-          for (let i = 0; i < this.totalSlides; i++) {
-            const indicator = document.createElement('div');
-            indicator.className = `indicator ${i === 0 ? 'active' : ''}`;
-            indicator.addEventListener('click', () => this.goToSlide(i));
-            this.indicators.appendChild(indicator);
-          }
-          this.indicatorElements = this.indicators.querySelectorAll('.indicator');
-        }
-
-        bindEvents() {
-          const carousel = document.getElementById('facilityCarousel');
-          if (!carousel) return;
-          carousel.addEventListener('mouseenter', () => this.pauseAutoPlay());
-          carousel.addEventListener('mouseleave', () => this.resumeAutoPlay());
-
-          let startX = 0;
-          let currentX = 0;
-          let isDragging = false;
-
-          this.container.addEventListener('touchstart', (e) => {
-            startX = e.touches[0].clientX;
-            isDragging = true;
-            this.pauseAutoPlay();
-          });
-
-          this.container.addEventListener('touchmove', (e) => {
-            if (!isDragging) return;
-            currentX = e.touches[0].clientX;
-          });
-
-          this.container.addEventListener('touchend', () => {
-            if (!isDragging) return;
-            isDragging = false;
-            const diffX = startX - currentX;
-            if (Math.abs(diffX) > 50) {
-              if (diffX > 0) {
-                this.nextSlide();
-              } else {
-                this.prevSlide();
-              }
-            }
-            this.resumeAutoPlay();
-          });
-        }
-
-        updateSlide() {
-          if (!this.container) return;
-          const translateX = -this.currentIndex * (100 / this.totalSlides);
-          this.container.style.transform = `translateX(${translateX}%)`;
-          if (this.indicatorElements) {
-            this.indicatorElements.forEach((indicator, index) => {
-              indicator.classList.toggle('active', index === this.currentIndex);
-            });
-          }
-        }
-
-        nextSlide() {
-          this.currentIndex = (this.currentIndex + 1) % this.totalSlides;
-          this.updateSlide();
-        }
-
-        prevSlide() {
-          this.currentIndex = this.currentIndex === 0 ? this.totalSlides - 1 : this.currentIndex - 1;
-          this.updateSlide();
-        }
-
-        goToSlide(index) {
-          this.currentIndex = index;
-          this.updateSlide();
-        }
-
-        startAutoPlay() {
-          this.autoPlayInterval = setInterval(() => {
-            this.nextSlide();
-          }, 4000);
-        }
-
-        pauseAutoPlay() {
-          clearInterval(this.autoPlayInterval);
-        }
-
-        resumeAutoPlay() {
-          this.pauseAutoPlay();
-          this.startAutoPlay();
-        }
-      }
-
-      // ==================== PROMO SLIDER ====================
-      class PromoSlider {
-        constructor() {
-          this.container = document.getElementById('promoContainer');
-          this.cards = this.container ? this.container.querySelectorAll('.promo-card') : [];
-          this.totalCards = this.cards.length;
-          this.dotsContainer = document.getElementById('dotsContainer');
-          this.currentIndex = 0;
-          this.prevBtn = document.getElementById('prevBtn');
-          this.nextBtn = document.getElementById('nextBtn');
-          this.init();
-        }
-
-        init() {
-          if (!this.container || this.totalCards === 0) return;
-          this.createDots();
-          this.bindEvents();
-          this.updateSlider();
-          this.autoPlay();
-        }
-
-        createDots() {
-          if (!this.dotsContainer) return;
-          this.dotsContainer.innerHTML = '';
-          for (let i = 0; i < this.totalCards; i++) {
-            const dot = document.createElement('div');
-            dot.className = `dot ${i === 0 ? 'active' : ''}`;
-            dot.addEventListener('click', () => this.goToSlide(i));
-            this.dotsContainer.appendChild(dot);
-          }
-          this.dotElements = this.dotsContainer.querySelectorAll('.dot');
-        }
-
-        bindEvents() {
-          if (this.prevBtn) {
-            this.prevBtn.addEventListener('click', () => this.prevSlide());
-          }
-          if (this.nextBtn) {
-            this.nextBtn.addEventListener('click', () => this.nextSlide());
-          }
-
-          if (this.container) {
-            this.container.addEventListener('mouseenter', () => this.pauseAutoPlay());
-            this.container.addEventListener('mouseleave', () => this.resumeAutoPlay());
-          }
-
-          window.addEventListener('resize', () => this.handleResize());
-          
-          let startX = 0;
-          let currentX = 0;
-          let isDragging = false;
-
-          this.container.addEventListener('touchstart', (e) => {
-            startX = e.touches[0].clientX;
-            isDragging = true;
-            this.pauseAutoPlay();
-          });
-
-          this.container.addEventListener('touchmove', (e) => {
-            if (!isDragging) return;
-            currentX = e.touches[0].clientX;
-          });
-
-          this.container.addEventListener('touchend', () => {
-            if (!isDragging) return;
-            isDragging = false;
-            const diffX = startX - currentX;
-            if (Math.abs(diffX) > 50) {
-              if (diffX > 0) {
-                this.nextSlide();
-              } else {
-                this.prevSlide();
-              }
-            }
-            this.resumeAutoPlay();
-          });
-        }
-
-        handleResize() {
-          this.updateSlider();
-        }
-
-        updateSlider() {
-          if (!this.container) return;
-          
-          this.cards.forEach((card, idx) => {
-            card.classList.toggle('active', idx === this.currentIndex);
-          });
-
-          if (this.dotElements) {
-            this.dotElements.forEach((dot, idx) => {
-              dot.classList.toggle('active', idx === this.currentIndex);
-            });
-          }
-
-          const cardWidth = this.cards[0]?.offsetWidth || 350;
-          const gap = window.innerWidth < 768 ? 16 : 32;
-          const offset = -this.currentIndex * (cardWidth + gap);
-          this.container.style.transform = `translateX(${offset}px)`;
-        }
-
-        nextSlide() {
-          this.currentIndex = (this.currentIndex + 1) % this.totalCards;
-          this.updateSlider();
-        }
-
-        prevSlide() {
-          this.currentIndex = this.currentIndex === 0 ? this.totalCards - 1 : this.currentIndex - 1;
-          this.updateSlider();
-        }
-
-        goToSlide(index) {
-          this.currentIndex = index;
-          this.updateSlider();
-        }
-
-        autoPlay() {
-          this.autoPlayInterval = setInterval(() => {
-            this.nextSlide();
-          }, 5000);
-        }
-
-        pauseAutoPlay() {
-          clearInterval(this.autoPlayInterval);
-        }
-
-        resumeAutoPlay() {
-          this.pauseAutoPlay();
-          this.autoPlay();
-        }
-      }
-
-      // ==================== INITIALIZE ALL ====================
-      document.addEventListener('DOMContentLoaded', () => {
-        new FacilityCarousel();
-        new PromoSlider();
-        feather.replace(); 
-
-        setTimeout(() => {
-          feather.replace();
-        }, 100);
-      });
-    </script>
+// Initialize sliders when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+  // Initialize Promo Slider
+  window.promoSlider = new PromoSlider(
+    '#promoContainer',
+    '#promoDotsContainer',
+    '#prevPromoBtn',
+    '#nextPromoBtn'
+  );
+  
+  // Initialize Voucher Slider
+  window.voucherSlider = new PromoSlider(
+    '#voucherContainer',
+    '#voucherDotsContainer',
+    '#prevVoucherBtn',
+    '#nextVoucherBtn'
+  );
+  
+  feather.replace();
+});
+</script>
   </body>
 </html>
