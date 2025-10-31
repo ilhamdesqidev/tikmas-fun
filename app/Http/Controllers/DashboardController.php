@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Promo;
 use App\Models\Voucher; // Import Voucher model
+use App\Models\VoucherClaim;
 use App\Models\Facility;
 use App\Models\Setting;
 
