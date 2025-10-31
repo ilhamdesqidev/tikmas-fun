@@ -733,7 +733,7 @@
 
         <div class="promo-container" id="voucherContainer">
           @foreach($vouchers as $voucher)
-            <div class="promo-card clickable" onclick="event.stopPropagation(); showClaimForm(@json($voucher))">
+            <div class="promo-card clickable" data-voucher='@json($voucher)' onclick="event.stopPropagation(); showClaimForm(JSON.parse(this.dataset.voucher))">
               @if($voucher->status === 'aktif')
                 <span class="featured-badge">Tersedia</span>
               @endif
