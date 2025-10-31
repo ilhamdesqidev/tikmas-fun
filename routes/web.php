@@ -99,17 +99,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('admin')->group(function () {
 
         // Staff Verification Routes
-        Route::prefix('staff/verification')->name('staff.verification.')->group(function () {
+        Route::prefix('staff-verification')->name('staff.verification.')->group(function () {
             Route::get('/', [StaffVerificationController::class, 'index'])->name('index');
             Route::post('/', [StaffVerificationController::class, 'store'])->name('store');
-            Route::get('/generate', [StaffVerificationController::class, 'generateCode'])->name('generate');
             Route::post('/generate-custom', [StaffVerificationController::class, 'generateCustomCode'])->name('generate.custom');
             Route::post('/check-code', [StaffVerificationController::class, 'checkCode'])->name('check');
-            Route::get('/suggestions', [StaffVerificationController::class, 'getCodeSuggestions'])->name('suggestions');
-            Route::put('/{id}', [StaffVerificationController::class, 'update'])->name('update');
-            Route::post('/{id}/toggle', [StaffVerificationController::class, 'toggleStatus'])->name('toggle');
-            Route::delete('/{id}', [StaffVerificationController::class, 'destroy'])->name('destroy');
-            Route::post('/bulk', [StaffVerificationController::class, 'bulkAction'])->name('bulk');
+            Route::get('/suggestions', [StaffVerificationController::class, 'suggestions'])->name('suggestions'); // Method name fixed
+            Route::put('/{staffCode}', [StaffVerificationController::class, 'update'])->name('update');
+            Route::post('/{staffCode}/toggle', [StaffVerificationController::class, 'toggle'])->name('toggle'); // Method name fixed
+            Route::delete('/{staffCode}', [StaffVerificationController::class, 'destroy'])->name('destroy');
+            Route::post('/bulk', [StaffVerificationController::class, 'bulk'])->name('bulk'); // Method name fixed
         });
         
         // Dashboard

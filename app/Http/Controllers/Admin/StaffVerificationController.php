@@ -82,7 +82,14 @@ class StaffVerificationController extends Controller
             ->with('success', 'Kode staff berhasil diupdate!');
     }
 
+    // Method toggle - untuk kompatibilitas
     public function toggle(StaffCode $staffCode)
+    {
+        return $this->toggleStatus($staffCode);
+    }
+
+    // Method toggleStatus - yang baru
+    public function toggleStatus(StaffCode $staffCode)
     {
         $staffCode->update([
             'is_active' => !$staffCode->is_active
