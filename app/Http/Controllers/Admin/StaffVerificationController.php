@@ -12,7 +12,7 @@ class StaffVerificationController extends Controller
     public function index()
     {
         $staffCodes = StaffCode::orderBy('created_at', 'desc')->get();
-        return view('admin.staff-verification', compact('staffCodes'));
+        return view('admin.staff-verification.index', compact('staffCodes'));
     }
 
     public function store(Request $request)
