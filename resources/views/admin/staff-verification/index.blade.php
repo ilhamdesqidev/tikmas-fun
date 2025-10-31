@@ -369,9 +369,9 @@
                         name="role" 
                         required
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
-                        <option value="scanner">Scanner - Scan tiket masuk</option>
-                        <option value="supervisor">Supervisor - Monitor dan supervisi</option>
-                        <option value="admin">Admin - Akses penuh</option>
+                        <option value="scanner">Scanner - Scan tiket promo</option>
+                        <option value="scanner">scanner - Scan Voucher</option>
+                        <option value="admin">Admin - Scan Tiket promo dan Voucher</option>
                     </select>
                     <p class="text-xs text-gray-500 mt-1">Pilih role sesuai tugas staff</p>
                 </div>
@@ -558,14 +558,6 @@
                         class="bg-primary hover:bg-yellow-500 text-black font-semibold px-4 py-2 rounded-lg transition-colors text-sm">
                         Generate
                     </button>
-                </div>
-            </div>
-
-            <!-- Quick Suggestions -->
-            <div id="suggestionsSection">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Saran Cepat</label>
-                <div id="quickSuggestions" class="grid grid-cols-2 gap-2">
-                    <!-- Will be populated by JS -->
                 </div>
             </div>
 
