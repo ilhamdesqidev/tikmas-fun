@@ -22,6 +22,41 @@
         .animate-slide-up { animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
         .ribbon { position: absolute; top: 15px; right: -5px; background: #CFD916; color: #1f2937; padding: 5px 15px; font-weight: bold; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
         .ribbon:before { content: ''; position: absolute; right: 0; bottom: -10px; border-left: 10px solid transparent; border-right: 10px solid #9DB91C; border-top: 10px solid #9DB91C; }
+        
+        /* Styling untuk voucher template */
+        .voucher-template-container {
+            width: 800px;
+            height: 400px;
+            background: white;
+            position: relative;
+            overflow: hidden;
+        }
+        .voucher-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        .voucher-content {
+            position: relative;
+            z-index: 2;
+            padding: 30px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .barcode-container {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 3;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -169,27 +204,36 @@
     </div>
 
     <!-- Hidden Template -->
-    <div id="voucherTemplate" style="position: absolute; left: -9999px; width: 800px; background: white;">
-        <div style="padding: 40px; font-family: Arial, sans-serif;">
-            <div style="background: linear-gradient(135deg, #CFD916 0%, #9DB91C 100%); padding: 30px; border-radius: 20px; margin-bottom: 20px;">
-                <h1 style="color: #1f2937; font-size: 32px; font-weight: bold; margin: 0 0 10px 0;" id="templateTitle"></h1>
-                <p style="color: #374151; font-size: 16px; margin: 0;">🎉 Voucher Berhasil Di-claim!</p>
+    <div id="voucherTemplate" style="position: absolute; left: -9999px;">
+        <div class="voucher-template-container">
+            <!-- Background Voucher -->
+            <img src="" alt="Voucher Background" class="voucher-background" id="templateBackground">
+            
+            <!-- Konten Voucher -->
+            <div class="voucher-content">
+                <div class="flex-1">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-2" id="templateTitle"></h1>
+                    <p class="text-gray-600 text-lg mb-4" id="templateDesc"></p>
+                    
+                    <div class="bg-white/80 backdrop-blur-sm p-4 rounded-lg inline-block">
+                        <p class="text-gray-700 mb-1"><strong>Nama:</strong> <span id="templateName"></span></p>
+                        <p class="text-gray-700 mb-1"><strong>No. Telepon:</strong> <span id="templatePhone"></span></p>
+                        <p class="text-gray-700"><strong>Berlaku hingga:</strong> <span id="templateExpiry"></span></p>
+                    </div>
+                </div>
+                
+                <!-- Kode Voucher -->
+                <div class="mt-4">
+                    <p class="text-gray-700 font-bold text-lg mb-2">Kode Voucher:</p>
+                    <div class="bg-white/90 backdrop-blur-sm p-3 rounded-lg inline-block">
+                        <p class="text-2xl font-bold text-gray-800 tracking-wider" id="templateCode"></p>
+                    </div>
+                </div>
             </div>
             
-            <div style="background: #f9fafb; padding: 25px; border-radius: 15px; margin-bottom: 20px;">
-                <p style="margin: 0 0 8px 0; color: #6b7280; font-size: 14px;"><strong>Nama:</strong> <span id="templateName"></span></p>
-                <p style="margin: 0 0 8px 0; color: #6b7280; font-size: 14px;"><strong>No. Telepon:</strong> <span id="templatePhone"></span></p>
-                <p style="margin: 0; color: #6b7280; font-size: 14px;"><strong>Berlaku hingga:</strong> <span id="templateExpiry"></span></p>
-            </div>
-
-            <div style="text-align: center; background: white; padding: 30px; border: 3px dashed #CFD916; border-radius: 15px;">
-                <p style="color: #1f2937; font-weight: bold; margin: 0 0 15px 0; font-size: 18px;">Kode Voucher:</p>
+            <!-- Barcode -->
+            <div class="barcode-container">
                 <svg id="templateBarcode"></svg>
-                <p style="margin: 15px 0 0 0; color: #6b7280; font-size: 12px;">Tunjukkan barcode ini saat melakukan pembayaran</p>
-            </div>
-
-            <div style="margin-top: 25px; padding: 20px; background: #fef3c7; border-radius: 10px; border-left: 4px solid #CFD916;">
-                <p style="margin: 0; color: #92400e; font-size: 13px; line-height: 1.6;" id="templateDesc"></p>
             </div>
         </div>
     </div>
@@ -270,26 +314,40 @@
                     year: 'numeric'
                 });
 
+                // Update template dengan data voucher
                 document.getElementById('templateTitle').textContent = currentVoucher.name;
                 document.getElementById('templateName').textContent = userName;
                 document.getElementById('templatePhone').textContent = userPhone;
                 document.getElementById('templateExpiry').textContent = expiryDate;
                 document.getElementById('templateDesc').textContent = currentVoucher.deskripsi;
+                document.getElementById('templateCode').textContent = uniqueCode;
+                
+                // Set background gambar voucher jika ada
+                const templateBackground = document.getElementById('templateBackground');
+                if (currentVoucher.image_url) {
+                    templateBackground.src = currentVoucher.image_url;
+                    templateBackground.style.display = 'block';
+                } else {
+                    templateBackground.style.display = 'none';
+                }
 
+                // Generate barcode
                 JsBarcode("#templateBarcode", uniqueCode, {
                     format: "CODE128",
                     width: 2,
-                    height: 80,
-                    displayValue: true,
+                    height: 60,
+                    displayValue: false,
                     fontSize: 16,
-                    margin: 10
+                    margin: 5
                 });
 
+                // Generate dan download gambar voucher
                 const template = document.getElementById('voucherTemplate');
                 const canvas = await html2canvas(template, {
                     scale: 2,
                     backgroundColor: '#ffffff',
-                    logging: false
+                    logging: false,
+                    useCORS: true
                 });
 
                 canvas.toBlob(function(blob) {
