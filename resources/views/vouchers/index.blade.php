@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Voucher & Promo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
@@ -94,7 +95,7 @@
             <!-- Mobile Layout (< 640px) -->
             <div class="sm:hidden">
                 <div class="flex items-center justify-between mb-3">
-                    <a href="/" class="flex items-center bg-[#CFD916] hover:bg-[#B5C91A] text-gray-800 px-3 py-2 rounded-lg transition-all duration-200 font-medium group shadow-sm">
+                    <a href="{{ route('home') }}" class="flex items-center bg-[#CFD916] hover:bg-[#B5C91A] text-gray-800 px-3 py-2 rounded-lg transition-all duration-200 font-medium group shadow-sm">
                         <svg class="w-4 h-4 mr-1.5 transform group-hover:-translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                         </svg>
@@ -105,7 +106,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
                         </svg>
-                        <span class="text-xs font-medium" id="voucherCount">5 Voucher</span>
+                        <span class="text-xs font-medium">{{ $vouchers->count() }} Voucher</span>
                     </div>
                 </div>
                 <div class="text-center">
@@ -116,7 +117,7 @@
             
             <!-- Desktop Layout (>= 640px) -->
             <div class="hidden sm:flex items-center justify-between">
-                <a href="/" class="flex items-center bg-[#CFD916] hover:bg-[#B5C91A] text-gray-800 px-4 py-2 rounded-lg transition-all duration-200 font-medium group shadow-sm">
+                <a href="{{ route('home') }}" class="flex items-center bg-[#CFD916] hover:bg-[#B5C91A] text-gray-800 px-4 py-2 rounded-lg transition-all duration-200 font-medium group shadow-sm">
                     <svg class="w-4 h-4 mr-2 transform group-hover:-translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                     </svg>
@@ -132,7 +133,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
                     </svg>
-                    <span class="text-sm font-medium" id="voucherCountDesktop">5 Voucher</span>
+                    <span class="text-sm font-medium">{{ $vouchers->count() }} Voucher</span>
                 </div>
             </div>
         </div>
@@ -140,25 +141,62 @@
 
     <!-- Main Content - Responsive -->
     <main class="container mx-auto px-3 sm:px-4 py-6 sm:py-12">
-        <div id="voucherGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-            <!-- Voucher cards will be inserted here -->
-        </div>
-        
-        <!-- Empty State -->
-        <div id="emptyState" class="hidden flex flex-col items-center justify-center py-12 sm:py-20 animate-fade-in">
-            <div class="bg-white rounded-3xl shadow-xl p-8 sm:p-12 text-center max-w-md mx-auto">
-                <div class="w-24 h-24 sm:w-32 sm:h-32 mx-auto mb-4 sm:mb-6 bg-gray-100 rounded-full flex items-center justify-center">
-                    <svg class="w-12 h-12 sm:w-16 sm:h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
+        @if($vouchers->count() > 0)
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+                @foreach($vouchers as $index => $voucher)
+                <div class="voucher-card bg-white rounded-xl sm:rounded-2xl shadow-lg overflow-hidden animate-fade-in" style="animation-delay: {{ $index * 0.1 }}s">
+                    <div class="relative h-40 sm:h-48 md:h-56 gradient-card">
+                        <img src="{{ $voucher->image_url }}" 
+                             alt="{{ $voucher->name }}" 
+                             class="w-full h-full object-cover"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="absolute inset-0 flex items-center justify-center text-gray-800 text-lg sm:text-xl md:text-2xl font-bold px-4 text-center" style="display: none;">
+                            {{ $voucher->name }}
+                        </div>
+                        
+                        <div class="ribbon uppercase tracking-wider">✓ {{ $voucher->status_text }}</div>
+                        <div class="absolute bottom-0 left-0 w-0 h-0 border-l-[30px] sm:border-l-[40px] border-l-white border-t-[30px] sm:border-t-[40px] border-t-transparent"></div>
+                    </div>
+
+                    <div class="p-4 sm:p-5 md:p-6">
+                        <h3 class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-2 sm:mb-3 line-clamp-2 min-h-[3.5rem] sm:min-h-[4rem]">{{ $voucher->name }}</h3>
+                        
+                        <p class="text-gray-600 text-xs sm:text-sm mb-4 sm:mb-6 line-clamp-3 min-h-[3.5rem] sm:min-h-[4.5rem]">
+                            {{ Str::limit($voucher->deskripsi, 120) }}
+                        </p>
+
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-3 sm:pt-4 border-t-2 border-gray-100">
+                            <div class="flex items-center text-xs text-gray-500">
+                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                <span class="font-medium">{{ $voucher->created_at->format('d M Y') }}</span>
+                            </div>
+                            <button onclick='showClaimForm(@json($voucher))' 
+                                    class="w-full sm:w-auto btn-primary text-gray-800 px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wide shadow-md">
+                                🎉 Claim Sekarang
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <h3 class="text-xl sm:text-2xl font-bold text-gray-800 mb-2 sm:mb-3">Belum Ada Voucher</h3>
-                <p class="text-sm sm:text-base text-gray-500 mb-4 sm:mb-6">Saat ini belum ada voucher yang tersedia. Silakan cek kembali nanti!</p>
-                <a href="/" class="btn-primary inline-block text-gray-800 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl font-bold text-sm sm:text-base">
-                    Kembali ke Beranda
-                </a>
+                @endforeach
             </div>
-        </div>
+        @else
+            <div class="flex flex-col items-center justify-center py-12 sm:py-20 animate-fade-in">
+                <div class="bg-white rounded-3xl shadow-xl p-8 sm:p-12 text-center max-w-md mx-auto">
+                    <div class="w-24 h-24 sm:w-32 sm:h-32 mx-auto mb-4 sm:mb-6 bg-gray-100 rounded-full flex items-center justify-center">
+                        <svg class="w-12 h-12 sm:w-16 sm:h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl sm:text-2xl font-bold text-gray-800 mb-2 sm:mb-3">Belum Ada Voucher</h3>
+                    <p class="text-sm sm:text-base text-gray-500 mb-4 sm:mb-6">Saat ini belum ada voucher yang tersedia. Silakan cek kembali nanti!</p>
+                    <a href="/" class="btn-primary inline-block text-gray-800 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl font-bold text-sm sm:text-base">
+                        Kembali ke Beranda
+                    </a>
+                </div>
+            </div>
+        @endif
     </main>
 
     <!-- Claim Form Pop-up - Responsive -->
@@ -249,117 +287,6 @@
     <script>
         let currentVoucher = null;
 
-        // Sample voucher data
-        const sampleVouchers = [
-            {
-                id: 1,
-                name: "Diskon 50% Menu Burger",
-                deskripsi: "Dapatkan diskon 50% untuk semua menu burger. Berlaku untuk makan di tempat dan take away. Tidak dapat digabung dengan promo lain.",
-                image_url: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800",
-                status_text: "Aktif",
-                created_at: "2024-10-15",
-                expiry_date: "2024-12-31"
-            },
-            {
-                id: 2,
-                name: "Gratis Minuman untuk Pembelian Paket",
-                deskripsi: "Beli 1 paket komplit, gratis 1 minuman ukuran sedang. Pilihan minuman: Es Teh, Es Jeruk, atau Soft Drink.",
-                image_url: "https://images.unsplash.com/photo-1551024601-bec78aea704b?w=800",
-                status_text: "Aktif",
-                created_at: "2024-10-20",
-                expiry_date: "2024-11-30"
-            },
-            {
-                id: 3,
-                name: "Cashback 30% untuk Member Baru",
-                deskripsi: "Khusus member baru! Dapatkan cashback 30% maksimal Rp 50.000 untuk transaksi pertama Anda. Syarat dan ketentuan berlaku.",
-                image_url: "https://images.unsplash.com/photo-1556742502-ec7c0e9f34b1?w=800",
-                status_text: "Aktif",
-                created_at: "2024-10-25",
-                expiry_date: "2024-12-15"
-            },
-            {
-                id: 4,
-                name: "Buy 2 Get 1 Free Pizza",
-                deskripsi: "Beli 2 pizza ukuran large, gratis 1 pizza ukuran medium. Semua varian pizza. Promo spesial weekend!",
-                image_url: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800",
-                status_text: "Aktif",
-                created_at: "2024-10-28",
-                expiry_date: "2024-11-30"
-            },
-            {
-                id: 5,
-                name: "Diskon 25% Semua Menu Dessert",
-                deskripsi: "Manjakan diri dengan dessert favorit! Diskon 25% untuk semua menu dessert termasuk cake, ice cream, dan pudding.",
-                image_url: "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=800",
-                status_text: "Aktif",
-                created_at: "2024-10-30",
-                expiry_date: "2024-12-31"
-            }
-        ];
-
-        // Render vouchers
-        function renderVouchers() {
-            const grid = document.getElementById('voucherGrid');
-            const emptyState = document.getElementById('emptyState');
-            
-            if (sampleVouchers.length === 0) {
-                grid.classList.add('hidden');
-                emptyState.classList.remove('hidden');
-                return;
-            }
-            
-            grid.innerHTML = sampleVouchers.map((voucher, index) => {
-                const createdDate = new Date(voucher.created_at).toLocaleDateString('id-ID', {
-                    day: 'numeric',
-                    month: 'short',
-                    year: 'numeric'
-                });
-                
-                return `
-                    <div class="voucher-card bg-white rounded-xl sm:rounded-2xl shadow-lg overflow-hidden animate-fade-in" style="animation-delay: ${index * 0.1}s">
-                        <div class="relative h-40 sm:h-48 md:h-56 gradient-card">
-                            <img src="${voucher.image_url}" 
-                                 alt="${voucher.name}" 
-                                 class="w-full h-full object-cover"
-                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                            <div class="absolute inset-0 flex items-center justify-center text-gray-800 text-lg sm:text-xl md:text-2xl font-bold px-4 text-center" style="display: none;">
-                                ${voucher.name}
-                            </div>
-                            
-                            <div class="ribbon uppercase tracking-wider">✓ ${voucher.status_text}</div>
-                            <div class="absolute bottom-0 left-0 w-0 h-0 border-l-[30px] sm:border-l-[40px] border-l-white border-t-[30px] sm:border-t-[40px] border-t-transparent"></div>
-                        </div>
-
-                        <div class="p-4 sm:p-5 md:p-6">
-                            <h3 class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-2 sm:mb-3 line-clamp-2 min-h-[3.5rem] sm:min-h-[4rem]">${voucher.name}</h3>
-                            
-                            <p class="text-gray-600 text-xs sm:text-sm mb-4 sm:mb-6 line-clamp-3 min-h-[3.5rem] sm:min-h-[4.5rem]">
-                                ${voucher.deskripsi}
-                            </p>
-
-                            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-3 sm:pt-4 border-t-2 border-gray-100">
-                                <div class="flex items-center text-xs text-gray-500">
-                                    <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                    </svg>
-                                    <span class="font-medium">${createdDate}</span>
-                                </div>
-                                <button onclick='showClaimForm(${JSON.stringify(voucher)})' 
-                                        class="w-full sm:w-auto btn-primary text-gray-800 px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wide shadow-md">
-                                    🎉 Claim Sekarang
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            // Update voucher count
-            document.getElementById('voucherCount').textContent = `${sampleVouchers.length} Voucher`;
-            document.getElementById('voucherCountDesktop').textContent = `${sampleVouchers.length} Voucher`;
-        }
-
         function showClaimForm(voucher) {
             currentVoucher = voucher;
             
@@ -404,10 +331,29 @@
 
             const userName = document.getElementById('userName').value;
             const userPhone = document.getElementById('userPhone').value;
+            const voucherId = document.getElementById('voucherId').value;
 
-            // Simulate API call
-            setTimeout(() => {
-                const uniqueCode = 'VC' + Date.now().toString().slice(-8);
+            try {
+                const response = await fetch('/vouchers/claim', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({
+                        voucher_id: voucherId,
+                        user_name: userName,
+                        user_phone: userPhone
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    throw new Error(result.message);
+                }
+
+                const uniqueCode = result.data.unique_code;
                 const expiryDate = new Date(currentVoucher.expiry_date).toLocaleDateString('id-ID', {
                     day: 'numeric',
                     month: 'long',
@@ -430,48 +376,49 @@
                 });
 
                 const template = document.getElementById('voucherTemplate');
-                html2canvas(template, {
+                const canvas = await html2canvas(template, {
                     scale: 2,
                     backgroundColor: '#ffffff',
                     logging: false
-                }).then(canvas => {
-                    canvas.toBlob(function(blob) {
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = `Voucher-${uniqueCode}.png`;
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                        URL.revokeObjectURL(url);
-
-                        hideClaimForm();
-                        
-                        // Success notification
-                        const notification = document.createElement('div');
-                        notification.className = 'fixed top-4 left-1/2 -translate-x-1/2 bg-green-500 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-xl shadow-2xl z-[100] animate-slide-up w-[calc(100%-2rem)] sm:w-auto max-w-md';
-                        notification.innerHTML = `
-                            <div class="flex items-center space-x-3">
-                                <svg class="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <div>
-                                    <p class="font-bold text-sm sm:text-base">Berhasil!</p>
-                                    <p class="text-xs sm:text-sm">Voucher telah di-download</p>
-                                </div>
-                            </div>
-                        `;
-                        document.body.appendChild(notification);
-                        setTimeout(() => notification.remove(), 5000);
-                    });
                 });
 
+                canvas.toBlob(function(blob) {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `Voucher-${uniqueCode}.png`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+
+                    hideClaimForm();
+                    
+                    // Success notification
+                    const notification = document.createElement('div');
+                    notification.className = 'fixed top-4 left-1/2 -translate-x-1/2 bg-green-500 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-xl shadow-2xl z-[100] notification-enter w-[calc(100%-2rem)] sm:w-auto max-w-md';
+                    notification.innerHTML = `
+                        <div class="flex items-center space-x-3">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <div>
+                                <p class="font-bold text-sm sm:text-base">Berhasil!</p>
+                                <p class="text-xs sm:text-sm">Voucher telah di-download</p>
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(notification);
+                    setTimeout(() => notification.remove(), 5000);
+                });
+            } catch (error) {
+                console.error('Error claiming voucher:', error);
+                alert('❌ Terjadi kesalahan: ' + error.message);
+            } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalText;
-            }, 1500);
+            }
         });
-
-        // Initialize
-        renderVouchers();
     </script>
 </body>
+</html>
