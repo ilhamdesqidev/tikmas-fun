@@ -569,80 +569,47 @@
         </div>
       </div>
     </section>
-
+  
     <!-- Promo & Voucher Section -->
-<section id="menu" class="py-6">
-  <h2 class="text-center text-3xl sm:text-4xl mb-4 text-text-dark">
-    <span class="text-primary">Promo & Voucher</span> Kami
-  </h2>
-  <p class="text-center max-w-lg mx-auto font-medium leading-relaxed text-text-dark mb-8 text-base sm:text-lg">
-    Nikmati berbagai pilihan promo dan voucher menarik untuk pengalaman liburan yang tak terlupakan
-  </p>
-  
-  <!-- Tab Navigation -->
-  <div class="flex justify-center mb-8">
-    <div class="inline-flex rounded-lg border border-gray-300 bg-white p-1 shadow-sm">
-      <button onclick="switchPromoTab('promo')" id="tabPromo" 
-              class="px-6 py-2.5 text-sm font-semibold rounded-md transition-all duration-200 bg-primary text-black">
-        <div class="flex items-center">
-          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-          </svg>
-          Promo
+    <section id="menu" class="py-6">
+      <h2 class="text-center text-3xl sm:text-4xl mb-4 text-text-dark">
+        <span class="text-primary">Promo & Voucher</span> Kami
+      </h2>
+      <p class="text-center max-w-lg mx-auto font-medium leading-relaxed text-text-dark mb-8 text-base sm:text-lg">
+        Nikmati berbagai pilihan promo dan voucher menarik untuk pengalaman liburan yang tak terlupakan
+      </p>
+      
+      <!-- Tab Navigation -->
+      <div class="flex justify-center mb-8">
+        <div class="inline-flex rounded-lg border border-gray-300 bg-white p-1 shadow-sm">
+          <button onclick="switchPromoTab('promo')" id="tabPromo" 
+                  class="px-6 py-2.5 text-sm font-semibold rounded-md transition-all duration-200 bg-primary text-black">
+            <div class="flex items-center">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+              </svg>
+              Promo
+            </div>
+          </button>
+          <button onclick="switchPromoTab('voucher')" id="tabVoucher" 
+                  class="px-6 py-2.5 text-sm font-semibold rounded-md transition-all duration-200 text-gray-600 hover:bg-gray-100">
+            <div class="flex items-center">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
+              </svg>
+              Voucher
+            </div>
+          </button>
         </div>
-      </button>
-      <button onclick="switchPromoTab('voucher')" id="tabVoucher" 
-              class="px-6 py-2.5 text-sm font-semibold rounded-md transition-all duration-200 text-gray-600 hover:bg-gray-100">
-        <div class="flex items-center">
-          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
-          </svg>
-          Voucher
-        </div>
-      </button>
-    </div>
-  </div>
-  
- <!-- Promo & Voucher Section -->
-<section id="menu" class="py-6">
-  <h2 class="text-center text-3xl sm:text-4xl mb-4 text-text-dark">
-    <span class="text-primary">Promo & Voucher</span> Kami
-  </h2>
-  <p class="text-center max-w-lg mx-auto font-medium leading-relaxed text-text-dark mb-8 text-base sm:text-lg">
-    Nikmati berbagai pilihan promo dan voucher menarik untuk pengalaman liburan yang tak terlupakan
-  </p>
-  
-  <!-- Tab Navigation -->
-  <div class="flex justify-center mb-8">
-    <div class="inline-flex rounded-lg border border-gray-300 bg-white p-1 shadow-sm">
-      <button onclick="switchPromoTab('promo')" id="tabPromo" 
-              class="px-6 py-2.5 text-sm font-semibold rounded-md transition-all duration-200 bg-primary text-black">
-        <div class="flex items-center">
-          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-          </svg>
-          Promo
-        </div>
-      </button>
-      <button onclick="switchPromoTab('voucher')" id="tabVoucher" 
-              class="px-6 py-2.5 text-sm font-semibold rounded-md transition-all duration-200 text-gray-600 hover:bg-gray-100">
-        <div class="flex items-center">
-          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
-          </svg>
-          Voucher
-        </div>
-      </button>
-    </div>
-  </div>
-  
-  <!-- Promo Content -->
-  <div id="promoContent">
-    @if($promos->count() > 0)
-      <div class="relative promo-slider">
-        <button class="nav-button prev" id="prevPromoBtn">
-          <i data-feather="chevron-left" class="w-6 h-6"></i>
-        </button>
+      </div>
+      
+      <!-- Promo Content -->
+      <div id="promoContent">
+        @if($promos->count() > 0)
+          <div class="relative promo-slider">
+            <button class="nav-button prev" id="prevPromoBtn">
+              <i data-feather="chevron-left" class="w-6 h-6"></i>
+            </button>
         
         <button class="nav-button next" id="nextPromoBtn">
           <i data-feather="chevron-right" class="w-6 h-6"></i>
