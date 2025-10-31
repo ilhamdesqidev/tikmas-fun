@@ -188,7 +188,7 @@
                                 {{ $claim->created_at->format('d M Y H:i') }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                @if($claim->is_used)
+                                @if($claim->is_used || $claim->scanned_at)
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
                                         Terpakai
                                     </span>
