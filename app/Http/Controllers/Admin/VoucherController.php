@@ -8,6 +8,7 @@ use App\Models\VoucherClaim;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class VoucherController extends Controller
 {
@@ -15,6 +16,11 @@ class VoucherController extends Controller
     {
         try {
             Log::info('Voucher index called');
+            
+            // Update semua voucher yang sudah expired
+            Voucher::where('expiry_date', '<', Carbon::now())
+                ->where('status', '!=', 'kadaluarsa')
+                ->update(['status' => 'kadaluarsa']);
             
             // Load vouchers dengan count claims
             $vouchers = Voucher::withCount('claims')->latest()->get();
@@ -55,10 +61,16 @@ class VoucherController extends Controller
             $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
             $imagePath = $image->storeAs('vouchers', $imageName, 'public');
 
+            // Cek apakah tanggal expiry sudah lewat
+            $status = $request->status;
+            if (Carbon::parse($request->expiry_date)->isPast()) {
+                $status = 'kadaluarsa';
+            }
+
             Voucher::create([
                 'name' => $request->name,
                 'deskripsi' => $request->deskripsi,
-                'status' => $request->status,
+                'status' => $status,
                 'image' => $imagePath,
                 'expiry_date' => $request->expiry_date,
             ]);
@@ -93,8 +105,14 @@ class VoucherController extends Controller
 
             $voucher->name = $request->name;
             $voucher->deskripsi = $request->deskripsi;
-            $voucher->status = $request->status;
             $voucher->expiry_date = $request->expiry_date;
+
+            // Cek apakah tanggal expiry sudah lewat
+            if (Carbon::parse($request->expiry_date)->isPast()) {
+                $voucher->status = 'kadaluarsa';
+            } else {
+                $voucher->status = $request->status;
+            }
 
             if ($request->hasFile('image')) {
                 $image = $request->file('image');
