@@ -143,7 +143,7 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <button onclick="openEditModal({{ $voucher->id }}, '{{ addslashes($voucher->name) }}', '{{ addslashes($voucher->deskripsi) }}', '{{ $voucher->status }}', '{{ $voucher->image }}', '{{ $voucher->expiry_date }}', {{ $voucher->is_unlimited ? 'true' : 'false' }}, {{ $voucher->quota ?? 'null' }})" 
+                                <button onclick="openEditModal({{ $voucher->id }}, '{{ addslashes($voucher->name) }}', '{{ addslashes($voucher->deskripsi) }}', '{{ $voucher->status }}', '{{ $voucher->image }}', '{{ $voucher->expiry_date }}')" 
                                         class="text-blue-600 hover:text-blue-900 mr-3">
                                     Edit
                                 </button>
@@ -320,33 +320,36 @@
                 @enderror
             </div>
 
-            <!-- Kuota Section - Edit Modal -->
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Tipe Kuota <span class="text-red-500">*</span></label>
-                    <div class="grid grid-cols-2 gap-3">
-                        <label class="flex items-center p-3 border border-gray-300 rounded-md cursor-pointer hover:bg-gray-50">
-                            <input type="radio" name="quota_type" value="unlimited" class="text-blue-600 focus:ring-blue-500" required>
-                            <span class="ml-2 text-sm font-medium text-gray-700">Unlimited</span>
-                        </label>
-                        <label class="flex items-center p-3 border border-gray-300 rounded-md cursor-pointer hover:bg-gray-50">
-                            <input type="radio" name="quota_type" value="limited" class="text-blue-600 focus:ring-blue-500" required>
-                            <span class="ml-2 text-sm font-medium text-gray-700">Terbatas</span>
-                        </label>
-                    </div>
+            <!-- Kuota Section -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Tipe Kuota <span class="text-red-500">*</span></label>
+                <div class="grid grid-cols-2 gap-3">
+                    <label class="flex items-center p-3 border border-gray-300 rounded-md cursor-pointer hover:bg-gray-50">
+                        <input type="radio" name="quota_type" value="unlimited" class="text-blue-600 focus:ring-blue-500" 
+                               {{ old('quota_type', 'unlimited') == 'unlimited' ? 'checked' : '' }} required>
+                        <span class="ml-2 text-sm font-medium text-gray-700">Unlimited</span>
+                    </label>
+                    <label class="flex items-center p-3 border border-gray-300 rounded-md cursor-pointer hover:bg-gray-50">
+                        <input type="radio" name="quota_type" value="limited" class="text-blue-600 focus:ring-blue-500" 
+                               {{ old('quota_type') == 'limited' ? 'checked' : '' }} required>
+                        <span class="ml-2 text-sm font-medium text-gray-700">Terbatas</span>
+                    </label>
                 </div>
+                @error('quota_type')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
 
-                <div id="editQuotaInputContainer" class="mb-4 hidden">
-                    <label for="edit_quota" class="block text-sm font-medium text-gray-700 mb-2">Jumlah Kuota <span class="text-red-500">*</span></label>
-                    <input type="number" id="edit_quota" name="quota" min="1"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                        placeholder="Contoh: 50">
-                    <p class="mt-1 text-xs text-gray-500">💡 Masukkan jumlah voucher yang tersedia</p>
-                    @error('quota')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
-
-               
+            <div id="quotaInputContainer" class="mb-4 hidden">
+                <label for="create_quota" class="block text-sm font-medium text-gray-700 mb-2">Jumlah Kuota <span class="text-red-500">*</span></label>
+                <input type="number" id="create_quota" name="quota" value="{{ old('quota') }}" min="1"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 @error('quota') border-red-500 @enderror" 
+                       placeholder="Contoh: 50">
+                <p class="mt-1 text-xs text-gray-500">💡 Masukkan jumlah voucher yang tersedia</p>
+                @error('quota')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
 
             <div class="mb-4">
                 <label for="create_expiry_date" class="block text-sm font-medium text-gray-700 mb-2">Tanggal Kadaluarsa <span class="text-red-500">*</span></label>
