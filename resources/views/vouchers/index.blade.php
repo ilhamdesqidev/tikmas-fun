@@ -377,7 +377,7 @@
                     format: "CODE128",
                     width: 2,
                     height: 80,
-                    displayValue: true,
+                    displayValue: false,
                     fontSize: 16,
                     margin: 10
                 });
