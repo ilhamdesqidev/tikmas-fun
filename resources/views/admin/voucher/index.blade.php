@@ -335,9 +335,9 @@
                     </div>
                 </div>
 
-                <div id="editQuotaInputContainer" class="mb-4 hidden">
-                    <label for="edit_quota" class="block text-sm font-medium text-gray-700 mb-2">Jumlah Kuota <span class="text-red-500">*</span></label>
-                    <input type="number" id="edit_quota" name="quota" min="1"
+                <div id="quotaInputContainer" class="mb-4 hidden">
+                    <label for="create_quota" class="block text-sm font-medium text-gray-700 mb-2">Jumlah Kuota <span class="text-red-500">*</span></label>
+                    <input type="number" id="create_quota" name="quota" min="1"
                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
                         placeholder="Contoh: 50">
                     <p class="mt-1 text-xs text-gray-500">💡 Masukkan jumlah voucher yang tersedia</p>
@@ -593,45 +593,51 @@ function searchClaims() {
     });
 }
 
-// Kuota Type Toggle Functions - FIXED
+// Kuota Type Toggle Functions - FIXED dengan null checking
 function toggleQuotaInput() {
     const createModal = document.getElementById('createVoucherModal');
-    const quotaType = createModal.querySelector('input[name="quota_type"]:checked');
+    if (!createModal) return;
     
+    const quotaType = createModal.querySelector('input[name="quota_type"]:checked');
     if (!quotaType) return;
     
     const quotaInputContainer = document.getElementById('quotaInputContainer');
     const quotaInput = document.getElementById('create_quota');
     
-    if (quotaType.value === 'limited') {
-        quotaInputContainer.classList.remove('hidden');
-        if (quotaInput) quotaInput.required = true;
-    } else {
-        quotaInputContainer.classList.add('hidden');
-        if (quotaInput) {
-            quotaInput.required = false;
-            quotaInput.value = '';
+    if (quotaInputContainer) {
+        if (quotaType.value === 'limited') {
+            quotaInputContainer.classList.remove('hidden');
+            if (quotaInput) quotaInput.required = true;
+        } else {
+            quotaInputContainer.classList.add('hidden');
+            if (quotaInput) {
+                quotaInput.required = false;
+                quotaInput.value = '';
+            }
         }
     }
 }
 
 function toggleEditQuotaInput() {
     const editModal = document.getElementById('editVoucherModal');
-    const quotaType = editModal.querySelector('input[name="quota_type"]:checked');
+    if (!editModal) return;
     
+    const quotaType = editModal.querySelector('input[name="quota_type"]:checked');
     if (!quotaType) return;
     
     const quotaInputContainer = document.getElementById('editQuotaInputContainer');
     const quotaInput = document.getElementById('edit_quota');
     
-    if (quotaType.value === 'limited') {
-        quotaInputContainer.classList.remove('hidden');
-        if (quotaInput) quotaInput.required = true;
-    } else {
-        quotaInputContainer.classList.add('hidden');
-        if (quotaInput) {
-            quotaInput.required = false;
-            quotaInput.value = '';
+    if (quotaInputContainer) {
+        if (quotaType.value === 'limited') {
+            quotaInputContainer.classList.remove('hidden');
+            if (quotaInput) quotaInput.required = true;
+        } else {
+            quotaInputContainer.classList.add('hidden');
+            if (quotaInput) {
+                quotaInput.required = false;
+                quotaInput.value = '';
+            }
         }
     }
 }
@@ -653,9 +659,11 @@ function closeCreateModal() {
     if (form) form.reset();
     // Reset quota type to default
     const createModal = document.getElementById('createVoucherModal');
-    const defaultQuotaType = createModal.querySelector('input[name="quota_type"][value="unlimited"]');
-    if (defaultQuotaType) defaultQuotaType.checked = true;
-    toggleQuotaInput();
+    if (createModal) {
+        const defaultQuotaType = createModal.querySelector('input[name="quota_type"][value="unlimited"]');
+        if (defaultQuotaType) defaultQuotaType.checked = true;
+        toggleQuotaInput();
+    }
 }
 
 function previewCreateImage(event) {
@@ -680,12 +688,14 @@ function openEditModal(id, name, deskripsi, status, imagePath, expiryDate, isUnl
     document.getElementById('edit_status').value = status;
     document.getElementById('edit_expiry_date').value = expiryDate;
     
-    // Set quota type and value - FIXED: menggunakan selector dalam modal
+    // Set quota type and value
     const editModal = document.getElementById('editVoucherModal');
-    const quotaType = isUnlimited ? 'unlimited' : 'limited';
-    const quotaRadio = editModal.querySelector(`input[name="quota_type"][value="${quotaType}"]`);
-    if (quotaRadio) {
-        quotaRadio.checked = true;
+    if (editModal) {
+        const quotaType = isUnlimited ? 'unlimited' : 'limited';
+        const quotaRadio = editModal.querySelector(`input[name="quota_type"][value="${quotaType}"]`);
+        if (quotaRadio) {
+            quotaRadio.checked = true;
+        }
     }
     
     if (!isUnlimited && quota) {
@@ -703,7 +713,7 @@ function openEditModal(id, name, deskripsi, status, imagePath, expiryDate, isUnl
     const previewWrap = document.getElementById('editImagePreview');
     if (previewWrap) previewWrap.classList.add('hidden');
     
-    // Initialize edit quota input - FIXED
+    // Initialize edit quota input
     setTimeout(() => {
         toggleEditQuotaInput();
     }, 100);
@@ -766,7 +776,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Create modal quota event listeners - FIXED
+    // Create modal quota event listeners
     const createModal = document.getElementById('createVoucherModal');
     if (createModal) {
         const createQuotaRadios = createModal.querySelectorAll('input[name="quota_type"]');
@@ -775,7 +785,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Edit modal quota event listeners - FIXED
+    // Edit modal quota event listeners
     const editModal = document.getElementById('editVoucherModal');
     if (editModal) {
         const editQuotaRadios = editModal.querySelectorAll('input[name="quota_type"]');
@@ -787,7 +797,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize on page load
     toggleQuotaInput();
     
-    // Show create modal if there are validation errors - FIXED
+    // Show create modal if there are validation errors
     @if($errors->any())
         openCreateModal(); 
         // Set quota type based on old input if exists
@@ -819,13 +829,5 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
-
-// Debug function untuk testing
-function debugQuota() {
-    console.log('Create Modal Quota Radios:', document.querySelectorAll('#createVoucherModal input[name="quota_type"]'));
-    console.log('Edit Modal Quota Radios:', document.querySelectorAll('#editVoucherModal input[name="quota_type"]'));
-    console.log('Quota Input Container:', document.getElementById('quotaInputContainer'));
-    console.log('Edit Quota Input Container:', document.getElementById('editQuotaInputContainer'));
-}
 </script>
 @endsection
