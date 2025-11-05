@@ -720,77 +720,118 @@
   </div>
   
   <!-- Voucher Content -->
-  <div id="voucherContent" class="hidden">
-    @if($vouchers->count() > 0)
-      <div class="relative promo-slider">
-        <button class="nav-button prev" id="prevVoucherBtn">
-          <i data-feather="chevron-left" class="w-6 h-6"></i>
-        </button>
-        
-        <button class="nav-button next" id="nextVoucherBtn">
-          <i data-feather="chevron-right" class="w-6 h-6"></i>
-        </button>
+<div id="voucherContent" class="hidden">
+  @if($vouchers->count() > 0)
+    <div class="relative promo-slider">
+      <button class="nav-button prev" id="prevVoucherBtn">
+        <i data-feather="chevron-left" class="w-6 h-6"></i>
+      </button>
+      
+      <button class="nav-button next" id="nextVoucherBtn">
+        <i data-feather="chevron-right" class="w-6 h-6"></i>
+      </button>
 
-        <div class="promo-container" id="voucherContainer">
-          @foreach($vouchers as $voucher)
-            <div class="promo-card clickable" data-voucher='@json($voucher)' onclick="event.stopPropagation(); showClaimForm(JSON.parse(this.dataset.voucher))">
-              @if($voucher->status === 'aktif')
-                <span class="featured-badge">Tersedia</span>
-              @endif
+      <div class="promo-container" id="voucherContainer">
+        @foreach($vouchers as $voucher)
+          @php
+            // Gunakan logika yang sama dengan controller - voucher expired jika hari ini > tanggal expiry
+            $isExpired = \Carbon\Carbon::now()->startOfDay()->greaterThan(\Carbon\Carbon::parse($voucher->expiry_date));
+            $currentStatus = $isExpired ? 'kadaluarsa' : $voucher->status;
+            $canBeClaimed = !$isExpired && $voucher->status === 'aktif';
+          @endphp
+          
+          <div class="promo-card {{ $canBeClaimed ? 'clickable' : 'non-clickable promo-disabled' }}" 
+               data-voucher='@json($voucher)' 
+               @if($canBeClaimed) onclick="event.stopPropagation(); showClaimForm(JSON.parse(this.dataset.voucher))" @endif>
+            
+            @if($canBeClaimed)
+              <span class="featured-badge">Tersedia</span>
+            @endif
+            
+            @if($isExpired)
+              <span class="badge-expired status-badge">Kadaluarsa</span>
+            @elseif($voucher->status === 'tidak_aktif')
+              <span class="badge-coming-soon status-badge">Tidak Aktif</span>
+            @endif
+            
+            <div class="promo-image">
+              <img src="{{ $voucher->image_url }}" alt="{{ $voucher->name }}" loading="lazy">
               
-              <div class="promo-image">
-                <img src="{{ $voucher->image_url }}" alt="{{ $voucher->name }}" loading="lazy">
+              @if(!$canBeClaimed)
+                <div class="promo-overlay-disabled">
+                  <div class="overlay-content">
+                    @if($isExpired)
+                      <i data-feather="x-circle" class="w-8 h-8 mb-2 mx-auto"></i>
+                      <span class="text-sm font-medium">Voucher Kadaluarsa</span>
+                      <p class="text-xs mt-1">Berlaku sampai: {{ \Carbon\Carbon::parse($voucher->expiry_date)->format('d M Y') }}</p>
+                    @elseif($voucher->status === 'tidak_aktif')
+                      <i data-feather="pause" class="w-8 h-8 mb-2 mx-auto"></i>
+                      <span class="text-sm font-medium">Tidak Aktif</span>
+                    @elseif($voucher->status === 'kadaluarsa')
+                      <i data-feather="clock" class="w-8 h-8 mb-2 mx-auto"></i>
+                      <span class="text-sm font-medium">Kadaluarsa</span>
+                    @endif
+                  </div>
+                </div>
+              @endif
+            </div>
+            
+            <div class="p-6">
+              <h3 class="text-xl font-bold mb-2 text-text-dark">{{ $voucher->name }}</h3>
+              <p class="text-gray-600 mb-4">{{ Str::limit($voucher->deskripsi, 100) }}</p>
+              
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <span class="text-primary font-bold text-xl block">Gratis</span>
+                </div>
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                       {{ $currentStatus === 'aktif' ? 'bg-green-100 text-green-800' : 
+                          ($currentStatus === 'tidak_aktif' ? 'bg-gray-100 text-gray-800' : 'bg-red-100 text-red-800') }}">
+                  {{ $currentStatus === 'aktif' ? 'Aktif' : 
+                     ($currentStatus === 'tidak_aktif' ? 'Tidak Aktif' : 'Kadaluarsa') }}
+                </span>
               </div>
               
-              <div class="p-6">
-                <h3 class="text-xl font-bold mb-2 text-text-dark">{{ $voucher->name }}</h3>
-                <p class="text-gray-600 mb-4">{{ Str::limit($voucher->deskripsi, 100) }}</p>
-                
-                <div class="flex items-center justify-between mb-4">
-                  <div>
-                    <span class="text-primary font-bold text-xl block">Gratis</span>
-                  </div>
-                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                         {{ $voucher->status === 'aktif' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
-                    {{ $voucher->status === 'aktif' ? 'Aktif' : 'Tidak Aktif' }}
-                  </span>
-                </div>
-                
-                <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
-                  <span>
-                    @if($voucher->expiry_date)
-                      Sampai: {{ \Carbon\Carbon::parse($voucher->expiry_date)->format('d M Y') }}
+              <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                <span>
+                  @if($voucher->expiry_date)
+                    @if($isExpired)
+                      Kadaluarsa: {{ \Carbon\Carbon::parse($voucher->expiry_date)->format('d M Y') }}
                     @else
-                      Tidak terbatas
+                      Sampai: {{ \Carbon\Carbon::parse($voucher->expiry_date)->format('d M Y') }}
                     @endif
+                  @else
+                    Tidak terbatas
+                  @endif
+                </span>
+                <span>
+                  <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold">
+                    {{ $voucher->claims_count ?? 0 }} Diklaim
                   </span>
-                  <span>
-                    <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold">
-                      {{ $voucher->claims_count ?? 0 }} Diklaim
-                    </span>
-                  </span>
-                </div>
-                
-                <div class="w-full text-center font-semibold py-3 rounded-lg transition-colors duration-300 bg-primary text-black hover:bg-yellow-500">
-                  🎉 Klaim Sekarang
-                </div>
+                </span>
+              </div>
+              
+              <div class="w-full text-center font-semibold py-3 rounded-lg transition-colors duration-300 
+                         {{ $canBeClaimed ? 'bg-primary text-black hover:bg-yellow-500' : 'bg-gray-300 text-gray-500 cursor-not-allowed' }}">
+                {{ $canBeClaimed ? '🎉 Klaim Sekarang' : 'Tidak Tersedia' }}
               </div>
             </div>
-          @endforeach
-        </div>
+          </div>
+        @endforeach
+      </div>
 
-        <div class="dots-container" id="voucherDotsContainer"></div>
+      <div class="dots-container" id="voucherDotsContainer"></div>
+    </div>
+  @else
+    <div class="text-center py-12">
+      <div class="inline-block p-4 bg-gray-100 rounded-full mb-4">
+        <i data-feather="gift" class="w-12 h-12 text-gray-400"></i>
       </div>
-    @else
-      <div class="text-center py-12">
-        <div class="inline-block p-4 bg-gray-100 rounded-full mb-4">
-          <i data-feather="gift" class="w-12 h-12 text-gray-400"></i>
-        </div>
-        <h3 class="text-xl font-semibold text-gray-600 mb-2">Tidak ada voucher saat ini</h3>
-        <p class="text-gray-500">Silakan kembali lagi nanti untuk melihat voucher terbaru</p>
-      </div>
-    @endif
-  </div>
+      <h3 class="text-xl font-semibold text-gray-600 mb-2">Tidak ada voucher saat ini</h3>
+      <p class="text-gray-500">Silakan kembali lagi nanti untuk melihat voucher terbaru</p>
+    </div>
+  @endif
+</div>
 </section>
 
 <!-- Claim Form Pop-up -->
