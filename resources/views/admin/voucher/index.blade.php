@@ -320,6 +320,37 @@
                 @enderror
             </div>
 
+            <!-- Kuota Section -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Tipe Kuota <span class="text-red-500">*</span></label>
+                <div class="grid grid-cols-2 gap-3">
+                    <label class="flex items-center p-3 border border-gray-300 rounded-md cursor-pointer hover:bg-gray-50">
+                        <input type="radio" name="quota_type" value="unlimited" class="text-blue-600 focus:ring-blue-500" 
+                               {{ old('quota_type', 'unlimited') == 'unlimited' ? 'checked' : '' }} required>
+                        <span class="ml-2 text-sm font-medium text-gray-700">Unlimited</span>
+                    </label>
+                    <label class="flex items-center p-3 border border-gray-300 rounded-md cursor-pointer hover:bg-gray-50">
+                        <input type="radio" name="quota_type" value="limited" class="text-blue-600 focus:ring-blue-500" 
+                               {{ old('quota_type') == 'limited' ? 'checked' : '' }} required>
+                        <span class="ml-2 text-sm font-medium text-gray-700">Terbatas</span>
+                    </label>
+                </div>
+                @error('quota_type')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div id="quotaInputContainer" class="mb-4 hidden">
+                <label for="create_quota" class="block text-sm font-medium text-gray-700 mb-2">Jumlah Kuota <span class="text-red-500">*</span></label>
+                <input type="number" id="create_quota" name="quota" value="{{ old('quota') }}" min="1"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 @error('quota') border-red-500 @enderror" 
+                       placeholder="Contoh: 50">
+                <p class="mt-1 text-xs text-gray-500">💡 Masukkan jumlah voucher yang tersedia</p>
+                @error('quota')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
             <div class="mb-4">
                 <label for="create_expiry_date" class="block text-sm font-medium text-gray-700 mb-2">Tanggal Kadaluarsa <span class="text-red-500">*</span></label>
                 <input type="date" id="create_expiry_date" name="expiry_date" value="{{ old('expiry_date') }}"
@@ -400,6 +431,29 @@
                     <option value="kadaluarsa">Kadaluarsa</option>
                 </select>
                 <p class="mt-1 text-xs text-gray-500">💡 Status akan otomatis berubah menjadi "Kadaluarsa" jika tanggal sudah lewat</p>
+            </div>
+
+            <!-- Kuota Section -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Tipe Kuota <span class="text-red-500">*</span></label>
+                <div class="grid grid-cols-2 gap-3">
+                    <label class="flex items-center p-3 border border-gray-300 rounded-md cursor-pointer hover:bg-gray-50">
+                        <input type="radio" name="quota_type" value="unlimited" class="text-blue-600 focus:ring-blue-500" required>
+                        <span class="ml-2 text-sm font-medium text-gray-700">Unlimited</span>
+                    </label>
+                    <label class="flex items-center p-3 border border-gray-300 rounded-md cursor-pointer hover:bg-gray-50">
+                        <input type="radio" name="quota_type" value="limited" class="text-blue-600 focus:ring-blue-500" required>
+                        <span class="ml-2 text-sm font-medium text-gray-700">Terbatas</span>
+                    </label>
+                </div>
+            </div>
+
+            <div id="editQuotaInputContainer" class="mb-4 hidden">
+                <label for="edit_quota" class="block text-sm font-medium text-gray-700 mb-2">Jumlah Kuota <span class="text-red-500">*</span></label>
+                <input type="number" id="edit_quota" name="quota" min="1"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                       placeholder="Contoh: 50">
+                <p class="mt-1 text-xs text-gray-500">💡 Masukkan jumlah voucher yang tersedia</p>
             </div>
 
             <div class="mb-4">
@@ -542,9 +596,52 @@ function searchClaims() {
     });
 }
 
+// Kuota Type Toggle Functions
+function toggleQuotaInput() {
+    const quotaType = document.querySelector('input[name="quota_type"]:checked');
+    if (!quotaType) return;
+    
+    const quotaInputContainer = document.getElementById('quotaInputContainer');
+    const quotaInput = document.getElementById('create_quota');
+    
+    if (quotaType.value === 'limited') {
+        quotaInputContainer.classList.remove('hidden');
+        if (quotaInput) quotaInput.required = true;
+    } else {
+        quotaInputContainer.classList.add('hidden');
+        if (quotaInput) {
+            quotaInput.required = false;
+            quotaInput.value = '';
+        }
+    }
+}
+
+function toggleEditQuotaInput() {
+    const quotaType = document.querySelector('input[name="quota_type"]:checked');
+    if (!quotaType) return;
+    
+    const quotaInputContainer = document.getElementById('editQuotaInputContainer');
+    const quotaInput = document.getElementById('edit_quota');
+    
+    if (quotaType.value === 'limited') {
+        quotaInputContainer.classList.remove('hidden');
+        if (quotaInput) quotaInput.required = true;
+    } else {
+        quotaInputContainer.classList.add('hidden');
+        if (quotaInput) {
+            quotaInput.required = false;
+            quotaInput.value = '';
+        }
+    }
+}
+
 // Create Modal Functions
 function openCreateModal() {
     document.getElementById('createVoucherModal').classList.remove('hidden');
+    // Initialize quota type
+    setTimeout(() => {
+        toggleQuotaInput();
+    }, 100);
 }
 
 function closeCreateModal() {
@@ -553,6 +650,10 @@ function closeCreateModal() {
     if (preview) preview.classList.add('hidden');
     const form = document.getElementById('createForm');
     if (form) form.reset();
+    // Reset quota type to default
+    const defaultQuotaType = document.querySelector('input[name="quota_type"][value="unlimited"]');
+    if (defaultQuotaType) defaultQuotaType.checked = true;
+    toggleQuotaInput();
 }
 
 function previewCreateImage(event) {
@@ -570,12 +671,26 @@ function previewCreateImage(event) {
 }
 
 // Edit Modal Functions
-function openEditModal(id, name, deskripsi, status, imagePath, expiryDate) {
+function openEditModal(id, name, deskripsi, status, imagePath, expiryDate, isUnlimited = true, quota = null) {
     document.getElementById('editVoucherModal').classList.remove('hidden');
     document.getElementById('edit_name').value = name;
     document.getElementById('edit_deskripsi').value = deskripsi;
     document.getElementById('edit_status').value = status;
     document.getElementById('edit_expiry_date').value = expiryDate;
+    
+    // Set quota type and value
+    const quotaType = isUnlimited ? 'unlimited' : 'limited';
+    const quotaRadio = document.querySelector(`input[name="quota_type"][value="${quotaType}"]`);
+    if (quotaRadio) {
+        quotaRadio.checked = true;
+    }
+    
+    if (!isUnlimited && quota) {
+        const quotaInput = document.getElementById('edit_quota');
+        if (quotaInput) {
+            quotaInput.value = quota;
+        }
+    }
     
     const imageUrl = imagePath ? `/storage/${imagePath}` : '';
     const currentImage = document.getElementById('currentImage');
@@ -584,6 +699,11 @@ function openEditModal(id, name, deskripsi, status, imagePath, expiryDate) {
     if (editForm) editForm.action = `/admin/voucher/${id}`;
     const previewWrap = document.getElementById('editImagePreview');
     if (previewWrap) previewWrap.classList.add('hidden');
+    
+    // Initialize edit quota input
+    setTimeout(() => {
+        toggleEditQuotaInput();
+    }, 100);
 }
 
 function closeEditModal() {
@@ -641,9 +761,38 @@ function closeDeleteModal() {
     }
 });
 
+// Initialize quota functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Create modal quota event listeners
+    const createQuotaRadios = document.querySelectorAll('#createForm input[name="quota_type"]');
+    createQuotaRadios.forEach(radio => {
+        radio.addEventListener('change', toggleQuotaInput);
+    });
+    
+    // Edit modal quota event listeners
+    const editQuotaRadios = document.querySelectorAll('#editForm input[name="quota_type"]');
+    editQuotaRadios.forEach(radio => {
+        radio.addEventListener('change', toggleEditQuotaInput);
+    });
+    
+    // Initialize on page load
+    toggleQuotaInput();
+});
+
 // Show create modal if there are validation errors
 @if($errors->any())
-    document.addEventListener('DOMContentLoaded', function() { openCreateModal(); });
+    document.addEventListener('DOMContentLoaded', function() { 
+        openCreateModal(); 
+        // Set quota type based on old input if exists
+        setTimeout(() => {
+            const oldQuotaType = '{{ old("quota_type", "unlimited") }}';
+            const quotaRadio = document.querySelector(`input[name="quota_type"][value="${oldQuotaType}"]`);
+            if (quotaRadio) {
+                quotaRadio.checked = true;
+                toggleQuotaInput();
+            }
+        }, 100);
+    });
 @endif
 </script>
 @endsection
