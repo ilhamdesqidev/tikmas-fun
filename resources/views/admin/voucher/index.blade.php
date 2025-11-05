@@ -1,3 +1,4 @@
+
 @extends('layouts.app')
 
 @section('title', 'Management Voucher')
@@ -98,11 +99,17 @@
                                 </button>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                @if($voucher->status === 'aktif')
+                                @php
+                                    // Auto check expiry untuk display
+                                    $isExpired = \Carbon\Carbon::now()->greaterThan(\Carbon\Carbon::parse($voucher->expiry_date));
+                                    $currentStatus = $isExpired ? 'kadaluarsa' : $voucher->status;
+                                @endphp
+                                
+                                @if($currentStatus === 'aktif')
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                                         Aktif
                                     </span>
-                                @elseif($voucher->status === 'tidak_aktif')
+                                @elseif($currentStatus === 'tidak_aktif')
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
                                         Tidak Aktif
                                     </span>
@@ -111,9 +118,26 @@
                                         Kadaluarsa
                                     </span>
                                 @endif
+                                
+                                @if($isExpired && $voucher->status !== 'kadaluarsa')
+                                    <span class="block text-xs text-orange-600 mt-1">
+                                        ⚠️ Auto-expired
+                                    </span>
+                                @endif
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ \Carbon\Carbon::parse($voucher->expiry_date)->format('d M Y') }}
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                @php
+                                    $expiryDate = \Carbon\Carbon::parse($voucher->expiry_date);
+                                    $isExpired = \Carbon\Carbon::now()->greaterThan($expiryDate);
+                                @endphp
+                                <span class="{{ $isExpired ? 'text-red-600 font-semibold' : 'text-gray-500' }}">
+                                    {{ $expiryDate->format('d M Y') }}
+                                </span>
+                                @if($isExpired)
+                                    <span class="block text-xs text-red-500">
+                                        (Sudah Lewat)
+                                    </span>
+                                @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                 <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold">
@@ -256,6 +280,7 @@
                     <option value="tidak_aktif" {{ old('status') == 'tidak_aktif' ? 'selected' : '' }}>Tidak Aktif</option>
                     <option value="kadaluarsa" {{ old('status') == 'kadaluarsa' ? 'selected' : '' }}>Kadaluarsa</option>
                 </select>
+                <p class="mt-1 text-xs text-gray-500">💡 Status akan otomatis berubah menjadi "Kadaluarsa" jika tanggal sudah lewat</p>
                 @error('status')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
@@ -265,6 +290,7 @@
                 <label for="create_expiry_date" class="block text-sm font-medium text-gray-700 mb-2">Tanggal Kadaluarsa <span class="text-red-500">*</span></label>
                 <input type="date" id="create_expiry_date" name="expiry_date" value="{{ old('expiry_date') }}"
                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 @error('expiry_date') border-red-500 @enderror" required>
+                <p class="mt-1 text-xs text-gray-500">⏰ Voucher akan otomatis kadaluarsa setelah tanggal ini</p>
                 @error('expiry_date')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
@@ -339,11 +365,13 @@
                     <option value="tidak_aktif">Tidak Aktif</option>
                     <option value="kadaluarsa">Kadaluarsa</option>
                 </select>
+                <p class="mt-1 text-xs text-gray-500">💡 Status akan otomatis berubah menjadi "Kadaluarsa" jika tanggal sudah lewat</p>
             </div>
 
             <div class="mb-4">
                 <label for="edit_expiry_date" class="block text-sm font-medium text-gray-700 mb-2">Tanggal Kadaluarsa <span class="text-red-500">*</span></label>
                 <input type="date" id="edit_expiry_date" name="expiry_date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                <p class="mt-1 text-xs text-gray-500">⏰ Voucher akan otomatis kadaluarsa setelah tanggal ini</p>
             </div>
 
             <div class="mb-4">
@@ -487,8 +515,10 @@ function openCreateModal() {
 
 function closeCreateModal() {
     document.getElementById('createVoucherModal').classList.add('hidden');
-    document.getElementById('createImagePreview').classList.add('hidden');
-    document.getElementById('createForm').reset();
+    const preview = document.getElementById('createImagePreview');
+    if (preview) preview.classList.add('hidden');
+    const form = document.getElementById('createForm');
+    if (form) form.reset();
 }
 
 function previewCreateImage(event) {
@@ -496,8 +526,10 @@ function previewCreateImage(event) {
     if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            document.getElementById('createPreview').src = e.target.result;
-            document.getElementById('createImagePreview').classList.remove('hidden');
+            const img = document.getElementById('createPreview');
+            const wrapper = document.getElementById('createImagePreview');
+            if (img) img.src = e.target.result;
+            if (wrapper) wrapper.classList.remove('hidden');
         }
         reader.readAsDataURL(file);
     }
@@ -511,10 +543,13 @@ function openEditModal(id, name, deskripsi, status, imagePath, expiryDate) {
     document.getElementById('edit_status').value = status;
     document.getElementById('edit_expiry_date').value = expiryDate;
     
-    const imageUrl = `/storage_laravel/app/public/${imagePath}`;
-    document.getElementById('currentImage').src = imageUrl;
-    document.getElementById('editForm').action = `/admin/voucher/${id}`;
-    document.getElementById('editImagePreview').classList.add('hidden');
+    const imageUrl = imagePath ? `/storage/${imagePath}` : '';
+    const currentImage = document.getElementById('currentImage');
+    if (currentImage) currentImage.src = imageUrl || 'https://via.placeholder.com/400x200?text=No+Image';
+    const editForm = document.getElementById('editForm');
+    if (editForm) editForm.action = `/admin/voucher/${id}`;
+    const previewWrap = document.getElementById('editImagePreview');
+    if (previewWrap) previewWrap.classList.add('hidden');
 }
 
 function closeEditModal() {
@@ -526,8 +561,10 @@ function previewEditImage(event) {
     if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            document.getElementById('editPreview').src = e.target.result;
-            document.getElementById('editImagePreview').classList.remove('hidden');
+            const img = document.getElementById('editPreview');
+            const wrapper = document.getElementById('editImagePreview');
+            if (img) img.src = e.target.result;
+            if (wrapper) wrapper.classList.remove('hidden');
         }
         reader.readAsDataURL(file);
     }
@@ -555,26 +592,24 @@ function closeDeleteModal() {
     document.getElementById('deleteModal').classList.add('hidden');
 }
 
-// Close modals when clicking outside
-document.getElementById('createVoucherModal').addEventListener('click', function(e) {
-    if (e.target === this) closeCreateModal();
-});
-
-document.getElementById('editVoucherModal').addEventListener('click', function(e) {
-    if (e.target === this) closeEditModal();
-});
-
-document.getElementById('descriptionModal').addEventListener('click', function(e) {
-    if (e.target === this) closeDescriptionModal();
-});
-
-document.getElementById('deleteModal').addEventListener('click', function(e) {
-    if (e.target === this) closeDeleteModal();
+// Close modals when clicking outside (safe guards if element exists)
+['createVoucherModal','editVoucherModal','descriptionModal','deleteModal'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+        el.addEventListener('click', function(e) {
+            if (e.target === this) {
+                if (id === 'createVoucherModal') closeCreateModal();
+                if (id === 'editVoucherModal') closeEditModal();
+                if (id === 'descriptionModal') closeDescriptionModal();
+                if (id === 'deleteModal') closeDeleteModal();
+            }
+        });
+    }
 });
 
 // Show create modal if there are validation errors
 @if($errors->any())
-    openCreateModal();
+    document.addEventListener('DOMContentLoaded', function() { openCreateModal(); });
 @endif
 </script>
 @endsection
