@@ -595,7 +595,7 @@ function searchClaims() {
 
 // Kuota Type Toggle Functions
 function toggleQuotaInput() {
-    const quotaType = document.querySelector('#createForm input[name="quota_type"]:checked');
+    const quotaType = document.querySelector('input[name="quota_type"]:checked');
     if (!quotaType) return;
     
     const quotaInputContainer = document.getElementById('quotaInputContainer');
@@ -614,7 +614,7 @@ function toggleQuotaInput() {
 }
 
 function toggleEditQuotaInput() {
-    const quotaType = document.querySelector('#editForm input[name="quota_type"]:checked');
+    const quotaType = document.querySelector('input[name="quota_type"]:checked');
     if (!quotaType) return;
     
     const quotaInputContainer = document.getElementById('editQuotaInputContainer');
@@ -648,7 +648,7 @@ function closeCreateModal() {
     const form = document.getElementById('createForm');
     if (form) form.reset();
     // Reset quota type to default
-    const defaultQuotaType = document.querySelector('#createForm input[name="quota_type"][value="unlimited"]');
+    const defaultQuotaType = document.querySelector('input[name="quota_type"][value="unlimited"]');
     if (defaultQuotaType) defaultQuotaType.checked = true;
     toggleQuotaInput();
 }
@@ -675,9 +675,9 @@ function openEditModal(id, name, deskripsi, status, imagePath, expiryDate, isUnl
     document.getElementById('edit_status').value = status;
     document.getElementById('edit_expiry_date').value = expiryDate;
     
-    // Set quota type and value - FIXED: menggunakan selector yang lebih spesifik
+    // Set quota type and value
     const quotaType = isUnlimited ? 'unlimited' : 'limited';
-    const quotaRadio = document.querySelector(`#editForm input[name="quota_type"][value="${quotaType}"]`);
+    const quotaRadio = document.querySelector(`input[name="quota_type"][value="${quotaType}"]`);
     if (quotaRadio) {
         quotaRadio.checked = true;
     }
@@ -697,7 +697,7 @@ function openEditModal(id, name, deskripsi, status, imagePath, expiryDate, isUnl
     const previewWrap = document.getElementById('editImagePreview');
     if (previewWrap) previewWrap.classList.add('hidden');
     
-    // Initialize edit quota input - FIXED
+    // Initialize edit quota input
     setTimeout(() => {
         toggleEditQuotaInput();
     }, 100);
@@ -743,30 +743,30 @@ function closeDeleteModal() {
     document.getElementById('deleteModal').classList.add('hidden');
 }
 
-// Close modals when clicking outside
-document.addEventListener('DOMContentLoaded', function() {
-    // Close modals when clicking outside
-    ['createVoucherModal','editVoucherModal','descriptionModal','deleteModal'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-            el.addEventListener('click', function(e) {
-                if (e.target === this) {
-                    if (id === 'createVoucherModal') closeCreateModal();
-                    if (id === 'editVoucherModal') closeEditModal();
-                    if (id === 'descriptionModal') closeDescriptionModal();
-                    if (id === 'deleteModal') closeDeleteModal();
-                }
-            });
-        }
-    });
+// Close modals when clicking outside (safe guards if element exists)
+['createVoucherModal','editVoucherModal','descriptionModal','deleteModal'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+        el.addEventListener('click', function(e) {
+            if (e.target === this) {
+                if (id === 'createVoucherModal') closeCreateModal();
+                if (id === 'editVoucherModal') closeEditModal();
+                if (id === 'descriptionModal') closeDescriptionModal();
+                if (id === 'deleteModal') closeDeleteModal();
+            }
+        });
+    }
+});
 
+// Initialize quota functionality
+document.addEventListener('DOMContentLoaded', function() {
     // Create modal quota event listeners
     const createQuotaRadios = document.querySelectorAll('#createForm input[name="quota_type"]');
     createQuotaRadios.forEach(radio => {
         radio.addEventListener('change', toggleQuotaInput);
     });
     
-    // Edit modal quota event listeners - FIXED: menggunakan selector yang spesifik
+    // Edit modal quota event listeners
     const editQuotaRadios = document.querySelectorAll('#editForm input[name="quota_type"]');
     editQuotaRadios.forEach(radio => {
         radio.addEventListener('change', toggleEditQuotaInput);
@@ -774,51 +774,22 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize on page load
     toggleQuotaInput();
-    
-    // Show create modal if there are validation errors
-    @if($errors->any())
+});
+
+// Show create modal if there are validation errors
+@if($errors->any())
+    document.addEventListener('DOMContentLoaded', function() { 
         openCreateModal(); 
         // Set quota type based on old input if exists
         setTimeout(() => {
             const oldQuotaType = '{{ old("quota_type", "unlimited") }}';
-            const quotaRadio = document.querySelector(`#createForm input[name="quota_type"][value="${oldQuotaType}"]`);
+            const quotaRadio = document.querySelector(`input[name="quota_type"][value="${oldQuotaType}"]`);
             if (quotaRadio) {
                 quotaRadio.checked = true;
                 toggleQuotaInput();
             }
         }, 100);
-    @endif
-});
-
-// Keyboard event untuk menutup modal dengan ESC
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        if (!document.getElementById('createVoucherModal').classList.contains('hidden')) {
-            closeCreateModal();
-        } else if (!document.getElementById('editVoucherModal').classList.contains('hidden')) {
-            closeEditModal();
-        } else if (!document.getElementById('descriptionModal').classList.contains('hidden')) {
-            closeDescriptionModal();
-        } else if (!document.getElementById('deleteModal').classList.contains('hidden')) {
-            closeDeleteModal();
-        }
-    }
-});
-
-// Prevent form submission ketika modal tertutup
-document.addEventListener('DOMContentLoaded', function() {
-    const forms = ['createForm', 'editForm'];
-    forms.forEach(formId => {
-        const form = document.getElementById(formId);
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                const modal = formId === 'createForm' ? 'createVoucherModal' : 'editVoucherModal';
-                if (document.getElementById(modal).classList.contains('hidden')) {
-                    e.preventDefault();
-                }
-            });
-        }
     });
-});
+@endif
 </script>
 @endsection
