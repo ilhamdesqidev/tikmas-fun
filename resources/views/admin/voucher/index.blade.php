@@ -1,23 +1,3 @@
-
-@php
-    // Gunakan helper function atau logika yang sama
-    use Carbon\Carbon;
-    $isExpired = Carbon::now()->startOfDay()->greaterThan(Carbon::parse($voucher->expiry_date));
-    $currentStatus = $isExpired ? 'kadaluarsa' : $voucher->status;
-@endphp
-
-// Di bagian tanggal kadaluarsa
-@php
-    $expiryDate = \Carbon\Carbon::parse($voucher->expiry_date);
-    $isExpired = \Carbon\Carbon::now()->startOfDay()->greaterThan($expiryDate);
-@endphp
-
-// Di bagian claims
-@php
-    $voucherExpired = $claim->voucher && \Carbon\Carbon::now()->startOfDay()->greaterThan(\Carbon\Carbon::parse($claim->voucher->expiry_date));
-    $isUsed = $claim->is_used || $claim->scanned_at;
-@endphp
-
 @extends('layouts.app')
 
 @section('title', 'Management Voucher')
@@ -105,6 +85,11 @@
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         @forelse($vouchers ?? [] as $index => $voucher)
+                        @php
+                            // Gunakan logika yang sama dengan controller - voucher expired jika hari ini > tanggal expiry
+                            $isExpired = \Carbon\Carbon::now()->startOfDay()->greaterThan(\Carbon\Carbon::parse($voucher->expiry_date));
+                            $currentStatus = $isExpired ? 'kadaluarsa' : $voucher->status;
+                        @endphp
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $index + 1 }}</td>
                             <td class="px-6 py-4 whitespace-nowrap">
@@ -118,12 +103,6 @@
                                 </button>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                @php
-                                    // Auto check expiry untuk display
-                                    $isExpired = \Carbon\Carbon::now()->greaterThan(\Carbon\Carbon::parse($voucher->expiry_date));
-                                    $currentStatus = $isExpired ? 'kadaluarsa' : $voucher->status;
-                                @endphp
-                                
                                 @if($currentStatus === 'aktif')
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                                         Aktif
@@ -147,7 +126,7 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm">
                                 @php
                                     $expiryDate = \Carbon\Carbon::parse($voucher->expiry_date);
-                                    $isExpired = \Carbon\Carbon::now()->greaterThan($expiryDate);
+                                    $isExpired = \Carbon\Carbon::now()->startOfDay()->greaterThan($expiryDate);
                                 @endphp
                                 <span class="{{ $isExpired ? 'text-red-600 font-semibold' : 'text-gray-500' }}">
                                     {{ $expiryDate->format('d M Y') }}
@@ -221,7 +200,8 @@
                     <tbody class="bg-white divide-y divide-gray-200" id="claimsTableBody">
                         @forelse($claims ?? [] as $index => $claim)
                         @php
-                            $voucherExpired = $claim->voucher && \Carbon\Carbon::now()->greaterThan($claim->voucher->expiry_date);
+                            // Gunakan logika yang sama - voucher expired jika hari ini > tanggal expiry
+                            $voucherExpired = $claim->voucher && \Carbon\Carbon::now()->startOfDay()->greaterThan(\Carbon\Carbon::parse($claim->voucher->expiry_date));
                             $isUsed = $claim->is_used || $claim->scanned_at;
                         @endphp
                         <tr class="claim-row {{ $voucherExpired && !$isUsed ? 'bg-red-50' : '' }}">
@@ -239,6 +219,7 @@
                                 @if($claim->voucher)
                                     @php
                                         $expiryDate = \Carbon\Carbon::parse($claim->voucher->expiry_date);
+                                        $voucherExpired = \Carbon\Carbon::now()->startOfDay()->greaterThan($expiryDate);
                                     @endphp
                                     <span class="{{ $voucherExpired ? 'text-red-600 font-semibold' : 'text-gray-500' }}">
                                         {{ $expiryDate->format('d M Y') }}
