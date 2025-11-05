@@ -143,7 +143,7 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <button onclick="openEditModal({{ $voucher->id }}, '{{ addslashes($voucher->name) }}', '{{ addslashes($voucher->deskripsi) }}', '{{ $voucher->status }}', '{{ $voucher->image }}', '{{ $voucher->expiry_date }}')" 
+                                <button onclick="openEditModal({{ $voucher->id }}, '{{ addslashes($voucher->name) }}', '{{ addslashes($voucher->deskripsi) }}', '{{ $voucher->status }}', '{{ $voucher->image }}', '{{ $voucher->expiry_date }}', {{ $voucher->is_unlimited ? 'true' : 'false' }}, {{ $voucher->quota ?? 'null' }})" 
                                         class="text-blue-600 hover:text-blue-900 mr-3">
                                     Edit
                                 </button>
@@ -320,36 +320,33 @@
                 @enderror
             </div>
 
-            <!-- Kuota Section -->
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Tipe Kuota <span class="text-red-500">*</span></label>
-                <div class="grid grid-cols-2 gap-3">
-                    <label class="flex items-center p-3 border border-gray-300 rounded-md cursor-pointer hover:bg-gray-50">
-                        <input type="radio" name="quota_type" value="unlimited" class="text-blue-600 focus:ring-blue-500" 
-                               {{ old('quota_type', 'unlimited') == 'unlimited' ? 'checked' : '' }} required>
-                        <span class="ml-2 text-sm font-medium text-gray-700">Unlimited</span>
-                    </label>
-                    <label class="flex items-center p-3 border border-gray-300 rounded-md cursor-pointer hover:bg-gray-50">
-                        <input type="radio" name="quota_type" value="limited" class="text-blue-600 focus:ring-blue-500" 
-                               {{ old('quota_type') == 'limited' ? 'checked' : '' }} required>
-                        <span class="ml-2 text-sm font-medium text-gray-700">Terbatas</span>
-                    </label>
+            <!-- Kuota Section - Edit Modal -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Tipe Kuota <span class="text-red-500">*</span></label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="flex items-center p-3 border border-gray-300 rounded-md cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="quota_type" value="unlimited" class="text-blue-600 focus:ring-blue-500" required>
+                            <span class="ml-2 text-sm font-medium text-gray-700">Unlimited</span>
+                        </label>
+                        <label class="flex items-center p-3 border border-gray-300 rounded-md cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="quota_type" value="limited" class="text-blue-600 focus:ring-blue-500" required>
+                            <span class="ml-2 text-sm font-medium text-gray-700">Terbatas</span>
+                        </label>
+                    </div>
                 </div>
-                @error('quota_type')
-                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                @enderror
-            </div>
 
-            <div id="quotaInputContainer" class="mb-4 hidden">
-                <label for="create_quota" class="block text-sm font-medium text-gray-700 mb-2">Jumlah Kuota <span class="text-red-500">*</span></label>
-                <input type="number" id="create_quota" name="quota" value="{{ old('quota') }}" min="1"
-                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 @error('quota') border-red-500 @enderror" 
-                       placeholder="Contoh: 50">
-                <p class="mt-1 text-xs text-gray-500">💡 Masukkan jumlah voucher yang tersedia</p>
-                @error('quota')
-                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                @enderror
-            </div>
+                <div id="editQuotaInputContainer" class="mb-4 hidden">
+                    <label for="edit_quota" class="block text-sm font-medium text-gray-700 mb-2">Jumlah Kuota <span class="text-red-500">*</span></label>
+                    <input type="number" id="edit_quota" name="quota" min="1"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                        placeholder="Contoh: 50">
+                    <p class="mt-1 text-xs text-gray-500">💡 Masukkan jumlah voucher yang tersedia</p>
+                    @error('quota')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+               
 
             <div class="mb-4">
                 <label for="create_expiry_date" class="block text-sm font-medium text-gray-700 mb-2">Tanggal Kadaluarsa <span class="text-red-500">*</span></label>
@@ -598,7 +595,7 @@ function searchClaims() {
 
 // Kuota Type Toggle Functions
 function toggleQuotaInput() {
-    const quotaType = document.querySelector('input[name="quota_type"]:checked');
+    const quotaType = document.querySelector('#createForm input[name="quota_type"]:checked');
     if (!quotaType) return;
     
     const quotaInputContainer = document.getElementById('quotaInputContainer');
@@ -617,7 +614,7 @@ function toggleQuotaInput() {
 }
 
 function toggleEditQuotaInput() {
-    const quotaType = document.querySelector('input[name="quota_type"]:checked');
+    const quotaType = document.querySelector('#editForm input[name="quota_type"]:checked');
     if (!quotaType) return;
     
     const quotaInputContainer = document.getElementById('editQuotaInputContainer');
@@ -651,7 +648,7 @@ function closeCreateModal() {
     const form = document.getElementById('createForm');
     if (form) form.reset();
     // Reset quota type to default
-    const defaultQuotaType = document.querySelector('input[name="quota_type"][value="unlimited"]');
+    const defaultQuotaType = document.querySelector('#createForm input[name="quota_type"][value="unlimited"]');
     if (defaultQuotaType) defaultQuotaType.checked = true;
     toggleQuotaInput();
 }
@@ -678,9 +675,9 @@ function openEditModal(id, name, deskripsi, status, imagePath, expiryDate, isUnl
     document.getElementById('edit_status').value = status;
     document.getElementById('edit_expiry_date').value = expiryDate;
     
-    // Set quota type and value
+    // Set quota type and value - FIXED: menggunakan selector yang lebih spesifik
     const quotaType = isUnlimited ? 'unlimited' : 'limited';
-    const quotaRadio = document.querySelector(`input[name="quota_type"][value="${quotaType}"]`);
+    const quotaRadio = document.querySelector(`#editForm input[name="quota_type"][value="${quotaType}"]`);
     if (quotaRadio) {
         quotaRadio.checked = true;
     }
@@ -700,7 +697,7 @@ function openEditModal(id, name, deskripsi, status, imagePath, expiryDate, isUnl
     const previewWrap = document.getElementById('editImagePreview');
     if (previewWrap) previewWrap.classList.add('hidden');
     
-    // Initialize edit quota input
+    // Initialize edit quota input - FIXED
     setTimeout(() => {
         toggleEditQuotaInput();
     }, 100);
@@ -746,30 +743,30 @@ function closeDeleteModal() {
     document.getElementById('deleteModal').classList.add('hidden');
 }
 
-// Close modals when clicking outside (safe guards if element exists)
-['createVoucherModal','editVoucherModal','descriptionModal','deleteModal'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-        el.addEventListener('click', function(e) {
-            if (e.target === this) {
-                if (id === 'createVoucherModal') closeCreateModal();
-                if (id === 'editVoucherModal') closeEditModal();
-                if (id === 'descriptionModal') closeDescriptionModal();
-                if (id === 'deleteModal') closeDeleteModal();
-            }
-        });
-    }
-});
-
-// Initialize quota functionality
+// Close modals when clicking outside
 document.addEventListener('DOMContentLoaded', function() {
+    // Close modals when clicking outside
+    ['createVoucherModal','editVoucherModal','descriptionModal','deleteModal'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    if (id === 'createVoucherModal') closeCreateModal();
+                    if (id === 'editVoucherModal') closeEditModal();
+                    if (id === 'descriptionModal') closeDescriptionModal();
+                    if (id === 'deleteModal') closeDeleteModal();
+                }
+            });
+        }
+    });
+
     // Create modal quota event listeners
     const createQuotaRadios = document.querySelectorAll('#createForm input[name="quota_type"]');
     createQuotaRadios.forEach(radio => {
         radio.addEventListener('change', toggleQuotaInput);
     });
     
-    // Edit modal quota event listeners
+    // Edit modal quota event listeners - FIXED: menggunakan selector yang spesifik
     const editQuotaRadios = document.querySelectorAll('#editForm input[name="quota_type"]');
     editQuotaRadios.forEach(radio => {
         radio.addEventListener('change', toggleEditQuotaInput);
@@ -777,22 +774,51 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize on page load
     toggleQuotaInput();
-});
-
-// Show create modal if there are validation errors
-@if($errors->any())
-    document.addEventListener('DOMContentLoaded', function() { 
+    
+    // Show create modal if there are validation errors
+    @if($errors->any())
         openCreateModal(); 
         // Set quota type based on old input if exists
         setTimeout(() => {
             const oldQuotaType = '{{ old("quota_type", "unlimited") }}';
-            const quotaRadio = document.querySelector(`input[name="quota_type"][value="${oldQuotaType}"]`);
+            const quotaRadio = document.querySelector(`#createForm input[name="quota_type"][value="${oldQuotaType}"]`);
             if (quotaRadio) {
                 quotaRadio.checked = true;
                 toggleQuotaInput();
             }
         }, 100);
+    @endif
+});
+
+// Keyboard event untuk menutup modal dengan ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        if (!document.getElementById('createVoucherModal').classList.contains('hidden')) {
+            closeCreateModal();
+        } else if (!document.getElementById('editVoucherModal').classList.contains('hidden')) {
+            closeEditModal();
+        } else if (!document.getElementById('descriptionModal').classList.contains('hidden')) {
+            closeDescriptionModal();
+        } else if (!document.getElementById('deleteModal').classList.contains('hidden')) {
+            closeDeleteModal();
+        }
+    }
+});
+
+// Prevent form submission ketika modal tertutup
+document.addEventListener('DOMContentLoaded', function() {
+    const forms = ['createForm', 'editForm'];
+    forms.forEach(formId => {
+        const form = document.getElementById(formId);
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const modal = formId === 'createForm' ? 'createVoucherModal' : 'editVoucherModal';
+                if (document.getElementById(modal).classList.contains('hidden')) {
+                    e.preventDefault();
+                }
+            });
+        }
     });
-@endif
+});
 </script>
 @endsection
