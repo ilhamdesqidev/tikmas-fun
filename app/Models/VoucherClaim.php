@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class VoucherClaim extends Model
 {
@@ -25,6 +26,8 @@ class VoucherClaim extends Model
         'is_used' => 'boolean'
     ];
 
+    protected $appends = ['status_label', 'is_expired'];
+
     // Relasi dengan voucher
     public function voucher()
     {
@@ -37,18 +40,37 @@ class VoucherClaim extends Model
         return $this->belongsTo(StaffCode::class, 'scanned_by');
     }
 
-    // Method untuk mengecek status
+    // Cek apakah voucher claim sudah expired
+    public function getIsExpiredAttribute()
+    {
+        if (!$this->voucher) {
+            return false;
+        }
+        
+        return Carbon::now()->greaterThan($this->voucher->expiry_date);
+    }
+
+    // Get status label dengan auto-check expiry
+    public function getStatusLabelAttribute()
+    {
+        // Jika sudah digunakan
+        if ($this->is_used || $this->scanned_at) {
+            return 'tergunakan';
+        }
+        
+        // Jika voucher sudah expired tapi belum digunakan
+        if ($this->is_expired) {
+            return 'kadaluarsa';
+        }
+        
+        // Jika masih valid dan belum digunakan
+        return 'belum_tergunakan';
+    }
+
+    // Method untuk mengecek status (backward compatibility)
     public function getStatusAttribute()
     {
-        if ($this->is_used) {
-            return 'tergunakan';
-        }
-        
-        if ($this->scanned_at) {
-            return 'tergunakan';
-        }
-        
-        return 'belum_tergunakan';
+        return $this->status_label;
     }
 
     // Method untuk menandai sebagai digunakan
@@ -70,5 +92,15 @@ class VoucherClaim extends Model
     public function scopeUnused($query)
     {
         return $query->where('is_used', false)->whereNull('scanned_at');
+    }
+
+    // Scope untuk expired claims yang belum digunakan
+    public function scopeExpiredUnused($query)
+    {
+        return $query->where('is_used', false)
+            ->whereNull('scanned_at')
+            ->whereHas('voucher', function($q) {
+                $q->where('expiry_date', '<', Carbon::now());
+            });
     }
 }

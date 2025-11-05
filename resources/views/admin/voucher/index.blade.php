@@ -195,12 +195,17 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Voucher</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kode Unik</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Klaim</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expired Date</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200" id="claimsTableBody">
                         @forelse($claims ?? [] as $index => $claim)
-                        <tr class="claim-row">
+                        @php
+                            $voucherExpired = $claim->voucher && \Carbon\Carbon::now()->greaterThan($claim->voucher->expiry_date);
+                            $isUsed = $claim->is_used || $claim->scanned_at;
+                        @endphp
+                        <tr class="claim-row {{ $voucherExpired && !$isUsed ? 'bg-red-50' : '' }}">
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $index + 1 }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $claim->user_name }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $claim->user_phone }}</td>
@@ -211,21 +216,50 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 {{ $claim->created_at->format('d M Y H:i') }}
                             </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                @if($claim->voucher)
+                                    @php
+                                        $expiryDate = \Carbon\Carbon::parse($claim->voucher->expiry_date);
+                                    @endphp
+                                    <span class="{{ $voucherExpired ? 'text-red-600 font-semibold' : 'text-gray-500' }}">
+                                        {{ $expiryDate->format('d M Y') }}
+                                    </span>
+                                    @if($voucherExpired)
+                                        <span class="block text-xs text-red-500">
+                                            (Sudah Lewat)
+                                        </span>
+                                    @endif
+                                @else
+                                    <span class="text-gray-400">-</span>
+                                @endif
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                @if($claim->is_used || $claim->scanned_at)
+                                @if($isUsed)
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                                        Terpakai
+                                        ✓ Terpakai
+                                    </span>
+                                    @if($claim->scanned_at)
+                                        <span class="block text-xs text-gray-500 mt-1">
+                                            {{ $claim->scanned_at->format('d M Y H:i') }}
+                                        </span>
+                                    @endif
+                                @elseif($voucherExpired)
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                        ⚠️ Kadaluarsa
+                                    </span>
+                                    <span class="block text-xs text-red-500 mt-1">
+                                        Voucher expired
                                     </span>
                                 @else
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                        Belum Terpakai
+                                        ✓ Belum Terpakai
                                     </span>
                                 @endif
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+                            <td colspan="8" class="px-6 py-8 text-center text-gray-500">
                                 Belum ada user yang klaim voucher
                             </td>
                         </tr>
