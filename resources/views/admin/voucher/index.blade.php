@@ -1,4 +1,23 @@
 
+@php
+    // Gunakan helper function atau logika yang sama
+    use Carbon\Carbon;
+    $isExpired = Carbon::now()->startOfDay()->greaterThan(Carbon::parse($voucher->expiry_date));
+    $currentStatus = $isExpired ? 'kadaluarsa' : $voucher->status;
+@endphp
+
+// Di bagian tanggal kadaluarsa
+@php
+    $expiryDate = \Carbon\Carbon::parse($voucher->expiry_date);
+    $isExpired = \Carbon\Carbon::now()->startOfDay()->greaterThan($expiryDate);
+@endphp
+
+// Di bagian claims
+@php
+    $voucherExpired = $claim->voucher && \Carbon\Carbon::now()->startOfDay()->greaterThan(\Carbon\Carbon::parse($claim->voucher->expiry_date));
+    $isUsed = $claim->is_used || $claim->scanned_at;
+@endphp
+
 @extends('layouts.app')
 
 @section('title', 'Management Voucher')

@@ -13,49 +13,49 @@ use Carbon\Carbon;
 class VoucherController extends Controller
 {
     public function index()
-{
-    try {
-        Log::info('Voucher index called');
-        
-        // Update semua voucher yang sudah expired
-        Voucher::where('expiry_date', '<', Carbon::now())
-            ->where('status', '!=', 'kadaluarsa')
-            ->update(['status' => 'kadaluarsa']);
-        
-        // Load vouchers dengan count claims
-        $vouchers = Voucher::withCount('claims')->latest()->get();
-        
-        // Load semua claims dengan voucher terkait
-        $claims = VoucherClaim::with('voucher')->latest()->get();
-        
-        // Hitung statistik claims
-        $claimsStats = [
-            'total' => $claims->count(),
-            'used' => $claims->filter(function($claim) {
-                return $claim->is_used || $claim->scanned_at;
-            })->count(),
-            'expired' => $claims->filter(function($claim) {
-                return !($claim->is_used || $claim->scanned_at) && 
-                       $claim->voucher && 
-                       Carbon::now()->greaterThan($claim->voucher->expiry_date);
-            })->count(),
-            'active' => $claims->filter(function($claim) {
-                return !($claim->is_used || $claim->scanned_at) && 
-                       (!$claim->voucher || 
-                        Carbon::now()->lessThanOrEqualTo($claim->voucher->expiry_date));
-            })->count(),
-        ];
-        
-        Log::info('Vouchers loaded: ' . $vouchers->count());
-        Log::info('Claims loaded: ' . $claims->count());
-        Log::info('Claims stats: ', $claimsStats);
-        
-        return view('admin.voucher.index', compact('vouchers', 'claims', 'claimsStats'));
-    } catch (\Exception $e) {
-        Log::error('Error loading vouchers: ' . $e->getMessage());
-        return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
+    {
+        try {
+            Log::info('Voucher index called');
+            
+            // Update semua voucher yang sudah expired (gunakan end of day)
+            Voucher::where('expiry_date', '<', Carbon::now()->startOfDay())
+                ->where('status', '!=', 'kadaluarsa')
+                ->update(['status' => 'kadaluarsa']);
+            
+            // Load vouchers dengan count claims
+            $vouchers = Voucher::withCount('claims')->latest()->get();
+            
+            // Load semua claims dengan voucher terkait
+            $claims = VoucherClaim::with('voucher')->latest()->get();
+            
+            // Hitung statistik claims
+            $claimsStats = [
+                'total' => $claims->count(),
+                'used' => $claims->filter(function($claim) {
+                    return $claim->is_used || $claim->scanned_at;
+                })->count(),
+                'expired' => $claims->filter(function($claim) {
+                    return !($claim->is_used || $claim->scanned_at) && 
+                           $claim->voucher && 
+                           Carbon::now()->startOfDay()->greaterThan(Carbon::parse($claim->voucher->expiry_date));
+                })->count(),
+                'active' => $claims->filter(function($claim) {
+                    return !($claim->is_used || $claim->scanned_at) && 
+                           (!$claim->voucher || 
+                            Carbon::now()->startOfDay()->lessThanOrEqualTo(Carbon::parse($claim->voucher->expiry_date)));
+                })->count(),
+            ];
+            
+            Log::info('Vouchers loaded: ' . $vouchers->count());
+            Log::info('Claims loaded: ' . $claims->count());
+            Log::info('Claims stats: ', $claimsStats);
+            
+            return view('admin.voucher.index', compact('vouchers', 'claims', 'claimsStats'));
+        } catch (\Exception $e) {
+            Log::error('Error loading vouchers: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
+        }
     }
-}
 
     public function store(Request $request)
     {
@@ -80,9 +80,10 @@ class VoucherController extends Controller
             $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
             $imagePath = $image->storeAs('vouchers', $imageName, 'public');
 
-            // Cek apakah tanggal expiry sudah lewat
+            // Cek apakah tanggal expiry sudah lewat (gunakan startOfDay untuk perbandingan tanggal saja)
             $status = $request->status;
-            if (Carbon::parse($request->expiry_date)->isPast()) {
+            $expiryDate = Carbon::parse($request->expiry_date);
+            if (Carbon::now()->startOfDay()->greaterThan($expiryDate)) {
                 $status = 'kadaluarsa';
             }
 
@@ -126,8 +127,9 @@ class VoucherController extends Controller
             $voucher->deskripsi = $request->deskripsi;
             $voucher->expiry_date = $request->expiry_date;
 
-            // Cek apakah tanggal expiry sudah lewat
-            if (Carbon::parse($request->expiry_date)->isPast()) {
+            // Cek apakah tanggal expiry sudah lewat (gunakan startOfDay)
+            $expiryDate = Carbon::parse($request->expiry_date);
+            if (Carbon::now()->startOfDay()->greaterThan($expiryDate)) {
                 $voucher->status = 'kadaluarsa';
             } else {
                 $voucher->status = $request->status;
@@ -173,5 +175,11 @@ class VoucherController extends Controller
             return redirect()->route('admin.voucher.index')
                            ->with('error', 'Gagal menghapus voucher: ' . $e->getMessage());
         }
+    }
+
+    // Helper function untuk mengecek apakah voucher expired
+    public static function isVoucherExpired($expiryDate)
+    {
+        return Carbon::now()->startOfDay()->greaterThan(Carbon::parse($expiryDate));
     }
 }
