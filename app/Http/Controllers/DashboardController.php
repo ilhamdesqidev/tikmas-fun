@@ -14,9 +14,15 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        // Update voucher yang kuotanya habis menjadi status "habis"
+        Voucher::where('status', 'aktif')
+               ->where('is_unlimited', false)
+               ->whereRaw('quota <= (SELECT COUNT(*) FROM voucher_claims WHERE voucher_claims.voucher_id = vouchers.id)')
+               ->update(['status' => 'habis']);
+        
         // Update status voucher yang expired
-        Voucher::where('expiry_date', '<', Carbon::now()->startOfDay())
-               ->where('status', '!=', 'kadaluarsa')
+        Voucher::whereIn('status', ['aktif', 'tidak_aktif'])
+               ->where('expiry_date', '<', Carbon::now()->startOfDay())
                ->update(['status' => 'kadaluarsa']);
 
         // Get promos for dashboard
@@ -25,21 +31,38 @@ class DashboardController extends Controller
                       ->limit(12)
                       ->get();
         
-        // Get vouchers untuk dashboard - HANYA yang aktif dan belum expired
-        $vouchers = Voucher::where('status', 'aktif')
-                          ->where(function($query) {
-                              // Voucher tanpa expiry date atau yang expiry_date >= hari ini
-                              $query->whereNull('expiry_date')
-                                    ->orWhere('expiry_date', '>=', Carbon::now()->startOfDay());
-                          })
+        // Get vouchers untuk dashboard - Tampilkan aktif, habis, dan kadaluarsa (BUKAN tidak_aktif)
+        $vouchers = Voucher::whereIn('status', ['aktif', 'habis', 'kadaluarsa'])
+                          ->with('claims')
                           ->withCount('claims')
                           ->latest()
-                          ->limit(12)
-                          ->get();
+                          ->get()
+                          ->sortBy(function($voucher) {
+                              // Sort priority: available > sold_out > expired
+                              if ($voucher->is_available) {
+                                  return 1;
+                              } elseif ($voucher->is_sold_out) {
+                                  return 2;
+                              } else {
+                                  return 3;
+                              }
+                          })
+                          ->values()
+                          ->take(12);
             
-        // Debug: Cek apakah ada voucher
-        \Log::info('Vouchers count: ' . $vouchers->count());
-        \Log::info('Vouchers data: ', $vouchers->toArray());
+        // Debug log
+        \Log::info('Dashboard Vouchers count: ' . $vouchers->count());
+        \Log::info('Dashboard Vouchers data: ', $vouchers->map(function($v) {
+            return [
+                'id' => $v->id,
+                'name' => $v->name,
+                'status' => $v->status,
+                'effective_status' => $v->effective_status,
+                'is_available' => $v->is_available,
+                'is_sold_out' => $v->is_sold_out,
+                'remaining_quota' => $v->remaining_quota,
+            ];
+        })->toArray());
             
         // Get facilities untuk carousel
         $facilities = Facility::latest()

@@ -734,42 +734,62 @@
       <div class="promo-container" id="voucherContainer">
         @foreach($vouchers as $voucher)
           @php
-            // Gunakan logika yang sama dengan controller - voucher expired jika hari ini > tanggal expiry
-            $isExpired = \Carbon\Carbon::now()->startOfDay()->greaterThan(\Carbon\Carbon::parse($voucher->expiry_date));
-            $currentStatus = $isExpired ? 'kadaluarsa' : $voucher->status;
-            $canBeClaimed = !$isExpired && $voucher->status === 'aktif';
+            // Cek status voucher menggunakan model attributes
+            $isAvailable = $voucher->is_available;
+            $isSoldOut = $voucher->is_sold_out;
+            $isExpired = $voucher->is_expired;
+            $effectiveStatus = $voucher->effective_status;
+            
+            // Hitung persentase kuota (jika limited)
+            if (!$voucher->is_unlimited && $voucher->quota > 0) {
+                $claimed = $voucher->claims->count();
+                $remaining = $voucher->remaining_quota;
+                $percentage = ($remaining / $voucher->quota) * 100;
+                
+                // Tentukan warna berdasarkan persentase
+                if ($percentage > 50) {
+                    $barColor = 'bg-green-500';
+                    $barBgColor = 'bg-green-100';
+                    $textColor = 'text-green-700';
+                } elseif ($percentage > 20) {
+                    $barColor = 'bg-yellow-500';
+                    $barBgColor = 'bg-yellow-100';
+                    $textColor = 'text-yellow-700';
+                } else {
+                    $barColor = 'bg-red-500';
+                    $barBgColor = 'bg-red-100';
+                    $textColor = 'text-red-700';
+                }
+            }
           @endphp
           
-          <div class="promo-card {{ $canBeClaimed ? 'clickable' : 'non-clickable promo-disabled' }}" 
+          <div class="promo-card {{ $isAvailable ? 'clickable' : 'non-clickable promo-disabled' }}" 
                data-voucher='@json($voucher)' 
-               @if($canBeClaimed) onclick="event.stopPropagation(); showClaimForm(JSON.parse(this.dataset.voucher))" @endif>
+               @if($isAvailable) onclick="event.stopPropagation(); showClaimForm(JSON.parse(this.dataset.voucher))" @endif>
             
-            @if($canBeClaimed)
-              <span class="featured-badge">Tersedia</span>
+            @if($isAvailable)
+              <span class="featured-badge">✓ Tersedia</span>
             @endif
             
-            @if($isExpired)
-              <span class="badge-expired status-badge">Kadaluarsa</span>
-            @elseif($voucher->status === 'tidak_aktif')
-              <span class="badge-coming-soon status-badge">Tidak Aktif</span>
+            @if($effectiveStatus === 'habis')
+              <span class="badge-sold-out status-badge">✕ Habis</span>
+            @elseif($effectiveStatus === 'kadaluarsa')
+              <span class="badge-expired status-badge">✕ Kadaluarsa</span>
             @endif
             
             <div class="promo-image">
               <img src="{{ $voucher->image_url }}" alt="{{ $voucher->name }}" loading="lazy">
               
-              @if(!$canBeClaimed)
+              @if(!$isAvailable)
                 <div class="promo-overlay-disabled">
                   <div class="overlay-content">
-                    @if($isExpired)
+                    @if($isSoldOut)
+                      <i data-feather="package" class="w-8 h-8 mb-2 mx-auto"></i>
+                      <span class="text-sm font-medium">Kuota Habis</span>
+                    @elseif($isExpired)
                       <i data-feather="x-circle" class="w-8 h-8 mb-2 mx-auto"></i>
                       <span class="text-sm font-medium">Voucher Kadaluarsa</span>
                       <p class="text-xs mt-1">Berlaku sampai: {{ \Carbon\Carbon::parse($voucher->expiry_date)->format('d M Y') }}</p>
-                    @elseif($voucher->status === 'tidak_aktif')
-                      <i data-feather="pause" class="w-8 h-8 mb-2 mx-auto"></i>
-                      <span class="text-sm font-medium">Tidak Aktif</span>
-                    @elseif($voucher->status === 'kadaluarsa')
-                      <i data-feather="clock" class="w-8 h-8 mb-2 mx-auto"></i>
-                      <span class="text-sm font-medium">Kadaluarsa</span>
                     @endif
                   </div>
                 </div>
@@ -778,17 +798,58 @@
             
             <div class="p-6">
               <h3 class="text-xl font-bold mb-2 text-text-dark">{{ $voucher->name }}</h3>
-              <p class="text-gray-600 mb-4">{{ Str::limit($voucher->deskripsi, 100) }}</p>
+              <p class="text-gray-600 mb-4 line-clamp-2">{{ Str::limit($voucher->deskripsi, 80) }}</p>
+              
+              <!-- Progress Bar Kuota -->
+              @if(!$voucher->is_unlimited)
+                <div class="mb-4">
+                  <div class="flex items-center justify-between text-xs mb-1.5">
+                    <span class="font-semibold {{ $textColor }}">
+                      @if($isSoldOut)
+                        🚫 Kuota Habis
+                      @elseif($percentage <= 20)
+                        ⚠️ Kuota Terbatas
+                      @else
+                        📊 Kuota Tersedia
+                      @endif
+                    </span>
+                    <span class="font-bold {{ $isSoldOut ? 'text-red-600' : $textColor }}">
+                      {{ $remaining }}/{{ $voucher->quota }}
+                    </span>
+                  </div>
+                  <div class="w-full {{ $barBgColor }} rounded-full h-2.5 overflow-hidden shadow-inner">
+                    <div class="{{ $barColor }} h-full rounded-full transition-all duration-500 ease-out" 
+                         style="width: {{ $percentage }}%"></div>
+                  </div>
+                  @if($percentage <= 20 && $percentage > 0)
+                    <p class="text-xs text-orange-600 mt-1.5 font-medium">
+                      ⚡ Buruan! Hanya tersisa {{ $remaining }} voucher
+                    </p>
+                  @elseif($percentage > 50)
+                    <p class="text-xs text-green-600 mt-1.5 font-medium">
+                      ✨ Masih banyak tersedia
+                    </p>
+                  @endif
+                </div>
+              @else
+                <div class="mb-4">
+                  <div class="flex items-center text-xs">
+                    <span class="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full font-semibold">
+                      ♾️ Kuota Unlimited
+                    </span>
+                  </div>
+                </div>
+              @endif
               
               <div class="flex items-center justify-between mb-4">
                 <div>
                   <span class="text-primary font-bold text-xl block">Gratis</span>
                 </div>
                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                       {{ $currentStatus === 'aktif' ? 'bg-green-100 text-green-800' : 
-                          ($currentStatus === 'tidak_aktif' ? 'bg-gray-100 text-gray-800' : 'bg-red-100 text-red-800') }}">
-                  {{ $currentStatus === 'aktif' ? 'Aktif' : 
-                     ($currentStatus === 'tidak_aktif' ? 'Tidak Aktif' : 'Kadaluarsa') }}
+                       {{ $effectiveStatus === 'aktif' ? 'bg-green-100 text-green-800' : 
+                          ($effectiveStatus === 'habis' ? 'bg-orange-100 text-orange-800' : 'bg-red-100 text-red-800') }}">
+                  {{ $effectiveStatus === 'aktif' ? 'Aktif' : 
+                     ($effectiveStatus === 'habis' ? 'Habis' : 'Kadaluarsa') }}
                 </span>
               </div>
               
@@ -812,8 +873,9 @@
               </div>
               
               <div class="w-full text-center font-semibold py-3 rounded-lg transition-colors duration-300 
-                         {{ $canBeClaimed ? 'bg-primary text-black hover:bg-yellow-500' : 'bg-gray-300 text-gray-500 cursor-not-allowed' }}">
-                {{ $canBeClaimed ? '🎉 Klaim Sekarang' : 'Tidak Tersedia' }}
+                         {{ $isAvailable ? 'bg-primary text-black hover:bg-yellow-500' : 'bg-gray-300 text-gray-500 cursor-not-allowed' }}">
+                {{ $isAvailable ? '🎉 Klaim Sekarang' : 
+                   ($isSoldOut ? '🚫 Habis' : '⏰ Kadaluarsa') }}
               </div>
             </div>
           </div>
