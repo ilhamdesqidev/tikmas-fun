@@ -622,6 +622,9 @@ let deleteId = null;
 let selectedFormat = 'custom';
 let checkCodeTimeout = null;
 
+const updateUrlTemplate = '{{ route("admin.staff.verification.update", ":id") }}';
+const destroyUrlTemplate = '{{ route("admin.staff.verification.destroy", ":id") }}';
+
 // Open Add Modal
 function openAddModal() {
     document.getElementById('modalTitle').textContent = 'Tambah Kode Staff';
@@ -634,10 +637,10 @@ function openAddModal() {
     document.body.style.overflow = 'hidden';
 }
 
-// Open Edit Modal
 function openEditModal(staff) {
     document.getElementById('modalTitle').textContent = 'Edit Kode Staff';
-    document.getElementById('staffForm').action = `/admin/staff/verification/${staff.id}`;
+    // gunakan template route dan ganti placeholder :id
+    document.getElementById('staffForm').action = updateUrlTemplate.replace(':id', staff.id);
     document.getElementById('method').value = 'PUT';
     document.getElementById('code').value = staff.code;
     document.getElementById('name').value = staff.name;
@@ -1043,7 +1046,8 @@ function executeDelete() {
     
     const form = document.createElement('form');
     form.method = 'POST';
-    form.action = `/admin/staff/verification/${deleteId}`;
+    // gunakan template route untuk destroy
+    form.action = destroyUrlTemplate.replace(':id', deleteId);
     form.innerHTML = `
         @csrf
         @method('DELETE')
