@@ -109,6 +109,25 @@
         .notification-enter {
             animation: slideInFromTop 0.4s ease-out forwards;
         }
+        
+        /* Progress Bar Animation */
+        @keyframes progressFill {
+            from { width: 0%; }
+        }
+        
+        .progress-bar-animate {
+            animation: progressFill 1s ease-out forwards;
+        }
+        
+        /* Pulse animation for low quota */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .pulse-warn {
+            animation: pulse 2s ease-in-out infinite;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -221,23 +240,73 @@
                             {{ Str::limit($voucher->deskripsi, 120) }}
                         </p>
 
+                        <!-- Quota Progress Bar (Jika Limited) -->
+                        @if(!$voucher->is_unlimited)
+                        @php
+                            $claimed = $voucher->claims->count();
+                            $remaining = $voucher->remaining_quota;
+                            $percentage = $voucher->quota > 0 ? ($remaining / $voucher->quota) * 100 : 0;
+                            
+                            // Tentukan warna berdasarkan persentase
+                            if ($percentage > 50) {
+                                $barColor = 'bg-green-500';
+                                $barBgColor = 'bg-green-100';
+                                $textColor = 'text-green-700';
+                            } elseif ($percentage > 20) {
+                                $barColor = 'bg-yellow-500';
+                                $barBgColor = 'bg-yellow-100';
+                                $textColor = 'text-yellow-700';
+                            } else {
+                                $barColor = 'bg-red-500';
+                                $barBgColor = 'bg-red-100';
+                                $textColor = 'text-red-700';
+                            }
+                        @endphp
+                        <div class="mb-3 sm:mb-4">
+                            <div class="flex items-center justify-between text-xs mb-1.5">
+                                <span class="font-semibold {{ $textColor }}">
+                                    @if($isSoldOut)
+                                        🚫 Kuota Habis
+                                    @elseif($percentage <= 20)
+                                        ⚠️ Kuota Terbatas
+                                    @else
+                                        📊 Kuota Tersedia
+                                    @endif
+                                </span>
+                                <span class="font-bold {{ $isSoldOut ? 'text-red-600' : $textColor }}">
+                                    {{ $remaining }}/{{ $voucher->quota }}
+                                </span>
+                            </div>
+                            <div class="w-full {{ $barBgColor }} rounded-full h-2.5 overflow-hidden shadow-inner">
+                                <div class="{{ $barColor }} h-full rounded-full transition-all duration-500 ease-out progress-bar-animate {{ $percentage <= 20 && $percentage > 0 ? 'pulse-warn' : '' }}" 
+                                     style="width: {{ $percentage }}%"></div>
+                            </div>
+                            @if($percentage <= 20 && $percentage > 0)
+                            <p class="text-xs text-orange-600 mt-1.5 font-medium animate-pulse">
+                                ⚡ Buruan! Hanya tersisa {{ $remaining }} voucher
+                            </p>
+                            @elseif($percentage > 50)
+                            <p class="text-xs text-green-600 mt-1.5 font-medium">
+                                ✨ Masih banyak tersedia
+                            </p>
+                            @endif
+                        </div>
+                        @else
+                        <div class="mb-3 sm:mb-4">
+                            <div class="flex items-center text-xs">
+                                <span class="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full font-semibold">
+                                    ♾️ Kuota Unlimited
+                                </span>
+                            </div>
+                        </div>
+                        @endif
+
                         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-3 sm:pt-4 border-t-2 border-gray-100">
-                            <div class="flex flex-col gap-1">
-                                <div class="flex items-center text-xs text-gray-500">
-                                    <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                    </svg>
-                                    <span class="font-medium">{{ \Carbon\Carbon::parse($voucher->expiry_date)->format('d M Y') }}</span>
-                                </div>
-                                
-                                @if(!$voucher->is_unlimited)
-                                <div class="flex items-center text-xs {{ $isSoldOut ? 'text-red-600 font-semibold' : 'text-gray-500' }}">
-                                    <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                    <span class="font-medium">{{ $voucher->formatted_quota }}</span>
-                                </div>
-                                @endif
+                            <div class="flex items-center text-xs text-gray-500">
+                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                <span class="font-medium">{{ \Carbon\Carbon::parse($voucher->expiry_date)->format('d M Y') }}</span>
                             </div>
                             
                             @if($isAvailable)
