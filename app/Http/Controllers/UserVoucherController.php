@@ -2,21 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Voucher;
-use Carbon\Carbon;
+use App\Models\VoucherClaim;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class UserVoucherController extends Controller
 {
     public function index()
     {
-        // Ambil semua voucher (termasuk yang habis dan expired untuk ditampilkan sebagai disabled)
-        // Urutkan: Tersedia dulu, lalu habis, lalu expired
-        $vouchers = Voucher::with('claims')
+        // Ambil voucher yang statusnya BUKAN 'tidak_aktif'
+        // Termasuk: aktif, habis, kadaluarsa (tetap muncul tapi disabled)
+        $vouchers = Voucher::whereIn('status', ['aktif', 'habis', 'kadaluarsa'])
+                          ->with('claims')
                           ->latest()
                           ->get()
                           ->sortBy(function($voucher) {
-                              // Sort priority: 1 = available, 2 = sold out, 3 = expired
+                              // Sort priority: 
+                              // 1 = available (aktif & belum habis & belum expired)
+                              // 2 = sold out (habis)
+                              // 3 = expired (kadaluarsa)
                               if ($voucher->is_available) {
                                   return 1;
                               } elseif ($voucher->is_sold_out) {
@@ -24,24 +30,84 @@ class UserVoucherController extends Controller
                               } else {
                                   return 3;
                               }
-                          });
+                          })
+                          ->values(); // Reset array keys setelah sort
         
         return view('voucher', compact('vouchers'));
     }
-    
-    // Alternative: Jika hanya ingin menampilkan voucher yang tersedia
-    public function indexAvailableOnly()
+
+    public function claim(Request $request)
     {
-        // Ambil hanya voucher yang bisa diklaim (aktif, belum expired, masih ada kuota)
-        $vouchers = Voucher::where('status', 'aktif')
-                          ->whereDate('expiry_date', '>=', Carbon::now()->startOfDay())
-                          ->where(function($query) {
-                              $query->where('is_unlimited', true)
-                                    ->orWhereRaw('quota > (SELECT COUNT(*) FROM voucher_claims WHERE voucher_claims.voucher_id = vouchers.id)');
-                          })
-                          ->latest()
-                          ->get();
-        
-        return view('voucher', compact('vouchers'));
+        $request->validate([
+            'voucher_id' => 'required|exists:vouchers,id',
+            'user_name' => 'required|string|max:255',
+            'user_phone' => 'required|string|max:15',
+        ]);
+
+        try {
+            $voucher = Voucher::findOrFail($request->voucher_id);
+
+            // Cek apakah voucher masih bisa diklaim
+            if (!$voucher->canBeClaimed()) {
+                if ($voucher->is_expired) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Voucher sudah kadaluarsa.'
+                    ], 400);
+                }
+                
+                if ($voucher->is_sold_out) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Maaf, kuota voucher sudah habis.'
+                    ], 400);
+                }
+                
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Voucher tidak dapat diklaim saat ini.'
+                ], 400);
+            }
+
+            // Generate unique code
+            $uniqueCode = strtoupper(Str::random(12));
+            
+            // Pastikan kode unik
+            while (VoucherClaim::where('unique_code', $uniqueCode)->exists()) {
+                $uniqueCode = strtoupper(Str::random(12));
+            }
+
+            // Simpan claim
+            $claim = VoucherClaim::create([
+                'voucher_id' => $request->voucher_id,
+                'user_name' => $request->user_name,
+                'user_phone' => $request->user_phone,
+                'unique_code' => $uniqueCode,
+            ]);
+
+            // Update status voucher jika kuota habis setelah claim ini
+            if (!$voucher->is_unlimited) {
+                $claimedCount = $voucher->claims()->count();
+                if ($claimedCount >= $voucher->quota) {
+                    $voucher->update(['status' => 'habis']);
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Voucher berhasil di-claim!',
+                'data' => [
+                    'unique_code' => $uniqueCode,
+                    'voucher' => $voucher,
+                    'claim' => $claim,
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error claiming voucher: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal claim voucher: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
