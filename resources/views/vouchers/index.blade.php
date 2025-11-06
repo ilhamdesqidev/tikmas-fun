@@ -10,12 +10,18 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         .voucher-card { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-        .voucher-card:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 20px 40px rgba(207, 217, 22, 0.3); }
+        .voucher-card:hover:not(.disabled) { transform: translateY(-8px) scale(1.02); box-shadow: 0 20px 40px rgba(207, 217, 22, 0.3); }
+        .voucher-card.disabled { opacity: 0.6; filter: grayscale(50%); cursor: not-allowed; }
+        .voucher-card.disabled img { opacity: 0.5; }
         .gradient-bg { background: linear-gradient(135deg, #CFD916 0%, #9DB91C 100%); }
         .gradient-card { background: linear-gradient(135deg, #CFD916 0%, #B5C91A 50%, #9DB91C 100%); }
         .btn-primary { background: #CFD916; transition: all 0.3s ease; }
         .btn-primary:hover { background: #B5C91A; transform: translateY(-2px); box-shadow: 0 8px 16px rgba(207, 217, 22, 0.4); }
+        .btn-disabled { background: #d1d5db; color: #6b7280; cursor: not-allowed; }
+        .btn-disabled:hover { background: #d1d5db; transform: none; box-shadow: none; }
         .badge-active { background: #CFD916; color: #1f2937; }
+        .badge-sold-out { background: #ef4444; color: white; }
+        .badge-expired { background: #6b7280; color: white; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(100px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
         .animate-fade-in { animation: fadeInUp 0.6s ease-out forwards; }
@@ -24,52 +30,70 @@
             position: absolute; 
             top: 10px; 
             right: -5px; 
-            background: #CFD916; 
-            color: #1f2937; 
             padding: 4px 12px; 
             font-weight: bold; 
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             font-size: 10px;
+            z-index: 10;
         }
+        .ribbon.active { background: #CFD916; color: #1f2937; }
+        .ribbon.sold-out { background: #ef4444; color: white; }
+        .ribbon.expired { background: #6b7280; color: white; }
         .ribbon:before { 
             content: ''; 
             position: absolute; 
             right: 0; 
             bottom: -8px; 
+        }
+        .ribbon.active:before {
             border-left: 8px solid transparent; 
             border-right: 8px solid #9DB91C; 
-            border-top: 8px solid #9DB91C; 
+            border-top: 8px solid #9DB91C;
+        }
+        .ribbon.sold-out:before {
+            border-left: 8px solid transparent; 
+            border-right: 8px solid #dc2626; 
+            border-top: 8px solid #dc2626;
+        }
+        .ribbon.expired:before {
+            border-left: 8px solid transparent; 
+            border-right: 8px solid #4b5563; 
+            border-top: 8px solid #4b5563;
         }
         
         /* Mobile optimizations */
         @media (max-width: 640px) {
-            .voucher-card:active { transform: scale(0.98); }
+            .voucher-card:active:not(.disabled) { transform: scale(0.98); }
             .ribbon { 
                 padding: 3px 10px; 
                 font-size: 9px;
                 top: 8px;
             }
             .ribbon:before { 
+                bottom: -6px;
+            }
+            .ribbon.active:before {
                 border-left: 6px solid transparent; 
                 border-right: 6px solid #9DB91C; 
                 border-top: 6px solid #9DB91C;
-                bottom: -6px;
+            }
+            .ribbon.sold-out:before {
+                border-left: 6px solid transparent; 
+                border-right: 6px solid #dc2626; 
+                border-top: 6px solid #dc2626;
+            }
+            .ribbon.expired:before {
+                border-left: 6px solid transparent; 
+                border-right: 6px solid #4b5563; 
+                border-top: 6px solid #4b5563;
             }
         }
         
-        /* Prevent horizontal scroll */
         body { overflow-x: hidden; }
-        
-        /* Touch-friendly buttons */
         button, a { -webkit-tap-highlight-color: transparent; }
-        
-        /* Smooth scrolling */
         html { scroll-behavior: smooth; }
-        
-        /* Better image loading */
         img { object-position: center; }
         
-        /* Fix modal on mobile */
         @media (max-width: 640px) {
             #claimCard { 
                 margin: auto;
@@ -77,7 +101,6 @@
             }
         }
         
-        /* Notification responsive */
         @keyframes slideInFromTop {
             from { opacity: 0; transform: translate(-50%, -100%); }
             to { opacity: 1; transform: translate(-50%, 0); }
@@ -93,7 +116,6 @@
     <header class="bg-white sticky top-0 z-40 shadow-sm">
         <!-- Mobile Layout (< 640px) -->
         <div class="sm:hidden">
-            <!-- Top Bar dengan Background Gradient -->
             <div class="gradient-bg px-4 py-3">
                 <div class="flex items-center justify-between">
                     <a href="{{ route('home') }}" class="flex items-center bg-white/20 backdrop-blur-sm hover:bg-white/30 text-gray-800 px-3 py-1.5 rounded-lg transition-all duration-200 font-medium group">
@@ -112,7 +134,6 @@
                 </div>
             </div>
             
-            <!-- Title Section -->
             <div class="bg-white px-4 py-4 border-b border-gray-200">
                 <h1 class="text-xl font-bold text-gray-800 mb-1">Voucher & Promo</h1>
                 <p class="text-xs text-gray-600">Dapatkan penawaran terbaik untuk Anda</p>
@@ -151,7 +172,20 @@
         @if($vouchers->count() > 0)
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
                 @foreach($vouchers as $index => $voucher)
-                <div class="voucher-card bg-white rounded-xl sm:rounded-2xl shadow-lg overflow-hidden animate-fade-in" style="animation-delay: {{ $index * 0.1 }}s">
+                @php
+                    // Cek status voucher
+                    $isAvailable = $voucher->is_available;
+                    $isSoldOut = $voucher->is_sold_out;
+                    $isExpired = $voucher->is_expired;
+                    $effectiveStatus = $voucher->effective_status;
+                    
+                    // Tentukan class dan badge
+                    $cardClass = $isAvailable ? '' : 'disabled';
+                    $ribbonClass = $isAvailable ? 'active' : ($isSoldOut ? 'sold-out' : 'expired');
+                    $ribbonText = $isAvailable ? '✓ TERSEDIA' : ($isSoldOut ? '✕ HABIS' : '✕ KADALUARSA');
+                @endphp
+                
+                <div class="voucher-card {{ $cardClass }} bg-white rounded-xl sm:rounded-2xl shadow-lg overflow-hidden animate-fade-in" style="animation-delay: {{ $index * 0.1 }}s">
                     <div class="relative h-40 sm:h-48 md:h-56 gradient-card">
                         <img src="{{ $voucher->image_url }}" 
                              alt="{{ $voucher->name }}" 
@@ -161,7 +195,22 @@
                             {{ $voucher->name }}
                         </div>
                         
-                        <div class="ribbon uppercase tracking-wider">✓ {{ $voucher->status_text }}</div>
+                        <div class="ribbon {{ $ribbonClass }} uppercase tracking-wider">{{ $ribbonText }}</div>
+                        
+                        @if(!$isAvailable)
+                        <div class="absolute inset-0 bg-black/40 flex items-center justify-center">
+                            <div class="bg-white/90 px-4 py-2 rounded-lg">
+                                <p class="text-sm sm:text-base font-bold text-gray-800">
+                                    @if($isSoldOut)
+                                        🚫 Kuota Habis
+                                    @else
+                                        ⏰ Sudah Kadaluarsa
+                                    @endif
+                                </p>
+                            </div>
+                        </div>
+                        @endif
+                        
                         <div class="absolute bottom-0 left-0 w-0 h-0 border-l-[30px] sm:border-l-[40px] border-l-white border-t-[30px] sm:border-t-[40px] border-t-transparent"></div>
                     </div>
 
@@ -173,16 +222,39 @@
                         </p>
 
                         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-3 sm:pt-4 border-t-2 border-gray-100">
-                            <div class="flex items-center text-xs text-gray-500">
-                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                </svg>
-                                <span class="font-medium">{{ $voucher->created_at->format('d M Y') }}</span>
+                            <div class="flex flex-col gap-1">
+                                <div class="flex items-center text-xs text-gray-500">
+                                    <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <span class="font-medium">{{ \Carbon\Carbon::parse($voucher->expiry_date)->format('d M Y') }}</span>
+                                </div>
+                                
+                                @if(!$voucher->is_unlimited)
+                                <div class="flex items-center text-xs {{ $isSoldOut ? 'text-red-600 font-semibold' : 'text-gray-500' }}">
+                                    <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <span class="font-medium">{{ $voucher->formatted_quota }}</span>
+                                </div>
+                                @endif
                             </div>
+                            
+                            @if($isAvailable)
                             <button onclick='showClaimForm(@json($voucher))' 
                                     class="w-full sm:w-auto btn-primary text-gray-800 px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wide shadow-md">
                                 🎉 Claim Sekarang
                             </button>
+                            @else
+                            <button disabled
+                                    class="w-full sm:w-auto btn-disabled px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wide">
+                                @if($isSoldOut)
+                                    🚫 Habis
+                                @else
+                                    ⏰ Kadaluarsa
+                                @endif
+                            </button>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -377,7 +449,7 @@
                     format: "CODE128",
                     width: 2,
                     height: 80,
-                    displayValue: false,
+                    displayValue: true,
                     fontSize: 16,
                     margin: 10
                 });
@@ -420,7 +492,23 @@
                 });
             } catch (error) {
                 console.error('Error claiming voucher:', error);
-                alert('❌ Terjadi kesalahan: ' + error.message);
+                
+                // Error notification
+                const notification = document.createElement('div');
+                notification.className = 'fixed top-4 left-1/2 -translate-x-1/2 bg-red-500 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-xl shadow-2xl z-[100] notification-enter w-[calc(100%-2rem)] sm:w-auto max-w-md';
+                notification.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        <div>
+                            <p class="font-bold text-sm sm:text-base">Gagal!</p>
+                            <p class="text-xs sm:text-sm">${error.message}</p>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(notification);
+                setTimeout(() => notification.remove(), 5000);
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalText;
