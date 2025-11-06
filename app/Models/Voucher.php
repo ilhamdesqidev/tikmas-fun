@@ -49,12 +49,13 @@ class Voucher extends Model
     // Get effective status (termasuk auto-expiry dan kuota habis)
     public function getEffectiveStatusAttribute()
     {
-        if ($this->isExpired()) {
-            return 'kadaluarsa';
-        }
-        
+        // Prioritas: Kuota habis > Expired > Status asli
         if (!$this->is_unlimited && $this->remaining_quota <= 0) {
             return 'habis';
+        }
+        
+        if ($this->isExpired()) {
+            return 'kadaluarsa';
         }
         
         return $this->status;
@@ -132,7 +133,7 @@ class Voucher extends Model
     // Scope untuk voucher yang habis
     public function scopeSoldOut($query)
     {
-        return $query->where('status', 'aktif')
+        return $query->where('status', '!=', 'kadaluarsa')
                     ->whereDate('expiry_date', '>=', Carbon::now()->startOfDay())
                     ->where('is_unlimited', false)
                     ->whereRaw('quota <= (SELECT COUNT(*) FROM voucher_claims WHERE voucher_claims.voucher_id = vouchers.id)');
@@ -143,6 +144,13 @@ class Voucher extends Model
     {
         $effectiveStatus = $this->effective_status;
         
+        // Cek kuota habis dulu (prioritas lebih tinggi)
+        if ($effectiveStatus === 'habis' && $this->status !== 'habis') {
+            $this->update(['status' => 'habis']);
+            return 'sold_out';
+        }
+        
+        // Kemudian cek expired
         if ($effectiveStatus === 'kadaluarsa' && $this->status !== 'kadaluarsa') {
             $this->update(['status' => 'kadaluarsa']);
             return 'expired';

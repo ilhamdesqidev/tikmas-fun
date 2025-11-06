@@ -17,14 +17,16 @@ class VoucherController extends Controller
         try {
             Log::info('Voucher index called');
             
-            // Update semua voucher yang sudah expired atau habis
-            Voucher::where(function($query) {
-                $query->where('expiry_date', '<', Carbon::now()->startOfDay())
-                      ->orWhere(function($q) {
-                          $q->where('is_unlimited', false)
-                            ->whereRaw('quota <= (SELECT COUNT(*) FROM voucher_claims WHERE voucher_claims.voucher_id = vouchers.id)');
-                      });
-            })->where('status', 'aktif')->update(['status' => 'kadaluarsa']);
+            // Update voucher yang kuotanya habis menjadi status "habis"
+            Voucher::where('status', 'aktif')
+                   ->where('is_unlimited', false)
+                   ->whereRaw('quota <= (SELECT COUNT(*) FROM voucher_claims WHERE voucher_claims.voucher_id = vouchers.id)')
+                   ->update(['status' => 'habis']);
+            
+            // Update voucher yang sudah expired menjadi status "kadaluarsa"
+            Voucher::whereIn('status', ['aktif', 'tidak_aktif'])
+                   ->where('expiry_date', '<', Carbon::now()->startOfDay())
+                   ->update(['status' => 'kadaluarsa']);
             
             // Load vouchers dengan count claims
             $vouchers = Voucher::withCount('claims')->latest()->get();
@@ -68,7 +70,7 @@ class VoucherController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'deskripsi' => 'required|string',
-            'status' => 'required|in:aktif,tidak_aktif,kadaluarsa',
+            'status' => 'required|in:aktif,tidak_aktif,kadaluarsa,habis',
             'image' => 'required|image|mimes:jpeg,png,jpg|max:10240',
             'expiry_date' => 'required|date',
             'quota_type' => 'required|in:unlimited,limited',
@@ -89,16 +91,17 @@ class VoucherController extends Controller
             $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
             $imagePath = $image->storeAs('vouchers', $imageName, 'public');
 
-            // Cek apakah tanggal expiry sudah lewat
             $status = $request->status;
             $expiryDate = Carbon::parse($request->expiry_date);
-            if (Carbon::now()->startOfDay()->greaterThan($expiryDate)) {
-                $status = 'kadaluarsa';
-            }
-
-            // Tentukan kuota
             $isUnlimited = $request->quota_type === 'unlimited';
             $quota = $isUnlimited ? null : $request->quota;
+
+            // Auto-set status berdasarkan kondisi
+            if (Carbon::now()->startOfDay()->greaterThan($expiryDate)) {
+                $status = 'kadaluarsa';
+            } elseif (!$isUnlimited && $quota <= 0) {
+                $status = 'habis';
+            }
 
             Voucher::create([
                 'name' => $request->name,
@@ -129,7 +132,7 @@ class VoucherController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'deskripsi' => 'required|string',
-            'status' => 'required|in:aktif,tidak_aktif,kadaluarsa',
+            'status' => 'required|in:aktif,tidak_aktif,kadaluarsa,habis',
             'image' => 'nullable|image|mimes:jpeg,png,jpg|max:10240',
             'expiry_date' => 'required|date',
             'quota_type' => 'required|in:unlimited,limited',
@@ -144,18 +147,21 @@ class VoucherController extends Controller
             $voucher->deskripsi = $request->deskripsi;
             $voucher->expiry_date = $request->expiry_date;
 
-            // Cek apakah tanggal expiry sudah lewat
             $expiryDate = Carbon::parse($request->expiry_date);
+            $isUnlimited = $request->quota_type === 'unlimited';
+            $quota = $isUnlimited ? null : $request->quota;
+            
+            $voucher->is_unlimited = $isUnlimited;
+            $voucher->quota = $quota;
+
+            // Auto-set status berdasarkan kondisi
             if (Carbon::now()->startOfDay()->greaterThan($expiryDate)) {
                 $voucher->status = 'kadaluarsa';
+            } elseif (!$isUnlimited && $quota <= $voucher->claims()->count()) {
+                $voucher->status = 'habis';
             } else {
                 $voucher->status = $request->status;
             }
-
-            // Update kuota
-            $isUnlimited = $request->quota_type === 'unlimited';
-            $voucher->is_unlimited = $isUnlimited;
-            $voucher->quota = $isUnlimited ? null : $request->quota;
 
             if ($request->hasFile('image')) {
                 $image = $request->file('image');

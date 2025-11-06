@@ -103,13 +103,24 @@
                                 </button>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                @if($currentStatus === 'aktif')
+                                @php
+                                    $effectiveStatus = $currentStatus;
+                                    if (!$voucher->is_unlimited && $voucher->remaining_quota <= 0) {
+                                        $effectiveStatus = 'habis';
+                                    }
+                                @endphp
+                                
+                                @if($effectiveStatus === 'aktif')
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                                         Aktif
                                     </span>
-                                @elseif($currentStatus === 'tidak_aktif')
+                                @elseif($effectiveStatus === 'tidak_aktif')
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
                                         Tidak Aktif
+                                    </span>
+                                @elseif($effectiveStatus === 'habis')
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-orange-100 text-orange-800">
+                                        Habis
                                     </span>
                                 @else
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
@@ -117,9 +128,9 @@
                                     </span>
                                 @endif
                                 
-                                @if($isExpired && $voucher->status !== 'kadaluarsa')
+                                @if($effectiveStatus !== $voucher->status)
                                     <span class="block text-xs text-orange-600 mt-1">
-                                        ⚠️ Auto-expired
+                                        ⚠️ Auto-{{ $effectiveStatus === 'habis' ? 'sold out' : 'expired' }}
                                     </span>
                                 @endif
                             </td>
@@ -313,8 +324,9 @@
                     <option value="aktif" {{ old('status') == 'aktif' ? 'selected' : '' }}>Aktif</option>
                     <option value="tidak_aktif" {{ old('status') == 'tidak_aktif' ? 'selected' : '' }}>Tidak Aktif</option>
                     <option value="kadaluarsa" {{ old('status') == 'kadaluarsa' ? 'selected' : '' }}>Kadaluarsa</option>
+                    <option value="habis" {{ old('status') == 'habis' ? 'selected' : '' }}>Habis</option>
                 </select>
-                <p class="mt-1 text-xs text-gray-500">💡 Status akan otomatis berubah menjadi "Kadaluarsa" jika tanggal sudah lewat</p>
+                <p class="mt-1 text-xs text-gray-500">💡 Status akan otomatis berubah jika tanggal sudah lewat atau kuota habis</p>
                 @error('status')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
@@ -426,8 +438,9 @@
                     <option value="aktif">Aktif</option>
                     <option value="tidak_aktif">Tidak Aktif</option>
                     <option value="kadaluarsa">Kadaluarsa</option>
+                    <option value="habis">Habis</option>
                 </select>
-                <p class="mt-1 text-xs text-gray-500">💡 Status akan otomatis berubah menjadi "Kadaluarsa" jika tanggal sudah lewat</p>
+                <p class="mt-1 text-xs text-gray-500">💡 Status akan otomatis berubah jika tanggal sudah lewat atau kuota habis</p>
             </div>
 
             <!-- Kuota Section -->
