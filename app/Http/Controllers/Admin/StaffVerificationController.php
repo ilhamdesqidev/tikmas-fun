@@ -155,15 +155,15 @@ class StaffVerificationController extends Controller
 
     public function generateCustomCode(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'prefix' => 'nullable|string|max:10',
             'format' => 'required|in:random,sequential,custom',
             'length' => 'required|integer|min:3|max:10'
         ]);
 
-        $prefix = strtoupper($request->prefix ?? '');
-        $format = $request->format;
-        $length = $request->length;
+        $prefix = strtoupper($validated['prefix'] ?? '');
+        $format = $validated['format'];
+        $length = $validated['length'];
 
         $code = '';
 
@@ -179,14 +179,14 @@ class StaffVerificationController extends Controller
                 $lastCode = StaffCode::where('code', 'LIKE', $prefix . '%')
                     ->orderBy('code', 'desc')
                     ->first();
-                
+
                 if ($lastCode) {
                     $lastNumber = (int) preg_replace('/[^0-9]/', '', substr($lastCode->code, strlen($prefix)));
                     $nextNumber = $lastNumber + 1;
                 } else {
                     $nextNumber = 1;
                 }
-                
+
                 $code = $prefix . str_pad($nextNumber, $length, '0', STR_PAD_LEFT);
                 break;
 
@@ -195,9 +195,9 @@ class StaffVerificationController extends Controller
                 do {
                     $randomPart = '';
                     for ($i = 0; $i < $length; $i++) {
-                        $randomPart .= (rand(0, 1) === 0) 
+                        $randomPart .= (rand(0, 1) === 0)
                             ? chr(rand(65, 90))  // A-Z
-                            : rand(0, 9);         // 0-9
+                            : rand(0, 9);        // 0-9
                     }
                     $code = $prefix . $randomPart;
                 } while (StaffCode::where('code', $code)->exists());
