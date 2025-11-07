@@ -1061,6 +1061,7 @@
 <script>
 // Paste semua kode dari artifact "dashboard-fixed-script" di sini
 // ==================== INITIALIZE ALL ====================
+// ==================== INITIALIZE ALL ====================
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize Feather icons
   feather.replace();
@@ -1083,6 +1084,9 @@ document.addEventListener('DOMContentLoaded', () => {
     '#prevVoucherBtn',
     '#nextVoucherBtn'
   );
+  
+  // Initialize claim form handlers
+  initializeClaimForm();
   
   // Re-initialize feather icons after delay
   setTimeout(() => {
@@ -1408,9 +1412,33 @@ class PromoSlider {
 // ==================== VOUCHER CLAIM FUNCTIONS ====================
 let currentVoucher = null;
 
+function initializeClaimForm() {
+  // Close on overlay click
+  const claimOverlay = document.getElementById('claimOverlay');
+  if (claimOverlay) {
+    claimOverlay.addEventListener('click', function(e) {
+      if (e.target === this) {
+        hideClaimForm();
+      }
+    });
+  }
+
+  // Close on ESC key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && claimOverlay && !claimOverlay.classList.contains('hidden')) {
+      hideClaimForm();
+    }
+  });
+
+  // Handle form submission
+  const claimForm = document.getElementById('claimForm');
+  if (claimForm) {
+    claimForm.addEventListener('submit', handleClaimSubmit);
+  }
+}
+
 // Show Claim Form
 function showClaimForm(voucher) {
-  console.log('Show claim form called', voucher);
   currentVoucher = voucher;
   
   const expiryDate = voucher.expiry_date 
@@ -1426,6 +1454,11 @@ function showClaimForm(voucher) {
   document.getElementById('claimExpiryDate').textContent = expiryDate;
   document.getElementById('claimOverlay').classList.remove('hidden');
   document.body.style.overflow = 'hidden';
+  
+  // Re-initialize feather icons in the modal
+  setTimeout(() => {
+    feather.replace();
+  }, 100);
 }
 
 // Hide Claim Form
@@ -1433,128 +1466,183 @@ function hideClaimForm() {
   document.getElementById('claimOverlay').classList.add('hidden');
   document.getElementById('claimForm').reset();
   document.body.style.overflow = 'auto';
+  currentVoucher = null;
 }
 
-// Close on overlay click
-if (document.getElementById('claimOverlay')) {
-  document.getElementById('claimOverlay').addEventListener('click', function(e) {
-    if (e.target === this) {
-      hideClaimForm();
+// Handle Claim Form Submission
+async function handleClaimSubmit(e) {
+  e.preventDefault();
+
+  const submitBtn = document.getElementById('submitBtn');
+  const originalText = submitBtn.innerHTML;
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '⏳ Memproses...';
+
+  const userName = document.getElementById('userName').value;
+  const userPhone = document.getElementById('userPhone').value;
+  const voucherId = document.getElementById('voucherId').value;
+
+  try {
+    const response = await fetch('/vouchers/claim', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+      },
+      body: JSON.stringify({
+        voucher_id: voucherId,
+        user_name: userName,
+        user_phone: userPhone
+      })
+    });
+
+    const result = await response.json();
+
+    if (!result.success) {
+      throw new Error(result.message);
     }
-  });
-}
 
-// Close on ESC key
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape' && document.getElementById('claimOverlay') && !document.getElementById('claimOverlay').classList.contains('hidden')) {
-    hideClaimForm();
+    await handleSuccessfulClaim(result, userName, userPhone);
+    
+  } catch (error) {
+    console.error('Error claiming voucher:', error);
+    showErrorNotification('❌ Terjadi kesalahan: ' + error.message);
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = 'Claim & Download 🎁';
   }
-});
+}
 
-// Handle form submission
-if (document.getElementById('claimForm')) {
-  document.getElementById('claimForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
+// Handle Successful Claim
+async function handleSuccessfulClaim(result, userName, userPhone) {
+  const uniqueCode = result.data.unique_code;
+  const expiryDate = currentVoucher.expiry_date 
+    ? new Date(currentVoucher.expiry_date).toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      })
+    : 'Tidak terbatas';
 
-    const submitBtn = document.getElementById('submitBtn');
-    const originalText = submitBtn.innerHTML;
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '⏳ Memproses...';
+  // Update voucher template
+  document.getElementById('templateTitle').textContent = currentVoucher.name;
+  document.getElementById('templateName').textContent = userName;
+  document.getElementById('templatePhone').textContent = userPhone;
+  document.getElementById('templateExpiry').textContent = expiryDate;
+  
+  // Set background image (gunakan download_image jika ada, fallback ke image biasa)
+  const bgImage = document.getElementById('templateBgImage');
+  if (bgImage) {
+    bgImage.src = currentVoucher.download_image_url || currentVoucher.image_url;
+  }
 
-    const userName = document.getElementById('userName').value;
-    const userPhone = document.getElementById('userPhone').value;
-    const voucherId = document.getElementById('voucherId').value;
+  // Generate barcode
+  JsBarcode("#templateBarcode", uniqueCode, {
+    format: "CODE128",
+    width: 2,
+    height: 60,
+    displayValue: true,
+    fontSize: 14,
+    margin: 5,
+    background: "transparent"
+  });
 
-    try {
-      const response = await fetch('/vouchers/claim', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-        },
-        body: JSON.stringify({
-          voucher_id: voucherId,
-          user_name: userName,
-          user_phone: userPhone
-        })
-      });
+  // Wait for image to load before capturing
+  if (bgImage) {
+    bgImage.onload = async function() {
+      await generateAndDownloadVoucher(uniqueCode);
+    };
 
-      const result = await response.json();
-
-      if (!result.success) {
-        throw new Error(result.message);
-      }
-
-      const uniqueCode = result.data.unique_code;
-      const expiryDate = currentVoucher.expiry_date 
-        ? new Date(currentVoucher.expiry_date).toLocaleDateString('id-ID', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric'
-          })
-        : 'Tidak terbatas';
-
-      document.getElementById('templateTitle').textContent = currentVoucher.name;
-      document.getElementById('templateName').textContent = userName;
-      document.getElementById('templatePhone').textContent = userPhone;
-      document.getElementById('templateExpiry').textContent = expiryDate;
-      document.getElementById('templateDesc').textContent = currentVoucher.deskripsi;
-
-      JsBarcode("#templateBarcode", uniqueCode, {
-        format: "CODE128",
-        width: 2,
-        height: 80,
-        displayValue: false,
-        fontSize: 16,
-        margin: 10
-      });
-
-      const template = document.getElementById('voucherTemplate');
-      const canvas = await html2canvas(template, {
-        scale: 2,
-        backgroundColor: '#ffffff',
-        logging: false
-      });
-
-      canvas.toBlob(function(blob) {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Voucher-${uniqueCode}.png`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-
-        hideClaimForm();
-        
-        const notification = document.createElement('div');
-        notification.className = 'fixed top-4 left-1/2 -translate-x-1/2 bg-green-500 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-xl shadow-2xl z-[100] notification-enter w-[calc(100%-2rem)] sm:w-auto max-w-md';
-        notification.innerHTML = `
-          <div class="flex items-center space-x-3">
-            <svg class="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
-            <div>
-              <p class="font-bold text-sm sm:text-base">Berhasil!</p>
-              <p class="text-xs sm:text-sm">Voucher telah di-download</p>
-            </div>
-          </div>
-        `;
-        document.body.appendChild(notification);
-        setTimeout(() => notification.remove(), 5000);
-      });
-    } catch (error) {
-      console.error('Error claiming voucher:', error);
-      alert('❌ Terjadi kesalahan: ' + error.message);
-    } finally {
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = originalText;
+    // If image already cached
+    if (bgImage.complete) {
+      await generateAndDownloadVoucher(uniqueCode);
     }
+  } else {
+    // Fallback if no background image element
+    await generateAndDownloadVoucher(uniqueCode);
+  }
+}
+
+// Generate and Download Voucher
+async function generateAndDownloadVoucher(uniqueCode) {
+  const template = document.getElementById('voucherTemplate');
+  const canvas = await html2canvas(template, {
+    scale: 2,
+    backgroundColor: '#ffffff',
+    logging: false,
+    useCORS: true,
+    allowTaint: true
+  });
+
+  canvas.toBlob(function(blob) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Voucher-${uniqueCode}.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    hideClaimForm();
+    showSuccessNotification('Voucher telah berhasil di-download!');
+    
+    // Refresh voucher slider to update quotas after delay
+    setTimeout(() => {
+      if (window.voucherSlider) {
+        window.voucherSlider.updateSlider();
+      }
+      // Optional: reload page untuk update kuota
+      // location.reload();
+    }, 2000);
   });
 }
 
-// Tab Switching
+// Show Success Notification
+function showSuccessNotification(message) {
+  const notification = document.createElement('div');
+  notification.className = 'fixed top-4 left-1/2 -translate-x-1/2 bg-green-500 text-white px-6 py-4 rounded-xl shadow-2xl z-[100] animate-fade-in';
+  notification.innerHTML = `
+    <div class="flex items-center space-x-3">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+      </svg>
+      <div>
+        <p class="font-bold">Berhasil!</p>
+        <p class="text-sm">${message}</p>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(notification);
+  setTimeout(() => {
+    notification.classList.add('animate-fade-out');
+    setTimeout(() => notification.remove(), 300);
+  }, 5000);
+}
+
+// Show Error Notification
+function showErrorNotification(message) {
+  const notification = document.createElement('div');
+  notification.className = 'fixed top-4 left-1/2 -translate-x-1/2 bg-red-500 text-white px-6 py-4 rounded-xl shadow-2xl z-[100] animate-fade-in';
+  notification.innerHTML = `
+    <div class="flex items-center space-x-3">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+      <div>
+        <p class="font-bold">Gagal!</p>
+        <p class="text-sm">${message}</p>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(notification);
+  setTimeout(() => {
+    notification.classList.add('animate-fade-out');
+    setTimeout(() => notification.remove(), 300);
+  }, 5000);
+}
+
+// ==================== TAB SWITCHING ====================
 function switchPromoTab(tab) {
   const promoTab = document.getElementById('tabPromo');
   const voucherTab = document.getElementById('tabVoucher');
@@ -1587,6 +1675,117 @@ function switchPromoTab(tab) {
   
   feather.replace();
 }
+
+// ==================== UTILITY FUNCTIONS ====================
+// Add CSS animations for notifications
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes fade-in {
+    from { opacity: 0; transform: translate(-50%, -20px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+  }
+  
+  @keyframes fade-out {
+    from { opacity: 1; transform: translate(-50%, 0); }
+    to { opacity: 0; transform: translate(-50%, -20px); }
+  }
+  
+  .animate-fade-in {
+    animation: fade-in 0.3s ease-out forwards;
+  }
+  
+  .animate-fade-out {
+    animation: fade-out 0.3s ease-in forwards;
+  }
+  
+  .animate-slide-up {
+    animation: slide-up 0.3s ease-out forwards;
+  }
+  
+  @keyframes slide-up {
+    from { 
+      opacity: 0; 
+      transform: translateY(30px) scale(0.95); 
+    }
+    to { 
+      opacity: 1; 
+      transform: translateY(0) scale(1); 
+    }
+  }
+`;
+document.head.appendChild(style);
+
+// ==================== FORM VALIDATION ====================
+function validatePhoneNumber(phone) {
+  const phoneRegex = /^[0-9]{10,13}$/;
+  return phoneRegex.test(phone);
+}
+
+function validateName(name) {
+  return name.trim().length >= 2 && name.trim().length <= 255;
+}
+
+// Real-time validation
+document.addEventListener('DOMContentLoaded', function() {
+  const userNameInput = document.getElementById('userName');
+  const userPhoneInput = document.getElementById('userPhone');
+  
+  if (userNameInput) {
+    userNameInput.addEventListener('input', function() {
+      const isValid = validateName(this.value);
+      this.classList.toggle('border-red-500', !isValid && this.value.length > 0);
+      this.classList.toggle('border-green-500', isValid && this.value.length > 0);
+    });
+  }
+  
+  if (userPhoneInput) {
+    userPhoneInput.addEventListener('input', function() {
+      const isValid = validatePhoneNumber(this.value);
+      this.classList.toggle('border-red-500', !isValid && this.value.length > 0);
+      this.classList.toggle('border-green-500', isValid && this.value.length > 0);
+    });
+  }
+});
+
+// ==================== PERFORMANCE OPTIMIZATIONS ====================
+// Debounce function for resize events
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+// Optimized resize handler
+const optimizedResize = debounce(() => {
+  if (window.promoSlider) window.promoSlider.handleResize();
+  if (window.voucherSlider) window.voucherSlider.handleResize();
+}, 250);
+
+window.addEventListener('resize', optimizedResize);
+
+// Lazy loading for images
+document.addEventListener('DOMContentLoaded', function() {
+  const lazyImages = document.querySelectorAll('img[loading="lazy"]');
+  
+  const imageObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const img = entry.target;
+        img.src = img.dataset.src;
+        img.classList.remove('lazy');
+        imageObserver.unobserve(img);
+      }
+    });
+  });
+
+  lazyImages.forEach(img => imageObserver.observe(img));
+});
 </script>
 
   </body>
