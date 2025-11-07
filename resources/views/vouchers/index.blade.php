@@ -19,19 +19,6 @@
         @keyframes slideUp { from { opacity: 0; transform: translateY(100px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
         .animate-fade-in { animation: fadeInUp 0.6s ease-out forwards; }
         .animate-slide-up { animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
-        
-        /* Barcode overlay styles */
-        .barcode-overlay {
-            position: absolute;
-            bottom: 60px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.95);
-            padding: 15px 25px;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(10px);
-        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -165,199 +152,199 @@
         </div>
     </div>
 
-
-<!-- Hidden Template untuk Download - IMPROVED VERSION -->
-<div id="voucherTemplate" style="position: absolute; left: -9999px; width: 1080px; height: 1080px;">
-    <div style="position: relative; width: 100%; height: 100%; font-family: 'Arial', sans-serif; overflow: hidden;">
-        
-        <!-- Background Image Container (65% atas) -->
-        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 65%; overflow: hidden;">
-            <img id="templateBgImage" src="" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
-            <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.8) 100%);"></div>
-        </div>
-        
-        <!-- Header Title -->
-        <div style="position: absolute; top: 40px; left: 40px; right: 40px; z-index: 10;">
-            <h1 style="color: white; font-size: 48px; font-weight: bold; margin: 0 0 15px 0; text-shadow: 3px 3px 8px rgba(0,0,0,0.8); line-height: 1.2;" id="templateTitle"></h1>
-            <div style="display: inline-block; background: rgba(207, 217, 22, 0.95); padding: 12px 24px; border-radius: 12px; backdrop-filter: blur(10px);">
-                <p style="color: #1f2937; font-size: 18px; font-weight: bold; margin: 0;">🎉 Voucher Berhasil Di-claim!</p>
-            </div>
-        </div>
-        
-        <!-- White Content Area (35% bawah) -->
-        <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 35%; background: #ffffff; padding: 40px;">
+    <!-- Hidden Template - FIXED VERSION -->
+    <div id="voucherTemplate" style="position: absolute; left: -9999px; width: 800px; height: 1000px;">
+        <div style="position: relative; width: 100%; height: 100%; background: #f3f4f6; font-family: Arial, sans-serif; overflow: hidden;">
             
-            <!-- Info User Card - Kiri -->
-            <div style="position: absolute; top: -60px; left: 40px; background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%); padding: 25px 30px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15); border: 3px solid #CFD916; max-width: 420px;">
-                <div style="display: flex; align-items: center; margin-bottom: 12px;">
-                    <div style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; margin-right: 12px;"></div>
-                    <p style="margin: 0; color: #1f2937; font-size: 16px; font-weight: 600;">
-                        <span style="color: #6b7280;">Nama:</span> <span id="templateName" style="color: #111827;"></span>
-                    </p>
-                </div>
-                <div style="display: flex; align-items: center; margin-bottom: 12px;">
-                    <div style="width: 8px; height: 8px; background: #3b82f6; border-radius: 50%; margin-right: 12px;"></div>
-                    <p style="margin: 0; color: #1f2937; font-size: 16px; font-weight: 600;">
-                        <span style="color: #6b7280;">No. HP:</span> <span id="templatePhone" style="color: #111827;"></span>
-                    </p>
-                </div>
-                <div style="display: flex; align-items: center;">
-                    <div style="width: 8px; height: 8px; background: #f59e0b; border-radius: 50%; margin-right: 12px;"></div>
-                    <p style="margin: 0; color: #1f2937; font-size: 16px; font-weight: 600;">
-                        <span style="color: #6b7280;">Berlaku:</span> <span id="templateExpiry" style="color: #111827;"></span>
-                    </p>
+            <!-- Top Section: Image (50%) -->
+            <div style="position: relative; width: 100%; height: 50%; overflow: hidden;">
+                <img id="templateBgImage" src="" style="width: 100%; height: 100%; object-fit: cover;">
+                <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.7) 100%);"></div>
+                
+                <!-- Title on Image -->
+                <div style="position: absolute; top: 30px; left: 30px; right: 30px;">
+                    <h1 id="templateTitle" style="color: white; font-size: 36px; font-weight: bold; margin: 0 0 12px 0; text-shadow: 2px 2px 6px rgba(0,0,0,0.8); line-height: 1.2;"></h1>
+                    <div style="display: inline-block; background: #CFD916; padding: 8px 20px; border-radius: 8px;">
+                        <p style="margin: 0; font-size: 14px; font-weight: bold; color: #1f2937;">✓ Voucher Berhasil Di-claim</p>
+                    </div>
                 </div>
             </div>
 
-            <!-- Barcode Card - Kanan Bawah -->
-            <div style="position: absolute; bottom: 40px; right: 40px; background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%); padding: 25px 35px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15); border: 3px solid #CFD916;">
-                <p style="text-align: center; color: #1f2937; font-weight: bold; margin: 0 0 15px 0; font-size: 16px; letter-spacing: 1px;">🎫 KODE VOUCHER</p>
-                <svg id="templateBarcode"></svg>
-                <p style="text-align: center; margin: 12px 0 0 0; color: #6b7280; font-size: 12px; font-style: italic;">
-                    Tunjukkan barcode saat pembayaran
-                </p>
-            </div>
-            
-        </div>
+            <!-- Bottom Section: White (50%) -->
+            <div style="position: relative; width: 100%; height: 50%; background: white; padding: 40px;">
+                
+                <!-- User Info Box -->
+                <div style="background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%); padding: 20px 25px; border-radius: 16px; margin-bottom: 30px; border: 2px solid #CFD916; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                    <div style="margin-bottom: 10px;">
+                        <span style="color: #6b7280; font-size: 13px; font-weight: 600;">👤 Nama:</span>
+                        <span id="templateName" style="color: #111827; font-size: 14px; font-weight: bold; margin-left: 8px;"></span>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span style="color: #6b7280; font-size: 13px; font-weight: 600;">📱 No. HP:</span>
+                        <span id="templatePhone" style="color: #111827; font-size: 14px; font-weight: bold; margin-left: 8px;"></span>
+                    </div>
+                    <div>
+                        <span style="color: #6b7280; font-size: 13px; font-weight: 600;">📅 Berlaku:</span>
+                        <span id="templateExpiry" style="color: #111827; font-size: 14px; font-weight: bold; margin-left: 8px;"></span>
+                    </div>
+                </div>
 
-        <!-- Decorative Line -->
-        <div style="position: absolute; top: 65%; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #CFD916 0%, #9DB91C 50%, #CFD916 100%);"></div>
-        
-        <!-- Watermark -->
-        <div style="position: absolute; bottom: 10px; left: 40px; opacity: 0.6;">
-            <p style="margin: 0; color: #9ca3af; font-size: 11px; font-weight: 600;">
-                MestaKara © 2025 | Valid Voucher
-            </p>
+                <!-- Barcode Box -->
+                <div style="background: #ffffff; padding: 20px; border-radius: 16px; text-align: center; border: 3px dashed #CFD916; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+                    <p style="margin: 0 0 12px 0; font-size: 14px; font-weight: bold; color: #1f2937; letter-spacing: 1px;">🎫 KODE VOUCHER</p>
+                    <div style="display: flex; justify-content: center; margin: 10px 0;">
+                        <svg id="templateBarcode"></svg>
+                    </div>
+                    <p style="margin: 10px 0 0 0; font-size: 11px; color: #6b7280; font-style: italic;">
+                        Tunjukkan barcode ini saat melakukan pembayaran
+                    </p>
+                </div>
+
+                <!-- Footer -->
+                <div style="position: absolute; bottom: 15px; left: 0; right: 0; text-align: center;">
+                    <p style="margin: 0; font-size: 10px; color: #9ca3af;">MestaKara © 2025 | Valid Voucher</p>
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-let currentVoucher = null;
+    <script>
+        let currentVoucher = null;
 
-function showClaimForm(voucher) {
-    currentVoucher = voucher;
-    document.getElementById('voucherId').value = voucher.id;
-    document.getElementById('claimVoucherName').textContent = voucher.name;
-    document.getElementById('claimOverlay').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-}
+        function showClaimForm(voucher) {
+            currentVoucher = voucher;
+            document.getElementById('voucherId').value = voucher.id;
+            document.getElementById('claimVoucherName').textContent = voucher.name;
+            document.getElementById('claimOverlay').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
 
-function hideClaimForm() {
-    document.getElementById('claimOverlay').classList.add('hidden');
-    document.getElementById('claimForm').reset();
-    document.body.style.overflow = 'auto';
-}
+        function hideClaimForm() {
+            document.getElementById('claimOverlay').classList.add('hidden');
+            document.getElementById('claimForm').reset();
+            document.body.style.overflow = 'auto';
+        }
 
-document.getElementById('claimForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
+        document.getElementById('claimForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
 
-    const submitBtn = document.getElementById('submitBtn');
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '⏳ Memproses...';
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '⏳ Memproses...';
 
-    const userName = document.getElementById('userName').value;
-    const userPhone = document.getElementById('userPhone').value;
-    const voucherId = document.getElementById('voucherId').value;
+            const userName = document.getElementById('userName').value;
+            const userPhone = document.getElementById('userPhone').value;
+            const voucherId = document.getElementById('voucherId').value;
 
-    try {
-        const response = await fetch('/vouchers/claim', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            },
-            body: JSON.stringify({
-                voucher_id: voucherId,
-                user_name: userName,
-                user_phone: userPhone
-            })
-        });
+            try {
+                const response = await fetch('/vouchers/claim', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({
+                        voucher_id: voucherId,
+                        user_name: userName,
+                        user_phone: userPhone
+                    })
+                });
 
-        const result = await response.json();
-        if (!result.success) throw new Error(result.message);
+                const result = await response.json();
+                if (!result.success) throw new Error(result.message);
 
-        const uniqueCode = result.data.unique_code;
-        const expiryDate = new Date(currentVoucher.expiry_date).toLocaleDateString('id-ID', {
-            day: 'numeric', month: 'long', year: 'numeric'
-        });
+                const uniqueCode = result.data.unique_code;
+                const expiryDate = new Date(currentVoucher.expiry_date).toLocaleDateString('id-ID', {
+                    day: 'numeric', month: 'long', year: 'numeric'
+                });
 
-        // Set template values
-        document.getElementById('templateTitle').textContent = currentVoucher.name;
-        document.getElementById('templateName').textContent = userName;
-        document.getElementById('templatePhone').textContent = userPhone;
-        document.getElementById('templateExpiry').textContent = expiryDate;
-        
-        const bgImage = document.getElementById('templateBgImage');
-        bgImage.src = currentVoucher.download_image_url || currentVoucher.image_url;
-
-        // Generate barcode
-        JsBarcode("#templateBarcode", uniqueCode, {
-            format: "CODE128",
-            width: 3,
-            height: 80,
-            displayValue: true,
-            fontSize: 18,
-            margin: 8,
-            background: "transparent",
-            lineColor: "#1f2937"
-        });
-
-        bgImage.onload = async function() {
-            const template = document.getElementById('voucherTemplate');
-            const canvas = await html2canvas(template, {
-                scale: 2,
-                backgroundColor: '#ffffff',
-                logging: false,
-                useCORS: true,
-                allowTaint: true
-            });
-
-            canvas.toBlob(function(blob) {
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `Voucher-${currentVoucher.name.replace(/\s+/g, '-')}-${uniqueCode}.png`;
-                a.click();
-                URL.revokeObjectURL(url);
-
-                hideClaimForm();
+                // Set values
+                document.getElementById('templateTitle').textContent = currentVoucher.name;
+                document.getElementById('templateName').textContent = userName;
+                document.getElementById('templatePhone').textContent = userPhone;
+                document.getElementById('templateExpiry').textContent = expiryDate;
                 
+                const bgImage = document.getElementById('templateBgImage');
+                bgImage.src = currentVoucher.download_image_url || currentVoucher.image_url;
+
+                // Generate barcode
+                JsBarcode("#templateBarcode", uniqueCode, {
+                    format: "CODE128",
+                    width: 2.5,
+                    height: 70,
+                    displayValue: true,
+                    fontSize: 16,
+                    margin: 10,
+                    background: "transparent",
+                    lineColor: "#111827"
+                });
+
+                // Wait for image load
+                const waitForImage = new Promise((resolve) => {
+                    if (bgImage.complete) {
+                        resolve();
+                    } else {
+                        bgImage.onload = resolve;
+                    }
+                });
+
+                await waitForImage;
+
+                // Capture
+                const template = document.getElementById('voucherTemplate');
+                const canvas = await html2canvas(template, {
+                    scale: 2,
+                    backgroundColor: '#f3f4f6',
+                    logging: false,
+                    useCORS: true,
+                    allowTaint: true,
+                    windowWidth: 800,
+                    windowHeight: 1000
+                });
+
+                canvas.toBlob(function(blob) {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `Voucher-${currentVoucher.name.replace(/\s+/g, '-')}-${uniqueCode}.png`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+
+                    hideClaimForm();
+                    
+                    const notification = document.createElement('div');
+                    notification.className = 'fixed top-4 left-1/2 -translate-x-1/2 bg-green-500 text-white px-6 py-4 rounded-xl shadow-2xl z-[100]';
+                    notification.innerHTML = `
+                        <div class="flex items-center space-x-3">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <div><p class="font-bold">Berhasil!</p><p class="text-sm">Voucher telah di-download</p></div>
+                        </div>
+                    `;
+                    document.body.appendChild(notification);
+                    setTimeout(() => { notification.remove(); location.reload(); }, 3000);
+                }, 'image/png', 1.0);
+
+            } catch (error) {
+                console.error('Error:', error);
                 const notification = document.createElement('div');
-                notification.className = 'fixed top-4 left-1/2 -translate-x-1/2 bg-green-500 text-white px-6 py-4 rounded-xl shadow-2xl z-[100]';
+                notification.className = 'fixed top-4 left-1/2 -translate-x-1/2 bg-red-500 text-white px-6 py-4 rounded-xl shadow-2xl z-[100]';
                 notification.innerHTML = `
                     <div class="flex items-center space-x-3">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
-                        <div><p class="font-bold">Berhasil!</p><p class="text-sm">Voucher telah di-download</p></div>
+                        <div><p class="font-bold">Gagal!</p><p class="text-sm">${error.message}</p></div>
                     </div>
                 `;
                 document.body.appendChild(notification);
-                setTimeout(() => { notification.remove(); location.reload(); }, 3000);
-            }, 'image/png', 1.0);
-        };
-
-        if (bgImage.complete) bgImage.onload();
-
-    } catch (error) {
-        const notification = document.createElement('div');
-        notification.className = 'fixed top-4 left-1/2 -translate-x-1/2 bg-red-500 text-white px-6 py-4 rounded-xl shadow-2xl z-[100]';
-        notification.innerHTML = `
-            <div class="flex items-center space-x-3">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-                <div><p class="font-bold">Gagal!</p><p class="text-sm">${error.message}</p></div>
-            </div>
-        `;
-        document.body.appendChild(notification);
-        setTimeout(() => notification.remove(), 5000);
-    } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = 'Claim & Download 🎁';
-    }
-});
-</script>
+                setTimeout(() => notification.remove(), 5000);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Claim & Download 🎁';
+            }
+        });
+    </script>
 </body>
 </html>
