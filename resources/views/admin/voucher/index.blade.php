@@ -223,58 +223,54 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200" id="claimsTableBody">
-                        @forelse($claims ?? [] as $index => $claim)
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @forelse($vouchers ?? [] as $index => $voucher)
                         @php
-                            $voucherExpired = $claim->voucher && \Carbon\Carbon::now()->startOfDay()->greaterThan(\Carbon\Carbon::parse($claim->voucher->expiry_date));
-                            $isUsed = $claim->is_used || $claim->scanned_at;
+                            // Gunakan logika yang sama dengan controller - voucher expired jika hari ini > tanggal expiry
+                            $isExpired = \Carbon\Carbon::now()->startOfDay()->greaterThan(\Carbon\Carbon::parse($voucher->expiry_date));
+                            $currentStatus = $isExpired ? 'kadaluarsa' : $voucher->status;
                         @endphp
-                        <tr class="claim-row {{ $voucherExpired && !$isUsed ? 'bg-red-50' : '' }}">
+                        <tr>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $index + 1 }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $claim->user_name }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $claim->user_phone }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-900">{{ $claim->voucher->name ?? '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <img src="{{ $voucher->image_url }}" alt="{{ $voucher->name }}" class="h-16 w-16 object-cover rounded" onerror="this.src='https://via.placeholder.com/64?text=No+Image'">
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $voucher->name }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                <span class="px-2 py-1 bg-gray-100 rounded font-mono text-xs">{{ $claim->unique_code }}</span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ $claim->created_at->format('d M Y H:i') }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                @if($claim->voucher)
-                                    @php
-                                        $expiryDate = \Carbon\Carbon::parse($claim->voucher->expiry_date);
-                                        $voucherExpired = \Carbon\Carbon::now()->startOfDay()->greaterThan($expiryDate);
-                                    @endphp
-                                    <span class="{{ $voucherExpired ? 'text-red-600 font-semibold' : 'text-gray-500' }}">
-                                        {{ $expiryDate->format('d M Y') }}
-                                    </span>
-                                    @if($voucherExpired)
-                                        <span class="block text-xs text-red-500">
-                                            (Sudah Lewat)
-                                        </span>
-                                    @endif
-                                @else
-                                    <span class="text-gray-400">-</span>
-                                @endif
+                                <button onclick="openDescriptionModal('{{ addslashes($voucher->name) }}', '{{ addslashes($voucher->deskripsi) }}')" 
+                                        class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs transition duration-200">
+                                    Lihat Deskripsi
+                                </button>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                @if($isUsed)
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                                        ✓ Terpakai
+                                @php
+                                    $effectiveStatus = $currentStatus;
+                                    if (!$voucher->is_unlimited && $voucher->remaining_quota <= 0) {
+                                        $effectiveStatus = 'habis';
+                                    }
+                                @endphp
+                                
+                                @if($effectiveStatus === 'aktif')
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                        Aktif
                                     </span>
-                                    @if($claim->scanned_at)
-                                        <span class="block text-xs text-gray-500 mt-1">
-                                            {{ $claim->scanned_at->format('d M Y H:i') }}
-                                        </span>
-                                    @endif
-                                @elseif($voucherExpired)
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                                        ⚠️ Kadaluarsa
+                                @elseif($effectiveStatus === 'tidak_aktif')
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                        Tidak Aktif
+                                    </span>
+                                @elseif($effectiveStatus === 'habis')
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-orange-100 text-orange-800">
+                                        Habis
                                     </span>
                                 @else
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                        ✓ Belum Terpakai
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                        Kadaluarsa
+                                    </span>
+                                @endif
+                                
+                                @if($effectiveStatus !== $voucher->status)
+                                    <span class="block text-xs text-orange-600 mt-1">
+                                        ⚠ Auto-{{ $effectiveStatus === 'habis' ? 'sold out' : 'expired' }}
                                     </span>
                                 @endif
                             </td>
@@ -324,12 +320,17 @@
 
             <div class="mb-4">
                 <label for="create_status" class="block text-sm font-medium text-gray-700 mb-2">Status <span class="text-red-500">*</span></label>
-                <select id="create_status" name="status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                <select id="create_status" name="status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 @error('status') border-red-500 @enderror" required>
                     <option value="">Pilih Status</option>
                     <option value="aktif" {{ old('status') == 'aktif' ? 'selected' : '' }}>Aktif</option>
                     <option value="tidak_aktif" {{ old('status') == 'tidak_aktif' ? 'selected' : '' }}>Tidak Aktif</option>
+                    <option value="kadaluarsa" {{ old('status') == 'kadaluarsa' ? 'selected' : '' }}>Kadaluarsa</option>
+                    <option value="habis" {{ old('status') == 'habis' ? 'selected' : '' }}>Habis</option>
                 </select>
                 <p class="mt-1 text-xs text-gray-500">💡 Status akan otomatis berubah jika tanggal sudah lewat atau kuota habis</p>
+                @error('status')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
             </div>
 
             <div class="mb-4">
