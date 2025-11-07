@@ -734,15 +734,23 @@
       <div class="promo-container" id="voucherContainer">
         @foreach($vouchers as $voucher)
           @php
-            // Cek status voucher menggunakan model attributes
-            $isAvailable = $voucher->is_available;
-            $isSoldOut = $voucher->is_sold_out;
-            $isExpired = $voucher->is_expired;
-            $effectiveStatus = $voucher->effective_status;
+            // Gunakan logika yang sama dengan management voucher
+            $isExpired = \Carbon\Carbon::now()->startOfDay()->greaterThan(\Carbon\Carbon::parse($voucher->expiry_date));
+            $currentStatus = $isExpired ? 'kadaluarsa' : $voucher->status;
+            
+            // Tentukan status efektif
+            $effectiveStatus = $currentStatus;
+            if (!$voucher->is_unlimited && $voucher->remaining_quota <= 0) {
+                $effectiveStatus = 'habis';
+            }
+            
+            $isAvailable = $effectiveStatus === 'aktif';
+            $isSoldOut = $effectiveStatus === 'habis';
+            $isExpired = $effectiveStatus === 'kadaluarsa';
             
             // Hitung persentase kuota (jika limited)
             if (!$voucher->is_unlimited && $voucher->quota > 0) {
-                $claimed = $voucher->claims->count();
+                $claimed = $voucher->claims_count ?? $voucher->claims->count();
                 $remaining = $voucher->remaining_quota;
                 $percentage = ($remaining / $voucher->quota) * 100;
                 
@@ -856,10 +864,14 @@
               <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
                 <span>
                   @if($voucher->expiry_date)
+                    @php
+                      $expiryDate = \Carbon\Carbon::parse($voucher->expiry_date);
+                      $isExpired = \Carbon\Carbon::now()->startOfDay()->greaterThan($expiryDate);
+                    @endphp
                     @if($isExpired)
-                      Kadaluarsa: {{ \Carbon\Carbon::parse($voucher->expiry_date)->format('d M Y') }}
+                      Kadaluarsa: {{ $expiryDate->format('d M Y') }}
                     @else
-                      Sampai: {{ \Carbon\Carbon::parse($voucher->expiry_date)->format('d M Y') }}
+                      Sampai: {{ $expiryDate->format('d M Y') }}
                     @endif
                   @else
                     Tidak terbatas
