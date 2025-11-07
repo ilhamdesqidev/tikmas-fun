@@ -1047,7 +1047,6 @@
 
 <!-- Main JavaScript -->
 <script>
-// Paste semua kode dari artifact "dashboard-fixed-script" di sini
 // ==================== INITIALIZE ALL ====================
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize Feather icons
@@ -1482,59 +1481,104 @@ if (document.getElementById('claimForm')) {
           })
         : 'Tidak terbatas';
 
-      document.getElementById('templateTitle').textContent = currentVoucher.name;
-      document.getElementById('templateName').textContent = userName;
-      document.getElementById('templatePhone').textContent = userPhone;
-      document.getElementById('templateExpiry').textContent = expiryDate;
-      document.getElementById('templateDesc').textContent = currentVoucher.deskripsi;
+      // Validasi elemen penting
+      const bgImage = document.getElementById('templateBgImage');
+      const templateBarcode = document.getElementById('templateBarcode');
+      
+      if (!bgImage || !templateBarcode) {
+        throw new Error('Template elements not found');
+      }
 
+      // Set template values dengan validasi
+      const templateTitle = document.getElementById('templateTitle');
+      const templateName = document.getElementById('templateName');
+      const templatePhone = document.getElementById('templatePhone');
+      const templateExpiry = document.getElementById('templateExpiry');
+      
+      if (templateTitle) templateTitle.textContent = currentVoucher.name;
+      if (templateName) templateName.textContent = userName;
+      if (templatePhone) templatePhone.textContent = userPhone;
+      if (templateExpiry) templateExpiry.textContent = expiryDate;
+      
+      // Set background image
+      bgImage.src = currentVoucher.download_image_url || currentVoucher.image_url;
+
+      // Generate barcode
       JsBarcode("#templateBarcode", uniqueCode, {
         format: "CODE128",
         width: 2,
-        height: 80,
-        displayValue: false,
-        fontSize: 16,
-        margin: 10
+        height: 60,
+        displayValue: true,
+        fontSize: 14,
+        margin: 5,
+        background: "transparent"
       });
 
-      const template = document.getElementById('voucherTemplate');
-      const canvas = await html2canvas(template, {
-        scale: 2,
-        backgroundColor: '#ffffff',
-        logging: false
-      });
+      // Wait for image to load before capturing
+      bgImage.onload = async function() {
+        const template = document.getElementById('voucherTemplate');
+        const canvas = await html2canvas(template, {
+          scale: 2,
+          backgroundColor: '#ffffff',
+          logging: false,
+          useCORS: true,
+          allowTaint: true
+        });
 
-      canvas.toBlob(function(blob) {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Voucher-${uniqueCode}.png`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        canvas.toBlob(function(blob) {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `Voucher-${uniqueCode}.png`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
 
-        hideClaimForm();
-        
-        const notification = document.createElement('div');
-        notification.className = 'fixed top-4 left-1/2 -translate-x-1/2 bg-green-500 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-xl shadow-2xl z-[100] notification-enter w-[calc(100%-2rem)] sm:w-auto max-w-md';
-        notification.innerHTML = `
-          <div class="flex items-center space-x-3">
-            <svg class="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
-            <div>
-              <p class="font-bold text-sm sm:text-base">Berhasil!</p>
-              <p class="text-xs sm:text-sm">Voucher telah di-download</p>
+          hideClaimForm();
+          
+          const notification = document.createElement('div');
+          notification.className = 'fixed top-4 left-1/2 -translate-x-1/2 bg-green-500 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-xl shadow-2xl z-[100] notification-enter w-[calc(100%-2rem)] sm:w-auto max-w-md';
+          notification.innerHTML = `
+            <div class="flex items-center space-x-3">
+              <svg class="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <div>
+                <p class="font-bold text-sm sm:text-base">Berhasil!</p>
+                <p class="text-xs sm:text-sm">Voucher telah di-download</p>
+              </div>
             </div>
-          </div>
-        `;
-        document.body.appendChild(notification);
-        setTimeout(() => notification.remove(), 5000);
-      });
+          `;
+          document.body.appendChild(notification);
+          setTimeout(() => notification.remove(), 5000);
+        });
+      };
+
+      // If image already cached
+      if (bgImage.complete) {
+        bgImage.onload();
+      }
+
     } catch (error) {
       console.error('Error claiming voucher:', error);
-      alert('❌ Terjadi kesalahan: ' + error.message);
+      
+      // Show error notification
+      const notification = document.createElement('div');
+      notification.className = 'fixed top-4 left-1/2 -translate-x-1/2 bg-red-500 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-xl shadow-2xl z-[100] w-[calc(100%-2rem)] sm:w-auto max-w-md';
+      notification.innerHTML = `
+        <div class="flex items-center space-x-3">
+          <svg class="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+          <div>
+            <p class="font-bold text-sm sm:text-base">Gagal!</p>
+            <p class="text-xs sm:text-sm">${error.message || 'Terjadi kesalahan saat claim voucher'}</p>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(notification);
+      setTimeout(() => notification.remove(), 5000);
     } finally {
       submitBtn.disabled = false;
       submitBtn.innerHTML = originalText;
