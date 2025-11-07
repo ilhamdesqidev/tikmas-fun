@@ -968,31 +968,39 @@
   </div>
 </div>
 
-<!-- Hidden Template for Voucher Download -->
-<div id="voucherTemplate" style="position: absolute; left: -9999px; width: 800px; background: white;">
-  <div style="padding: 40px; font-family: Arial, sans-serif;">
-    <div style="background: linear-gradient(135deg, #CFD916 0%, #9DB91C 100%); padding: 30px; border-radius: 20px; margin-bottom: 20px;">
-      <h1 style="color: #1f2937; font-size: 32px; font-weight: bold; margin: 0 0 10px 0;" id="templateTitle"></h1>
-      <p style="color: #374151; font-size: 16px; margin: 0;">🎉 Voucher Berhasil Di-claim!</p>
-    </div>
-    
-    <div style="background: #f9fafb; padding: 25px; border-radius: 15px; margin-bottom: 20px;">
-      <p style="margin: 0 0 8px 0; color: #6b7280; font-size: 14px;"><strong>Nama:</strong> <span id="templateName"></span></p>
-      <p style="margin: 0 0 8px 0; color: #6b7280; font-size: 14px;"><strong>No. Telepon:</strong> <span id="templatePhone"></span></p>
-      <p style="margin: 0; color: #6b7280; font-size: 14px;"><strong>Berlaku hingga:</strong> <span id="templateExpiry"></span></p>
-    </div>
+<!-- Hidden Template untuk Download dengan Barcode Overlay -->
+<div id="voucherTemplate" style="position: absolute; left: -9999px; width: 800px; height: 600px;">
+        <div style="position: relative; width: 100%; height: 100%; font-family: Arial, sans-serif;">
+            <!-- Background Image -->
+            <img id="templateBgImage" src="" style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;">
+            
+            <!-- Overlay dengan Info -->
+            <div style="position: absolute; top: 0; left: 0; right: 0; background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%); padding: 30px;">
+                <h1 style="color: white; font-size: 32px; font-weight: bold; margin: 0 0 10px 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);" id="templateTitle"></h1>
+                <p style="color: white; font-size: 16px; margin: 0; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">🎉 Voucher Berhasil Di-claim!</p>
+            </div>
+            
+            <!-- Info User di Kiri Bawah -->
+            <div style="position: absolute; bottom: 180px; left: 30px; background: rgba(255, 255, 255, 0.95); padding: 20px; border-radius: 15px; max-width: 300px; backdrop-filter: blur(10px);">
+                <p style="margin: 0 0 8px 0; color: #1f2937; font-size: 14px;"><strong>Nama:</strong> <span id="templateName"></span></p>
+                <p style="margin: 0 0 8px 0; color: #1f2937; font-size: 14px;"><strong>No. HP:</strong> <span id="templatePhone"></span></p>
+                <p style="margin: 0; color: #1f2937; font-size: 14px;"><strong>Berlaku hingga:</strong> <span id="templateExpiry"></span></p>
+            </div>
 
-    <div style="text-align: center; background: white; padding: 30px; border: 3px dashed #CFD916; border-radius: 15px;">
-      <p style="color: #1f2937; font-weight: bold; margin: 0 0 15px 0; font-size: 18px;">Kode Voucher:</p>
-      <svg id="templateBarcode"></svg>
-      <p style="margin: 15px 0 0 0; color: #6b7280; font-size: 12px;">Tunjukkan barcode ini saat melakukan pembayaran</p>
-    </div>
+            <!-- Barcode Overlay di Tengah Bawah -->
+            <div style="position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); background: rgba(255, 255, 255, 0.95); padding: 15px 25px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3); backdrop-filter: blur(10px);">
+                <p style="text-align: center; color: #1f2937; font-weight: bold; margin: 0 0 10px 0; font-size: 14px;">KODE VOUCHER</p>
+                <svg id="templateBarcode"></svg>
+            </div>
 
-    <div style="margin-top: 25px; padding: 20px; background: #fef3c7; border-radius: 10px; border-left: 4px solid #CFD916;">
-      <p style="margin: 0; color: #92400e; font-size: 13px; line-height: 1.6;" id="templateDesc"></p>
+            <!-- Footer -->
+            <div style="position: absolute; bottom: 15px; left: 0; right: 0; text-align: center;">
+                <p style="margin: 0; color: white; font-size: 11px; text-shadow: 1px 1px 2px rgba(0,0,0,0.7);">
+                    Tunjukkan barcode ini saat melakukan pembayaran
+                </p>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 
 <!-- Footer -->
     <footer class="bg-black text-white pt-8 sm:pt-10 lg:pt-12 pb-6 sm:pb-8">
