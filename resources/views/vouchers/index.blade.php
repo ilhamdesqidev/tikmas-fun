@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Voucher & Promo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
@@ -27,7 +26,7 @@
         <div class="sm:hidden">
             <div class="gradient-bg px-4 py-3">
                 <div class="flex items-center justify-between">
-                    <a href="{{ route('home') }}" class="flex items-center bg-white/20 backdrop-blur-sm hover:bg-white/30 text-gray-800 px-3 py-1.5 rounded-lg transition-all duration-200 font-medium group">
+                    <a href="#" class="flex items-center bg-white/20 backdrop-blur-sm hover:bg-white/30 text-gray-800 px-3 py-1.5 rounded-lg transition-all duration-200 font-medium group">
                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                         </svg>
@@ -40,73 +39,43 @@
 
     <!-- Main Content -->
     <main class="container mx-auto px-3 sm:px-4 py-6 sm:py-12">
-        @if($vouchers->count() > 0)
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-                @foreach($vouchers as $index => $voucher)
-                <div class="voucher-card {{ $voucher->is_available ? '' : 'disabled' }} bg-white rounded-xl shadow-lg overflow-hidden animate-fade-in">
-                    <div class="relative h-48">
-                        <img src="{{ $voucher->image_url }}" alt="{{ $voucher->name }}" class="w-full h-full object-cover">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+            <!-- Voucher Card Example -->
+            <div class="voucher-card bg-white rounded-xl shadow-lg overflow-hidden animate-fade-in">
+                <div class="relative h-48">
+                    <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Voucher Example" class="w-full h-full object-cover">
+                </div>
+
+                <div class="p-5">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Voucher Hemat 50%</h3>
+                    <p class="text-gray-600 text-sm mb-4">Dapatkan diskon 50% untuk semua produk di toko kami. Berlaku hingga 29 November 2025.</p>
+
+                    <div class="mb-4">
+                        <div class="flex items-center justify-between text-xs mb-1.5">
+                            <span class="font-semibold">Kuota Tersedia</span>
+                            <span class="font-bold">45/50</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div class="bg-green-500 h-full rounded-full" style="width: 90%"></div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-4 border-t">
+                        <div class="text-xs text-gray-500">
+                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            29 Nov 2025
+                        </div>
                         
-                        @if(!$voucher->is_available)
-                        <div class="absolute inset-0 bg-black/40 flex items-center justify-center">
-                            <div class="bg-white/90 px-4 py-2 rounded-lg">
-                                <p class="text-sm font-bold text-gray-800">
-                                    @if($voucher->is_sold_out) 🚫 Kuota Habis
-                                    @else ⏰ Sudah Kadaluarsa
-                                    @endif
-                                </p>
-                            </div>
-                        </div>
-                        @endif
-                    </div>
-
-                    <div class="p-5">
-                        <h3 class="text-xl font-bold text-gray-800 mb-2">{{ $voucher->name }}</h3>
-                        <p class="text-gray-600 text-sm mb-4 line-clamp-3">{{ Str::limit($voucher->deskripsi, 120) }}</p>
-
-                        @if(!$voucher->is_unlimited)
-                        <div class="mb-4">
-                            <div class="flex items-center justify-between text-xs mb-1.5">
-                                <span class="font-semibold">Kuota Tersedia</span>
-                                <span class="font-bold">{{ $voucher->remaining_quota }}/{{ $voucher->quota }}</span>
-                            </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2.5">
-                                <div class="bg-green-500 h-full rounded-full" style="width: {{ ($voucher->remaining_quota / $voucher->quota) * 100 }}%"></div>
-                            </div>
-                        </div>
-                        @endif
-
-                        <div class="flex items-center justify-between pt-4 border-t">
-                            <div class="text-xs text-gray-500">
-                                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                </svg>
-                                {{ \Carbon\Carbon::parse($voucher->expiry_date)->format('d M Y') }}
-                            </div>
-                            
-                            @if($voucher->is_available)
-                            <button onclick='showClaimForm(@json($voucher))' 
-                                    class="btn-primary text-gray-800 px-5 py-2 rounded-xl text-sm font-bold">
-                                🎉 Claim Sekarang
-                            </button>
-                            @else
-                            <button disabled class="bg-gray-300 text-gray-600 px-5 py-2 rounded-xl text-sm font-bold cursor-not-allowed">
-                                @if($voucher->is_sold_out) 🚫 Habis @else ⏰ Kadaluarsa @endif
-                            </button>
-                            @endif
-                        </div>
+                        <button onclick='showClaimForm()' 
+                                class="btn-primary text-gray-800 px-5 py-2 rounded-xl text-sm font-bold">
+                            🎉 Claim Sekarang
+                        </button>
                     </div>
                 </div>
-                @endforeach
             </div>
-        @else
-            <div class="flex flex-col items-center justify-center py-20">
-                <div class="bg-white rounded-3xl shadow-xl p-12 text-center max-w-md">
-                    <h3 class="text-2xl font-bold text-gray-800 mb-3">Belum Ada Voucher</h3>
-                    <p class="text-gray-500 mb-6">Silakan cek kembali nanti!</p>
-                </div>
-            </div>
-        @endif
+        </div>
     </main>
 
     <!-- Claim Form Modal -->
@@ -114,12 +83,10 @@
         <div id="claimCard" class="bg-white rounded-3xl shadow-2xl max-w-md w-full animate-slide-up overflow-hidden">
             <div class="gradient-bg p-6 text-center">
                 <h2 class="text-2xl font-bold text-gray-800 mb-2">Claim Voucher</h2>
-                <p class="text-sm text-gray-700" id="claimVoucherName"></p>
+                <p class="text-sm text-gray-700" id="claimVoucherName">Voucher Hemat 50%</p>
             </div>
 
             <form id="claimForm" class="p-6">
-                <input type="hidden" id="voucherId">
-                
                 <div class="mb-5">
                     <label class="block text-sm font-bold text-gray-700 mb-2">
                         📝 Nama Lengkap <span class="text-red-500">*</span>
@@ -152,14 +119,14 @@
         </div>
     </div>
 
-    <!-- Hidden Template - FIXED VERSION -->
+    <!-- Hidden Template - REVISED VERSION -->
     <div id="voucherTemplate" style="position: absolute; left: -9999px; width: 800px; height: 1000px;">
         <div style="position: relative; width: 100%; height: 100%; background: #f3f4f6; font-family: Arial, sans-serif; overflow: hidden;">
             
-            <!-- Top Section: Image (50%) -->
-            <div style="position: relative; width: 100%; height: 50%; overflow: hidden;">
+            <!-- Top Section: Image with Overlay -->
+            <div style="position: relative; width: 100%; height: 60%; overflow: hidden;">
                 <img id="templateBgImage" src="" style="width: 100%; height: 100%; object-fit: cover;">
-                <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.7) 100%);"></div>
+                <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.7) 100%);"></div>
                 
                 <!-- Title on Image -->
                 <div style="position: absolute; top: 30px; left: 30px; right: 30px;">
@@ -168,10 +135,23 @@
                         <p style="margin: 0; font-size: 14px; font-weight: bold; color: #1f2937;">✓ Voucher Berhasil Di-claim</p>
                     </div>
                 </div>
+
+                <!-- Barcode Overlay on Image -->
+                <div style="position: absolute; bottom: 40px; left: 0; right: 0; display: flex; justify-content: center;">
+                    <div style="background: rgba(255, 255, 255, 0.95); padding: 20px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); max-width: 80%;">
+                        <p style="margin: 0 0 12px 0; font-size: 16px; font-weight: bold; color: #1f2937; text-align: center; letter-spacing: 1px;">🎫 KODE VOUCHER</p>
+                        <div style="display: flex; justify-content: center; margin: 10px 0;">
+                            <svg id="templateBarcode"></svg>
+                        </div>
+                        <p style="margin: 10px 0 0 0; font-size: 12px; color: #6b7280; text-align: center; font-style: italic;">
+                            Tunjukkan barcode ini saat melakukan pembayaran
+                        </p>
+                    </div>
+                </div>
             </div>
 
-            <!-- Bottom Section: White (50%) -->
-            <div style="position: relative; width: 100%; height: 50%; background: white; padding: 40px;">
+            <!-- Bottom Section: White -->
+            <div style="position: relative; width: 100%; height: 40%; background: white; padding: 40px;">
                 
                 <!-- User Info Box -->
                 <div style="background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%); padding: 20px 25px; border-radius: 16px; margin-bottom: 30px; border: 2px solid #CFD916; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
@@ -189,17 +169,6 @@
                     </div>
                 </div>
 
-                <!-- Barcode Box -->
-                <div style="background: #ffffff; padding: 20px; border-radius: 16px; text-align: center; border: 3px dashed #CFD916; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
-                    <p style="margin: 0 0 12px 0; font-size: 14px; font-weight: bold; color: #1f2937; letter-spacing: 1px;">🎫 KODE VOUCHER</p>
-                    <div style="display: flex; justify-content: center; margin: 10px 0;">
-                        <svg id="templateBarcode"></svg>
-                    </div>
-                    <p style="margin: 10px 0 0 0; font-size: 11px; color: #6b7280; font-style: italic;">
-                        Tunjukkan barcode ini saat melakukan pembayaran
-                    </p>
-                </div>
-
                 <!-- Footer -->
                 <div style="position: absolute; bottom: 15px; left: 0; right: 0; text-align: center;">
                     <p style="margin: 0; font-size: 10px; color: #9ca3af;">MestaKara © 2025 | Valid Voucher</p>
@@ -209,12 +178,7 @@
     </div>
 
     <script>
-        let currentVoucher = null;
-
-        function showClaimForm(voucher) {
-            currentVoucher = voucher;
-            document.getElementById('voucherId').value = voucher.id;
-            document.getElementById('claimVoucherName').textContent = voucher.name;
+        function showClaimForm() {
             document.getElementById('claimOverlay').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
         }
@@ -234,38 +198,22 @@
 
             const userName = document.getElementById('userName').value;
             const userPhone = document.getElementById('userPhone').value;
-            const voucherId = document.getElementById('voucherId').value;
 
             try {
-                const response = await fetch('/vouchers/claim', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    },
-                    body: JSON.stringify({
-                        voucher_id: voucherId,
-                        user_name: userName,
-                        user_phone: userPhone
-                    })
-                });
-
-                const result = await response.json();
-                if (!result.success) throw new Error(result.message);
-
-                const uniqueCode = result.data.unique_code;
-                const expiryDate = new Date(currentVoucher.expiry_date).toLocaleDateString('id-ID', {
-                    day: 'numeric', month: 'long', year: 'numeric'
-                });
+                // Simulate API call
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                const uniqueCode = "UOSHSOCQUISS";
+                const expiryDate = "29 November 2025";
 
                 // Set values
-                document.getElementById('templateTitle').textContent = currentVoucher.name;
+                document.getElementById('templateTitle').textContent = "Voucher Hemat 50%";
                 document.getElementById('templateName').textContent = userName;
                 document.getElementById('templatePhone').textContent = userPhone;
                 document.getElementById('templateExpiry').textContent = expiryDate;
                 
                 const bgImage = document.getElementById('templateBgImage');
-                bgImage.src = currentVoucher.download_image_url || currentVoucher.image_url;
+                bgImage.src = "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80";
 
                 // Generate barcode
                 JsBarcode("#templateBarcode", uniqueCode, {
@@ -306,7 +254,7 @@
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `Voucher-${currentVoucher.name.replace(/\s+/g, '-')}-${uniqueCode}.png`;
+                    a.download = `Voucher-${uniqueCode}.png`;
                     a.click();
                     URL.revokeObjectURL(url);
 
@@ -323,7 +271,7 @@
                         </div>
                     `;
                     document.body.appendChild(notification);
-                    setTimeout(() => { notification.remove(); location.reload(); }, 3000);
+                    setTimeout(() => { notification.remove(); }, 3000);
                 }, 'image/png', 1.0);
 
             } catch (error) {
