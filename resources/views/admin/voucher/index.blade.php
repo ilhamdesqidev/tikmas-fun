@@ -74,7 +74,8 @@
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gambar</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gambar Display</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gambar Download</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Voucher</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Deskripsi</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
@@ -86,14 +87,28 @@
                     <tbody class="bg-white divide-y divide-gray-200">
                         @forelse($vouchers ?? [] as $index => $voucher)
                         @php
-                            // Gunakan logika yang sama dengan controller - voucher expired jika hari ini > tanggal expiry
                             $isExpired = \Carbon\Carbon::now()->startOfDay()->greaterThan(\Carbon\Carbon::parse($voucher->expiry_date));
                             $currentStatus = $isExpired ? 'kadaluarsa' : $voucher->status;
                         @endphp
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $index + 1 }}</td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <img src="{{ $voucher->image_url }}" alt="{{ $voucher->name }}" class="h-16 w-16 object-cover rounded" onerror="this.src='https://via.placeholder.com/64?text=No+Image'">
+                                <div class="relative group">
+                                    <img src="{{ $voucher->image_url }}" alt="{{ $voucher->name }}" class="h-16 w-16 object-cover rounded cursor-pointer" onerror="this.src='https://via.placeholder.com/64?text=No+Image'" onclick="showImageModal('{{ $voucher->image_url }}', 'Gambar Display')">
+                                    <span class="absolute bottom-0 right-0 bg-blue-500 text-white text-xs px-1 rounded">Display</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="relative group">
+                                    @if($voucher->download_image)
+                                        <img src="{{ $voucher->download_image_url }}" alt="{{ $voucher->name }} Download" class="h-16 w-16 object-cover rounded cursor-pointer" onerror="this.src='https://via.placeholder.com/64?text=No+Image'" onclick="showImageModal('{{ $voucher->download_image_url }}', 'Gambar Download')">
+                                        <span class="absolute bottom-0 right-0 bg-green-500 text-white text-xs px-1 rounded">Download</span>
+                                    @else
+                                        <div class="h-16 w-16 bg-gray-100 rounded flex items-center justify-center">
+                                            <span class="text-xs text-gray-400">Sama</span>
+                                        </div>
+                                    @endif
+                                </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $voucher->name }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -154,7 +169,7 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <button onclick="openEditModal({{ $voucher->id }}, '{{ addslashes($voucher->name) }}', '{{ addslashes($voucher->deskripsi) }}', '{{ $voucher->status }}', '{{ $voucher->image }}', '{{ $voucher->expiry_date }}', {{ $voucher->is_unlimited ? 'true' : 'false' }}, {{ $voucher->quota ?? 'null' }})" 
+                                <button onclick='openEditModal(@json($voucher))' 
                                         class="text-blue-600 hover:text-blue-900 mr-3">
                                     Edit
                                 </button>
@@ -166,7 +181,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="8" class="px-6 py-8 text-center text-gray-500">
+                            <td colspan="9" class="px-6 py-8 text-center text-gray-500">
                                 Belum ada voucher yang tersedia
                             </td>
                         </tr>
@@ -211,7 +226,6 @@
                     <tbody class="bg-white divide-y divide-gray-200" id="claimsTableBody">
                         @forelse($claims ?? [] as $index => $claim)
                         @php
-                            // Gunakan logika yang sama - voucher expired jika hari ini > tanggal expiry
                             $voucherExpired = $claim->voucher && \Carbon\Carbon::now()->startOfDay()->greaterThan(\Carbon\Carbon::parse($claim->voucher->expiry_date));
                             $isUsed = $claim->is_used || $claim->scanned_at;
                         @endphp
@@ -258,9 +272,6 @@
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
                                         ⚠️ Kadaluarsa
                                     </span>
-                                    <span class="block text-xs text-red-500 mt-1">
-                                        Voucher expired
-                                    </span>
                                 @else
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                                         ✓ Belum Terpakai
@@ -284,7 +295,7 @@
 
 <!-- Modal Create Voucher -->
 <div id="createVoucherModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-    <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+    <div class="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center pb-3 border-b">
             <h3 class="text-xl font-semibold text-gray-900">Tambah Voucher Baru</h3>
             <button type="button" onclick="closeCreateModal()" class="text-gray-400 hover:text-gray-500">
@@ -300,97 +311,102 @@
             <div class="mb-4">
                 <label for="create_name" class="block text-sm font-medium text-gray-700 mb-2">Nama Voucher <span class="text-red-500">*</span></label>
                 <input type="text" id="create_name" name="name" value="{{ old('name') }}"
-                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 @error('name') border-red-500 @enderror" 
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
                        placeholder="Contoh: Diskon 50% Hari Kemerdekaan" required>
-                @error('name')
-                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                @enderror
             </div>
 
             <div class="mb-4">
                 <label for="create_deskripsi" class="block text-sm font-medium text-gray-700 mb-2">Deskripsi Voucher <span class="text-red-500">*</span></label>
                 <textarea id="create_deskripsi" name="deskripsi" rows="4"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 @error('deskripsi') border-red-500 @enderror" 
-                    placeholder="Deskripsi detail tentang voucher, syarat dan ketentuan, dll." required>{{ old('deskripsi') }}</textarea>
-                @error('deskripsi')
-                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                @enderror
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                    placeholder="Deskripsi detail tentang voucher" required>{{ old('deskripsi') }}</textarea>
             </div>
 
             <div class="mb-4">
                 <label for="create_status" class="block text-sm font-medium text-gray-700 mb-2">Status <span class="text-red-500">*</span></label>
-                <select id="create_status" name="status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 @error('status') border-red-500 @enderror" required>
+                <select id="create_status" name="status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
                     <option value="">Pilih Status</option>
                     <option value="aktif" {{ old('status') == 'aktif' ? 'selected' : '' }}>Aktif</option>
                     <option value="tidak_aktif" {{ old('status') == 'tidak_aktif' ? 'selected' : '' }}>Tidak Aktif</option>
-                    <option value="kadaluarsa" {{ old('status') == 'kadaluarsa' ? 'selected' : '' }}>Kadaluarsa</option>
-                    <option value="habis" {{ old('status') == 'habis' ? 'selected' : '' }}>Habis</option>
                 </select>
                 <p class="mt-1 text-xs text-gray-500">💡 Status akan otomatis berubah jika tanggal sudah lewat atau kuota habis</p>
-                @error('status')
-                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                @enderror
             </div>
 
-            <!-- Kuota Section - Edit Modal -->
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Tipe Kuota <span class="text-red-500">*</span></label>
-                    <div class="grid grid-cols-2 gap-3">
-                        <label class="flex items-center p-3 border border-gray-300 rounded-md cursor-pointer hover:bg-gray-50">
-                            <input type="radio" name="quota_type" value="unlimited" class="text-blue-600 focus:ring-blue-500" required>
-                            <span class="ml-2 text-sm font-medium text-gray-700">Unlimited</span>
-                        </label>
-                        <label class="flex items-center p-3 border border-gray-300 rounded-md cursor-pointer hover:bg-gray-50">
-                            <input type="radio" name="quota_type" value="limited" class="text-blue-600 focus:ring-blue-500" required>
-                            <span class="ml-2 text-sm font-medium text-gray-700">Terbatas</span>
-                        </label>
-                    </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Tipe Kuota <span class="text-red-500">*</span></label>
+                <div class="grid grid-cols-2 gap-3">
+                    <label class="flex items-center p-3 border border-gray-300 rounded-md cursor-pointer hover:bg-gray-50">
+                        <input type="radio" name="quota_type" value="unlimited" class="text-blue-600 focus:ring-blue-500" required>
+                        <span class="ml-2 text-sm font-medium text-gray-700">Unlimited</span>
+                    </label>
+                    <label class="flex items-center p-3 border border-gray-300 rounded-md cursor-pointer hover:bg-gray-50">
+                        <input type="radio" name="quota_type" value="limited" class="text-blue-600 focus:ring-blue-500" required>
+                        <span class="ml-2 text-sm font-medium text-gray-700">Terbatas</span>
+                    </label>
                 </div>
+            </div>
 
-                <div id="quotaInputContainer" class="mb-4 hidden">
-                    <label for="create_quota" class="block text-sm font-medium text-gray-700 mb-2">Jumlah Kuota <span class="text-red-500">*</span></label>
-                    <input type="number" id="create_quota" name="quota" min="1"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                        placeholder="Contoh: 50">
-                    <p class="mt-1 text-xs text-gray-500">💡 Masukkan jumlah voucher yang tersedia</p>
-                    @error('quota')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
-
-               
+            <div id="quotaInputContainer" class="mb-4 hidden">
+                <label for="create_quota" class="block text-sm font-medium text-gray-700 mb-2">Jumlah Kuota <span class="text-red-500">*</span></label>
+                <input type="number" id="create_quota" name="quota" min="1"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                    placeholder="Contoh: 50">
+                <p class="mt-1 text-xs text-gray-500">💡 Masukkan jumlah voucher yang tersedia</p>
+            </div>
 
             <div class="mb-4">
                 <label for="create_expiry_date" class="block text-sm font-medium text-gray-700 mb-2">Tanggal Kadaluarsa <span class="text-red-500">*</span></label>
                 <input type="date" id="create_expiry_date" name="expiry_date" value="{{ old('expiry_date') }}"
-                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 @error('expiry_date') border-red-500 @enderror" required>
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
                 <p class="mt-1 text-xs text-gray-500">⏰ Voucher akan otomatis kadaluarsa setelah tanggal ini</p>
-                @error('expiry_date')
-                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                @enderror
             </div>
 
             <div class="mb-4">
-                <label for="create_image" class="block text-sm font-medium text-gray-700 mb-2">Gambar Voucher <span class="text-red-500">*</span></label>
+                <label for="create_image" class="block text-sm font-medium text-gray-700 mb-2">
+                    Gambar Voucher (Display) <span class="text-red-500">*</span>
+                </label>
+                <p class="text-xs text-gray-500 mb-2">📱 Gambar ini akan ditampilkan di halaman daftar voucher</p>
                 <div class="flex items-center justify-center w-full">
                     <label for="create_image" class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
                         <div class="flex flex-col items-center justify-center pt-5 pb-6">
                             <svg class="w-8 h-8 mb-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                             </svg>
-                            <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click to upload</span> atau drag and drop</p>
+                            <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click to upload</span></p>
                             <p class="text-xs text-gray-500">PNG, JPG, JPEG (MAX. 10MB)</p>
                         </div>
-                        <input id="create_image" name="image" type="file" accept="image/png,image/jpeg,image/jpg"
-                               class="hidden" onchange="previewCreateImage(event)" required>
+                        <input id="create_image" name="image" type="file" accept="image/*" class="hidden" onchange="previewCreateImage(event)" required>
                     </label>
                 </div>
-                @error('image')
-                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                @enderror
-                
                 <div id="createImagePreview" class="mt-3 hidden">
                     <img id="createPreview" src="" alt="Preview" class="w-full h-48 object-cover rounded-lg">
+                </div>
+            </div>
+
+            <div class="mb-4 bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <label for="create_download_image" class="block text-sm font-medium text-gray-700 mb-2">
+                    🎁 Gambar Voucher (Download) <span class="text-gray-500">(Opsional)</span>
+                </label>
+                <p class="text-xs text-blue-600 mb-3">
+                    📸 Gambar ini akan digunakan sebagai background saat user download voucher (dengan barcode overlay). 
+                    <br>
+                    💡 Jika tidak diisi, akan menggunakan gambar display. Rekomendasi ukuran: 800x600px
+                </p>
+                <div class="flex items-center justify-center w-full">
+                    <label for="create_download_image" class="flex flex-col items-center justify-center w-full h-32 border-2 border-blue-300 border-dashed rounded-lg cursor-pointer bg-white hover:bg-blue-50">
+                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                            <svg class="w-8 h-8 mb-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <p class="mb-2 text-sm text-blue-600"><span class="font-semibold">Upload gambar khusus</span></p>
+                            <p class="text-xs text-gray-500">PNG, JPG, JPEG (MAX. 10MB)</p>
+                        </div>
+                        <input id="create_download_image" name="download_image" type="file" accept="image/*" class="hidden" onchange="previewCreateDownloadImage(event)">
+                    </label>
+                </div>
+                <div id="createDownloadImagePreview" class="mt-3 hidden">
+                    <p class="text-xs text-gray-600 mb-2">Preview gambar download:</p>
+                    <img id="createDownloadPreview" src="" alt="Download Preview" class="w-full h-48 object-cover rounded-lg border-2 border-blue-300">
                 </div>
             </div>
 
@@ -408,7 +424,7 @@
 
 <!-- Modal Edit Voucher -->
 <div id="editVoucherModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-    <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+    <div class="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center pb-3 border-b">
             <h3 class="text-xl font-semibold text-gray-900">Edit Voucher</h3>
             <button type="button" onclick="closeEditModal()" class="text-gray-400 hover:text-gray-500">
@@ -443,7 +459,6 @@
                 <p class="mt-1 text-xs text-gray-500">💡 Status akan otomatis berubah jika tanggal sudah lewat atau kuota habis</p>
             </div>
 
-            <!-- Kuota Section -->
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Tipe Kuota <span class="text-red-500">*</span></label>
                 <div class="grid grid-cols-2 gap-3">
@@ -473,11 +488,11 @@
             </div>
 
             <div class="mb-4">
-                <label for="edit_image" class="block text-sm font-medium text-gray-700 mb-2">Gambar Voucher</label>
-                <p class="text-xs text-gray-500 mb-2">Kosongkan jika tidak ingin mengubah gambar</p>
+                <label for="edit_image" class="block text-sm font-medium text-gray-700 mb-2">Gambar Voucher (Display)</label>
+                <p class="text-xs text-gray-500 mb-2">Kosongkan jika tidak ingin mengubah gambar display</p>
                 
                 <div id="currentImageContainer" class="mb-3">
-                    <p class="text-sm text-gray-600 mb-2">Gambar saat ini:</p>
+                    <p class="text-sm text-gray-600 mb-2">Gambar display saat ini:</p>
                     <img id="currentImage" src="" alt="Current" class="w-full h-48 object-cover rounded-lg">
                 </div>
                 
@@ -490,13 +505,45 @@
                             <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click to upload</span> gambar baru</p>
                             <p class="text-xs text-gray-500">PNG, JPG, JPEG (MAX. 10MB)</p>
                         </div>
-                        <input id="edit_image" name="image" type="file" accept="image/png,image/jpeg,image/jpg" class="hidden" onchange="previewEditImage(event)">
+                        <input id="edit_image" name="image" type="file" accept="image/*" class="hidden" onchange="previewEditImage(event)">
                     </label>
                 </div>
                 
                 <div id="editImagePreview" class="mt-3 hidden">
-                    <p class="text-sm text-gray-600 mb-2">Preview gambar baru:</p>
+                    <p class="text-sm text-gray-600 mb-2">Preview gambar display baru:</p>
                     <img id="editPreview" src="" alt="Preview" class="w-full h-48 object-cover rounded-lg">
+                </div>
+            </div>
+
+            <div class="mb-4 bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <label for="edit_download_image" class="block text-sm font-medium text-gray-700 mb-2">
+                    🎁 Gambar Voucher (Download) <span class="text-gray-500">(Opsional)</span>
+                </label>
+                <p class="text-xs text-blue-600 mb-3">
+                    📸 Gambar untuk background download dengan barcode. Kosongkan jika tidak ingin mengubah.
+                </p>
+                
+                <div id="currentDownloadImageContainer" class="mb-3">
+                    <p class="text-sm text-gray-600 mb-2">Gambar download saat ini:</p>
+                    <img id="currentDownloadImage" src="" alt="Current Download" class="w-full h-48 object-cover rounded-lg border-2 border-blue-300">
+                </div>
+                
+                <div class="flex items-center justify-center w-full">
+                    <label for="edit_download_image" class="flex flex-col items-center justify-center w-full h-32 border-2 border-blue-300 border-dashed rounded-lg cursor-pointer bg-white hover:bg-blue-50">
+                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                            <svg class="w-8 h-8 mb-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <p class="mb-2 text-sm text-blue-600"><span class="font-semibold">Upload gambar download baru</span></p>
+                            <p class="text-xs text-gray-500">PNG, JPG, JPEG (MAX. 10MB)</p>
+                        </div>
+                        <input id="edit_download_image" name="download_image" type="file" accept="image/*" class="hidden" onchange="previewEditDownloadImage(event)">
+                    </label>
+                </div>
+                
+                <div id="editDownloadImagePreview" class="mt-3 hidden">
+                    <p class="text-sm text-gray-600 mb-2">Preview gambar download baru:</p>
+                    <img id="editDownloadPreview" src="" alt="Download Preview" class="w-full h-48 object-cover rounded-lg border-2 border-blue-300">
                 </div>
             </div>
 
@@ -570,6 +617,21 @@
     </div>
 </div>
 
+<!-- Modal Image Preview -->
+<div id="imageModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-90 overflow-y-auto h-full w-full z-50" onclick="closeImageModal()">
+    <div class="relative top-10 mx-auto p-5 w-full max-w-4xl">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold text-white" id="imageModalTitle">Preview Gambar</h3>
+            <button type="button" onclick="closeImageModal()" class="text-white hover:text-gray-300">
+                <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        <img id="imageModalContent" src="" alt="Preview" class="w-full h-auto rounded-lg shadow-2xl" onclick="event.stopPropagation()">
+    </div>
+</div>
+
 <script>
 // Tab Switching
 function switchTab(tab) {
@@ -606,7 +668,7 @@ function searchClaims() {
     });
 }
 
-// Kuota Type Toggle Functions - FIXED dengan null checking
+// Quota Toggle Functions
 function toggleQuotaInput() {
     const createModal = document.getElementById('createVoucherModal');
     if (!createModal) return;
@@ -655,28 +717,18 @@ function toggleEditQuotaInput() {
     }
 }
 
-// Create Modal Functions - FIXED
+// Create Modal Functions
 function openCreateModal() {
     document.getElementById('createVoucherModal').classList.remove('hidden');
-    // Initialize quota type
-    setTimeout(() => {
-        toggleQuotaInput();
-    }, 100);
+    setTimeout(() => toggleQuotaInput(), 100);
 }
 
 function closeCreateModal() {
     document.getElementById('createVoucherModal').classList.add('hidden');
-    const preview = document.getElementById('createImagePreview');
-    if (preview) preview.classList.add('hidden');
     const form = document.getElementById('createForm');
     if (form) form.reset();
-    // Reset quota type to default
-    const createModal = document.getElementById('createVoucherModal');
-    if (createModal) {
-        const defaultQuotaType = createModal.querySelector('input[name="quota_type"][value="unlimited"]');
-        if (defaultQuotaType) defaultQuotaType.checked = true;
-        toggleQuotaInput();
-    }
+    document.getElementById('createImagePreview')?.classList.add('hidden');
+    document.getElementById('createDownloadImagePreview')?.classList.add('hidden');
 }
 
 function previewCreateImage(event) {
@@ -684,52 +736,58 @@ function previewCreateImage(event) {
     if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            const img = document.getElementById('createPreview');
-            const wrapper = document.getElementById('createImagePreview');
-            if (img) img.src = e.target.result;
-            if (wrapper) wrapper.classList.remove('hidden');
+            document.getElementById('createPreview').src = e.target.result;
+            document.getElementById('createImagePreview').classList.remove('hidden');
         }
         reader.readAsDataURL(file);
     }
 }
 
-// Edit Modal Functions - FIXED
-function openEditModal(id, name, deskripsi, status, imagePath, expiryDate, isUnlimited = true, quota = null) {
+function previewCreateDownloadImage(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('createDownloadPreview').src = e.target.result;
+            document.getElementById('createDownloadImagePreview').classList.remove('hidden');
+        }
+        reader.readAsDataURL(file);
+    }
+}
+
+// Edit Modal Functions
+function openEditModal(voucher) {
     document.getElementById('editVoucherModal').classList.remove('hidden');
-    document.getElementById('edit_name').value = name;
-    document.getElementById('edit_deskripsi').value = deskripsi;
-    document.getElementById('edit_status').value = status;
-    document.getElementById('edit_expiry_date').value = expiryDate;
+    document.getElementById('edit_name').value = voucher.name;
+    document.getElementById('edit_deskripsi').value = voucher.deskripsi;
+    document.getElementById('edit_status').value = voucher.status;
+    document.getElementById('edit_expiry_date').value = voucher.expiry_date;
     
-    // Set quota type and value
     const editModal = document.getElementById('editVoucherModal');
     if (editModal) {
-        const quotaType = isUnlimited ? 'unlimited' : 'limited';
+        const quotaType = voucher.is_unlimited ? 'unlimited' : 'limited';
         const quotaRadio = editModal.querySelector(`input[name="quota_type"][value="${quotaType}"]`);
-        if (quotaRadio) {
-            quotaRadio.checked = true;
-        }
+        if (quotaRadio) quotaRadio.checked = true;
     }
     
-    if (!isUnlimited && quota) {
-        const quotaInput = document.getElementById('edit_quota');
-        if (quotaInput) {
-            quotaInput.value = quota;
-        }
+    if (!voucher.is_unlimited && voucher.quota) {
+        document.getElementById('edit_quota').value = voucher.quota;
     }
     
-    const imageUrl = imagePath ? `/storage/${imagePath}` : '';
-    const currentImage = document.getElementById('currentImage');
-    if (currentImage) currentImage.src = imageUrl || 'https://via.placeholder.com/400x200?text=No+Image';
-    const editForm = document.getElementById('editForm');
-    if (editForm) editForm.action = `/admin/voucher/${id}`;
-    const previewWrap = document.getElementById('editImagePreview');
-    if (previewWrap) previewWrap.classList.add('hidden');
+    document.getElementById('currentImage').src = voucher.image_url;
     
-    // Initialize edit quota input
-    setTimeout(() => {
-        toggleEditQuotaInput();
-    }, 100);
+    if (voucher.download_image) {
+        document.getElementById('currentDownloadImage').src = voucher.download_image_url;
+        document.getElementById('currentDownloadImageContainer').classList.remove('hidden');
+    } else {
+        document.getElementById('currentDownloadImageContainer').classList.add('hidden');
+    }
+    
+    document.getElementById('editForm').action = `/admin/voucher/${voucher.id}`;
+    document.getElementById('editImagePreview')?.classList.add('hidden');
+    document.getElementById('editDownloadImagePreview')?.classList.add('hidden');
+    
+    setTimeout(() => toggleEditQuotaInput(), 100);
 }
 
 function closeEditModal() {
@@ -741,16 +799,26 @@ function previewEditImage(event) {
     if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            const img = document.getElementById('editPreview');
-            const wrapper = document.getElementById('editImagePreview');
-            if (img) img.src = e.target.result;
-            if (wrapper) wrapper.classList.remove('hidden');
+            document.getElementById('editPreview').src = e.target.result;
+            document.getElementById('editImagePreview').classList.remove('hidden');
         }
         reader.readAsDataURL(file);
     }
 }
 
-// Description Modal Functions
+function previewEditDownloadImage(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('editDownloadPreview').src = e.target.result;
+            document.getElementById('editDownloadImagePreview').classList.remove('hidden');
+        }
+        reader.readAsDataURL(file);
+    }
+}
+
+// Description Modal
 function openDescriptionModal(name, deskripsi) {
     document.getElementById('descriptionModal').classList.remove('hidden');
     document.getElementById('descriptionTitle').textContent = `Deskripsi: ${name}`;
@@ -761,7 +829,7 @@ function closeDescriptionModal() {
     document.getElementById('descriptionModal').classList.add('hidden');
 }
 
-// Delete Modal Functions
+// Delete Modal
 function confirmDelete(id, name) {
     document.getElementById('deleteModal').classList.remove('hidden');
     document.getElementById('deleteVoucherName').textContent = name;
@@ -772,9 +840,20 @@ function closeDeleteModal() {
     document.getElementById('deleteModal').classList.add('hidden');
 }
 
-// Initialize semua fungsi setelah DOM loaded
+// Image Preview Modal
+function showImageModal(url, title) {
+    document.getElementById('imageModal').classList.remove('hidden');
+    document.getElementById('imageModalTitle').textContent = title;
+    document.getElementById('imageModalContent').src = url;
+}
+
+function closeImageModal() {
+    document.getElementById('imageModal').classList.add('hidden');
+}
+
+// Initialize
 document.addEventListener('DOMContentLoaded', function() {
-    // Close modals when clicking outside
+    // Close modals on outside click
     ['createVoucherModal','editVoucherModal','descriptionModal','deleteModal'].forEach(id => {
         const el = document.getElementById(id);
         if (el) {
@@ -789,31 +868,27 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Create modal quota event listeners
+    // Create modal quota listeners
     const createModal = document.getElementById('createVoucherModal');
     if (createModal) {
-        const createQuotaRadios = createModal.querySelectorAll('input[name="quota_type"]');
-        createQuotaRadios.forEach(radio => {
+        createModal.querySelectorAll('input[name="quota_type"]').forEach(radio => {
             radio.addEventListener('change', toggleQuotaInput);
         });
     }
     
-    // Edit modal quota event listeners
+    // Edit modal quota listeners
     const editModal = document.getElementById('editVoucherModal');
     if (editModal) {
-        const editQuotaRadios = editModal.querySelectorAll('input[name="quota_type"]');
-        editQuotaRadios.forEach(radio => {
+        editModal.querySelectorAll('input[name="quota_type"]').forEach(radio => {
             radio.addEventListener('change', toggleEditQuotaInput);
         });
     }
     
-    // Initialize on page load
     toggleQuotaInput();
     
-    // Show create modal if there are validation errors
+    // Show modal if validation errors
     @if($errors->any())
         openCreateModal(); 
-        // Set quota type based on old input if exists
         setTimeout(() => {
             const oldQuotaType = '{{ old("quota_type", "unlimited") }}';
             const createModal = document.getElementById('createVoucherModal');
@@ -827,7 +902,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 100);
     @endif
 
-    // Keyboard event untuk menutup modal dengan ESC
+    // ESC key to close modals
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             if (!document.getElementById('createVoucherModal').classList.contains('hidden')) {
@@ -838,6 +913,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 closeDescriptionModal();
             } else if (!document.getElementById('deleteModal').classList.contains('hidden')) {
                 closeDeleteModal();
+            } else if (!document.getElementById('imageModal').classList.contains('hidden')) {
+                closeImageModal();
             }
         }
     });

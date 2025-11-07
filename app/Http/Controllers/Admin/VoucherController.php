@@ -72,6 +72,7 @@ class VoucherController extends Controller
             'deskripsi' => 'required|string',
             'status' => 'required|in:aktif,tidak_aktif,kadaluarsa,habis',
             'image' => 'required|image|mimes:jpeg,png,jpg|max:10240',
+            'download_image' => 'nullable|image|mimes:jpeg,png,jpg|max:10240',
             'expiry_date' => 'required|date',
             'quota_type' => 'required|in:unlimited,limited',
             'quota' => 'required_if:quota_type,limited|integer|min:1|nullable',
@@ -80,6 +81,7 @@ class VoucherController extends Controller
             'deskripsi.required' => 'Deskripsi voucher wajib diisi',
             'status.required' => 'Status voucher wajib dipilih',
             'image.required' => 'Gambar voucher wajib diupload',
+            'download_image.image' => 'File gambar download harus berupa gambar',
             'expiry_date.required' => 'Tanggal kadaluarsa wajib diisi',
             'quota_type.required' => 'Tipe kuota wajib dipilih',
             'quota.required_if' => 'Kuota wajib diisi untuk tipe terbatas',
@@ -90,6 +92,13 @@ class VoucherController extends Controller
             $image = $request->file('image');
             $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
             $imagePath = $image->storeAs('vouchers', $imageName, 'public');
+
+            $downloadImagePath = null;
+            if ($request->hasFile('download_image')) {
+                $downloadImage = $request->file('download_image');
+                $downloadImageName = time() . '_download_' . uniqid() . '.' . $downloadImage->getClientOriginalExtension();
+                $downloadImagePath = $downloadImage->storeAs('vouchers/downloads', $downloadImageName, 'public');
+            }
 
             $status = $request->status;
             $expiryDate = Carbon::parse($request->expiry_date);
@@ -108,6 +117,7 @@ class VoucherController extends Controller
                 'deskripsi' => $request->deskripsi,
                 'status' => $status,
                 'image' => $imagePath,
+                'download_image' => $downloadImagePath,
                 'expiry_date' => $request->expiry_date,
                 'quota' => $quota,
                 'is_unlimited' => $isUnlimited,
@@ -119,6 +129,9 @@ class VoucherController extends Controller
             Log::error('Error creating voucher: ' . $e->getMessage());
             if (isset($imagePath)) {
                 Storage::disk('public')->delete($imagePath);
+            }
+            if (isset($downloadImagePath)) {
+                Storage::disk('public')->delete($downloadImagePath);
             }
             return redirect()->route('admin.voucher.index')
                            ->with('error', 'Gagal menambahkan voucher: ' . $e->getMessage());
@@ -134,6 +147,7 @@ class VoucherController extends Controller
             'deskripsi' => 'required|string',
             'status' => 'required|in:aktif,tidak_aktif,kadaluarsa,habis',
             'image' => 'nullable|image|mimes:jpeg,png,jpg|max:10240',
+            'download_image' => 'nullable|image|mimes:jpeg,png,jpg|max:10240',
             'expiry_date' => 'required|date',
             'quota_type' => 'required|in:unlimited,limited',
             'quota' => 'required_if:quota_type,limited|integer|min:1|nullable',
@@ -142,6 +156,7 @@ class VoucherController extends Controller
         try {
             $voucher = Voucher::findOrFail($id);
             $oldImage = $voucher->image;
+            $oldDownloadImage = $voucher->download_image;
 
             $voucher->name = $request->name;
             $voucher->deskripsi = $request->deskripsi;
@@ -163,6 +178,7 @@ class VoucherController extends Controller
                 $voucher->status = $request->status;
             }
 
+            // Update gambar display jika ada
             if ($request->hasFile('image')) {
                 $image = $request->file('image');
                 $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
@@ -171,6 +187,18 @@ class VoucherController extends Controller
 
                 if ($oldImage) {
                     Storage::disk('public')->delete($oldImage);
+                }
+            }
+
+            // Update gambar download jika ada
+            if ($request->hasFile('download_image')) {
+                $downloadImage = $request->file('download_image');
+                $downloadImageName = time() . '_download_' . uniqid() . '.' . $downloadImage->getClientOriginalExtension();
+                $downloadImagePath = $downloadImage->storeAs('vouchers/downloads', $downloadImageName, 'public');
+                $voucher->download_image = $downloadImagePath;
+
+                if ($oldDownloadImage) {
+                    Storage::disk('public')->delete($oldDownloadImage);
                 }
             }
 
@@ -192,6 +220,10 @@ class VoucherController extends Controller
             
             if ($voucher->image) {
                 Storage::disk('public')->delete($voucher->image);
+            }
+
+            if ($voucher->download_image) {
+                Storage::disk('public')->delete($voucher->download_image);
             }
 
             $voucher->delete();

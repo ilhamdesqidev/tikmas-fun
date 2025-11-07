@@ -16,6 +16,7 @@ class Voucher extends Model
         'deskripsi',
         'status',
         'image',
+        'download_image',
         'expiry_date',
         'quota',
         'is_unlimited'
@@ -26,7 +27,7 @@ class Voucher extends Model
         'is_unlimited' => 'boolean',
     ];
 
-    protected $appends = ['image_url', 'status_text', 'is_expired', 'remaining_quota', 'is_available'];
+    protected $appends = ['image_url', 'download_image_url', 'status_text', 'is_expired', 'remaining_quota', 'is_available'];
 
     public function getImageUrlAttribute()
     {
@@ -34,6 +35,15 @@ class Voucher extends Model
             return Storage::url($this->image);
         }
         return 'https://via.placeholder.com/400x300?text=No+Image';
+    }
+
+    public function getDownloadImageUrlAttribute()
+    {
+        if ($this->download_image) {
+            return Storage::url($this->download_image);
+        }
+        // Fallback ke image biasa jika tidak ada download_image
+        return $this->image_url;
     }
 
     // Helper method untuk cek apakah voucher expired
