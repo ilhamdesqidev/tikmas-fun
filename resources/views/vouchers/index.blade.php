@@ -152,60 +152,52 @@
         </div>
     </div>
 
-    <!-- Hidden Template - REVISED VERSION (BARCODE OVERLAY) -->
-    <div id="voucherTemplate" style="position: absolute; left: -9999px; width: 800px; height: 1000px;">
-        <div style="position: relative; width: 100%; height: 100%; background: #f3f4f6; font-family: Arial, sans-serif; overflow: hidden;">
+    <!-- Hidden Template - SIMPLE VERSION -->
+    <div id="voucherTemplate" style="position: absolute; left: -9999px; width: 600px; height: 400px;">
+        <div style="position: relative; width: 100%; height: 100%; background: white; font-family: Arial, sans-serif; border: 2px solid #e5e7eb; padding: 20px;">
             
-            <!-- Top Section: Image with Overlay (60%) -->
-            <div style="position: relative; width: 100%; height: 60%; overflow: hidden;">
-                <img id="templateBgImage" src="" style="width: 100%; height: 100%; object-fit: cover;">
-                <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.7) 100%);"></div>
-                
-                <!-- Title on Image -->
-                <div style="position: absolute; top: 30px; left: 30px; right: 30px;">
-                    <h1 id="templateTitle" style="color: white; font-size: 36px; font-weight: bold; margin: 0 0 12px 0; text-shadow: 2px 2px 6px rgba(0,0,0,0.8); line-height: 1.2;"></h1>
-                    <div style="display: inline-block; background: #CFD916; padding: 8px 20px; border-radius: 8px;">
-                        <p style="margin: 0; font-size: 14px; font-weight: bold; color: #1f2937;">✓ Voucher Berhasil Di-claim</p>
-                    </div>
-                </div>
+            <!-- Header -->
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h1 style="font-size: 24px; font-weight: bold; color: #1f2937; margin: 0;">Mestakara</h1>
+                <h2 style="font-size: 20px; font-weight: bold; color: #374151; margin: 5px 0;">AGROWISATA GUNUNG MAS</h2>
+            </div>
 
-                <!-- Barcode Overlay on Image -->
-                <div style="position: absolute; bottom: 40px; left: 0; right: 0; display: flex; justify-content: center;">
-                    <div style="background: rgba(255, 255, 255, 0.95); padding: 20px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); max-width: 80%;">
-                        <p style="margin: 0 0 12px 0; font-size: 16px; font-weight: bold; color: #1f2937; text-align: center; letter-spacing: 1px;">🎫 KODE VOUCHER</p>
-                        <div style="display: flex; justify-content: center; margin: 10px 0;">
-                            <svg id="templateBarcode"></svg>
-                        </div>
-                        <p style="margin: 10px 0 0 0; font-size: 12px; color: #6b7280; text-align: center; font-style: italic;">
-                            Tunjukkan barcode ini saat melakukan pembayaran
-                        </p>
-                    </div>
+            <!-- Ticket Info -->
+            <div style="margin-bottom: 15px;">
+                <p style="font-size: 14px; color: #6b7280; margin: 5px 0;">Tiket berlaku dalam 1 hari</p>
+                <p style="font-size: 14px; color: #6b7280; margin: 5px 0;">Tiket ini hanya berlaku untuk 1 orang</p>
+                <p style="font-size: 14px; color: #6b7280; margin: 5px 0;">Tiket masuk area</p>
+            </div>
+
+            <!-- Ticket Type -->
+            <div style="text-align: center; margin: 20px 0; padding: 10px; background: #f3f4f6; border-radius: 8px;">
+                <p style="font-size: 18px; font-weight: bold; color: #1f2937; margin: 0;">TIKET KOL</p>
+            </div>
+
+            <!-- User Info -->
+            <div style="margin-bottom: 20px;">
+                <div style="margin-bottom: 8px;">
+                    <span style="font-size: 14px; color: #6b7280;">Nama:</span>
+                    <span id="templateName" style="font-size: 14px; font-weight: bold; color: #111827; margin-left: 8px;"></span>
+                </div>
+                <div style="margin-bottom: 8px;">
+                    <span style="font-size: 14px; color: #6b7280;">No. HP:</span>
+                    <span id="templatePhone" style="font-size: 14px; font-weight: bold; color: #111827; margin-left: 8px;"></span>
+                </div>
+                <div>
+                    <span style="font-size: 14px; color: #6b7280;">Berlaku:</span>
+                    <span id="templateExpiry" style="font-size: 14px; font-weight: bold; color: #111827; margin-left: 8px;"></span>
                 </div>
             </div>
 
-            <!-- Bottom Section: White (40%) -->
-            <div style="position: relative; width: 100%; height: 40%; background: white; padding: 40px;">
-                
-                <!-- User Info Box -->
-                <div style="background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%); padding: 20px 25px; border-radius: 16px; margin-bottom: 30px; border: 2px solid #CFD916; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-                    <div style="margin-bottom: 10px;">
-                        <span style="color: #6b7280; font-size: 13px; font-weight: 600;">👤 Nama:</span>
-                        <span id="templateName" style="color: #111827; font-size: 14px; font-weight: bold; margin-left: 8px;"></span>
-                    </div>
-                    <div style="margin-bottom: 10px;">
-                        <span style="color: #6b7280; font-size: 13px; font-weight: 600;">📱 No. HP:</span>
-                        <span id="templatePhone" style="color: #111827; font-size: 14px; font-weight: bold; margin-left: 8px;"></span>
-                    </div>
-                    <div>
-                        <span style="color: #6b7280; font-size: 13px; font-weight: 600;">📅 Berlaku:</span>
-                        <span id="templateExpiry" style="color: #111827; font-size: 14px; font-weight: bold; margin-left: 8px;"></span>
-                    </div>
-                </div>
+            <!-- Barcode -->
+            <div style="text-align: center; margin-top: 20px;">
+                <svg id="templateBarcode"></svg>
+            </div>
 
-                <!-- Footer -->
-                <div style="position: absolute; bottom: 15px; left: 0; right: 0; text-align: center;">
-                    <p style="margin: 0; font-size: 10px; color: #9ca3af;">MestaKara © 2025 | Valid Voucher</p>
-                </div>
+            <!-- Footer -->
+            <div style="position: absolute; bottom: 15px; left: 0; right: 0; text-align: center;">
+                <p style="margin: 0; font-size: 10px; color: #9ca3af;">Mestakara © 2025 | Valid Voucher</p>
             </div>
         </div>
     </div>
@@ -261,47 +253,32 @@
                 });
 
                 // Set values
-                document.getElementById('templateTitle').textContent = currentVoucher.name;
                 document.getElementById('templateName').textContent = userName;
                 document.getElementById('templatePhone').textContent = userPhone;
                 document.getElementById('templateExpiry').textContent = expiryDate;
-                
-                const bgImage = document.getElementById('templateBgImage');
-                bgImage.src = currentVoucher.download_image_url || currentVoucher.image_url;
 
                 // Generate barcode
                 JsBarcode("#templateBarcode", uniqueCode, {
                     format: "CODE128",
-                    width: 2.5,
-                    height: 70,
+                    width: 2,
+                    height: 50,
                     displayValue: true,
-                    fontSize: 16,
+                    fontSize: 14,
                     margin: 10,
                     background: "transparent",
                     lineColor: "#111827"
                 });
 
-                // Wait for image load
-                const waitForImage = new Promise((resolve) => {
-                    if (bgImage.complete) {
-                        resolve();
-                    } else {
-                        bgImage.onload = resolve;
-                    }
-                });
-
-                await waitForImage;
-
                 // Capture
                 const template = document.getElementById('voucherTemplate');
                 const canvas = await html2canvas(template, {
                     scale: 2,
-                    backgroundColor: '#f3f4f6',
+                    backgroundColor: '#ffffff',
                     logging: false,
                     useCORS: true,
                     allowTaint: true,
-                    windowWidth: 800,
-                    windowHeight: 1000
+                    windowWidth: 600,
+                    windowHeight: 400
                 });
 
                 canvas.toBlob(function(blob) {
