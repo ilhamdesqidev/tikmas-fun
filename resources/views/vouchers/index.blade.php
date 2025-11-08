@@ -255,6 +255,8 @@
             document.body.style.overflow = 'auto';
         }
 
+        // ...existing code...
+
         document.getElementById('claimForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
@@ -280,17 +282,45 @@
                     })
                 });
 
-                const result = await response.json();
-
-                // CEK RESPONSE - INI YANG PENTING!
-                if (!response.ok || !result.success) {
-                    // Tutup modal dulu sebelum tampilkan error
-                    hideClaimForm();
-                    
-                    // Tampilkan error dari backend
-                    throw new Error(result.message || 'Terjadi kesalahan saat mengklaim voucher');
+                // Clone response so we can attempt json/text inspection reliably
+                const responseClone = response.clone();
+                let result = null;
+                try {
+                    result = await response.json();
+                } catch (parseErr) {
+                    // If JSON parse fails, try to read raw text for diagnostics
+                    try {
+                        const txt = await responseClone.text();
+                        result = { rawText: txt };
+                    } catch (_) {
+                        result = null;
+                    }
                 }
 
+                // Handle non-ok responses with friendly messages for known cases
+                if (!response.ok) {
+                    let message = 'Terjadi kesalahan saat mengklaim voucher';
+                    if (result && result.message) {
+                        message = result.message;
+                    } else if (response.status === 409) {
+                        message = 'Nomor telepon ini sudah pernah digunakan untuk klaim voucher ini.';
+                    } else if (result && typeof result.rawText === 'string') {
+                        const raw = result.rawText;
+                        if (raw.includes('Duplicate entry') || raw.includes('unique_phone_per_voucher')) {
+                            message = 'Nomor telepon ini sudah pernah digunakan untuk klaim voucher ini.';
+                        } else if (response.status >= 500) {
+                            message = 'Terjadi kesalahan server. Silakan coba lagi nanti.';
+                        }
+                    } else if (response.status >= 500) {
+                        message = 'Terjadi kesalahan server. Silakan coba lagi nanti.';
+                    }
+
+                    // Tutup modal dulu sebelum tampilkan error
+                    hideClaimForm();
+                    throw new Error(message);
+                }
+
+                // Success path
                 const uniqueCode = result.data.unique_code;
                 const expiryDate = new Date(currentVoucher.expiry_date).toLocaleDateString('id-ID', {
                     day: 'numeric',
