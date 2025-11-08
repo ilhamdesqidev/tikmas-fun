@@ -39,132 +39,86 @@ class UserVoucherController extends Controller
     }
 
     public function claim(Request $request)
-    {
-        $request->validate([
-            'voucher_id' => 'required|exists:vouchers,id',
-            'user_name' => 'required|string|max:255',
-            'user_phone' => 'required|string|max:15',
-        ]);
+{
+    $request->validate([
+        'voucher_id' => 'required|exists:vouchers,id',
+        'user_name'  => 'required|string|max:255',
+        'user_phone' => 'required|string|max:32',
+    ]);
 
+    try {
+        $voucher = Voucher::findOrFail($request->voucher_id);
+
+        if (!$voucher->canBeClaimed()) {
+            $msg = $voucher->is_expired ? 'Voucher sudah kadaluarsa.' :
+                   ($voucher->is_sold_out ? 'Kuota voucher sudah habis.' : 'Voucher tidak dapat diklaim saat ini.');
+            return response()->json(['success' => false, 'message' => $msg], 400);
+        }
+
+        // generate unique code
+        $uniqueCode = strtoupper(\Illuminate\Support\Str::random(12));
+        while (VoucherClaim::where('unique_code', $uniqueCode)->exists()) {
+            $uniqueCode = strtoupper(\Illuminate\Support\Str::random(12));
+        }
+
+        // inser dengan transaction; jika duplicate terjadi, tangani QueryException
+        $claim = null;
+        DB::beginTransaction();
         try {
-            $voucher = Voucher::findOrFail($request->voucher_id);
+            $claim = VoucherClaim::create([
+                'voucher_id'  => $request->voucher_id,
+                'user_name'   => $request->user_name,
+                'user_phone'  => $request->user_phone,
+                'unique_code' => $uniqueCode,
+            ]);
 
-            // VALIDASI 1: Cek apakah nomor telepon sudah pernah claim voucher ini
-            // Gunakan exists() untuk performa lebih baik
-            $hasClaimedBefore = VoucherClaim::where('voucher_id', $request->voucher_id)
-                                           ->where('user_phone', $request->user_phone)
-                                           ->exists();
+            if (!$voucher->is_unlimited) {
+                $claimedCount = $voucher->claims()->count();
+                if ($claimedCount >= $voucher->quota) {
+                    $voucher->update(['status' => 'habis']);
+                }
+            }
 
-            if ($hasClaimedBefore) {
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Voucher berhasil di-claim!',
+                'data'    => ['unique_code' => $uniqueCode, 'claim' => $claim]
+            ], 200);
+
+        } catch (\Illuminate\Database\QueryException $e) {
+            DB::rollBack();
+            $errNo = $e->errorInfo[1] ?? null;
+
+            // Duplicate entry -> kembalikan 409 dengan pesan aman
+            if ($errNo == 1062) {
+                \Log::warning('Duplicate claim prevented: ' . $e->getMessage());
                 return response()->json([
                     'success' => false,
-                    'message' => 'Nomor telepon Anda sudah pernah mengklaim voucher ini. Satu nomor hanya dapat mengklaim voucher yang sama sekali saja.'
-                ], 400);
+                    'message' => 'Nomor telepon ini sudah pernah mengklaim voucher ini.'
+                ], 409);
             }
 
-            // VALIDASI 2: Cek apakah voucher masih bisa diklaim
-            if (!$voucher->canBeClaimed()) {
-                if ($voucher->is_expired) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Voucher sudah kadaluarsa.'
-                    ], 400);
-                }
-                
-                if ($voucher->is_sold_out) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Maaf, kuota voucher sudah habis.'
-                    ], 400);
-                }
-                
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Voucher tidak dapat diklaim saat ini.'
-                ], 400);
-            }
-
-            // Generate unique code
-            $uniqueCode = strtoupper(Str::random(12));
-            
-            // Pastikan kode unik
-            while (VoucherClaim::where('unique_code', $uniqueCode)->exists()) {
-                $uniqueCode = strtoupper(Str::random(12));
-            }
-
-            // Gunakan DB Transaction untuk memastikan data konsisten
-            DB::beginTransaction();
-
-            try {
-                // Double check lagi sebelum insert (untuk race condition)
-                $doubleCheck = VoucherClaim::where('voucher_id', $request->voucher_id)
-                                          ->where('user_phone', $request->user_phone)
-                                          ->lockForUpdate() // Lock row untuk prevent race condition
-                                          ->exists();
-
-                if ($doubleCheck) {
-                    DB::rollBack();
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Nomor telepon Anda sudah pernah mengklaim voucher ini.'
-                    ], 400);
-                }
-
-                // Simpan claim
-                $claim = VoucherClaim::create([
-                    'voucher_id' => $request->voucher_id,
-                    'user_name' => $request->user_name,
-                    'user_phone' => $request->user_phone,
-                    'unique_code' => $uniqueCode,
-                ]);
-
-                // Update status voucher jika kuota habis setelah claim ini
-                if (!$voucher->is_unlimited) {
-                    $claimedCount = $voucher->claims()->count();
-                    if ($claimedCount >= $voucher->quota) {
-                        $voucher->update(['status' => 'habis']);
-                    }
-                }
-
-                DB::commit();
-
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Voucher berhasil di-claim!',
-                    'data' => [
-                        'unique_code' => $uniqueCode,
-                        'voucher' => $voucher,
-                        'claim' => $claim,
-                    ]
-                ]);
-
-            } catch (QueryException $e) {
-                DB::rollBack();
-                
-                // Tangkap error database constraint violation
-                if ($e->errorInfo[1] == 1062) { // MySQL duplicate entry error code
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Nomor telepon Anda sudah pernah mengklaim voucher ini.'
-                    ], 400);
-                }
-                
-                throw $e; // Re-throw jika bukan duplicate error
-            }
-
-        } catch (QueryException $e) {
-            Log::error('Database error claiming voucher: ' . $e->getMessage());
+            \Log::error('DB error when claiming voucher: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan pada sistem. Silakan coba lagi.'
-            ], 500);
-
-        } catch (\Exception $e) {
-            Log::error('Error claiming voucher: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan sistem. Silakan coba lagi nanti.'
+                'message' => 'Terjadi kesalahan saat menyimpan klaim voucher.'
             ], 500);
         }
+
+    } catch (\Illuminate\Database\QueryException $e) {
+        \Log::error('QueryException claiming voucher: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Terjadi kesalahan database. Silakan coba lagi.'
+        ], 500);
+    } catch (\Exception $e) {
+        \Log::error('Exception claiming voucher: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Terjadi kesalahan sistem. Silakan coba lagi nanti.'
+        ], 500);
     }
+}
 }
