@@ -16,7 +16,7 @@ use Illuminate\Database\QueryException;
 
 class DashboardController extends Controller
 {
-    public function index()
+   public function index()
     {
         // Update voucher yang kuotanya habis menjadi status "habis"
         Voucher::where('status', 'aktif')
