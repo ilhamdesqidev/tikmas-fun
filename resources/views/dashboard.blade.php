@@ -1046,6 +1046,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <!-- Main JavaScript -->
+<script src="https://unpkg.com/feather-icons"></script>
 <script>
 // ==================== INITIALIZE ALL ====================
 document.addEventListener('DOMContentLoaded', () => {
@@ -1620,6 +1621,7 @@ function switchPromoTab(tab) {
   feather.replace();
 }
 </script>
+
 
   </body>
 </html>
