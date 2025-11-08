@@ -47,7 +47,7 @@ class VoucherClaim extends Model
             return false;
         }
         
-        return Carbon::now()->greaterThan($this->voucher->expiry_date);
+        return Carbon::now()->startOfDay()->greaterThan(Carbon::parse($this->voucher->expiry_date));
     }
 
     // Get status label dengan auto-check expiry
@@ -100,7 +100,89 @@ class VoucherClaim extends Model
         return $query->where('is_used', false)
             ->whereNull('scanned_at')
             ->whereHas('voucher', function($q) {
-                $q->where('expiry_date', '<', Carbon::now());
+                $q->where('expiry_date', '<', Carbon::now()->startOfDay());
+            });
+    }
+
+    // ========== VALIDASI NOMOR TELEPON (FITUR BARU) ==========
+    
+    /**
+     * Method untuk cek apakah nomor sudah pernah claim voucher ini
+     * @param int $voucherId
+     * @param string $userPhone
+     * @return bool
+     */
+    public static function hasClaimedVoucher($voucherId, $userPhone)
+    {
+        return self::where('voucher_id', $voucherId)
+                   ->where('user_phone', $userPhone)
+                   ->exists();
+    }
+
+    /**
+     * Method untuk mendapatkan semua voucher yang pernah di-claim oleh nomor ini
+     * @param string $userPhone
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public static function getClaimedVouchersByPhone($userPhone)
+    {
+        return self::where('user_phone', $userPhone)
+                   ->with('voucher')
+                   ->get();
+    }
+
+    /**
+     * Method untuk mendapatkan jumlah voucher yang pernah di-claim oleh nomor ini
+     * @param string $userPhone
+     * @return int
+     */
+    public static function countClaimedVouchersByPhone($userPhone)
+    {
+        return self::where('user_phone', $userPhone)->count();
+    }
+
+    /**
+     * Method untuk cek apakah nomor ini pernah claim voucher tertentu dan belum digunakan
+     * @param int $voucherId
+     * @param string $userPhone
+     * @return bool
+     */
+    public static function hasUnusedClaimForVoucher($voucherId, $userPhone)
+    {
+        return self::where('voucher_id', $voucherId)
+                   ->where('user_phone', $userPhone)
+                   ->where('is_used', false)
+                   ->whereNull('scanned_at')
+                   ->exists();
+    }
+
+    // ========== SCOPE TAMBAHAN ==========
+
+    /**
+     * Scope untuk filter by phone number
+     */
+    public function scopeByPhone($query, $phone)
+    {
+        return $query->where('user_phone', $phone);
+    }
+
+    /**
+     * Scope untuk filter by voucher
+     */
+    public function scopeByVoucher($query, $voucherId)
+    {
+        return $query->where('voucher_id', $voucherId);
+    }
+
+    /**
+     * Scope untuk claims yang masih valid (belum digunakan dan belum expired)
+     */
+    public function scopeValid($query)
+    {
+        return $query->where('is_used', false)
+            ->whereNull('scanned_at')
+            ->whereHas('voucher', function($q) {
+                $q->where('expiry_date', '>=', Carbon::now()->startOfDay());
             });
     }
 }

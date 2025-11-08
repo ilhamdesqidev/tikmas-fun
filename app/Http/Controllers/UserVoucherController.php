@@ -69,6 +69,18 @@ class UserVoucherController extends Controller
                 ], 400);
             }
 
+            // VALIDASI BARU: Cek apakah nomor telepon sudah pernah claim voucher ini
+            $existingClaim = VoucherClaim::where('voucher_id', $request->voucher_id)
+                                        ->where('user_phone', $request->user_phone)
+                                        ->first();
+
+            if ($existingClaim) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Nomor telepon ini sudah pernah mengklaim voucher ini sebelumnya. Satu nomor hanya dapat mengklaim voucher yang sama sekali saja.'
+                ], 400);
+            }
+
             // Generate unique code
             $uniqueCode = strtoupper(Str::random(12));
             
