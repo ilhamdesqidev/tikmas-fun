@@ -239,7 +239,9 @@
     </div>
 
    
+        
 <script>
+(function(){
     let currentVoucher = null;
 
     function showClaimForm(voucher) {
@@ -256,52 +258,9 @@
         document.body.style.overflow = 'auto';
     }
 
-    // Generic notification builder (success / error)
-    function showNotification({ type = 'info', title = '', message = '', technical = null, ttl = 6000 }) {
-        const base = document.createElement('div');
-        base.className = `fixed top-4 right-4 w-[min(420px,calc(100%-2rem))] z-[110] rounded-xl shadow-2xl overflow-hidden transform transition-all`;
-
-        // color
-        const bg = type === 'success' ? 'bg-green-500' : (type === 'error' ? 'bg-red-600' : 'bg-gray-800');
-        base.innerHTML = `
-            <div class="${bg} text-white px-5 py-4 flex items-start gap-4">
-                <div class="flex-shrink-0">
-                    ${type === 'success' ? '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>' 
-                    : '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>'}
-                </div>
-                <div class="flex-1">
-                    <div class="font-semibold">${title}</div>
-                    <div class="text-sm mt-1">${message}</div>
-                    ${technical ? `<details class="mt-3 text-xs text-white/90 rounded-md"><summary class="cursor-pointer">Tampilkan detil teknis</summary><pre class="whitespace-pre-wrap break-words mt-2 p-2 bg-white/10 rounded">${escapeHtml(technical)}</pre>
-                        <div class="mt-2 flex gap-2">
-                            <button class="px-3 py-1 text-xs bg-white/10 rounded copy-btn">Salin detil</button>
-                        </div>
-                    </details>` : ''}
-                </div>
-                <button class="ml-3 close-btn text-white/90 hover:text-white">&times;</button>
-            </div>
-        `;
-
-        document.body.appendChild(base);
-
-        // copy button handler
-        const copyBtn = base.querySelector('.copy-btn');
-        if (copyBtn) {
-            copyBtn.addEventListener('click', () => {
-                navigator.clipboard.writeText(technical || '').then(() => {
-                    copyBtn.textContent = 'Tersalin';
-                    setTimeout(() => copyBtn.textContent = 'Salin detil', 2000);
-                });
-            });
-        }
-
-        base.querySelector('.close-btn').addEventListener('click', () => base.remove());
-        setTimeout(() => base.remove(), ttl);
-    }
-
     function escapeHtml(text) {
         if (!text) return '';
-        return text
+        return String(text)
             .replaceAll('&', '&amp;')
             .replaceAll('<', '&lt;')
             .replaceAll('>', '&gt;')
@@ -309,25 +268,92 @@
             .replaceAll("'", '&#039;');
     }
 
-    // Map raw/technical error -> friendly message
-    function friendlyErrorFrom(responseStatus, parsedResult, fallback) {
-        // priority: parsedResult.message -> status 409 -> raw SQL duplicate detection -> status >=500 -> fallback
-        if (parsedResult && parsedResult.message) return { user: parsedResult.message, tech: JSON.stringify(parsedResult) };
-        if (responseStatus === 409) return { user: 'Nomor telepon ini sudah pernah digunakan untuk klaim voucher ini.', tech: 'HTTP 409 Conflict' };
-        const raw = parsedResult && parsedResult.rawText ? parsedResult.rawText : (fallback || '');
-        if (typeof raw === 'string' && (raw.includes('Duplicate entry') || raw.includes('unique_phone_per_voucher'))) {
-            return { user: 'Nomor telepon ini sudah pernah digunakan untuk klaim voucher ini.', tech: raw };
+    // Small helper to create notifications with optional technical details
+    function showNotification({ type = 'info', title = '', message = '', technical = null, ttl = 7000 }) {
+        const container = document.createElement('div');
+        container.className = 'fixed top-6 right-6 z-[120] w-[min(420px,calc(100%-2rem))] rounded-xl shadow-xl overflow-hidden';
+        const bg = type === 'success' ? 'bg-green-500' : (type === 'error' ? 'bg-red-600' : 'bg-gray-800');
+        container.innerHTML = `
+            <div class="${bg} text-white p-4">
+                <div class="flex items-start gap-3">
+                    <div class="flex-shrink-0">
+                        ${ type === 'success' ? '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>'
+                        : '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>' }
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-semibold">${escapeHtml(title)}</div>
+                        <div class="text-sm mt-1">${escapeHtml(message)}</div>
+                        ${ technical ? `<details class="mt-3 text-xs text-white/90 bg-white/10 rounded p-2"><summary class="cursor-pointer">Tampilkan detil teknis</summary><pre class="whitespace-pre-wrap break-words mt-2">${escapeHtml(technical)}</pre>
+                            <div class="mt-2"><button class="copy-technical px-3 py-1 text-xs bg-white/20 rounded">Salin detil</button></div>
+                        </details>` : '' }
+                    </div>
+                    <button class="ml-3 close-btn text-white/90 hover:text-white">&times;</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(container);
+
+        const closeBtn = container.querySelector('.close-btn');
+        if (closeBtn) closeBtn.addEventListener('click', () => container.remove());
+
+        const copyBtn = container.querySelector('.copy-technical');
+        if (copyBtn && technical) {
+            copyBtn.addEventListener('click', () => {
+                navigator.clipboard.writeText(technical).then(() => {
+                    copyBtn.textContent = 'Tersalin';
+                    setTimeout(() => copyBtn.textContent = 'Salin detil', 2000);
+                });
+            });
         }
+
+        setTimeout(() => container.remove(), ttl);
+    }
+
+    // Sanitize and map backend errors to user-friendly messages.
+    function friendlyErrorFrom(responseStatus, parsedResult, fallback) {
+        // Build a raw string for inspection
+        let raw = '';
+        if (parsedResult) {
+            try { raw = typeof parsedResult === 'string' ? parsedResult : JSON.stringify(parsedResult); } catch(e) { raw = String(parsedResult); }
+        }
+        raw = raw || (fallback || '');
+
+        // 1) explicit duplicate phone / unique constraint
+        if (responseStatus === 409 || /Duplicate entry|unique_phone_per_voucher/i.test(raw)) {
+            return {
+                user: 'Nomor telepon ini sudah pernah digunakan untuk klaim voucher ini.',
+                tech: raw
+            };
+        }
+
+        // 2) generic SQL / integrity messages — hide raw SQL from main message
+        if (/SQLSTATE|Integrity constraint violation|SQL:/i.test(raw)) {
+            return {
+                user: 'Terjadi konflik data saat mengklaim voucher. Nomor telepon mungkin sudah terdaftar untuk voucher ini.',
+                tech: raw
+            };
+        }
+
+        // 3) if backend returns a clean message field, sanitize and truncate it
+        if (parsedResult && parsedResult.message) {
+            let clean = String(parsedResult.message)
+                .replace(/^Gagal\s*claim\s*voucher[:\-\s]*/i, '') // drop backend prefix
+                .trim();
+            if (clean.length > 240) clean = clean.slice(0, 240) + '...';
+            return { user: clean || 'Terjadi kesalahan saat klaim voucher.', tech: raw };
+        }
+
+        // 4) server error
         if (responseStatus >= 500) {
             return { user: 'Terjadi kesalahan pada server. Silakan coba lagi nanti atau hubungi admin.', tech: raw || `HTTP ${responseStatus}` };
         }
-        // generic
-        return { user: 'Gagal mengklaim voucher. Silakan periksa kembali data Anda dan coba lagi.', tech: raw || 'Unknown error' };
+
+        // 5) fallback generic
+        return { user: 'Gagal mengklaim voucher. Periksa data dan coba lagi.', tech: raw || 'Unknown error' };
     }
 
-    document.getElementById('claimForm').addEventListener('submit', async function(e) {
+    async function submitClaim(e) {
         e.preventDefault();
-
         const submitBtn = document.getElementById('submitBtn');
         submitBtn.disabled = true;
         submitBtn.innerHTML = '⏳ Memproses...';
@@ -337,50 +363,43 @@
         const voucherId = document.getElementById('voucherId').value;
 
         try {
-            const response = await fetch('/vouchers/claim', {
+            const res = await fetch('/vouchers/claim', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                 },
-                body: JSON.stringify({
-                    voucher_id: voucherId,
-                    user_name: userName,
-                    user_phone: userPhone
-                })
+                body: JSON.stringify({ voucher_id: voucherId, user_name: userName, user_phone: userPhone })
             });
 
-            const responseClone = response.clone();
+            const clone = res.clone();
             let parsed = null;
-            try {
-                parsed = await response.json();
-            } catch (err) {
-                try { parsed = { rawText: await responseClone.text() }; } catch (_) { parsed = null; }
+            try { parsed = await res.json(); } catch (err) {
+                try { parsed = { rawText: await clone.text() }; } catch (_) { parsed = null; }
             }
 
-            if (!response.ok) {
-                // Build friendly message + technical detail and show immediately (do not leak raw SQL as main message)
-                const { user, tech } = friendlyErrorFrom(response.status, parsed, parsed && parsed.rawText ? parsed.rawText : response.statusText);
+            if (!res.ok) {
+                const map = friendlyErrorFrom(res.status, parsed, parsed && parsed.rawText ? parsed.rawText : res.statusText);
+                // hide modal first, show friendly message and keep full tech in details
                 hideClaimForm();
-                console.error('Claim voucher technical detail:', tech);
-                showNotification({ type: 'error', title: 'Gagal!', message: user, technical: tech });
+                console.error('Claim voucher technical detail:', map.tech);
+                showNotification({ type: 'error', title: 'Gagal!', message: map.user, technical: map.tech });
                 return;
             }
 
-            // success path
-            const uniqueCode = parsed && parsed.data ? parsed.data.unique_code : (parsed && parsed.rawText ? parsed.rawText : null);
+            // success -> obtain unique code (support different response shapes)
+            let uniqueCode = null;
+            if (parsed && parsed.data && parsed.data.unique_code) uniqueCode = parsed.data.unique_code;
+            else if (parsed && parsed.unique_code) uniqueCode = parsed.unique_code;
+            else if (parsed && parsed.rawText) uniqueCode = parsed.rawText;
             if (!uniqueCode) {
+                const tech = parsed ? JSON.stringify(parsed) : 'No payload';
                 hideClaimForm();
-                showNotification({ type: 'error', title: 'Gagal!', message: 'Respons klaim tidak mengembalikan kode voucher.', technical: JSON.stringify(parsed) });
+                showNotification({ type: 'error', title: 'Gagal!', message: 'Respons klaim tidak mengembalikan kode voucher.', technical: tech });
                 return;
             }
 
-            const expiryDate = new Date(currentVoucher.expiry_date).toLocaleDateString('id-ID', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
-            });
-
+            const expiryDate = new Date(currentVoucher.expiry_date).toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' });
             document.getElementById('templateTitle').textContent = currentVoucher.name;
             document.getElementById('templateName').textContent = userName;
             document.getElementById('templatePhone').textContent = userPhone;
@@ -390,67 +409,60 @@
             bgImage.src = currentVoucher.download_image_url || currentVoucher.image_url;
 
             try {
-                JsBarcode("#templateBarcode", uniqueCode, {
-                    format: "CODE128",
-                    width: 2,
-                    height: 60,
-                    displayValue: true,
-                    fontSize: 14,
-                    margin: 5,
-                    background: "transparent"
-                });
-            } catch (barcodeErr) {
-                console.warn('Barcode generation failed:', barcodeErr);
+                JsBarcode('#templateBarcode', uniqueCode, { format: 'CODE128', width: 2, height: 60, displayValue: true, fontSize: 14, margin: 5, background: 'transparent' });
+            } catch (err) {
+                console.warn('Barcode generation failed:', err);
             }
 
+            // capture & download helper
             const captureAndDownload = async () => {
                 const template = document.getElementById('voucherTemplate');
-                const canvas = await html2canvas(template, {
-                    scale: 2,
-                    backgroundColor: '#ffffff',
-                    logging: false,
-                    useCORS: true,
-                    allowTaint: true
-                });
-
-                canvas.toBlob(function(blob) {
+                const canvas = await html2canvas(template, { scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false });
+                canvas.toBlob(blob => {
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
                     a.download = `Voucher-${uniqueCode}.png`;
                     document.body.appendChild(a);
                     a.click();
-                    document.body.removeChild(a);
+                    a.remove();
                     URL.revokeObjectURL(url);
 
                     hideClaimForm();
-                    showNotification({ type: 'success', title: 'Berhasil!', message: 'Voucher telah di-download' });
-                    setTimeout(() => location.reload(), 1600);
-                });
+                    showNotification({ type: 'success', title: 'Berhasil!', message: 'Voucher berhasil di-download.' });
+                    setTimeout(() => location.reload(), 1400);
+                }, 'image/png');
             };
 
-            if (bgImage.complete) {
-                await captureAndDownload();
-            } else {
-                bgImage.onload = async () => { await captureAndDownload(); };
-                bgImage.onerror = () => { captureAndDownload().catch(() => {}); };
+            if (bgImage.complete) await captureAndDownload();
+            else {
+                bgImage.onload = captureAndDownload;
+                bgImage.onerror = () => { captureAndDownload().catch(()=>{}); };
             }
 
         } catch (err) {
-            // Network or unexpected JS error
-            console.error('Unexpected error while claiming voucher:', err);
+            // network / unexpected
+            const tech = (err && err.stack) ? err.stack.toString() : String(err);
+            console.error('Unexpected claim error:', tech);
             hideClaimForm();
             showNotification({
                 type: 'error',
                 title: 'Gagal!',
-                message: 'Terjadi masalah saat proses klaim. Periksa koneksi Anda atau coba lagi.',
-                technical: (err && err.stack) ? err.stack.toString() : String(err)
+                message: 'Terjadi masalah saat proses klaim. Periksa koneksi atau coba lagi.',
+                technical: tech
             });
         } finally {
             submitBtn.disabled = false;
             submitBtn.innerHTML = 'Claim & Download 🎁';
         }
-    });
+    }
+
+    // attach handlers
+    document.getElementById('claimForm').addEventListener('submit', submitClaim);
+    // expose for inline onclick in buttons
+    window.showClaimForm = showClaimForm;
+    window.hideClaimForm = hideClaimForm;
+})();
 </script>
 </body>
 </html>
