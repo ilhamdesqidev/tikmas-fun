@@ -16,6 +16,9 @@ return new class extends Migration
             $table->string('unique_code')->unique();
             $table->boolean('is_used')->default(false);
             $table->timestamps();
+            
+            // Tambahkan unique constraint untuk voucher_id + user_phone
+            $table->unique(['voucher_id', 'user_phone'], 'unique_phone_per_voucher');
         });
     }
 
