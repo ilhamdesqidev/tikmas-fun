@@ -238,107 +238,109 @@
         </div>
     </div>
 
-    <script>
-        let currentVoucher = null;
+   
+<script>
+    let currentVoucher = null;
 
-        function showClaimForm(voucher) {
-            currentVoucher = voucher;
-            document.getElementById('voucherId').value = voucher.id;
-            document.getElementById('claimVoucherName').textContent = voucher.name;
-            document.getElementById('claimOverlay').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
+    function showClaimForm(voucher) {
+        currentVoucher = voucher;
+        document.getElementById('voucherId').value = voucher.id;
+        document.getElementById('claimVoucherName').textContent = voucher.name;
+        document.getElementById('claimOverlay').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
 
-        function hideClaimForm() {
-            document.getElementById('claimOverlay').classList.add('hidden');
-            document.getElementById('claimForm').reset();
-            document.body.style.overflow = 'auto';
-        }
+    function hideClaimForm() {
+        document.getElementById('claimOverlay').classList.add('hidden');
+        document.getElementById('claimForm').reset();
+        document.body.style.overflow = 'auto';
+    }
 
-        // ...existing code...
+    document.getElementById('claimForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
 
-        document.getElementById('claimForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '⏳ Memproses...';
 
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '⏳ Memproses...';
+        const userName = document.getElementById('userName').value.trim();
+        const userPhone = document.getElementById('userPhone').value.trim();
+        const voucherId = document.getElementById('voucherId').value;
 
-            const userName = document.getElementById('userName').value;
-            const userPhone = document.getElementById('userPhone').value;
-            const voucherId = document.getElementById('voucherId').value;
+        try {
+            const response = await fetch('/vouchers/claim', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({
+                    voucher_id: voucherId,
+                    user_name: userName,
+                    user_phone: userPhone
+                })
+            });
 
+            // Clone so we can inspect text if json fails
+            const responseClone = response.clone();
+            let result = null;
             try {
-                const response = await fetch('/vouchers/claim', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    },
-                    body: JSON.stringify({
-                        voucher_id: voucherId,
-                        user_name: userName,
-                        user_phone: userPhone
-                    })
-                });
-
-                // Clone response so we can attempt json/text inspection reliably
-                const responseClone = response.clone();
-                let result = null;
+                result = await response.json();
+            } catch (parseErr) {
                 try {
-                    result = await response.json();
-                } catch (parseErr) {
-                    // If JSON parse fails, try to read raw text for diagnostics
-                    try {
-                        const txt = await responseClone.text();
-                        result = { rawText: txt };
-                    } catch (_) {
-                        result = null;
-                    }
+                    const txt = await responseClone.text();
+                    result = { rawText: txt };
+                } catch (_) {
+                    result = null;
                 }
+            }
 
-                // Handle non-ok responses with friendly messages for known cases
-                if (!response.ok) {
-                    let message = 'Terjadi kesalahan saat mengklaim voucher';
-                    if (result && result.message) {
-                        message = result.message;
-                    } else if (response.status === 409) {
+            // Handle non-ok responses with friendly messages
+            if (!response.ok) {
+                let message = 'Terjadi kesalahan saat mengklaim voucher';
+                if (result && result.message) {
+                    message = result.message;
+                } else if (response.status === 409) {
+                    message = 'Nomor telepon ini sudah pernah digunakan untuk klaim voucher ini.';
+                } else if (result && typeof result.rawText === 'string') {
+                    const raw = result.rawText;
+                    if (raw.includes('Duplicate entry') || raw.includes('unique_phone_per_voucher')) {
                         message = 'Nomor telepon ini sudah pernah digunakan untuk klaim voucher ini.';
-                    } else if (result && typeof result.rawText === 'string') {
-                        const raw = result.rawText;
-                        if (raw.includes('Duplicate entry') || raw.includes('unique_phone_per_voucher')) {
-                            message = 'Nomor telepon ini sudah pernah digunakan untuk klaim voucher ini.';
-                        } else if (response.status >= 500) {
-                            message = 'Terjadi kesalahan server. Silakan coba lagi nanti.';
-                        }
                     } else if (response.status >= 500) {
                         message = 'Terjadi kesalahan server. Silakan coba lagi nanti.';
                     }
-
-                    // Tutup modal dulu sebelum tampilkan error
-                    hideClaimForm();
-                    throw new Error(message);
+                } else if (response.status >= 500) {
+                    message = 'Terjadi kesalahan server. Silakan coba lagi nanti.';
                 }
 
-                // Success path
-                const uniqueCode = result.data.unique_code;
-                const expiryDate = new Date(currentVoucher.expiry_date).toLocaleDateString('id-ID', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric'
-                });
+                // Close modal then throw to be caught below
+                hideClaimForm();
+                throw new Error(message);
+            }
 
-                // Set template values
-                document.getElementById('templateTitle').textContent = currentVoucher.name;
-                document.getElementById('templateName').textContent = userName;
-                document.getElementById('templatePhone').textContent = userPhone;
-                document.getElementById('templateExpiry').textContent = expiryDate;
-                
-                // Set background image (gunakan download_image jika ada, fallback ke image biasa)
-                const bgImage = document.getElementById('templateBgImage');
-                bgImage.src = currentVoucher.download_image_url || currentVoucher.image_url;
+            // Success path
+            const uniqueCode = result && result.data ? result.data.unique_code : (result && result.rawText ? result.rawText : null);
+            if (!uniqueCode) {
+                throw new Error('Respons klaim tidak mengembalikan kode voucher.');
+            }
 
-                // Generate barcode
+            const expiryDate = new Date(currentVoucher.expiry_date).toLocaleDateString('id-ID', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+
+            // Fill template
+            document.getElementById('templateTitle').textContent = currentVoucher.name;
+            document.getElementById('templateName').textContent = userName;
+            document.getElementById('templatePhone').textContent = userPhone;
+            document.getElementById('templateExpiry').textContent = expiryDate;
+
+            const bgImage = document.getElementById('templateBgImage');
+            bgImage.src = currentVoucher.download_image_url || currentVoucher.image_url;
+
+            // Generate barcode
+            try {
                 JsBarcode("#templateBarcode", uniqueCode, {
                     format: "CODE128",
                     width: 2,
@@ -348,84 +350,94 @@
                     margin: 5,
                     background: "transparent"
                 });
-
-                // Wait for image to load before capturing
-                bgImage.onload = async function() {
-                    const template = document.getElementById('voucherTemplate');
-                    const canvas = await html2canvas(template, {
-                        scale: 2,
-                        backgroundColor: '#ffffff',
-                        logging: false,
-                        useCORS: true,
-                        allowTaint: true
-                    });
-
-                    canvas.toBlob(function(blob) {
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = `Voucher-${uniqueCode}.png`;
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                        URL.revokeObjectURL(url);
-
-                        hideClaimForm();
-                        
-                        // Success notification
-                        const notification = document.createElement('div');
-                        notification.className = 'fixed top-4 left-1/2 -translate-x-1/2 bg-green-500 text-white px-6 py-4 rounded-xl shadow-2xl z-[100]';
-                        notification.innerHTML = `
-                            <div class="flex items-center space-x-3">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <div>
-                                    <p class="font-bold">Berhasil!</p>
-                                    <p class="text-sm">Voucher telah di-download</p>
-                                </div>
-                            </div>
-                        `;
-                        document.body.appendChild(notification);
-                        setTimeout(() => notification.remove(), 5000);
-                        
-                        // Reload page untuk update kuota
-                        setTimeout(() => location.reload(), 2000);
-                    });
-                };
-
-                // If image already cached
-                if (bgImage.complete) {
-                    bgImage.onload();
-                }
-
-            } catch (error) {
-                console.error('Error:', error);
-                
-                // Pastikan modal sudah tertutup
-                hideClaimForm();
-                
-                // Tampilkan error notification
-                const notification = document.createElement('div');
-                notification.className = 'fixed top-4 left-1/2 -translate-x-1/2 bg-red-500 text-white px-6 py-4 rounded-xl shadow-2xl z-[100] max-w-md';
-                notification.innerHTML = `
-                    <div class="flex items-center space-x-3">
-                        <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                        <div>
-                            <p class="font-bold">Gagal!</p>
-                            <p class="text-sm">${error.message}</p>
-                        </div>
-                    </div>
-                `;
-                document.body.appendChild(notification);
-                setTimeout(() => notification.remove(), 5000);
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = 'Claim & Download 🎁';
+            } catch (barcodeErr) {
+                console.warn('Barcode generation failed:', barcodeErr);
             }
-        });
-    </script>
+
+            // Wait for image load before capture
+            const captureAndDownload = async () => {
+                const template = document.getElementById('voucherTemplate');
+                const canvas = await html2canvas(template, {
+                    scale: 2,
+                    backgroundColor: '#ffffff',
+                    logging: false,
+                    useCORS: true,
+                    allowTaint: true
+                });
+
+                canvas.toBlob(function(blob) {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `Voucher-${uniqueCode}.png`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+
+                    hideClaimForm();
+
+                    // Success notification
+                    const notification = document.createElement('div');
+                    notification.className = 'fixed top-4 left-1/2 -translate-x-1/2 bg-green-500 text-white px-6 py-4 rounded-xl shadow-2xl z-[100]';
+                    notification.innerHTML = `
+                        <div class="flex items-center space-x-3">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <div>
+                                <p class="font-bold">Berhasil!</p>
+                                <p class="text-sm">Voucher telah di-download</p>
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(notification);
+                    setTimeout(() => notification.remove(), 5000);
+
+                    // Reload untuk update kuota
+                    setTimeout(() => location.reload(), 2000);
+                });
+            };
+
+            if (bgImage.complete) {
+                await captureAndDownload();
+            } else {
+                bgImage.onload = async function() {
+                    await captureAndDownload();
+                };
+                bgImage.onerror = function() {
+                    // Still attempt capture if background fails to load
+                    captureAndDownload().catch(() => {});
+                };
+            }
+
+        } catch (error) {
+            console.error('Error:', error);
+
+            hideClaimForm();
+
+            const messageText = error && error.message ? error.message : 'Gagal claim voucher';
+
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-4 left-1/2 -translate-x-1/2 bg-red-500 text-white px-6 py-4 rounded-xl shadow-2xl z-[100] max-w-md';
+            notification.innerHTML = `
+                <div class="flex items-center space-x-3">
+                    <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    <div>
+                        <p class="font-bold">Gagal!</p>
+                        <p class="text-sm">${messageText}</p>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 5000);
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Claim & Download 🎁';
+        }
+    });
+</script>
 </body>
 </html>
