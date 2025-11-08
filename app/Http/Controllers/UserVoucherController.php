@@ -7,6 +7,7 @@ use App\Models\VoucherClaim;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Database\QueryException;
 
 class UserVoucherController extends Controller
 {
@@ -47,7 +48,20 @@ class UserVoucherController extends Controller
         try {
             $voucher = Voucher::findOrFail($request->voucher_id);
 
-            // Cek apakah voucher masih bisa diklaim
+            // VALIDASI 1: Cek apakah nomor telepon sudah pernah claim voucher ini
+            // Ini harus paling atas sebelum validasi lainnya
+            $existingClaim = VoucherClaim::where('voucher_id', $request->voucher_id)
+                                        ->where('user_phone', $request->user_phone)
+                                        ->first();
+
+            if ($existingClaim) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Nomor telepon Anda sudah pernah mengklaim voucher ini sebelumnya. Satu nomor hanya dapat mengklaim voucher yang sama sekali saja.'
+                ], 400);
+            }
+
+            // VALIDASI 2: Cek apakah voucher masih bisa diklaim
             if (!$voucher->canBeClaimed()) {
                 if ($voucher->is_expired) {
                     return response()->json([
@@ -66,18 +80,6 @@ class UserVoucherController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'Voucher tidak dapat diklaim saat ini.'
-                ], 400);
-            }
-
-            // VALIDASI BARU: Cek apakah nomor telepon sudah pernah claim voucher ini
-            $existingClaim = VoucherClaim::where('voucher_id', $request->voucher_id)
-                                        ->where('user_phone', $request->user_phone)
-                                        ->first();
-
-            if ($existingClaim) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Nomor telepon ini sudah pernah mengklaim voucher ini sebelumnya. Satu nomor hanya dapat mengklaim voucher yang sama sekali saja.'
                 ], 400);
             }
 
@@ -114,11 +116,27 @@ class UserVoucherController extends Controller
                     'claim' => $claim,
                 ]
             ]);
+
+        } catch (QueryException $e) {
+            // Tangkap error database constraint violation
+            if ($e->getCode() === '23000') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Nomor telepon Anda sudah pernah mengklaim voucher ini sebelumnya.'
+                ], 400);
+            }
+            
+            Log::error('Database error claiming voucher: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan pada database. Silakan coba lagi.'
+            ], 500);
+
         } catch (\Exception $e) {
             Log::error('Error claiming voucher: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal claim voucher: ' . $e->getMessage()
+                'message' => 'Terjadi kesalahan sistem. Silakan coba lagi nanti.'
             ], 500);
         }
     }
