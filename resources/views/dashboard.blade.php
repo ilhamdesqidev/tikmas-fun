@@ -1041,6 +1041,7 @@
       </div>
     </footer>
 
+
 <!-- Required Libraries - HARUS DI ATAS -->
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -1454,24 +1455,48 @@ if (document.getElementById('claimForm')) {
     const voucherId = document.getElementById('voucherId').value;
 
     try {
-      const response = await fetch('/vouchers/claim', {
+      const res = await fetch('/vouchers/claim', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
         },
-        body: JSON.stringify({
-          voucher_id: voucherId,
-          user_name: userName,
-          user_phone: userPhone
-        })
+        body: JSON.stringify({ voucher_id: voucherId, user_name: userName, user_phone: userPhone })
       });
 
-      const result = await response.json();
+      // parse body safely
+      let payload = null;
+      try { payload = await res.json(); } catch (err) { payload = null; }
 
-      if (!result.success) {
-        throw new Error(result.message);
+      if (!res.ok) {
+        const userMsg = (payload && payload.message) ? payload.message : (res.status === 409 ? 'Nomor telepon sudah pernah digunakan.' : 'Gagal mengklaim voucher.');
+        const tech = (payload && payload.technical) ? payload.technical : (payload ? JSON.stringify(payload) : res.statusText);
+        hideClaimForm();
+        console.error('Claim voucher technical detail:', tech);
+
+        const notification = document.createElement('div');
+        notification.className = 'fixed top-4 left-1/2 -translate-x-1/2 bg-red-500 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-xl shadow-2xl z-[100] w-[calc(100%-2rem)] sm:w-auto max-w-md';
+        notification.innerHTML = `
+          <div class="flex items-center space-x-3">
+            <svg class="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+            <div>
+              <p class="font-bold text-sm sm:text-base">Gagal!</p>
+              <p class="text-xs sm:text-sm">${userMsg}</p>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(notification);
+        setTimeout(() => notification.remove(), 5000);
+
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+        return;
       }
+
+      // success path: set `result` compatible object for the rest of the handler
+      var result = payload;
 
       const uniqueCode = result.data.unique_code;
       const expiryDate = currentVoucher.expiry_date 
