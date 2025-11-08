@@ -256,6 +256,75 @@
         document.body.style.overflow = 'auto';
     }
 
+    // Generic notification builder (success / error)
+    function showNotification({ type = 'info', title = '', message = '', technical = null, ttl = 6000 }) {
+        const base = document.createElement('div');
+        base.className = `fixed top-4 right-4 w-[min(420px,calc(100%-2rem))] z-[110] rounded-xl shadow-2xl overflow-hidden transform transition-all`;
+
+        // color
+        const bg = type === 'success' ? 'bg-green-500' : (type === 'error' ? 'bg-red-600' : 'bg-gray-800');
+        base.innerHTML = `
+            <div class="${bg} text-white px-5 py-4 flex items-start gap-4">
+                <div class="flex-shrink-0">
+                    ${type === 'success' ? '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>' 
+                    : '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>'}
+                </div>
+                <div class="flex-1">
+                    <div class="font-semibold">${title}</div>
+                    <div class="text-sm mt-1">${message}</div>
+                    ${technical ? `<details class="mt-3 text-xs text-white/90 rounded-md"><summary class="cursor-pointer">Tampilkan detil teknis</summary><pre class="whitespace-pre-wrap break-words mt-2 p-2 bg-white/10 rounded">${escapeHtml(technical)}</pre>
+                        <div class="mt-2 flex gap-2">
+                            <button class="px-3 py-1 text-xs bg-white/10 rounded copy-btn">Salin detil</button>
+                        </div>
+                    </details>` : ''}
+                </div>
+                <button class="ml-3 close-btn text-white/90 hover:text-white">&times;</button>
+            </div>
+        `;
+
+        document.body.appendChild(base);
+
+        // copy button handler
+        const copyBtn = base.querySelector('.copy-btn');
+        if (copyBtn) {
+            copyBtn.addEventListener('click', () => {
+                navigator.clipboard.writeText(technical || '').then(() => {
+                    copyBtn.textContent = 'Tersalin';
+                    setTimeout(() => copyBtn.textContent = 'Salin detil', 2000);
+                });
+            });
+        }
+
+        base.querySelector('.close-btn').addEventListener('click', () => base.remove());
+        setTimeout(() => base.remove(), ttl);
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        return text
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#039;');
+    }
+
+    // Map raw/technical error -> friendly message
+    function friendlyErrorFrom(responseStatus, parsedResult, fallback) {
+        // priority: parsedResult.message -> status 409 -> raw SQL duplicate detection -> status >=500 -> fallback
+        if (parsedResult && parsedResult.message) return { user: parsedResult.message, tech: JSON.stringify(parsedResult) };
+        if (responseStatus === 409) return { user: 'Nomor telepon ini sudah pernah digunakan untuk klaim voucher ini.', tech: 'HTTP 409 Conflict' };
+        const raw = parsedResult && parsedResult.rawText ? parsedResult.rawText : (fallback || '');
+        if (typeof raw === 'string' && (raw.includes('Duplicate entry') || raw.includes('unique_phone_per_voucher'))) {
+            return { user: 'Nomor telepon ini sudah pernah digunakan untuk klaim voucher ini.', tech: raw };
+        }
+        if (responseStatus >= 500) {
+            return { user: 'Terjadi kesalahan pada server. Silakan coba lagi nanti atau hubungi admin.', tech: raw || `HTTP ${responseStatus}` };
+        }
+        // generic
+        return { user: 'Gagal mengklaim voucher. Silakan periksa kembali data Anda dan coba lagi.', tech: raw || 'Unknown error' };
+    }
+
     document.getElementById('claimForm').addEventListener('submit', async function(e) {
         e.preventDefault();
 
@@ -281,47 +350,29 @@
                 })
             });
 
-            // Clone so we can inspect text if json fails
             const responseClone = response.clone();
-            let result = null;
+            let parsed = null;
             try {
-                result = await response.json();
-            } catch (parseErr) {
-                try {
-                    const txt = await responseClone.text();
-                    result = { rawText: txt };
-                } catch (_) {
-                    result = null;
-                }
+                parsed = await response.json();
+            } catch (err) {
+                try { parsed = { rawText: await responseClone.text() }; } catch (_) { parsed = null; }
             }
 
-            // Handle non-ok responses with friendly messages
             if (!response.ok) {
-                let message = 'Terjadi kesalahan saat mengklaim voucher';
-                if (result && result.message) {
-                    message = result.message;
-                } else if (response.status === 409) {
-                    message = 'Nomor telepon ini sudah pernah digunakan untuk klaim voucher ini.';
-                } else if (result && typeof result.rawText === 'string') {
-                    const raw = result.rawText;
-                    if (raw.includes('Duplicate entry') || raw.includes('unique_phone_per_voucher')) {
-                        message = 'Nomor telepon ini sudah pernah digunakan untuk klaim voucher ini.';
-                    } else if (response.status >= 500) {
-                        message = 'Terjadi kesalahan server. Silakan coba lagi nanti.';
-                    }
-                } else if (response.status >= 500) {
-                    message = 'Terjadi kesalahan server. Silakan coba lagi nanti.';
-                }
-
-                // Close modal then throw to be caught below
+                // Build friendly message + technical detail and show immediately (do not leak raw SQL as main message)
+                const { user, tech } = friendlyErrorFrom(response.status, parsed, parsed && parsed.rawText ? parsed.rawText : response.statusText);
                 hideClaimForm();
-                throw new Error(message);
+                console.error('Claim voucher technical detail:', tech);
+                showNotification({ type: 'error', title: 'Gagal!', message: user, technical: tech });
+                return;
             }
 
-            // Success path
-            const uniqueCode = result && result.data ? result.data.unique_code : (result && result.rawText ? result.rawText : null);
+            // success path
+            const uniqueCode = parsed && parsed.data ? parsed.data.unique_code : (parsed && parsed.rawText ? parsed.rawText : null);
             if (!uniqueCode) {
-                throw new Error('Respons klaim tidak mengembalikan kode voucher.');
+                hideClaimForm();
+                showNotification({ type: 'error', title: 'Gagal!', message: 'Respons klaim tidak mengembalikan kode voucher.', technical: JSON.stringify(parsed) });
+                return;
             }
 
             const expiryDate = new Date(currentVoucher.expiry_date).toLocaleDateString('id-ID', {
@@ -330,7 +381,6 @@
                 year: 'numeric'
             });
 
-            // Fill template
             document.getElementById('templateTitle').textContent = currentVoucher.name;
             document.getElementById('templateName').textContent = userName;
             document.getElementById('templatePhone').textContent = userPhone;
@@ -339,7 +389,6 @@
             const bgImage = document.getElementById('templateBgImage');
             bgImage.src = currentVoucher.download_image_url || currentVoucher.image_url;
 
-            // Generate barcode
             try {
                 JsBarcode("#templateBarcode", uniqueCode, {
                     format: "CODE128",
@@ -354,7 +403,6 @@
                 console.warn('Barcode generation failed:', barcodeErr);
             }
 
-            // Wait for image load before capture
             const captureAndDownload = async () => {
                 const template = document.getElementById('voucherTemplate');
                 const canvas = await html2canvas(template, {
@@ -376,63 +424,28 @@
                     URL.revokeObjectURL(url);
 
                     hideClaimForm();
-
-                    // Success notification
-                    const notification = document.createElement('div');
-                    notification.className = 'fixed top-4 left-1/2 -translate-x-1/2 bg-green-500 text-white px-6 py-4 rounded-xl shadow-2xl z-[100]';
-                    notification.innerHTML = `
-                        <div class="flex items-center space-x-3">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                            </svg>
-                            <div>
-                                <p class="font-bold">Berhasil!</p>
-                                <p class="text-sm">Voucher telah di-download</p>
-                            </div>
-                        </div>
-                    `;
-                    document.body.appendChild(notification);
-                    setTimeout(() => notification.remove(), 5000);
-
-                    // Reload untuk update kuota
-                    setTimeout(() => location.reload(), 2000);
+                    showNotification({ type: 'success', title: 'Berhasil!', message: 'Voucher telah di-download' });
+                    setTimeout(() => location.reload(), 1600);
                 });
             };
 
             if (bgImage.complete) {
                 await captureAndDownload();
             } else {
-                bgImage.onload = async function() {
-                    await captureAndDownload();
-                };
-                bgImage.onerror = function() {
-                    // Still attempt capture if background fails to load
-                    captureAndDownload().catch(() => {});
-                };
+                bgImage.onload = async () => { await captureAndDownload(); };
+                bgImage.onerror = () => { captureAndDownload().catch(() => {}); };
             }
 
-        } catch (error) {
-            console.error('Error:', error);
-
+        } catch (err) {
+            // Network or unexpected JS error
+            console.error('Unexpected error while claiming voucher:', err);
             hideClaimForm();
-
-            const messageText = error && error.message ? error.message : 'Gagal claim voucher';
-
-            const notification = document.createElement('div');
-            notification.className = 'fixed top-4 left-1/2 -translate-x-1/2 bg-red-500 text-white px-6 py-4 rounded-xl shadow-2xl z-[100] max-w-md';
-            notification.innerHTML = `
-                <div class="flex items-center space-x-3">
-                    <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                    <div>
-                        <p class="font-bold">Gagal!</p>
-                        <p class="text-sm">${messageText}</p>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(notification);
-            setTimeout(() => notification.remove(), 5000);
+            showNotification({
+                type: 'error',
+                title: 'Gagal!',
+                message: 'Terjadi masalah saat proses klaim. Periksa koneksi Anda atau coba lagi.',
+                technical: (err && err.stack) ? err.stack.toString() : String(err)
+            });
         } finally {
             submitBtn.disabled = false;
             submitBtn.innerHTML = 'Claim & Download 🎁';
