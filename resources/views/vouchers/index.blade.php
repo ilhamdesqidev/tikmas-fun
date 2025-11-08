@@ -35,17 +35,56 @@
     </style>
 </head>
 <body class="bg-gray-50">
-    <!-- Header -->
+    <!-- Header - Responsive -->
     <header class="bg-white sticky top-0 z-40 shadow-sm">
+        <!-- Mobile Layout (< 640px) -->
         <div class="sm:hidden">
             <div class="gradient-bg px-4 py-3">
                 <div class="flex items-center justify-between">
                     <a href="{{ route('home') }}" class="flex items-center bg-white/20 backdrop-blur-sm hover:bg-white/30 text-gray-800 px-3 py-1.5 rounded-lg transition-all duration-200 font-medium group">
-                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 mr-1 transform group-hover:-translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                         </svg>
                         <span class="text-xs font-semibold">Kembali</span>
                     </a>
+                    
+                    <div class="flex items-center space-x-1.5 bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-lg">
+                        <svg class="w-4 h-4 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                        </svg>
+                        <span class="text-xs font-bold text-gray-800">{{ $vouchers->count() }} Voucher</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white px-4 py-4 border-b border-gray-200">
+                <h1 class="text-xl font-bold text-gray-800 mb-1">Voucher & Promo</h1>
+                <p class="text-xs text-gray-600">Dapatkan penawaran terbaik untuk Anda</p>
+            </div>
+        </div>
+        
+        <!-- Desktop Layout (>= 640px) -->
+        <div class="hidden sm:block border-b border-gray-200">
+            <div class="container mx-auto px-4 py-5">
+                <div class="flex items-center justify-between">
+                    <a href="{{ route('home') }}" class="flex items-center bg-[#CFD916] hover:bg-[#B5C91A] text-gray-800 px-4 py-2 rounded-lg transition-all duration-200 font-medium group shadow-sm">
+                        <svg class="w-4 h-4 mr-2 transform group-hover:-translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                        <span class="text-sm">Kembali ke Dashboard</span>
+                    </a>
+                    
+                    <div class="text-center flex-1 px-4">
+                        <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Voucher & Promo</h1>
+                        <p class="text-xs text-gray-600">Dapatkan penawaran terbaik untuk Anda</p>
+                    </div>
+                    
+                    <div class="flex items-center space-x-2 text-gray-600">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                        </svg>
+                        <span class="text-sm font-medium">{{ $vouchers->count() }} Voucher</span>
+                    </div>
                 </div>
             </div>
         </div>
