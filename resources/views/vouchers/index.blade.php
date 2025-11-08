@@ -282,8 +282,13 @@
 
                 const result = await response.json();
 
-                if (!result.success) {
-                    throw new Error(result.message);
+                // CEK RESPONSE - INI YANG PENTING!
+                if (!response.ok || !result.success) {
+                    // Tutup modal dulu sebelum tampilkan error
+                    hideClaimForm();
+                    
+                    // Tampilkan error dari backend
+                    throw new Error(result.message || 'Terjadi kesalahan saat mengklaim voucher');
                 }
 
                 const uniqueCode = result.data.unique_code;
@@ -367,11 +372,15 @@
             } catch (error) {
                 console.error('Error:', error);
                 
+                // Pastikan modal sudah tertutup
+                hideClaimForm();
+                
+                // Tampilkan error notification
                 const notification = document.createElement('div');
-                notification.className = 'fixed top-4 left-1/2 -translate-x-1/2 bg-red-500 text-white px-6 py-4 rounded-xl shadow-2xl z-[100]';
+                notification.className = 'fixed top-4 left-1/2 -translate-x-1/2 bg-red-500 text-white px-6 py-4 rounded-xl shadow-2xl z-[100] max-w-md';
                 notification.innerHTML = `
                     <div class="flex items-center space-x-3">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                         <div>
