@@ -9,6 +9,10 @@ use App\Models\VoucherClaim;
 use App\Models\Facility;
 use App\Models\Setting;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\QueryException;
 
 class DashboardController extends Controller
 {
