@@ -112,20 +112,19 @@ class SettingsController extends Controller
             'message' => 'About section updated successfully!'
         ]);
     }
-
-    /**
-     * Update Website Settings
-     */
+    
     public function updateWebsite(Request $request)
     {
         $validated = $request->validate([
             'website_description' => 'required|string',
+            'contact_whatsapp' => 'required|string|max:20',
             'primary_color' => 'required|string|regex:/^#[0-9A-Fa-f]{6}$/',
             'footer_text' => 'required|string|max:255',
             'maintenance_mode' => 'nullable|boolean',
         ]);
 
         Setting::set('website_description', $validated['website_description'], 'textarea', 'website');
+        Setting::set('contact_whatsapp', $validated['contact_whatsapp'], 'text', 'website');
         Setting::set('primary_color', $validated['primary_color'], 'color', 'website');
         Setting::set('footer_text', $validated['footer_text'], 'text', 'website');
         Setting::set('maintenance_mode', $request->has('maintenance_mode') ? '1' : '0', 'boolean', 'website');

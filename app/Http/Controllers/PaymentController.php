@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Promo;
 use App\Models\Order;
+use App\Models\Setting;
 use Illuminate\Support\Str;
 use Midtrans\Config;
 use Midtrans\Snap;
@@ -16,7 +17,7 @@ use Picqer\Barcode\BarcodeGeneratorPNG;
 
 class PaymentController extends Controller
 {
-     public function __construct()
+    public function __construct()
     {
         // Ambil dari config agar aman terhadap config cache
         $serverKey = config('midtrans.server_key');
@@ -155,7 +156,7 @@ class PaymentController extends Controller
         ]);
     }
 
-     public function paymentFinish(Request $request)
+    public function paymentFinish(Request $request)
     {
         $orderId = $request->order_id;
         $order = Order::where('order_number', $orderId)->firstOrFail();
@@ -172,11 +173,13 @@ class PaymentController extends Controller
         // Jika status sukses, tampilkan halaman invoice dengan auto download script
         if ($order->status === 'success') {
             $promo = Promo::findOrFail($order->promo_id);
+            $contactWhatsapp = Setting::get('contact_whatsapp', '812-3456-7890');
             
             return view('payment.invoice', [
                 'order' => $order,
                 'promo' => $promo,
                 'invoiceNumber' => $order->invoice_number,
+                'contactWhatsapp' => $contactWhatsapp,
                 'autoDownload' => true // Flag untuk auto download
             ]);
         }
@@ -398,7 +401,7 @@ class PaymentController extends Controller
     /**
      * Method untuk menampilkan invoice dan auto download
      */
-     public function showInvoice($order_id)
+    public function showInvoice($order_id)
     {
         $order = Order::where('order_number', $order_id)->firstOrFail();
         $promo = Promo::findOrFail($order->promo_id);
@@ -409,6 +412,9 @@ class PaymentController extends Controller
             $order->save();
         }
 
+        // Get contact WhatsApp from settings
+        $contactWhatsapp = Setting::get('contact_whatsapp', '812-3456-7890');
+
         // Cek jika request ingin download PDF
         if (request()->has('download')) {
             return $this->downloadInvoice($order, $promo);
@@ -418,6 +424,7 @@ class PaymentController extends Controller
             'order' => $order,
             'promo' => $promo,
             'invoiceNumber' => $order->invoice_number,
+            'contactWhatsapp' => $contactWhatsapp,
             'autoDownload' => request()->has('autodownload') // Flag untuk auto download
         ]);
     }
@@ -458,28 +465,28 @@ class PaymentController extends Controller
     }
 
     private function generateAsciiBarcode($text)
-{
-    $barcode = '';
-    $chars = str_split($text);
-    
-    foreach ($chars as $char) {
-        // Convert character to binary-like pattern
-        $ascii = ord($char);
-        $binary = decbin($ascii);
+    {
+        $barcode = '';
+        $chars = str_split($text);
         
-        // Convert binary to barcode pattern
-        for ($i = 0; $i < strlen($binary); $i++) {
-            if ($binary[$i] === '1') {
-                $barcode .= '█';
-            } else {
-                $barcode .= '▒';
+        foreach ($chars as $char) {
+            // Convert character to binary-like pattern
+            $ascii = ord($char);
+            $binary = decbin($ascii);
+            
+            // Convert binary to barcode pattern
+            for ($i = 0; $i < strlen($binary); $i++) {
+                if ($binary[$i] === '1') {
+                    $barcode .= '█';
+                } else {
+                    $barcode .= '▒';
+                }
             }
+            $barcode .= '░'; // Separator
         }
-        $barcode .= '░'; // Separator
+        
+        return $barcode;
     }
-    
-    return $barcode;
-}
 
     /**
      * Convert binary pattern to barcode bars for HTML/CSS
@@ -500,9 +507,12 @@ class PaymentController extends Controller
     /**
      * Method untuk download invoice PDF - FIXED VERSION dengan Barcode
      */
-     public function downloadInvoice($order, $promo)
+    public function downloadInvoice($order, $promo)
     {
         $invoiceNumber = $order->invoice_number;
+        
+        // Get contact WhatsApp from settings
+        $contactWhatsapp = Setting::get('contact_whatsapp', '812-3456-7890');
         
         // Generate REAL barcode menggunakan library
         $generator = new BarcodeGeneratorHTML();
@@ -517,6 +527,7 @@ class PaymentController extends Controller
             'order' => $order,
             'promo' => $promo,
             'invoiceNumber' => $invoiceNumber,
+            'contactWhatsapp' => $contactWhatsapp,
             'barcodeHTML' => $barcodeHTML,
             'barcodeImage' => $barcodeImage,
         ]);
@@ -538,7 +549,7 @@ class PaymentController extends Controller
     /**
      * Method khusus untuk auto download setelah pembayaran sukses
      */
-   public function autoDownloadInvoice($order_id)
+    public function autoDownloadInvoice($order_id)
     {
         $order = Order::where('order_number', $order_id)->firstOrFail();
         $promo = Promo::findOrFail($order->promo_id);
@@ -551,8 +562,9 @@ class PaymentController extends Controller
     {
         $order = Order::where('order_number', $order_id)->firstOrFail();
         $promo = Promo::findOrFail($order->promo_id);
+        $contactWhatsapp = Setting::get('contact_whatsapp', '812-3456-7890');
 
-        return view('payment.invoice', compact('order', 'promo'));
+        return view('payment.invoice', compact('order', 'promo', 'contactWhatsapp'));
     }
 
     // Method untuk refund payment
@@ -616,9 +628,12 @@ class PaymentController extends Controller
         return $filename;
     }
 
-        public function downloadInvoiceWithBarcodeFile($order, $promo)
+    public function downloadInvoiceWithBarcodeFile($order, $promo)
     {
         $invoiceNumber = $order->invoice_number;
+        
+        // Get contact WhatsApp from settings
+        $contactWhatsapp = Setting::get('contact_whatsapp', '812-3456-7890');
         
         // Generate dan save barcode file
         $barcodeFilename = $this->generateBarcodeFile($order->order_number);
@@ -636,6 +651,7 @@ class PaymentController extends Controller
             'order' => $order,
             'promo' => $promo,
             'invoiceNumber' => $invoiceNumber,
+            'contactWhatsapp' => $contactWhatsapp,
             'barcodeImage' => $barcodeBase64,
         ]);
 

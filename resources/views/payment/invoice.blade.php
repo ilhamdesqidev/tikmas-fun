@@ -161,12 +161,18 @@
             <!-- Footer with integrated button -->
             <div class="bg-gray-50 p-8 text-center">
                 <p class="text-gray-600">Terima kasih telah memilih MestaKara</p>
-                <p class="text-sm text-gray-500 mt-2">Untuk pertanyaan, hubungi WhatsApp: +62 812-3456-7890</p>
+                <p class="text-sm text-gray-500 mt-2">
+                    Untuk pertanyaan, hubungi WhatsApp: 
+                    <a href="https://wa.me/62{{ preg_replace('/[^0-9]/', '', App\Models\Setting::get('contact_whatsapp', '812-3456-7890')) }}" 
+                    class="text-green-600 font-medium hover:underline" target="_blank">
+                        +62 {{ App\Models\Setting::get('contact_whatsapp', '812-3456-7890') }}
+                    </a>
+                </p>
                 
                 <!-- Integrated Back to Home Button -->
                 <div class="mt-6 no-print">
                     <a href="{{ route('home') }}" 
-                       class="inline-block bg-gray-200 text-gray-800 font-semibold py-3 px-6 rounded-lg hover:bg-gray-300 transition-colors text-center">
+                    class="inline-block bg-gray-200 text-gray-800 font-semibold py-3 px-6 rounded-lg hover:bg-gray-300 transition-colors text-center">
                         🏠 Kembali ke Beranda
                     </a>
                 </div>

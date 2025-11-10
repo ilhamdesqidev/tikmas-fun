@@ -257,23 +257,37 @@
                             <label class="block text-sm font-medium mb-2">Website Description</label>
                             <textarea name="website_description" rows="3" class="w-full px-3 py-2 border rounded-lg">{{ $getSetting('website_description', 'Mari Berlibur...') }}</textarea>
                         </div>
+                        
+                        <!-- NEW: Contact WhatsApp Number -->
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Contact WhatsApp Number</label>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-gray-600">+62</span>
+                                <input type="text" name="contact_whatsapp" 
+                                    value="{{ $getSetting('contact_whatsapp', '812-3456-7890') }}" 
+                                    placeholder="812-3456-7890"
+                                    class="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary">
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">Nomor WhatsApp yang akan ditampilkan di invoice dan halaman kontak</p>
+                        </div>
+                        
                         <div class="grid grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-sm font-medium mb-2">Primary Color</label>
                                 <div class="flex items-center space-x-3">
                                     <input type="color" id="primary-color" name="primary_color" 
-                                           value="{{ $getSetting('primary_color', '#CFD916') }}" 
-                                           class="w-12 h-10 rounded border cursor-pointer">
+                                        value="{{ $getSetting('primary_color', '#CFD916') }}" 
+                                        class="w-12 h-10 rounded border cursor-pointer">
                                     <input type="text" id="primary-color-text" 
-                                           value="{{ $getSetting('primary_color', '#CFD916') }}" 
-                                           class="flex-1 px-3 py-2 border rounded-lg">
+                                        value="{{ $getSetting('primary_color', '#CFD916') }}" 
+                                        class="flex-1 px-3 py-2 border rounded-lg">
                                 </div>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium mb-2">Footer Text</label>
                                 <input type="text" name="footer_text" 
-                                       value="{{ $getSetting('footer_text', '© 2025 Tiketmas. All rights reserved.') }}" 
-                                       class="w-full px-3 py-2 border rounded-lg">
+                                    value="{{ $getSetting('footer_text', '© 2025 Tiketmas. All rights reserved.') }}" 
+                                    class="w-full px-3 py-2 border rounded-lg">
                             </div>
                         </div>
                         <div class="border-t pt-6">
@@ -284,7 +298,7 @@
                                 </div>
                                 <label class="relative inline-flex items-center cursor-pointer">
                                     <input type="checkbox" name="maintenance_mode" class="sr-only peer" 
-                                           {{ $getSetting('maintenance_mode', '0') == '1' ? 'checked' : '' }}>
+                                        {{ $getSetting('maintenance_mode', '0') == '1' ? 'checked' : '' }}>
                                     <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                                 </label>
                             </div>
