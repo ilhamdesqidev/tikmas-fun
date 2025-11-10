@@ -265,18 +265,6 @@ class Setting extends Model
     }
 
     /**
-     * Refresh cache for a specific setting
-     * 
-     * @param string $key
-     * @return mixed
-     */
-    public static function refresh($key)
-    {
-        Cache::forget("setting_{$key}");
-        return self::get($key);
-    }
-
-    /**
      * Get settings for specific groups
      * 
      * @param array $groups
