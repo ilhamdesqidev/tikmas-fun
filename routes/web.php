@@ -56,6 +56,7 @@ Route::get('/invoice/{order_id}/autodownload', [PaymentController::class, 'autoD
 // Voucher Routes (Public - User)
 Route::get('/vouchers', [VoucherClaimController::class, 'index'])->name('vouchers.index');
 Route::post('/vouchers/claim', [VoucherClaimController::class, 'claim'])->name('vouchers.claim');
+Route::post('/vouchers/check-claim', [VoucherClaimController::class, 'checkClaim'])->name('vouchers.check');
 
 // ============================================
 // VOUCHER SCANNER ROUTES
