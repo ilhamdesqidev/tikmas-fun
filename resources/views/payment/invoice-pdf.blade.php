@@ -3,9 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invoice #{{ $invoiceNumber }} - Mestakara</title>
+    <title>Invoice #{{ $invoiceNumber }} - MestaKara</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        @page {
+            margin: 0;
+            size: A4;
+        }
         
         * {
             margin: 0;
@@ -14,403 +17,534 @@
         }
         
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Helvetica', 'Arial', sans-serif;
             color: #333;
-            background: #fafafa;
+            background: white;
             line-height: 1.5;
-            font-size: 14px;
-            padding: 20px;
+            font-size: 11pt;
         }
         
-        .invoice-wrapper {
-            max-width: 800px;
+        .invoice-container {
+            width: 100%;
+            max-width: 210mm;
             margin: 0 auto;
             background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
         
+        /* Header */
         .invoice-header {
-            padding: 25px 30px;
-            border-bottom: 1px solid #eee;
-            text-align: center;
+            background: #CFD916;
+            padding: 35px 45px;
+            color: #1a1a1a;
+            border-bottom: 3px solid #b8c414;
         }
         
-        .invoice-header h1 {
-            font-size: 24px;
+        .header-flex {
+            display: table;
+            width: 100%;
+        }
+        
+        .header-left, .header-right {
+            display: table-cell;
+            vertical-align: middle;
+        }
+        
+        .header-right {
+            text-align: right;
+        }
+        
+        .company-name {
+            font-size: 28pt;
             font-weight: 700;
-            color: #222;
-            margin-bottom: 5px;
-        }
-        
-        .invoice-header p {
-            color: #666;
-            font-size: 14px;
-        }
-        
-        .invoice-body {
-            padding: 30px;
-        }
-        
-        .invoice-info {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 25px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .invoice-info div {
-            flex: 1;
-        }
-        
-        .info-label {
-            font-size: 12px;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 5px;
-        }
-        
-        .info-value {
-            font-size: 16px;
-            font-weight: 600;
-            color: #222;
-        }
-        
-        .customer-info {
-            margin-bottom: 25px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .section-title {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: #222;
-            display: flex;
-            align-items: center;
-        }
-        
-        .section-title::before {
-            content: "";
-            display: inline-block;
-            width: 4px;
-            height: 16px;
-            background: #4f46e5;
-            margin-right: 10px;
-            border-radius: 2px;
-        }
-        
-        .customer-details {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        
-        .detail-item {
-            margin-bottom: 10px;
-        }
-        
-        .detail-label {
-            font-size: 13px;
-            color: #666;
             margin-bottom: 3px;
         }
         
-        .detail-value {
-            font-size: 15px;
-            font-weight: 500;
-            color: #222;
+        .company-tagline {
+            font-size: 10pt;
+            color: #4a4a4a;
         }
         
+        .invoice-type {
+            background: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 9pt;
+            font-weight: 700;
+            color: #1a1a1a;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        /* Body */
+        .invoice-body {
+            padding: 35px 45px;
+        }
+        
+        /* Invoice Info Bar */
+        .info-bar {
+            background: #f8f9fa;
+            padding: 20px 25px;
+            border-radius: 6px;
+            margin-bottom: 30px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .info-grid {
+            display: table;
+            width: 100%;
+        }
+        
+        .info-item {
+            display: table-cell;
+            width: 33.33%;
+            vertical-align: top;
+        }
+        
+        .info-label {
+            font-size: 9pt;
+            color: #6c757d;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        
+        .info-value {
+            font-size: 12pt;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            background: #d4edda;
+            color: #155724;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 9pt;
+            font-weight: 700;
+            border: 1px solid #c3e6cb;
+        }
+        
+        /* Customer Section */
+        .section-box {
+            margin: 25px 0;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        .section-header {
+            background: #f8f9fa;
+            padding: 12px 20px;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 11pt;
+            font-weight: 700;
+            color: #495057;
+        }
+        
+        .section-content {
+            padding: 20px;
+        }
+        
+        .detail-grid {
+            display: table;
+            width: 100%;
+        }
+        
+        .detail-row {
+            display: table-row;
+        }
+        
+        .detail-cell {
+            display: table-cell;
+            padding: 8px 15px 8px 0;
+            width: 50%;
+            vertical-align: top;
+        }
+        
+        .detail-label {
+            font-size: 9pt;
+            color: #6c757d;
+            margin-bottom: 3px;
+            font-weight: 500;
+        }
+        
+        .detail-value {
+            font-size: 11pt;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+        
+        /* Order Table */
         .order-table {
             width: 100%;
             border-collapse: collapse;
             margin: 20px 0;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        .order-table thead {
+            background: #343a40;
+            color: white;
         }
         
         .order-table th {
-            text-align: left;
             padding: 12px 15px;
-            background: #f8f9fa;
+            text-align: left;
             font-weight: 600;
-            color: #444;
-            border-bottom: 1px solid #e0e0e0;
+            font-size: 10pt;
         }
         
         .order-table td {
             padding: 15px;
-            border-bottom: 1px solid #f0f0f0;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 10pt;
         }
         
-        .text-right {
-            text-align: right;
+        .order-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .item-name {
+            font-weight: 700;
+            color: #1a1a1a;
+            font-size: 11pt;
+            margin-bottom: 2px;
+        }
+        
+        .item-desc {
+            font-size: 9pt;
+            color: #6c757d;
         }
         
         .text-center {
             text-align: center;
         }
         
-        .total-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #e0e0e0;
+        .text-right {
+            text-align: right;
+        }
+        
+        /* Total Box */
+        .total-box {
+            background: #f8f9fa;
+            border: 2px solid #CFD916;
+            border-radius: 6px;
+            padding: 20px 25px;
+            margin: 25px 0;
+        }
+        
+        .total-row {
+            display: table;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+        
+        .total-row:last-child {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 2px solid #dee2e6;
+        }
+        
+        .total-label, .total-value {
+            display: table-cell;
+            vertical-align: middle;
         }
         
         .total-label {
-            font-size: 16px;
+            font-size: 11pt;
+            color: #495057;
+        }
+        
+        .total-value {
+            text-align: right;
+            font-size: 11pt;
             font-weight: 600;
         }
         
-        .total-amount {
-            font-size: 20px;
+        .grand-total .total-label {
+            font-size: 13pt;
             font-weight: 700;
-            color: #4f46e5;
+            color: #1a1a1a;
         }
         
-        .status-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            background: #ecfdf5;
-            color: #065f46;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-left: 10px;
+        .grand-total .total-value {
+            font-size: 16pt;
+            font-weight: 700;
+            color: #1a1a1a;
         }
         
+        /* Barcode Section */
         .barcode-section {
             text-align: center;
-            margin: 30px 0;
-            padding: 20px;
+            padding: 25px;
             background: #f8f9fa;
             border-radius: 6px;
+            margin: 25px 0;
+            border: 1px solid #e9ecef;
         }
         
         .barcode-title {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 5px;
+            font-size: 12pt;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 4px;
         }
         
         .barcode-subtitle {
-            font-size: 13px;
-            color: #666;
-            margin-bottom: 15px;
+            font-size: 9pt;
+            color: #6c757d;
+            margin-bottom: 18px;
         }
         
-        .barcode-container {
+        .barcode-wrapper {
             display: inline-block;
             padding: 15px;
             background: white;
-            border: 1px solid #e0e0e0;
+            border: 1px solid #dee2e6;
             border-radius: 4px;
         }
         
-        .barcode-placeholder {
-            width: 200px;
-            height: 80px;
-            background: #f5f5f5;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #666;
-            font-family: monospace;
-            letter-spacing: 2px;
+        .barcode-wrapper img {
+            display: block;
+            max-width: 280px;
+            height: auto;
         }
         
-        .instructions {
-            background: #f0f9ff;
-            padding: 20px;
-            border-radius: 6px;
-            margin-top: 20px;
+        .barcode-id {
+            margin-top: 10px;
+            font-size: 8pt;
+            color: #adb5bd;
+            font-family: monospace;
+            letter-spacing: 1px;
+        }
+        
+        /* Instructions */
+        .instructions-box {
+            background: #fff9e6;
+            border: 1px solid #ffe69c;
+            border-left: 4px solid #ffc107;
+            padding: 18px 22px;
+            border-radius: 4px;
+            margin: 20px 0;
         }
         
         .instructions-title {
-            font-size: 15px;
-            font-weight: 600;
+            font-size: 11pt;
+            font-weight: 700;
+            color: #856404;
             margin-bottom: 10px;
-            color: #0369a1;
         }
         
-        .instructions ul {
+        .instructions-list {
             list-style: none;
+            margin: 0;
+            padding: 0;
         }
         
-        .instructions li {
+        .instructions-list li {
             padding: 5px 0;
-            display: flex;
-            align-items: flex-start;
+            font-size: 10pt;
+            color: #856404;
+            position: relative;
+            padding-left: 18px;
         }
         
-        .instructions li::before {
+        .instructions-list li::before {
             content: "•";
-            color: #0369a1;
-            font-weight: bold;
-            margin-right: 8px;
+            position: absolute;
+            left: 0;
+            color: #ffc107;
+            font-weight: 700;
+            font-size: 14pt;
+            line-height: 10pt;
         }
         
+        /* Footer */
         .invoice-footer {
+            background: #343a40;
+            color: white;
+            padding: 25px 45px;
             text-align: center;
-            padding: 20px;
-            background: #f8f9fa;
-            border-top: 1px solid #eee;
-            color: #666;
-            font-size: 13px;
+        }
+        
+        .footer-thanks {
+            font-size: 11pt;
+            font-weight: 600;
+            margin-bottom: 8px;
         }
         
         .footer-contact {
-            margin-top: 5px;
-            font-weight: 500;
+            font-size: 9pt;
+            color: #dee2e6;
+            margin: 4px 0;
         }
         
-        @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
-            
-            .invoice-body {
-                padding: 20px;
-            }
-            
-            .invoice-info {
-                flex-direction: column;
-                gap: 15px;
-            }
-            
-            .customer-details {
-                grid-template-columns: 1fr;
-            }
-            
-            .order-table {
-                display: block;
-                overflow-x: auto;
-            }
+        .footer-contact a {
+            color: #CFD916;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .footer-divider {
+            height: 1px;
+            background: #495057;
+            margin: 15px 0;
+        }
+        
+        .footer-timestamp {
+            font-size: 8pt;
+            color: #adb5bd;
         }
         
         @media print {
             body {
-                background: white;
-                padding: 0;
-            }
-            
-            .invoice-wrapper {
-                box-shadow: none;
-                border-radius: 0;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
             }
         }
     </style>
 </head>
 <body>
-    <div class="invoice-wrapper">
+    <div class="invoice-container">
         <!-- Header -->
         <div class="invoice-header">
-            <h1>Mestakara</h1>
-            <p>Wisata dan Hiburan Keluarga • E-Ticket & Invoice</p>
+            <div class="header-flex">
+                <div class="header-left">
+                    <div class="company-name">MestaKara</div>
+                    <div class="company-tagline">Wisata dan Hiburan Keluarga</div>
+                </div>
+                <div class="header-right">
+                    <div class="invoice-type">E-TICKET</div>
+                </div>
+            </div>
         </div>
         
         <!-- Body -->
         <div class="invoice-body">
-            <!-- Invoice Info -->
-            <div class="invoice-info">
-                <div>
-                    <div class="info-label">Invoice #</div>
-                    <div class="info-value">{{ $invoiceNumber }}</div>
-                </div>
-                <div style="text-align: right;">
-                    <div class="info-label">Tanggal</div>
-                    <div class="info-value">{{ \Carbon\Carbon::parse($order->created_at)->format('d M Y') }}</div>
+            <!-- Invoice Info Bar -->
+            <div class="info-bar">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Invoice Number</div>
+                        <div class="info-value">#{{ $invoiceNumber }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Tanggal</div>
+                        <div class="info-value">{{ \Carbon\Carbon::parse($order->created_at)->format('d M Y') }}</div>
+                    </div>
+                    <div class="info-item" style="text-align: right;">
+                        <div class="info-label">Status</div>
+                        <div><span class="status-badge">LUNAS</span></div>
+                    </div>
                 </div>
             </div>
             
-            <!-- Customer Info -->
-            <div class="customer-info">
-                <div class="section-title">Informasi Pemesan</div>
-                <div class="customer-details">
-                    <div class="detail-item">
-                        <div class="detail-label">Nama Lengkap</div>
-                        <div class="detail-value">{{ $order->customer_name }}</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">WhatsApp</div>
-                        <div class="detail-value">{{ $order->whatsapp_number }}</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Cabang</div>
-                        <div class="detail-value">{{ $order->branch ?? 'Cabang Utama' }}</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Tanggal Kunjungan</div>
-                        <div class="detail-value">{{ \Carbon\Carbon::parse($order->visit_date)->format('d M Y') }}</div>
+            <!-- Customer Section -->
+            <div class="section-box">
+                <div class="section-header">Informasi Pemesan</div>
+                <div class="section-content">
+                    <div class="detail-grid">
+                        <div class="detail-row">
+                            <div class="detail-cell">
+                                <div class="detail-label">Nama Lengkap</div>
+                                <div class="detail-value">{{ $order->customer_name }}</div>
+                            </div>
+                            <div class="detail-cell">
+                                <div class="detail-label">Nomor WhatsApp</div>
+                                <div class="detail-value">{{ $order->whatsapp_number }}</div>
+                            </div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-cell">
+                                <div class="detail-label">Cabang</div>
+                                <div class="detail-value">{{ $order->branch ?? 'Cabang Utama' }}</div>
+                            </div>
+                            <div class="detail-cell">
+                                <div class="detail-label">Tanggal Kunjungan</div>
+                                <div class="detail-value">{{ \Carbon\Carbon::parse($order->visit_date)->format('d M Y') }}</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
             
             <!-- Order Details -->
-            <div class="section-title">Detail Pesanan</div>
-            <table class="order-table">
-                <thead>
-                    <tr>
-                        <th>Item</th>
-                        <th class="text-center">Qty</th>
-                        <th class="text-right">Harga</th>
-                        <th class="text-right">Subtotal</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>
-                            <strong>{{ $promo->name }}</strong>
-                            <div style="font-size: 13px; color: #666; margin-top: 3px;">
-                                Tiket masuk {{ $promo->name }}
-                            </div>
-                        </td>
-                        <td class="text-center">{{ $order->ticket_quantity }}</td>
-                        <td class="text-right">Rp {{ number_format($promo->promo_price, 0, ',', '.') }}</td>
-                        <td class="text-right">Rp {{ number_format($order->total_price, 0, ',', '.') }}</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="section-box">
+                <div class="section-header">Detail Pesanan</div>
+                <div class="section-content" style="padding: 0;">
+                    <table class="order-table" style="border: none;">
+                        <thead>
+                            <tr>
+                                <th style="width: 50%;">Item</th>
+                                <th class="text-center" style="width: 15%;">Qty</th>
+                                <th class="text-right" style="width: 17.5%;">Harga</th>
+                                <th class="text-right" style="width: 17.5%;">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="item-name">{{ $promo->name }}</div>
+                                    <div class="item-desc">Tiket masuk wahana {{ $promo->name }}</div>
+                                </td>
+                                <td class="text-center" style="font-weight: 700;">{{ $order->ticket_quantity }}</td>
+                                <td class="text-right">Rp {{ number_format($promo->promo_price, 0, ',', '.') }}</td>
+                                <td class="text-right" style="font-weight: 700;">Rp {{ number_format($order->total_price, 0, ',', '.') }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
             
             <!-- Total -->
-            <div class="total-section">
-                <div class="total-label">Total Pembayaran</div>
-                <div>
-                    <span class="total-amount">Rp {{ number_format($order->total_price, 0, ',', '.') }}</span>
-                    <span class="status-badge">LUNAS</span>
+            <div class="total-box">
+                <div class="total-row">
+                    <div class="total-label">Subtotal</div>
+                    <div class="total-value">Rp {{ number_format($order->total_price, 0, ',', '.') }}</div>
+                </div>
+                <div class="total-row">
+                    <div class="total-label">Pajak & Biaya Admin</div>
+                    <div class="total-value">Rp 0</div>
+                </div>
+                <div class="total-row grand-total">
+                    <div class="total-label">TOTAL PEMBAYARAN</div>
+                    <div class="total-value">Rp {{ number_format($order->total_price, 0, ',', '.') }}</div>
                 </div>
             </div>
             
             <!-- Barcode -->
             <div class="barcode-section">
-                <div class="barcode-title">Barcode E-Ticket</div>
+                <div class="barcode-title">E-Ticket Barcode</div>
                 <div class="barcode-subtitle">Tunjukkan barcode ini saat check-in</div>
                 
-                <div class="barcode-container">
+                <div class="barcode-wrapper">
                     @if(isset($barcodeImage))
-                        <img src="{{ $barcodeImage }}" alt="Barcode" style="max-width: 100%; height: auto;">
+                        <img src="{{ $barcodeImage }}" alt="Barcode">
                     @else
-                        <div class="barcode-placeholder">
-                            BARCODE: {{ $order->order_number }}
+                        <div style="padding: 25px; background: #f5f5f5;">
+                            <div style="font-family: monospace; font-size: 12pt; font-weight: 700; color: #666; letter-spacing: 2px;">
+                                {{ $order->order_number }}
+                            </div>
                         </div>
                     @endif
                 </div>
+                
+                <div class="barcode-id">ORDER: {{ $order->order_number }}</div>
             </div>
             
             <!-- Instructions -->
-            <div class="instructions">
-                <div class="instructions-title">Instruksi Kunjungan</div>
-                <ul>
-                    <li>Tunjukkan barcode kepada pelugas untuk di-scan</li>
-                    <li>E-ticket hanya dapat digunakan sekali</li>
-                    <li>Valid untuk kunjungan {{ \Carbon\Carbon::parse($order->visit_date)->format('d M Y') }}</li>
-                    <li>Jumlah pengunjung {{ $order->ticket_quantity }} orang</li>
+            <div class="instructions-box">
+                <div class="instructions-title">Panduan Penggunaan</div>
+                <ul class="instructions-list">
+                    <li>Tunjukkan barcode kepada petugas untuk di-scan</li>
+                    <li>E-ticket berlaku untuk satu kali kunjungan</li>
+                    <li>Valid untuk tanggal: <strong>{{ \Carbon\Carbon::parse($order->visit_date)->format('d M Y') }}</strong></li>
+                    <li>Jumlah pengunjung: <strong>{{ $order->ticket_quantity }} orang</strong></li>
                     <li>Harap datang tepat waktu sesuai jadwal kunjungan</li>
                 </ul>
             </div>
@@ -418,15 +552,17 @@
         
         <!-- Footer -->
         <div class="invoice-footer">
-            <p>Terima kasih telah memilih Mestakara</p>
-            <p class="text-sm text-gray-500 mt-2">
-                Untuk pertanyaan, hubungi WhatsApp: 
-                <a href="https://wa.me/62{{ preg_replace('/[^0-9]/', '', App\Models\Setting::get('contact_whatsapp', '812-3456-7890')) }}" 
-                class="text-green-600 font-medium hover:underline" target="_blank">
-                   +62 {{ App\Models\Setting::get('contact_whatsapp', '812-3456-7890') }}
+            <div class="footer-thanks">Terima kasih telah memilih MestaKara</div>
+            <div class="footer-contact">
+                Hubungi kami: WhatsApp 
+                <a href="https://wa.me/62{{ preg_replace('/[^0-9]/', '', $contactWhatsapp ?? '8123456789') }}">
+                    +62 {{ $contactWhatsapp ?? '812-3456-7890' }}
                 </a>
-            </p>
-            <p style="margin-top: 5px;">Invoice generated on: {{ \Carbon\Carbon::now()->format('d M Y H:i:s') }}</p>
+            </div>
+            <div class="footer-divider"></div>
+            <div class="footer-timestamp">
+                Generated: {{ \Carbon\Carbon::now()->format('d M Y, H:i') }} WIB
+            </div>
         </div>
     </div>
 </body>
