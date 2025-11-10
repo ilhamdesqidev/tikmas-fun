@@ -26,6 +26,22 @@ class VoucherClaimController extends Controller
     }
 
     /**
+     * Show single voucher detail
+     */
+    public function show($id)
+    {
+        $voucher = Voucher::findOrFail($id);
+        
+        // Cek apakah voucher bisa diklaim
+        if (!$voucher->is_available) {
+            return redirect()->route('vouchers.index')
+                ->with('error', 'Voucher tidak tersedia untuk diklaim.');
+        }
+        
+        return view('vouchers.show', compact('voucher'));
+    }
+
+    /**
      * Claim voucher dengan validasi ketat
      */
     public function claim(Request $request)
@@ -40,11 +56,14 @@ class VoucherClaimController extends Controller
                     'string',
                     'regex:/^(08|62)[0-9]{8,12}$/', // Format Indonesia
                 ],
+                'user_domisili' => 'required|string|min:3|max:255', // TAMBAHAN BARU
             ], [
                 'user_name.required' => 'Nama lengkap wajib diisi',
                 'user_name.min' => 'Nama minimal 3 karakter',
-                'user_phone.required' => 'Nomor telepon wajib diisi',
-                'user_phone.regex' => 'Format nomor telepon tidak valid. Gunakan format 08xxx atau 62xxx (10-14 digit)',
+                'user_phone.required' => 'Nomor WhatsApp wajib diisi',
+                'user_phone.regex' => 'Format nomor tidak valid. Gunakan format 08xxx atau 62xxx (10-14 digit)',
+                'user_domisili.required' => 'Domisili wajib diisi',
+                'user_domisili.min' => 'Domisili minimal 3 karakter',
             ]);
         } catch (ValidationException $e) {
             return response()->json([
@@ -79,7 +98,6 @@ class VoucherClaimController extends Controller
             }
 
             // ==================== CEK DUPLICATE CLAIM ====================
-            // Cek apakah nomor ini sudah pernah claim voucher ini
             $existingClaim = VoucherClaim::where('voucher_id', $request->voucher_id)
                                         ->where('user_phone', $userPhone)
                                         ->first();
@@ -100,7 +118,7 @@ class VoucherClaimController extends Controller
                         'claimed_at' => $existingClaim->created_at->format('d M Y H:i'),
                         'unique_code' => $existingClaim->unique_code
                     ]
-                ], 409); // 409 Conflict
+                ], 409);
             }
 
             // ==================== CEK KUOTA ====================
@@ -130,11 +148,12 @@ class VoucherClaimController extends Controller
 
                 // Buat claim baru
                 $claim = VoucherClaim::create([
-                    'voucher_id'  => $request->voucher_id,
-                    'user_name'   => trim($validated['user_name']),
-                    'user_phone'  => $userPhone,
-                    'unique_code' => $uniqueCode,
-                    'is_used'     => false,
+                    'voucher_id'    => $request->voucher_id,
+                    'user_name'     => trim($validated['user_name']),
+                    'user_phone'    => $userPhone,
+                    'user_domisili' => trim($validated['user_domisili']), // TAMBAHAN BARU
+                    'unique_code'   => $uniqueCode,
+                    'is_used'       => false,
                 ]);
 
                 // Update status voucher jika kuota habis
@@ -161,6 +180,7 @@ class VoucherClaimController extends Controller
                     'voucher_name' => $voucher->name,
                     'user_name' => $claim->user_name,
                     'user_phone' => $userPhone,
+                    'user_domisili' => $claim->user_domisili,
                     'unique_code' => $uniqueCode
                 ]);
 
@@ -173,6 +193,7 @@ class VoucherClaimController extends Controller
                         'unique_code'  => $uniqueCode,
                         'voucher_name' => $voucher->name,
                         'user_name'    => $claim->user_name,
+                        'user_domisili' => $claim->user_domisili,
                         'expiry_date'  => $voucher->expiry_date,
                         'claimed_at'   => $claim->created_at->format('d M Y H:i')
                     ]
@@ -181,10 +202,9 @@ class VoucherClaimController extends Controller
             } catch (QueryException $e) {
                 DB::rollBack();
                 
-                // Handle database constraint errors
                 $errorCode = $e->errorInfo[1] ?? null;
 
-                if ($errorCode == 1062) { // MySQL duplicate entry
+                if ($errorCode == 1062) {
                     Log::error('Database duplicate entry constraint violation', [
                         'error_message' => $e->getMessage(),
                         'voucher_id' => $request->voucher_id,
@@ -198,7 +218,6 @@ class VoucherClaimController extends Controller
                     ], 409);
                 }
 
-                // Log other database errors
                 Log::error('Database error during voucher claim', [
                     'error' => $e->getMessage(),
                     'code' => $errorCode,
@@ -214,7 +233,6 @@ class VoucherClaimController extends Controller
             }
 
         } catch (\Exception $e) {
-            // Rollback jika ada transaction
             if (DB::transactionLevel() > 0) {
                 DB::rollBack();
             }
@@ -235,7 +253,7 @@ class VoucherClaimController extends Controller
     }
 
     /**
-     * Cek status claim untuk nomor tertentu (optional endpoint)
+     * Cek status claim untuk nomor tertentu
      */
     public function checkClaim(Request $request)
     {
@@ -282,13 +300,11 @@ class VoucherClaimController extends Controller
         $attempt = 0;
 
         do {
-            // Format: VOUC-XXXX-XXXX
             $uniqueCode = 'VOUC-' . strtoupper(Str::random(4)) . '-' . strtoupper(Str::random(4));
             $exists = VoucherClaim::where('unique_code', $uniqueCode)->exists();
             $attempt++;
         } while ($exists && $attempt < $maxAttempts);
 
-        // Fallback jika masih duplicate (sangat jarang terjadi)
         if ($exists) {
             $uniqueCode = 'VOUC-' . strtoupper(Str::random(6)) . '-' . time();
         }
@@ -301,10 +317,8 @@ class VoucherClaimController extends Controller
      */
     private function normalizePhoneNumber($phone)
     {
-        // Hapus semua karakter non-digit
         $phone = preg_replace('/[^0-9]/', '', $phone);
         
-        // Convert 62 ke 0 untuk konsistensi
         if (substr($phone, 0, 2) === '62') {
             $phone = '0' . substr($phone, 2);
         }

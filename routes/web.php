@@ -55,6 +55,7 @@ Route::get('/invoice/{order_id}/autodownload', [PaymentController::class, 'autoD
 
 // Voucher Routes (Public - User)
 Route::get('/vouchers', [VoucherClaimController::class, 'index'])->name('vouchers.index');
+Route::get('/vouchers/{id}', [VoucherClaimController::class, 'show'])->name('vouchers.show'); // ROUTE BARU
 Route::post('/vouchers/claim', [VoucherClaimController::class, 'claim'])->name('vouchers.claim');
 Route::post('/vouchers/check-claim', [VoucherClaimController::class, 'checkClaim'])->name('vouchers.check');
 

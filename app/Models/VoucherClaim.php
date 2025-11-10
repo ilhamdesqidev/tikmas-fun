@@ -16,6 +16,7 @@ class VoucherClaim extends Model
         'unique_code',
         'user_name',
         'user_phone',
+        'user_domisili', // TAMBAHAN BARU
         'scanned_at',
         'scanned_by',
         'is_used'

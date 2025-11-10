@@ -763,9 +763,8 @@
             }
           @endphp
           
-          <div class="promo-card {{ $isAvailable ? 'clickable' : 'non-clickable promo-disabled' }}" 
-               data-voucher='@json($voucher)' 
-               @if($isAvailable) onclick="event.stopPropagation(); showClaimForm(JSON.parse(this.dataset.voucher))" @endif>
+          <div class="promo-card {{ $isAvailable ? 'clickable' : 'non-clickable promo-disabled' }}"
+               @if($isAvailable) onclick="window.location.href='/vouchers/{{ $voucher->id }}'" @endif>
             
             @if($isAvailable)
               <span class="featured-badge">✓ Tersedia</span>
@@ -895,100 +894,6 @@
   @endif
 </div>
 </section>
-
-<!-- Claim Form Pop-up -->
-<div id="claimOverlay" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4">
-  <div id="claimCard" class="bg-white rounded-2xl sm:rounded-3xl shadow-2xl max-w-md w-full animate-slide-up overflow-hidden max-h-[95vh] overflow-y-auto">
-    <!-- Card Header -->
-    <div class="gradient-bg p-5 sm:p-6 text-center" style="background: linear-gradient(135deg, #CFD916 0%, #9DB91C 100%);">
-      <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-3 sm:mb-4 bg-white rounded-full flex items-center justify-center shadow-lg">
-        <svg class="w-8 h-8 sm:w-10 sm:h-10 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-        </svg>
-      </div>
-      <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-2">Claim Voucher</h2>
-      <p class="text-sm text-gray-700 px-2" id="claimVoucherName"></p>
-      <p class="text-xs text-gray-600 mt-1">Berlaku hingga: <span id="claimExpiryDate"></span></p>
-    </div>
-
-    <!-- Form -->
-    <form id="claimForm" class="p-5 sm:p-6">
-      <input type="hidden" id="voucherId">
-      
-      <div class="mb-4 sm:mb-5">
-        <label for="userName" class="block text-xs sm:text-sm font-bold text-gray-700 mb-2">
-          📝 Nama Lengkap <span class="text-red-500">*</span>
-        </label>
-        <input type="text" 
-               id="userName" 
-               required
-               class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#CFD916] focus:border-transparent transition-all" 
-               placeholder="Masukkan nama lengkap Anda">
-      </div>
-
-      <div class="mb-5 sm:mb-6">
-        <label for="userPhone" class="block text-xs sm:text-sm font-bold text-gray-700 mb-2">
-          📱 Nomor Telepon <span class="text-red-500">*</span>
-        </label>
-        <input type="tel" 
-               id="userPhone" 
-               required
-               pattern="[0-9]{10,13}"
-               class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#CFD916] focus:border-transparent transition-all" 
-               placeholder="08xxxxxxxxxx">
-        <p class="mt-1.5 text-xs text-gray-500">💡 Format: 08xxxxxxxxxx (10-13 digit)</p>
-      </div>
-
-      <div class="flex flex-col sm:flex-row gap-3">
-        <button type="button" 
-                onclick="hideClaimForm()"
-                class="w-full sm:flex-1 px-5 sm:px-6 py-2.5 sm:py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-all duration-300 font-bold text-sm sm:text-base">
-          Batal
-        </button>
-        <button type="submit" 
-                id="submitBtn"
-                class="w-full sm:flex-1 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl font-bold shadow-lg text-sm sm:text-base transition-all duration-300"
-                style="background: #CFD916; color: #1f2937;">
-          Claim & Download 🎁
-        </button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- Hidden Template untuk Download dengan Barcode Overlay -->
-<div id="voucherTemplate" style="position: absolute; left: -9999px; width: 800px; height: 600px;">
-  <div style="position: relative; width: 100%; height: 100%; font-family: Arial, sans-serif;">
-    <!-- Background Image -->
-    <img id="templateBgImage" src="" style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;">
-    
-    <!-- Overlay dengan Info -->
-    <div style="position: absolute; top: 0; left: 0; right: 0; background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%); padding: 30px;">
-      <h1 style="color: white; font-size: 32px; font-weight: bold; margin: 0 0 10px 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);" id="templateTitle"></h1>
-      <p style="color: white; font-size: 16px; margin: 0; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">🎉 Voucher Berhasil Di-claim!</p>
-    </div>
-    
-    <!-- Info User di Kiri Bawah -->
-    <div style="position: absolute; bottom: 180px; left: 30px; background: rgba(255, 255, 255, 0.95); padding: 20px; border-radius: 15px; max-width: 300px; backdrop-filter: blur(10px);">
-      <p style="margin: 0 0 8px 0; color: #1f2937; font-size: 14px;"><strong>Nama:</strong> <span id="templateName"></span></p>
-      <p style="margin: 0 0 8px 0; color: #1f2937; font-size: 14px;"><strong>No. HP:</strong> <span id="templatePhone"></span></p>
-      <p style="margin: 0; color: #1f2937; font-size: 14px;"><strong>Berlaku hingga:</strong> <span id="templateExpiry"></span></p>
-    </div>
-
-    <!-- Barcode Overlay di Tengah Bawah -->
-    <div style="position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); background: rgba(255, 255, 255, 0.95); padding: 15px 25px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3); backdrop-filter: blur(10px);">
-      <p style="text-align: center; color: #1f2937; font-weight: bold; margin: 0 0 10px 0; font-size: 14px;">KODE VOUCHER</p>
-      <svg id="templateBarcode"></svg>
-    </div>
-
-    <!-- Footer -->
-    <div style="position: absolute; bottom: 15px; left: 0; right: 0; text-align: center;">
-      <p style="margin: 0; color: white; font-size: 11px; text-shadow: 1px 1px 2px rgba(0,0,0,0.7);">
-        Tunjukkan barcode ini saat melakukan pembayaran
-      </p>
-    </div>
-  </div>
-</div>
 
 <!-- Footer -->
     <footer class="bg-black text-white pt-8 sm:pt-10 lg:pt-12 pb-6 sm:pb-8">
@@ -1397,41 +1302,6 @@ class PromoSlider {
 // ==================== VOUCHER CLAIM FUNCTIONS ====================
 let currentVoucher = null;
 
-// Show Claim Form
-function showClaimForm(voucher) {
-  console.log('Show claim form called', voucher);
-  currentVoucher = voucher;
-  
-  const expiryDate = voucher.expiry_date 
-    ? new Date(voucher.expiry_date).toLocaleDateString('id-ID', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-      })
-    : 'Tidak terbatas';
-
-  document.getElementById('voucherId').value = voucher.id;
-  document.getElementById('claimVoucherName').textContent = voucher.name;
-  document.getElementById('claimExpiryDate').textContent = expiryDate;
-  document.getElementById('claimOverlay').classList.remove('hidden');
-  document.body.style.overflow = 'hidden';
-}
-
-// Hide Claim Form
-function hideClaimForm() {
-  document.getElementById('claimOverlay').classList.add('hidden');
-  document.getElementById('claimForm').reset();
-  document.body.style.overflow = 'auto';
-}
-
-// Close on overlay click
-if (document.getElementById('claimOverlay')) {
-  document.getElementById('claimOverlay').addEventListener('click', function(e) {
-    if (e.target === this) {
-      hideClaimForm();
-    }
-  });
-}
 
 // Close on ESC key
 document.addEventListener('keydown', function(e) {
