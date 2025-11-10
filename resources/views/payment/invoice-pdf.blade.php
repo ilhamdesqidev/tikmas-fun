@@ -419,7 +419,13 @@
         <!-- Footer -->
         <div class="invoice-footer">
             <p>Terima kasih telah memilih Mestakara</p>
-            <p class="footer-contact">Untuk pertanyaan, hubungi WhatsApp: +62 812-3456-7890</p>
+            <p class="text-sm text-gray-500 mt-2">
+                Untuk pertanyaan, hubungi WhatsApp: 
+                <a href="https://wa.me/62{{ preg_replace('/[^0-9]/', '', App\Models\Setting::get('contact_whatsapp', '812-3456-7890')) }}" 
+                class="text-green-600 font-medium hover:underline" target="_blank">
+                   +62 {{ App\Models\Setting::get('contact_whatsapp', '812-3456-7890') }}
+                </a>
+            </p>
             <p style="margin-top: 5px;">Invoice generated on: {{ \Carbon\Carbon::now()->format('d M Y H:i:s') }}</p>
         </div>
     </div>
