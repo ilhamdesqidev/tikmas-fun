@@ -212,6 +212,7 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">WhatsApp</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Domisili</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Visit Date</th>
                             <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Qty</th>
                             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total</th>
@@ -251,6 +252,9 @@
                                     {{ $order->whatsapp_number }}
                                 </a>
                             </td>
+                            <td class="px-6 py-4">
+                                <div class="text-sm text-gray-900">{{ $order->domicile ?? '-' }}</div>
+                            </td>
                             <td class="px-6 py-4 text-sm text-gray-900">
                                 {{ \Carbon\Carbon::parse($order->visit_date)->format('d M Y') }}
                             </td>
@@ -278,7 +282,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="9" class="px-6 py-12 text-center">
+                            <td colspan="10" class="px-6 py-12 text-center">
                                 <div class="text-gray-500">
                                     <i class="fas fa-inbox text-2xl mb-2"></i>
                                     <p>Tidak ada data tiket</p>
