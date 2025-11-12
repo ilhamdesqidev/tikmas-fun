@@ -15,6 +15,7 @@ class Order extends Model
         'promo_id',
         'customer_name',
         'whatsapp_number',
+        'domicile',
         'branch',
         'visit_date',
         'ticket_quantity',

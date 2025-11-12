@@ -47,40 +47,43 @@ class PaymentController extends Controller
     }
 
     // Method untuk memproses checkout dan mengarahkan ke halaman pembayaran
-    public function processCheckout(Request $request, $id)
-    {
-        $promo = Promo::findOrFail($id);
+    // Method untuk memproses checkout dan mengarahkan ke halaman pembayaran
+public function processCheckout(Request $request, $id)
+{
+    $promo = Promo::findOrFail($id);
 
-        // Validasi input
-        $request->validate([
-            'customer_name'   => 'required|string|max:255',
-            'whatsapp_number' => 'required|string|max:15',
-            'visit_date'      => 'required|date',
-            'ticket_quantity' => 'required|integer|min:1',
-        ]);
+    // Validasi input
+    $request->validate([
+        'customer_name'   => 'required|string|max:255',
+        'whatsapp_number' => 'required|string|max:15',
+        'domicile'        => 'required|string|max:255', // Tambahkan validasi domicile
+        'visit_date'      => 'required|date',
+        'ticket_quantity' => 'required|integer|min:1',
+    ]);
 
-        // Generate order number
-        $orderNumber = 'MK' . date('Ymd') . Str::random(4);
+    // Generate order number
+    $orderNumber = 'MK' . date('Ymd') . Str::random(4);
 
-        // Hitung total harga
-        $totalPrice = $request->ticket_quantity * $promo->promo_price;
+    // Hitung total harga
+    $totalPrice = $request->ticket_quantity * $promo->promo_price;
 
-        // Simpan order ke database
-        $order = Order::create([
-            'order_number'    => $orderNumber,
-            'promo_id'        => $promo->id,
-            'customer_name'   => $request->customer_name,
-            'whatsapp_number' => $request->whatsapp_number,
-            'branch'          => $request->branch,
-            'visit_date'      => $request->visit_date,
-            'ticket_quantity' => $request->ticket_quantity,
-            'total_price'     => $totalPrice,
-            'status'          => 'pending',
-        ]);
+    // Simpan order ke database
+    $order = Order::create([
+        'order_number'    => $orderNumber,
+        'promo_id'        => $promo->id,
+        'customer_name'   => $request->customer_name,
+        'whatsapp_number' => $request->whatsapp_number,
+        'domicile'        => $request->domicile, // Tambahkan ini
+        'branch'          => $request->branch,
+        'visit_date'      => $request->visit_date,
+        'ticket_quantity' => $request->ticket_quantity,
+        'total_price'     => $totalPrice,
+        'status'          => 'pending',
+    ]);
 
-        // Redirect ke halaman pembayaran
-        return redirect()->route('payment.checkout', ['order_id' => $orderNumber]);
-    }
+    // Redirect ke halaman pembayaran
+    return redirect()->route('payment.checkout', ['order_id' => $orderNumber]);
+}
 
     // Method untuk menampilkan halaman pembayaran dengan QRIS
     public function showCheckout($order_id)
