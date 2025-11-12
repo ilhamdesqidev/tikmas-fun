@@ -36,7 +36,7 @@
             <a href="/" class="text-2xl font-bold">
                 MestaKara<span class="text-[#CFD916]">.</span>
             </a>
-            <a href="/" class="text-gray-600 hover:text-gray-900 flex items-center gap-2">
+            <a href="/dashboard" class="text-gray-600 hover:text-gray-900 flex items-center gap-2">
                 <i data-feather="arrow-left" class="w-5 h-5"></i>
                 Kembali
             </a>
