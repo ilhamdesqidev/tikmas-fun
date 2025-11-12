@@ -342,6 +342,10 @@
                         <div class="detail-value">{{ $order->whatsapp_number }}</div>
                     </div>
                     <div class="detail-item">
+                        <div class="detail-label">Domisili</div>
+                        <div class="detail-value">{{ $order->domicile }}</div>
+                    </div>
+                    <div class="detail-item">
                         <div class="detail-label">Cabang</div>
                         <div class="detail-value">{{ $order->branch ?? 'Cabang Utama' }}</div>
                     </div>
@@ -407,7 +411,7 @@
             <div class="instructions">
                 <div class="instructions-title">Instruksi Kunjungan</div>
                 <ul>
-                    <li>Tunjukkan barcode kepada pelugas untuk di-scan</li>
+                    <li>Tunjukkan barcode kepada petugas untuk di-scan</li>
                     <li>E-ticket hanya dapat digunakan sekali</li>
                     <li>Valid untuk kunjungan {{ \Carbon\Carbon::parse($order->visit_date)->format('d M Y') }}</li>
                     <li>Jumlah pengunjung {{ $order->ticket_quantity }} orang</li>

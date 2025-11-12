@@ -48,6 +48,10 @@
                         <span class="font-medium">{{ $order->customer_name }}</span>
                     </div>
                     <div class="flex justify-between">
+                        <span class="text-gray-600">Domisili:</span>
+                        <span class="font-medium">{{ $order->domicile }}</span>
+                    </div>
+                    <div class="flex justify-between">
                         <span class="text-gray-600">Tanggal Kunjungan:</span>
                         <span class="font-medium">{{ \Carbon\Carbon::parse($order->visit_date)->format('d M Y') }}</span>
                     </div>

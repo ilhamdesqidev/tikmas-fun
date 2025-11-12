@@ -87,6 +87,10 @@
                         <p class="font-medium">{{ $order->whatsapp_number }}</p>
                     </div>
                     <div>
+                        <p class="text-gray-600">Domisili</p>
+                        <p class="font-medium">{{ $order->domicile }}</p>
+                    </div>
+                    <div>
                         <p class="text-gray-600">Cabang</p>
                         <p class="font-medium">{{ $order->branch ?? 'Cabang Utama' }}</p>
                     </div>
