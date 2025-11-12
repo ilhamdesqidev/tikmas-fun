@@ -237,9 +237,14 @@ class VoucherController extends Controller
         }
     }
 
+    /**
+     * Export data voucher claims ke Excel berdasarkan status
+     */
     public function export(Request $request)
     {
         try {
+            Log::info('Export voucher claims called with status: ' . $request->get('status', 'all'));
+            
             $status = $request->get('status', 'all');
             
             // Ambil semua claims dengan voucher
@@ -247,6 +252,8 @@ class VoucherController extends Controller
             
             // Filter berdasarkan status
             $filteredClaims = $this->filterClaimsByStatus($claims, $status);
+            
+            Log::info('Total claims after filter: ' . $filteredClaims->count());
             
             // Generate Excel
             $filename = $this->generateExcelFilename($status);
@@ -256,12 +263,13 @@ class VoucherController extends Controller
             return response()->streamDownload(function() use ($excelData) {
                 echo $excelData;
             }, $filename, [
-                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Content-Type' => 'text/csv',
                 'Content-Disposition' => 'attachment; filename="' . $filename . '"',
             ]);
             
         } catch (\Exception $e) {
             Log::error('Export voucher claims error: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
             return redirect()->back()->with('error', 'Gagal export data: ' . $e->getMessage());
         }
     }
@@ -308,7 +316,8 @@ class VoucherController extends Controller
         $label = $statusLabel[$status] ?? 'Data';
         $date = Carbon::now()->format('Y-m-d_His');
         
-        return "Voucher_Claims_{$label}_{$date}.xlsx";
+        // Ubah ekstensi jadi .csv karena format sebenarnya CSV
+        return "Voucher_Claims_{$label}_{$date}.csv";
     }
     
     /**
@@ -416,5 +425,4 @@ class VoucherController extends Controller
         
         return $output;
     }
-
 }
