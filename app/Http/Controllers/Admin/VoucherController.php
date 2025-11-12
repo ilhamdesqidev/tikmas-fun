@@ -236,4 +236,185 @@ class VoucherController extends Controller
                            ->with('error', 'Gagal menghapus voucher: ' . $e->getMessage());
         }
     }
+
+    public function export(Request $request)
+    {
+        try {
+            $status = $request->get('status', 'all');
+            
+            // Ambil semua claims dengan voucher
+            $claims = VoucherClaim::with('voucher')->latest()->get();
+            
+            // Filter berdasarkan status
+            $filteredClaims = $this->filterClaimsByStatus($claims, $status);
+            
+            // Generate Excel
+            $filename = $this->generateExcelFilename($status);
+            $excelData = $this->generateExcelData($filteredClaims, $status);
+            
+            // Return download response
+            return response()->streamDownload(function() use ($excelData) {
+                echo $excelData;
+            }, $filename, [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Export voucher claims error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal export data: ' . $e->getMessage());
+        }
+    }
+    
+    /**
+     * Filter claims berdasarkan status
+     */
+    private function filterClaimsByStatus($claims, $status)
+    {
+        if ($status === 'all') {
+            return $claims;
+        }
+        
+        return $claims->filter(function($claim) use ($status) {
+            $isUsed = $claim->is_used || $claim->scanned_at;
+            $voucherExpired = $claim->voucher && 
+                            Carbon::now()->startOfDay()->greaterThan(Carbon::parse($claim->voucher->expiry_date));
+            
+            switch ($status) {
+                case 'active':
+                    return !$isUsed && !$voucherExpired;
+                case 'used':
+                    return $isUsed;
+                case 'expired':
+                    return !$isUsed && $voucherExpired;
+                default:
+                    return true;
+            }
+        });
+    }
+    
+    /**
+     * Generate nama file Excel
+     */
+    private function generateExcelFilename($status)
+    {
+        $statusLabel = [
+            'all' => 'Semua_Data',
+            'active' => 'Belum_Terpakai',
+            'used' => 'Sudah_Terpakai',
+            'expired' => 'Kadaluarsa'
+        ];
+        
+        $label = $statusLabel[$status] ?? 'Data';
+        $date = Carbon::now()->format('Y-m-d_His');
+        
+        return "Voucher_Claims_{$label}_{$date}.xlsx";
+    }
+    
+    /**
+     * Generate Excel data dalam format CSV yang kompatibel dengan Excel
+     */
+    private function generateExcelData($claims, $status)
+    {
+        // Gunakan format CSV dengan UTF-8 BOM untuk Excel compatibility
+        $output = "\xEF\xBB\xBF"; // UTF-8 BOM
+        
+        // Status label untuk header
+        $statusLabels = [
+            'all' => 'SEMUA DATA',
+            'active' => 'BELUM TERPAKAI',
+            'used' => 'SUDAH TERPAKAI',
+            'expired' => 'KADALUARSA'
+        ];
+        
+        // Header Info
+        $output .= "DATA KLAIM VOUCHER - " . ($statusLabels[$status] ?? 'SEMUA') . "\n";
+        $output .= "Tanggal Export: " . Carbon::now()->format('d M Y H:i:s') . "\n";
+        $output .= "Total Data: " . $claims->count() . " klaim\n";
+        $output .= "\n";
+        
+        // Header Kolom
+        $headers = [
+            'No',
+            'Nama User',
+            'Domisili',
+            'No. WhatsApp',
+            'Nama Voucher',
+            'Kode Unik',
+            'Tanggal Klaim',
+            'Tanggal Expired',
+            'Status Voucher',
+            'Status Pemakaian',
+            'Tanggal Terpakai'
+        ];
+        
+        $output .= implode("\t", $headers) . "\n";
+        
+        // Data Rows
+        foreach ($claims as $index => $claim) {
+            $isUsed = $claim->is_used || $claim->scanned_at;
+            $voucherExpired = $claim->voucher && 
+                            Carbon::now()->startOfDay()->greaterThan(Carbon::parse($claim->voucher->expiry_date));
+            
+            // Tentukan status
+            if ($isUsed) {
+                $statusPemakaian = 'Terpakai';
+            } elseif ($voucherExpired) {
+                $statusPemakaian = 'Kadaluarsa';
+            } else {
+                $statusPemakaian = 'Belum Terpakai';
+            }
+            
+            $row = [
+                $index + 1,
+                $claim->user_name,
+                $claim->user_domisili ?? '-',
+                $claim->user_phone,
+                $claim->voucher->name ?? '-',
+                $claim->unique_code,
+                $claim->created_at->format('d M Y H:i'),
+                $claim->voucher ? Carbon::parse($claim->voucher->expiry_date)->format('d M Y') : '-',
+                $voucherExpired ? 'Expired' : 'Aktif',
+                $statusPemakaian,
+                $claim->scanned_at ? $claim->scanned_at->format('d M Y H:i') : '-'
+            ];
+            
+            // Escape dan format data
+            $row = array_map(function($value) {
+                // Handle special characters
+                $value = str_replace(["\r\n", "\n", "\r"], ' ', $value);
+                return $value;
+            }, $row);
+            
+            $output .= implode("\t", $row) . "\n";
+        }
+        
+        // Summary
+        $output .= "\n";
+        $output .= "RINGKASAN:\n";
+        
+        $activeCount = $claims->filter(function($c) {
+            $isUsed = $c->is_used || $c->scanned_at;
+            $expired = $c->voucher && Carbon::now()->startOfDay()->greaterThan(Carbon::parse($c->voucher->expiry_date));
+            return !$isUsed && !$expired;
+        })->count();
+        
+        $usedCount = $claims->filter(function($c) {
+            return $c->is_used || $c->scanned_at;
+        })->count();
+        
+        $expiredCount = $claims->filter(function($c) {
+            $isUsed = $c->is_used || $c->scanned_at;
+            $expired = $c->voucher && Carbon::now()->startOfDay()->greaterThan(Carbon::parse($c->voucher->expiry_date));
+            return !$isUsed && $expired;
+        })->count();
+        
+        $output .= "Total Belum Terpakai: " . $activeCount . "\n";
+        $output .= "Total Sudah Terpakai: " . $usedCount . "\n";
+        $output .= "Total Kadaluarsa: " . $expiredCount . "\n";
+        $output .= "TOTAL: " . $claims->count() . "\n";
+        
+        return $output;
+    }
+
 }
