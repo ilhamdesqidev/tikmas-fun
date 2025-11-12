@@ -6,8 +6,6 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Voucher & Promo</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         .voucher-card { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         .voucher-card:hover:not(.disabled) { transform: translateY(-8px) scale(1.02); }
@@ -16,22 +14,7 @@
         .btn-primary { background: #CFD916; transition: all 0.3s ease; }
         .btn-primary:hover { background: #B5C91A; transform: translateY(-2px); }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(100px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
         .animate-fade-in { animation: fadeInUp 0.6s ease-out forwards; }
-        .animate-slide-up { animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
-        
-        /* Barcode overlay styles */
-        .barcode-overlay {
-            position: absolute;
-            bottom: 60px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.95);
-            padding: 15px 25px;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(10px);
-        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -137,10 +120,10 @@
                             </div>
                             
                             @if($voucher->is_available)
-                            <button onclick='showClaimForm(@json($voucher))' 
-                                    class="btn-primary text-gray-800 px-5 py-2 rounded-xl text-sm font-bold">
+                            <a href="/vouchers/{{ $voucher->id }}" 
+                               class="btn-primary text-gray-800 px-5 py-2 rounded-xl text-sm font-bold inline-block">
                                 🎉 Claim Sekarang
-                            </button>
+                            </a>
                             @else
                             <button disabled class="bg-gray-300 text-gray-600 px-5 py-2 rounded-xl text-sm font-bold cursor-not-allowed">
                                 @if($voucher->is_sold_out) 🚫 Habis @else ⏰ Kadaluarsa @endif
@@ -161,87 +144,8 @@
         @endif
     </main>
 
-    <!-- Claim Form Modal -->
-    <div id="claimOverlay" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div id="claimCard" class="bg-white rounded-3xl shadow-2xl max-w-md w-full animate-slide-up overflow-hidden">
-            <div class="gradient-bg p-6 text-center">
-                <h2 class="text-2xl font-bold text-gray-800 mb-2">Claim Voucher</h2>
-                <p class="text-sm text-gray-700" id="claimVoucherName"></p>
-            </div>
-
-            <form id="claimForm" class="p-6">
-                <input type="hidden" id="voucherId">
-                
-                <div class="mb-5">
-                    <label class="block text-sm font-bold text-gray-700 mb-2">
-                        📝 Nama Lengkap <span class="text-red-500">*</span>
-                    </label>
-                    <input type="text" id="userName" required
-                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#CFD916]" 
-                           placeholder="Masukkan nama lengkap">
-                </div>
-
-                <div class="mb-6">
-                    <label class="block text-sm font-bold text-gray-700 mb-2">
-                        📱 Nomor Telepon <span class="text-red-500">*</span>
-                    </label>
-                    <input type="tel" id="userPhone" required pattern="[0-9]{10,13}"
-                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#CFD916]" 
-                           placeholder="08xxxxxxxxxx">
-                </div>
-
-                <div class="flex gap-3">
-                    <button type="button" onclick="hideClaimForm()"
-                            class="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 font-bold">
-                        Batal
-                    </button>
-                    <button type="submit" id="submitBtn"
-                            class="flex-1 btn-primary text-gray-800 px-6 py-3 rounded-xl font-bold shadow-lg">
-                        Claim & Download 🎁
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Hidden Template untuk Download dengan Barcode Overlay -->
-    <div id="voucherTemplate" style="position: absolute; left: -9999px; width: 800px; height: 600px;">
-        <div style="position: relative; width: 100%; height: 100%; font-family: Arial, sans-serif;">
-            <!-- Background Image -->
-            <img id="templateBgImage" src="" style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;">
-            
-            <!-- Overlay dengan Info -->
-            <div style="position: absolute; top: 0; left: 0; right: 0; background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%); padding: 30px;">
-                <h1 style="color: white; font-size: 32px; font-weight: bold; margin: 0 0 10px 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);" id="templateTitle"></h1>
-                <p style="color: white; font-size: 16px; margin: 0; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">🎉 Voucher Berhasil Di-claim!</p>
-            </div>
-            
-            <!-- Info User di Kiri Bawah -->
-            <div style="position: absolute; bottom: 180px; left: 30px; background: rgba(255, 255, 255, 0.95); padding: 20px; border-radius: 15px; max-width: 300px; backdrop-filter: blur(10px);">
-                <p style="margin: 0 0 8px 0; color: #1f2937; font-size: 14px;"><strong>Nama:</strong> <span id="templateName"></span></p>
-                <p style="margin: 0 0 8px 0; color: #1f2937; font-size: 14px;"><strong>No. HP:</strong> <span id="templatePhone"></span></p>
-                <p style="margin: 0; color: #1f2937; font-size: 14px;"><strong>Berlaku hingga:</strong> <span id="templateExpiry"></span></p>
-            </div>
-
-            <!-- Barcode Overlay di Tengah Bawah -->
-            <div style="position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); background: rgba(255, 255, 255, 0.95); padding: 15px 25px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3); backdrop-filter: blur(10px);">
-                <p style="text-align: center; color: #1f2937; font-weight: bold; margin: 0 0 10px 0; font-size: 14px;">KODE VOUCHER</p>
-                <svg id="templateBarcode"></svg>
-            </div>
-
-            <!-- Footer -->
-            <div style="position: absolute; bottom: 15px; left: 0; right: 0; text-align: center;">
-                <p style="margin: 0; color: white; font-size: 11px; text-shadow: 1px 1px 2px rgba(0,0,0,0.7);">
-                    Tunjukkan barcode ini saat melakukan pembayaran
-                </p>
-            </div>
-        </div>
-    </div>
-
-   
-        
-<script>
-(function(){
+    <script>
+        (function(){
     let currentVoucher = null;
 
     function showClaimForm(voucher) {
@@ -345,7 +249,7 @@
 
         // 4) server error
         if (responseStatus >= 500) {
-            return { user: 'Terjadi kesalahan pada server. Silakan coba lagi nanti atau hubungi admin.', tech: raw || `HTTP ${responseStatus}` };
+            return { user: 'Terjadi kesalahan pada server. Silakan coba lagi nanti atau hubungi admin.', tech: raw || HTTP ${responseStatus} };
         }
 
         // 5) fallback generic
@@ -422,7 +326,7 @@
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `Voucher-${uniqueCode}.png`;
+                    a.download = Voucher-${uniqueCode}.png;
                     document.body.appendChild(a);
                     a.click();
                     a.remove();
@@ -463,6 +367,6 @@
     window.showClaimForm = showClaimForm;
     window.hideClaimForm = hideClaimForm;
 })();
-</script>
+    </script>
 </body>
 </html>
