@@ -12,6 +12,113 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class ScannerController extends Controller
 {
+    // Method untuk scan barcode - UPDATED WITH DOMICILE
+    public function scanBarcode(Request $request)
+    {
+        $request->validate([
+            'barcode' => 'required|string'
+        ]);
+
+        $barcode = trim($request->barcode);
+        
+        try {
+            // Find order by order_number (barcode)
+            $order = Order::with('promo')
+                ->where('order_number', $barcode)
+                ->first();
+
+            if (!$order) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Barcode tidak ditemukan dalam sistem!'
+                ]);
+            }
+
+            // Check if order is paid/success
+            if ($order->status !== 'success' && $order->status !== 'used') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tiket belum dibayar atau tidak valid!'
+                ]);
+            }
+
+            // Check if already used
+            if ($order->status === 'used') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tiket sudah pernah digunakan sebelumnya!',
+                    'order' => [
+                        'order_number' => $order->order_number,
+                        'customer_name' => $order->customer_name,
+                        'status' => $order->status,
+                        'used_at' => $order->used_at
+                    ]
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Tiket valid dan siap digunakan!',
+                'order' => [
+                    'order_number' => $order->order_number,
+                    'customer_name' => $order->customer_name,
+                    'whatsapp_number' => $order->whatsapp_number,
+                    'domicile' => $order->domicile, // TAMBAHKAN INI
+                    'visit_date' => Carbon::parse($order->visit_date)->format('d/m/Y'),
+                    'ticket_quantity' => $order->ticket_quantity,
+                    'total_price' => $order->total_price,
+                    'promo_name' => $order->promo ? $order->promo->name : 'Unknown',
+                    'status' => $order->status
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Scanner error: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan sistem saat memproses barcode!'
+            ]);
+        }
+    }
+
+    // Method untuk check ticket (API) - UPDATED WITH DOMICILE
+    public function checkTicket(Request $request)
+    {
+        $request->validate([
+            'order_number' => 'required|string'
+        ]);
+
+        $order = Order::with('promo')
+            ->where('order_number', $request->order_number)
+            ->first();
+
+        if (!$order) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tiket tidak ditemukan'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'order' => [
+                'order_number' => $order->order_number,
+                'customer_name' => $order->customer_name,
+                'whatsapp_number' => $order->whatsapp_number,
+                'domicile' => $order->domicile, // TAMBAHKAN INI
+                'branch' => $order->branch,
+                'visit_date' => $order->visit_date,
+                'ticket_quantity' => $order->ticket_quantity,
+                'total_price' => $order->total_price,
+                'status' => $order->status,
+                'created_at' => $order->created_at,
+                'used_at' => $order->used_at,
+            ],
+            'promo' => $order->promo
+        ]);
+    }
+
     // Method untuk menampilkan form verifikasi petugas
     public function showVerificationForm()
     {
@@ -123,75 +230,6 @@ class ScannerController extends Controller
             'staffRole',
             'hasVoucherAccess'
         ));
-    }
-
-    // Method untuk scan barcode
-    public function scanBarcode(Request $request)
-    {
-        $request->validate([
-            'barcode' => 'required|string'
-        ]);
-
-        $barcode = trim($request->barcode);
-        
-        try {
-            // Find order by order_number (barcode)
-            $order = Order::with('promo')
-                ->where('order_number', $barcode)
-                ->first();
-
-            if (!$order) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Barcode tidak ditemukan dalam sistem!'
-                ]);
-            }
-
-            // Check if order is paid/success
-            if ($order->status !== 'success' && $order->status !== 'used') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Tiket belum dibayar atau tidak valid!'
-                ]);
-            }
-
-            // Check if already used
-            if ($order->status === 'used') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Tiket sudah pernah digunakan sebelumnya!',
-                    'order' => [
-                        'order_number' => $order->order_number,
-                        'customer_name' => $order->customer_name,
-                        'status' => $order->status,
-                        'used_at' => $order->used_at
-                    ]
-                ]);
-            }
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Tiket valid dan siap digunakan!',
-                'order' => [
-                    'order_number' => $order->order_number,
-                    'customer_name' => $order->customer_name,
-                    'whatsapp_number' => $order->whatsapp_number,
-                    'visit_date' => Carbon::parse($order->visit_date)->format('d/m/Y'),
-                    'ticket_quantity' => $order->ticket_quantity,
-                    'total_price' => $order->total_price,
-                    'promo_name' => $order->promo ? $order->promo->name : 'Unknown',
-                    'status' => $order->status
-                ]
-            ]);
-
-        } catch (\Exception $e) {
-            \Log::error('Scanner error: ' . $e->getMessage());
-            
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan sistem saat memproses barcode!'
-            ]);
-        }
     }
 
     // Method untuk menggunakan tiket dan mencetak bracelet
@@ -381,31 +419,6 @@ class ScannerController extends Controller
                 'message' => 'Gagal mempersiapkan pencetakan!'
             ]);
         }
-    }
-
-    // Method untuk check ticket (API)
-    public function checkTicket(Request $request)
-    {
-        $request->validate([
-            'order_number' => 'required|string'
-        ]);
-
-        $order = Order::with('promo')
-            ->where('order_number', $request->order_number)
-            ->first();
-
-        if (!$order) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Tiket tidak ditemukan'
-            ], 404);
-        }
-
-        return response()->json([
-            'success' => true,
-            'order' => $order,
-            'promo' => $order->promo
-        ]);
     }
 
     // Method untuk logout petugas
