@@ -234,7 +234,7 @@
                 <div id="scan-status" class="hidden p-2 sm:p-3 rounded-lg mb-4 text-sm"></div>
             </div>
 
-            <!-- Ticket Detail Section -->
+            <!-- Ticket Detail Section - UPDATED VERSION -->
             <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6">
                 <h2 class="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">Detail Tiket</h2>
                 
@@ -256,6 +256,10 @@
                             <div>
                                 <p class="text-gray-600">WhatsApp</p>
                                 <p class="font-medium" id="detail-whatsapp">-</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">Domisili</p>
+                                <p class="font-medium break-words" id="detail-domicile">-</p>
                             </div>
                             <div>
                                 <p class="text-gray-600">Tanggal Kunjungan</p>
@@ -636,7 +640,7 @@
             statusDiv.classList.remove('hidden');
         }
 
-        // Show ticket detail
+        // Show ticket detail - UPDATED VERSION
         function showTicketDetail(order) {
             document.getElementById('ticket-detail').classList.remove('hidden');
             document.getElementById('no-ticket').classList.add('hidden');
@@ -644,6 +648,7 @@
             document.getElementById('detail-order-number').textContent = order.order_number;
             document.getElementById('detail-customer-name').textContent = order.customer_name;
             document.getElementById('detail-whatsapp').textContent = order.whatsapp_number;
+            document.getElementById('detail-domicile').textContent = order.domicile || '-'; // BARU
             document.getElementById('detail-visit-date').textContent = order.visit_date;
             document.getElementById('detail-quantity').textContent = order.ticket_quantity;
             document.getElementById('detail-promo-name').textContent = order.promo_name;
