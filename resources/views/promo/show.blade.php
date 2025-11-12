@@ -284,6 +284,13 @@
                 </div>
                 <p class="text-xs text-gray-500 mt-1">Contoh: 81234567890 (tanpa 0 di depan)</p>
               </div>
+
+              <!-- Domisili -->
+              <div>
+                <label for="domicile" class="block text-sm font-medium text-gray-700 mb-1">Domisili <span class="text-red-500">*</span></label>
+                <input type="text" id="domicile" name="domicile" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" placeholder="Masukkan wilayah tempat tinggal" required>
+                <p class="text-xs text-gray-500 mt-1">Contoh: Jakarta Selatan</p>
+              </div>
               
               <!-- Cabang (Fixed Value) -->
               <div>
