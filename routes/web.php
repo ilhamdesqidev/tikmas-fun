@@ -85,9 +85,7 @@ Route::prefix('voucher-scanner')->name('voucher.scanner.')->group(function () {
     Route::post('/logout', [VoucherScannerController::class, 'logout'])
         ->name('logout');
     Route::get('/logout', [VoucherScannerController::class, 'logout']);
-
-    // Export voucher
-    Route::get('/voucher/export', [VoucherController::class, 'export'])->name('voucher.export');
+    
 });
 
 // Admin Routes
@@ -177,6 +175,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         
         // Voucher Management Routes (ADMIN)
         Route::resource('voucher', AdminVoucherController::class);
+        Route::get('/voucher/export', [AdminVoucherController::class, 'export'])->name('voucher.export');
         
         // Customers Routes
         Route::prefix('customers')->name('customers.')->group(function () {
