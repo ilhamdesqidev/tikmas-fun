@@ -371,7 +371,7 @@ class VoucherController extends Controller
         }
         
         // ========== COLUMN WIDTHS ==========
-        $sheet->getColumnDimension('A')->setWidth(6);
+        $sheet->getColumnDimension('A')->setWidth(18);
         $sheet->getColumnDimension('B')->setWidth(25);
         $sheet->getColumnDimension('C')->setWidth(20);
         $sheet->getColumnDimension('D')->setWidth(18);
