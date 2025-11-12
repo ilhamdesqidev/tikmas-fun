@@ -55,7 +55,7 @@ Route::get('/invoice/{order_id}/autodownload', [PaymentController::class, 'autoD
 
 // Voucher Routes (Public - User)
 Route::get('/vouchers', [VoucherClaimController::class, 'index'])->name('vouchers.index');
-Route::get('/vouchers/{id}', [VoucherClaimController::class, 'show'])->name('vouchers.show'); // ROUTE BARU
+Route::get('/vouchers/{id}', [VoucherClaimController::class, 'show'])->name('vouchers.show');
 Route::post('/vouchers/claim', [VoucherClaimController::class, 'claim'])->name('vouchers.claim');
 Route::post('/vouchers/check-claim', [VoucherClaimController::class, 'checkClaim'])->name('vouchers.check');
 
@@ -63,29 +63,13 @@ Route::post('/vouchers/check-claim', [VoucherClaimController::class, 'checkClaim
 // VOUCHER SCANNER ROUTES
 // ============================================
 Route::prefix('voucher-scanner')->name('voucher.scanner.')->group(function () {
-    // Verification (shared with ticket scanner)
-    Route::get('/verification', [VoucherScannerController::class, 'showVerificationForm'])
-        ->name('verification');
-    Route::post('/verify', [VoucherScannerController::class, 'verifyStaff'])
-        ->name('verify');
-    
-    // Voucher Scanner Dashboard (requires verification)
-    Route::get('/dashboard', [VoucherScannerController::class, 'dashboard'])
-        ->name('dashboard');
-    
-    // Scan voucher barcode
-    Route::post('/scan', [VoucherScannerController::class, 'scanVoucher'])
-        ->name('scan');
-    
-    // Use/redeem voucher
-    Route::post('/use', [VoucherScannerController::class, 'useVoucher'])
-        ->name('use');
-    
-    // Logout
-    Route::post('/logout', [VoucherScannerController::class, 'logout'])
-        ->name('logout');
+    Route::get('/verification', [VoucherScannerController::class, 'showVerificationForm'])->name('verification');
+    Route::post('/verify', [VoucherScannerController::class, 'verifyStaff'])->name('verify');
+    Route::get('/dashboard', [VoucherScannerController::class, 'dashboard'])->name('dashboard');
+    Route::post('/scan', [VoucherScannerController::class, 'scanVoucher'])->name('scan');
+    Route::post('/use', [VoucherScannerController::class, 'useVoucher'])->name('use');
+    Route::post('/logout', [VoucherScannerController::class, 'logout'])->name('logout');
     Route::get('/logout', [VoucherScannerController::class, 'logout']);
-    
 });
 
 // Admin Routes
@@ -107,11 +91,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/', [StaffVerificationController::class, 'store'])->name('store');
             Route::post('/generate-custom', [StaffVerificationController::class, 'generateCustomCode'])->name('generate.custom');
             Route::post('/check-code', [StaffVerificationController::class, 'checkCode'])->name('check');
-            Route::get('/suggestions', [StaffVerificationController::class, 'suggestions'])->name('suggestions'); // Method name fixed
+            Route::get('/suggestions', [StaffVerificationController::class, 'suggestions'])->name('suggestions');
             Route::put('/{staffCode}', [StaffVerificationController::class, 'update'])->name('update');
-            Route::post('/{staffCode}/toggle', [StaffVerificationController::class, 'toggle'])->name('toggle'); // Method name fixed
+            Route::post('/{staffCode}/toggle', [StaffVerificationController::class, 'toggle'])->name('toggle');
             Route::delete('/{staffCode}', [StaffVerificationController::class, 'destroy'])->name('destroy');
-            Route::post('/bulk', [StaffVerificationController::class, 'bulk'])->name('bulk'); // Method name fixed
+            Route::post('/bulk', [StaffVerificationController::class, 'bulk'])->name('bulk');
         });
         
         // Dashboard
@@ -173,9 +157,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/wahana-images/reorder', [SettingsController::class, 'reorderWahanaImages'])->name('wahana.reorder');
         });
         
-        // Voucher Management Routes (ADMIN)
-        Route::resource('voucher', AdminVoucherController::class);
-        Route::get('/voucher/export', [AdminVoucherController::class, 'export'])->name('voucher.export');
+        // ============================================
+        // VOUCHER MANAGEMENT ROUTES (ADMIN)
+        // PENTING: Export route HARUS sebelum resource routes
+        // ============================================
+        Route::prefix('voucher')->name('voucher.')->group(function () {
+            // Export route - HARUS DI ATAS
+            Route::get('/export', [AdminVoucherController::class, 'export'])->name('export');
+            
+            // CRUD routes
+            Route::get('/', [AdminVoucherController::class, 'index'])->name('index');
+            Route::post('/', [AdminVoucherController::class, 'store'])->name('store');
+            Route::put('/{id}', [AdminVoucherController::class, 'update'])->name('update');
+            Route::delete('/{id}', [AdminVoucherController::class, 'destroy'])->name('destroy');
+        });
         
         // Customers Routes
         Route::prefix('customers')->name('customers.')->group(function () {
@@ -212,35 +207,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
 // EXISTING SCANNER ROUTES (Ticket Scanner)
 // ============================================
 Route::prefix('scanner')->name('scanner.')->group(function () {
-    // Verification
-    Route::get('/verification', [ScannerController::class, 'showVerificationForm'])
-        ->name('verification');
-    Route::post('/verify', [ScannerController::class, 'verifyStaff'])
-        ->name('verify');
-    
-    // Dashboard
-    Route::get('/dashboard', [ScannerController::class, 'dashboard'])
-        ->name('dashboard');
-    
-    // Scan operations
-    Route::post('/scan', [ScannerController::class, 'scanBarcode'])
-        ->name('scan');
-    Route::post('/use', [ScannerController::class, 'useTicket'])
-        ->name('use');
-    
-    // Print bracelet
-    Route::get('/print/bracelet/{order_id}', [ScannerController::class, 'printBracelet'])
-        ->name('print.bracelet');
-    Route::post('/auto-print', [ScannerController::class, 'autoPrintBracelet'])
-        ->name('auto.print');
-    
-    // Check ticket
-    Route::post('/check', [ScannerController::class, 'checkTicket'])
-        ->name('check');
-    
-    // Logout
-    Route::get('/logout', [ScannerController::class, 'logout'])
-        ->name('logout');
+    Route::get('/verification', [ScannerController::class, 'showVerificationForm'])->name('verification');
+    Route::post('/verify', [ScannerController::class, 'verifyStaff'])->name('verify');
+    Route::get('/dashboard', [ScannerController::class, 'dashboard'])->name('dashboard');
+    Route::post('/scan', [ScannerController::class, 'scanBarcode'])->name('scan');
+    Route::post('/use', [ScannerController::class, 'useTicket'])->name('use');
+    Route::get('/print/bracelet/{order_id}', [ScannerController::class, 'printBracelet'])->name('print.bracelet');
+    Route::post('/auto-print', [ScannerController::class, 'autoPrintBracelet'])->name('auto.print');
+    Route::post('/check', [ScannerController::class, 'checkTicket'])->name('check');
+    Route::get('/logout', [ScannerController::class, 'logout'])->name('logout');
 });
 
 // API Routes untuk AJAX requests
