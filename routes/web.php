@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\StaffVerificationController;
 use App\Http\Controllers\Admin\VoucherController as AdminVoucherController;
 use App\Http\Controllers\VoucherClaimController;
 use App\Http\Controllers\VoucherScannerController;
+use App\Http\Controllers\Admin\ReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -157,10 +158,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/wahana-images/reorder', [SettingsController::class, 'reorderWahanaImages'])->name('wahana.reorder');
         });
         
-        // ============================================
-        // VOUCHER MANAGEMENT ROUTES (ADMIN)
-        // PENTING: Export route HARUS sebelum resource routes
-        // ============================================
+        // Voucher Management Routes
         Route::prefix('voucher')->name('voucher.')->group(function () {
             // Export route - HARUS DI ATAS
             Route::get('/export', [AdminVoucherController::class, 'export'])->name('export');
@@ -183,16 +181,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
             })->name('show');
         });
         
-        // Reports Routes
+        // Reports Routes - FIXED VERSION
         Route::prefix('reports')->name('reports.')->group(function () {
-            Route::get('/', function () {
-                return view('admin.reports.index');
-            })->name('index');
+            // Voucher Reports
+            Route::get('/', [ReportController::class, 'index'])->name('index');
+            Route::get('/data', [ReportController::class, 'getChartData'])->name('data');
             
+            // Sales Reports
             Route::get('/sales', function () {
                 return view('admin.reports.sales');
             })->name('sales');
             
+            // Customers Reports
             Route::get('/customers', function () {
                 return view('admin.reports.customers');
             })->name('customers');
@@ -225,7 +225,3 @@ Route::prefix('api/admin')->name('api.admin.')->middleware('admin')->group(funct
     Route::post('/promo/{id}/duplicate', [AdminPromoController::class, 'duplicate'])->name('promo.duplicate');
     Route::get('/tickets/stats', [TicketController::class, 'getStats']);
 });
-
-// Di dalam group admin routes
-Route::get('/reports', [ReportController::class, 'index'])->name('admin.reports.index');
-Route::get('/reports/data', [ReportController::class, 'getChartData'])->name('admin.reports.data');
