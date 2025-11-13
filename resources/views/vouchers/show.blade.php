@@ -123,7 +123,7 @@
                             <i data-feather="check-circle" class="w-5 h-5 text-gray-400"></i>
                             <div>
                                 <p class="text-sm text-gray-500">Total Diklaim</p>
-                                <p class="font-semibold" id="total-claimed">{{ $voucher->claims()->count() }} Orang</p>
+                                <p class="font-semibold">{{ $voucher->claims_count ?? 0 }} Orang</p>
                             </div>
                         </div>
                     </div>
@@ -256,9 +256,21 @@
         <div style="position: relative; width: 100%; height: 100%; font-family: Arial, sans-serif;">
             <img id="templateBgImage" src="{{ $voucher->download_image_url ?? $voucher->image_url }}" 
                  style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;">
+            
+            <div style="position: absolute; top: 0; left: 0; right: 0; background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%); padding: 30px;">
+                <h1 style="color: white; font-size: 32px; font-weight: bold; margin: 0 0 10px 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);" id="templateTitle">{{ $voucher->name }}</h1>
+                <p style="color: white; font-size: 16px; margin: 0; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">🎉 Voucher Berhasil Di-claim!</p>
+            </div>
+            
+            <div style="position: absolute; bottom: 180px; left: 30px; background: rgba(255, 255, 255, 0.95); padding: 20px; border-radius: 15px; max-width: 350px; backdrop-filter: blur(10px);">
+                <p style="margin: 0 0 8px 0; color: #1f2937; font-size: 14px;"><strong>Nama:</strong> <span id="templateName"></span></p>
+                <p style="margin: 0 0 8px 0; color: #1f2937; font-size: 14px;"><strong>Domisili:</strong> <span id="templateDomisili"></span></p>
+                <p style="margin: 0 0 8px 0; color: #1f2937; font-size: 14px;"><strong>No. WA:</strong> <span id="templatePhone"></span></p>
+                <p style="margin: 0; color: #1f2937; font-size: 14px;"><strong>Berlaku hingga:</strong> <span id="templateExpiry"></span></p>
+            </div>
 
-            <div style="position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); background: rgba(255, 255, 255, 0.95); padding: 8px 15px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25); backdrop-filter: blur(10px);">
-                <p style="text-align: center; color: #1f2937; font-weight: bold; margin: 0 0 5px 0; font-size: 11px;">KODE VOUCHER</p>
+            <div style="position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); background: rgba(255, 255, 255, 0.95); padding: 15px 25px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3); backdrop-filter: blur(10px);">
+                <p style="text-align: center; color: #1f2937; font-weight: bold; margin: 0 0 10px 0; font-size: 14px;">KODE VOUCHER</p>
                 <svg id="templateBarcode"></svg>
             </div>
 
@@ -272,9 +284,6 @@
 
     <script>
         feather.replace();
-
-        // Simpan current claimed count
-        let currentClaimedCount = {{ $voucher->claims()->count() }};
 
         function showClaimForm() {
             document.getElementById('claimModal').classList.remove('hidden');
@@ -336,19 +345,22 @@
 
                 const result = payload;
                 const uniqueCode = result.data.unique_code;
+                const expiryDate = '{{ $voucher->expiry_date ? \Carbon\Carbon::parse($voucher->expiry_date)->format("d M Y") : "Tidak terbatas" }}';
 
-                // Update total claimed count
-                currentClaimedCount++;
-                document.getElementById('total-claimed').textContent = currentClaimedCount + ' Orang';
+                // Set template values
+                document.getElementById('templateName').textContent = userName;
+                document.getElementById('templateDomisili').textContent = userDomisili;
+                document.getElementById('templatePhone').textContent = userPhone;
+                document.getElementById('templateExpiry').textContent = expiryDate;
 
                 // Generate barcode
                 JsBarcode("#templateBarcode", uniqueCode, {
                     format: "CODE128",
-                    width: 1.5,
-                    height: 40,
+                    width: 2,
+                    height: 60,
                     displayValue: true,
-                    fontSize: 12,
-                    margin: 3,
+                    fontSize: 14,
+                    margin: 5,
                     background: "transparent"
                 });
 
