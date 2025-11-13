@@ -215,7 +215,7 @@ public function export(Request $request)
     /**
      * Export sebagai CSV (fallback method)
      */
-   private function exportAsCSV($claims, $status)
+  private function exportAsCSV($claims, $status)
 {
     $statusLabels = [
         'all' => 'SEMUA DATA',
@@ -234,59 +234,76 @@ public function export(Request $request)
         'Expires' => '0'
     ];
     
-    $callback = function() use ($claims, $statusLabels, $status) {
-        $file = fopen('php://output', 'w');
+$callback = function() use ($claims, $statusLabels, $status) {
+    $file = fopen('php://output', 'w');
+    
+    // Add BOM for UTF-8
+    fwrite($file, "\xEF\xBB\xBF");
         
-        // Add BOM for UTF-8
-        fwrite($file, "\xEF\xBB\xBF");
-        
-        // Header info
-        fputcsv($file, ["LAPORAN DATA KLAIM VOUCHER - " . ($statusLabels[$status] ?? 'SEMUA')]);
+        // ========== HEADER SECTION ==========
+        fputcsv($file, ["LAPORAN DATA KLAIM VOUCHER"]); // Title
+        fputcsv($file, ["Filter Status: " . ($statusLabels[$status] ?? 'SEMUA DATA')]);
         fputcsv($file, ["Tanggal Export: " . date('d M Y H:i:s')]);
         fputcsv($file, ["Total Data: " . $claims->count() . " klaim"]);
-        fputcsv($file, [""]); // empty line
+        fputcsv($file, [""]); // Empty line
         
-        // Column headers
+        // ========== TABLE HEADER ==========
         fputcsv($file, [
-            'No', 
-            'Nama User', 
-            'Domisili', 
-            'No. WhatsApp', 
-            'Nama Voucher',
-            'Kode Unik', 
-            'Tanggal Klaim', 
-            'Tanggal Expired',
-            'Status Voucher',
-            'Status Pemakaian',
-            'Tanggal Terpakai'
-        ]);
+            'NO',
+            'NAMA USER', 
+            'DOMISILI', 
+            'NO. WHATSAPP', 
+            'NAMA VOUCHER',
+            'KODE UNIK', 
+            'TANGGAL KLAIM', 
+            'TANGGAL EXPIRED',
+            'STATUS VOUCHER',
+            'STATUS PEMAKAIAN',
+            'TANGGAL TERPAKAI'
+        ], ',', ' ');
         
-        // Data rows
-        foreach ($claims as $index => $claim) {
+        fputcsv($file, [""]); // Empty line
+        
+        // ========== DATA ROWS ==========
+        $counter = 1;
+        foreach ($claims as $claim) {
             $isUsed = $claim->is_used || $claim->scanned_at;
             $voucherExpired = $claim->voucher && 
                             \Carbon\Carbon::now()->startOfDay()->greaterThan(\Carbon\Carbon::parse($claim->voucher->expiry_date));
             
-            $statusPemakaian = $isUsed ? 'Terpakai' : ($voucherExpired ? 'Kadaluarsa' : 'Belum Terpakai');
+            // Tentukan status dan warna (untuk Excel nanti)
+            if ($isUsed) {
+                $statusPemakaian = 'TERPAKAI';
+                $statusColor = 'GRAY';
+            } elseif ($voucherExpired) {
+                $statusPemakaian = 'KADALUARSA';
+                $statusColor = 'RED';
+            } else {
+                $statusPemakaian = 'BELUM TERPAKAI';
+                $statusColor = 'GREEN';
+            }
+            
+            $statusVoucher = $voucherExpired ? 'EXPIRED' : 'AKTIF';
             
             fputcsv($file, [
-                $index + 1,
+                $counter++,
                 $claim->user_name,
                 $claim->user_domisili ?? '-',
-                $claim->user_phone,
+                $this->formatPhoneNumber($claim->user_phone),
                 $claim->voucher->name ?? '-',
                 $claim->unique_code,
                 $claim->created_at->format('d M Y H:i'),
                 $claim->voucher ? \Carbon\Carbon::parse($claim->voucher->expiry_date)->format('d M Y') : '-',
-                $voucherExpired ? 'Expired' : 'Aktif',
+                $statusVoucher,
                 $statusPemakaian,
                 $claim->scanned_at ? $claim->scanned_at->format('d M Y H:i') : '-'
-            ]);
+            ], ',', ' ');
         }
         
-        // Summary
+        // ========== SUMMARY SECTION ==========
         fputcsv($file, [""]);
-        fputcsv($file, ["RINGKASAN:"]);
+        fputcsv($file, ["RINGKASAN STATISTIK"]);
+        fputcsv($file, ["==================="]);
         
         $activeCount = $claims->filter(function($c) {
             $isUsed = $c->is_used || $c->scanned_at;
@@ -304,15 +321,55 @@ public function export(Request $request)
             return !$isUsed && $expired;
         })->count();
         
-        fputcsv($file, ["Total Belum Terpakai:", $activeCount]);
+        fputcsv($file, ["Total Belum Terpakai (Aktif):", $activeCount]);
         fputcsv($file, ["Total Sudah Terpakai:", $usedCount]);
         fputcsv($file, ["Total Kadaluarsa:", $expiredCount]);
         fputcsv($file, ["TOTAL KESELURUHAN:", $claims->count()]);
+        
+        fputcsv($file, [""]);
+        fputcsv($file, ["CATATAN:"]);
+        fputcsv($file, ["- File ini di-generate otomatis dari sistem"]);
+        fputcsv($file, ["- Data terupdate per: " . date('d M Y H:i:s')]);
+        fputcsv($file, ["- Format tanggal: DD MMM YYYY HH:MM"]);
         
         fclose($file);
     };
     
     return response()->stream($callback, 200, $headers);
+}
+
+private function generateExcelTemplateInstructions()
+{
+    return [
+        "",
+        "PETUNJUK FORMATTING DI EXCEL:",
+        "1. Buka file CSV di Excel",
+        "2. Pilih semua data (Ctrl+A)",
+        "3. Format sebagai Table (Ctrl+T)",
+        "4. Pilih style tabel yang diinginkan",
+        "5. Untuk kolom status, gunakan conditional formatting:",
+        "   - TERPAKAI: Fill color abu-abu",
+        "   - BELUM TERPAKAI: Fill color hijau muda", 
+        "   - KADALUARSA: Fill color merah muda",
+        "6. Freeze pane pada baris 6 untuk header tabel",
+        "7. Auto-fit semua kolom untuk tampilan optimal"
+    ];
+}
+
+// Helper method untuk format nomor telepon
+private function formatPhoneNumber($phone)
+{
+    // Hilangkan karakter non-digit
+    $clean = preg_replace('/[^0-9]/', '', $phone);
+    
+    // Format ke +62
+    if (substr($clean, 0, 1) === '0') {
+        return '+62' . substr($clean, 1);
+    } elseif (substr($clean, 0, 2) === '62') {
+        return '+' . $clean;
+    }
+    
+    return $phone;
 }
     
     /**
