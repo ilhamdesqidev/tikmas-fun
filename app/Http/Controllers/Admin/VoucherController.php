@@ -196,7 +196,7 @@ class VoucherController extends Controller
     /**
      * Export data voucher claims ke Excel dengan styling profesional
      */
-    public function export(Request $request)
+ public function export(Request $request)
 {
     try {
         $status = $request->get('status', 'all');
@@ -208,17 +208,20 @@ class VoucherController extends Controller
             $spreadsheet = $this->generateExcelSpreadsheet($filteredClaims, $status);
             $filename = $this->generateExcelFilename($status);
             
-            // Simpan file temporary
-            $tempPath = storage_path('app/temp/' . $filename);
+            // Buat directory temp jika belum ada
+            $tempDir = storage_path('app/temp');
+            if (!file_exists($tempDir)) {
+                mkdir($tempDir, 0755, true);
+            }
+            
+            $tempPath = $tempDir . '/' . $filename;
             $writer = new Xlsx($spreadsheet);
             $writer->save($tempPath);
             
             // Download file
-            $response = response()->download($tempPath, $filename, [
+            return response()->download($tempPath, $filename, [
                 'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             ])->deleteFileAfterSend(true);
-            
-            return $response;
             
         } else {
             return $this->exportAsCSV($filteredClaims, $status);
