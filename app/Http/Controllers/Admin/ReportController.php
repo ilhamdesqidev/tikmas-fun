@@ -13,34 +13,48 @@ class ReportController extends Controller
 {
     public function index()
     {
-        // Summary statistics
-        $totalVouchers = Voucher::count();
-        $activeVouchers = Voucher::where('status', 'aktif')->count();
-        $totalClaims = VoucherClaim::count();
-        $claimsThisMonth = VoucherClaim::whereMonth('created_at', Carbon::now()->month)
-                                      ->whereYear('created_at', Carbon::now()->year)
-                                      ->count();
-        
-        // Top 5 most claimed vouchers
-        $topVouchers = Voucher::withCount('claims')
-                             ->orderBy('claims_count', 'desc')
-                             ->take(5)
-                             ->get();
-        
-        // Recent claims
-        $recentClaims = VoucherClaim::with('voucher')
-                                   ->latest()
-                                   ->take(10)
-                                   ->get();
-        
-        return view('admin.reports.index', compact(
-            'totalVouchers',
-            'activeVouchers',
-            'totalClaims',
-            'claimsThisMonth',
-            'topVouchers',
-            'recentClaims'
-        ));
+        try {
+            // Summary statistics
+            $totalVouchers = Voucher::count();
+            $activeVouchers = Voucher::where('status', 'aktif')->count();
+            $totalClaims = VoucherClaim::count();
+            $claimsThisMonth = VoucherClaim::whereMonth('created_at', Carbon::now()->month)
+                                          ->whereYear('created_at', Carbon::now()->year)
+                                          ->count();
+            
+            // Top 5 most claimed vouchers
+            $topVouchers = Voucher::withCount('claims')
+                                 ->orderBy('claims_count', 'desc')
+                                 ->take(5)
+                                 ->get();
+            
+            // Recent claims
+            $recentClaims = VoucherClaim::with('voucher')
+                                       ->latest()
+                                       ->take(10)
+                                       ->get();
+            
+            return view('admin.reports.index', compact(
+                'totalVouchers',
+                'activeVouchers',
+                'totalClaims',
+                'claimsThisMonth',
+                'topVouchers',
+                'recentClaims'
+            ));
+        } catch (\Exception $e) {
+            Log::error('Error loading reports: ' . $e->getMessage());
+            
+            // Return view with default values if error occurs
+            return view('admin.reports.index', [
+                'totalVouchers' => 0,
+                'activeVouchers' => 0,
+                'totalClaims' => 0,
+                'claimsThisMonth' => 0,
+                'topVouchers' => collect([]),
+                'recentClaims' => collect([])
+            ]);
+        }
     }
     
     public function getChartData(Request $request)
