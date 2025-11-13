@@ -529,22 +529,31 @@ private function formatPhoneNumber($phone)
             $summaryRow++;
         }
         
-        // ========== COLUMN WIDTHS ==========
-        $sheet->getColumnDimension('A')->setWidth(6);
-        $sheet->getColumnDimension('B')->setWidth(25);
-        $sheet->getColumnDimension('C')->setWidth(20);
-        $sheet->getColumnDimension('D')->setWidth(18);
-        $sheet->getColumnDimension('E')->setWidth(30);
-        $sheet->getColumnDimension('F')->setWidth(18);
-        $sheet->getColumnDimension('G')->setWidth(18);
-        $sheet->getColumnDimension('H')->setWidth(18);
-        $sheet->getColumnDimension('I')->setWidth(15);
-        $sheet->getColumnDimension('J')->setWidth(18);
-        $sheet->getColumnDimension('K')->setWidth(18);
-        
-        // Center align untuk kolom tertentu
-        $sheet->getStyle('A7:A' . ($row-1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('I7:J' . ($row-1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+      // ========== COLUMN WIDTHS ==========
+$sheet->getColumnDimension('A')->setWidth(8);  // NO - lebih lebar
+$sheet->getColumnDimension('B')->setWidth(25); // NAMA USER - ok
+$sheet->getColumnDimension('C')->setWidth(20); // DOMISILI - ok
+$sheet->getColumnDimension('D')->setWidth(20); // NO WHATSAPP - lebih lebar
+$sheet->getColumnDimension('E')->setWidth(35); // NAMA VOUCHER - lebih lebar
+$sheet->getColumnDimension('F')->setWidth(20); // KODE UNIK - lebih lebar
+$sheet->getColumnDimension('G')->setWidth(20); // TANGGAL KLAIM - lebih lebar
+$sheet->getColumnDimension('H')->setWidth(18); // EXPIRED DATE - ok
+$sheet->getColumnDimension('I')->setWidth(15); // STATUS VOUCHER - ok
+$sheet->getColumnDimension('J')->setWidth(20); // STATUS PEMAKAIAN - lebih lebar
+$sheet->getColumnDimension('K')->setWidth(20); // TANGGAL TERPAKAI - lebih lebar
+
+// Auto-wrap text untuk kolom yang panjang
+$sheet->getStyle('E7:E' . ($row-1))->getAlignment()->setWrapText(true); // Nama Voucher
+$sheet->getStyle('B7:B' . ($row-1))->getAlignment()->setWrapText(true); // Nama User
+
+// Center align untuk kolom tertentu
+$sheet->getStyle('A7:A' . ($row-1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+$sheet->getStyle('I7:J' . ($row-1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+// Set row height untuk accommodate wrapped text
+for ($i = 7; $i <= $row-1; $i++) {
+    $sheet->getRowDimension($i)->setRowHeight(25);
+}
         
         return $spreadsheet;
     }
