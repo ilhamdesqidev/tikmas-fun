@@ -201,77 +201,75 @@ public function export(Request $request)
     try {
         $status = $request->get('status', 'all');
         
-        Log::info('Starting export with status: ' . $status);
-        
         $claims = VoucherClaim::with('voucher')->latest()->get();
-        Log::info('Claims count: ' . $claims->count());
-        
         $filteredClaims = $this->filterClaimsByStatus($claims, $status);
-        Log::info('Filtered claims count: ' . $filteredClaims->count());
         
-        if (class_exists('PhpOffice\PhpSpreadsheet\Spreadsheet')) {
-            Log::info('Using PhpSpreadsheet for export');
-            
-            $spreadsheet = $this->generateExcelSpreadsheet($filteredClaims, $status);
-            $filename = $this->generateExcelFilename($status);
-            
-            Log::info('Filename: ' . $filename);
-            
-            $writer = new Xlsx($spreadsheet);
-            
-            return response()->streamDownload(function() use ($writer) {
-                $writer->save('php://output');
-            }, $filename, [
-                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            ]);
-            
-        } else {
-            Log::info('Using CSV fallback');
-            return $this->exportAsCSV($filteredClaims, $status);
-        }
+        // Langsung gunakan CSV saja - lebih reliable
+        return $this->exportAsCSV($filteredClaims, $status);
         
     } catch (\Exception $e) {
         Log::error('Export error: ' . $e->getMessage());
-        Log::error('Stack trace: ' . $e->getTraceAsString());
         return redirect()->back()->with('error', 'Gagal export data: ' . $e->getMessage());
     }
 }
     /**
      * Export sebagai CSV (fallback method)
      */
-    private function exportAsCSV($claims, $status)
-    {
-        $filename = str_replace('.xlsx', '.csv', $this->generateExcelFilename($status));
+   private function exportAsCSV($claims, $status)
+{
+    $statusLabels = [
+        'all' => 'SEMUA DATA',
+        'active' => 'BELUM TERPAKAI', 
+        'used' => 'SUDAH TERPAKAI',
+        'expired' => 'KADALUARSA'
+    ];
+    
+    $filename = "Voucher_Claims_" . ($statusLabels[$status] ?? 'Data') . "_" . date('Y-m-d_His') . ".csv";
+    
+    $headers = [
+        'Content-Type' => 'text/csv; charset=UTF-8',
+        'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        'Pragma' => 'no-cache',
+        'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+        'Expires' => '0'
+    ];
+    
+    $callback = function() use ($claims, $statusLabels, $status) {
+        $file = fopen('php://output', 'w');
         
-        $statusLabels = [
-            'all' => 'SEMUA DATA',
-            'active' => 'BELUM TERPAKAI',
-            'used' => 'SUDAH TERPAKAI',
-            'expired' => 'KADALUARSA'
-        ];
+        // Add BOM for UTF-8
+        fwrite($file, "\xEF\xBB\xBF");
         
-        $output = "\xEF\xBB\xBF"; // UTF-8 BOM
+        // Header info
+        fputcsv($file, ["LAPORAN DATA KLAIM VOUCHER - " . ($statusLabels[$status] ?? 'SEMUA')]);
+        fputcsv($file, ["Tanggal Export: " . date('d M Y H:i:s')]);
+        fputcsv($file, ["Total Data: " . $claims->count() . " klaim"]);
+        fputcsv($file, [""]); // empty line
         
-        // Header Info
-        $output .= "LAPORAN DATA KLAIM VOUCHER - " . ($statusLabels[$status] ?? 'SEMUA') . "\n";
-        $output .= "Tanggal Export: " . Carbon::now()->format('d M Y H:i:s') . "\n";
-        $output .= "Total Data: " . $claims->count() . " klaim\n\n";
+        // Column headers
+        fputcsv($file, [
+            'No', 
+            'Nama User', 
+            'Domisili', 
+            'No. WhatsApp', 
+            'Nama Voucher',
+            'Kode Unik', 
+            'Tanggal Klaim', 
+            'Tanggal Expired',
+            'Status Voucher',
+            'Status Pemakaian',
+            'Tanggal Terpakai'
+        ]);
         
-        // Header Kolom
-        $headers = ['No', 'Nama User', 'Domisili', 'No. WhatsApp', 'Nama Voucher', 
-                    'Kode Unik', 'Tanggal Klaim', 'Tanggal Expired', 'Status Voucher', 
-                    'Status Pemakaian', 'Tanggal Terpakai'];
-        $output .= implode(";", $headers) . "\n";
-        
-        // Data Rows
+        // Data rows
         foreach ($claims as $index => $claim) {
             $isUsed = $claim->is_used || $claim->scanned_at;
             $voucherExpired = $claim->voucher && 
-                            Carbon::now()->startOfDay()->greaterThan(Carbon::parse($claim->voucher->expiry_date));
+                            \Carbon\Carbon::now()->startOfDay()->greaterThan(\Carbon\Carbon::parse($claim->voucher->expiry_date));
             
             $statusPemakaian = $isUsed ? 'Terpakai' : ($voucherExpired ? 'Kadaluarsa' : 'Belum Terpakai');
             
-            $row = [
+            fputcsv($file, [
                 $index + 1,
                 $claim->user_name,
                 $claim->user_domisili ?? '-',
@@ -279,19 +277,20 @@ public function export(Request $request)
                 $claim->voucher->name ?? '-',
                 $claim->unique_code,
                 $claim->created_at->format('d M Y H:i'),
-                $claim->voucher ? Carbon::parse($claim->voucher->expiry_date)->format('d M Y') : '-',
+                $claim->voucher ? \Carbon\Carbon::parse($claim->voucher->expiry_date)->format('d M Y') : '-',
                 $voucherExpired ? 'Expired' : 'Aktif',
                 $statusPemakaian,
                 $claim->scanned_at ? $claim->scanned_at->format('d M Y H:i') : '-'
-            ];
-            
-            $output .= implode(";", $row) . "\n";
+            ]);
         }
         
         // Summary
+        fputcsv($file, [""]);
+        fputcsv($file, ["RINGKASAN:"]);
+        
         $activeCount = $claims->filter(function($c) {
             $isUsed = $c->is_used || $c->scanned_at;
-            $expired = $c->voucher && Carbon::now()->startOfDay()->greaterThan(Carbon::parse($c->voucher->expiry_date));
+            $expired = $c->voucher && \Carbon\Carbon::now()->startOfDay()->greaterThan(\Carbon\Carbon::parse($c->voucher->expiry_date));
             return !$isUsed && !$expired;
         })->count();
         
@@ -301,23 +300,20 @@ public function export(Request $request)
         
         $expiredCount = $claims->filter(function($c) {
             $isUsed = $c->is_used || $c->scanned_at;
-            $expired = $c->voucher && Carbon::now()->startOfDay()->greaterThan(Carbon::parse($c->voucher->expiry_date));
+            $expired = $c->voucher && \Carbon\Carbon::now()->startOfDay()->greaterThan(\Carbon\Carbon::parse($c->voucher->expiry_date));
             return !$isUsed && $expired;
         })->count();
         
-        $output .= "\nRINGKASAN:\n";
-        $output .= "Total Belum Terpakai:;" . $activeCount . "\n";
-        $output .= "Total Sudah Terpakai:;" . $usedCount . "\n";
-        $output .= "Total Kadaluarsa:;" . $expiredCount . "\n";
-        $output .= "TOTAL:;" . $claims->count() . "\n";
+        fputcsv($file, ["Total Belum Terpakai:", $activeCount]);
+        fputcsv($file, ["Total Sudah Terpakai:", $usedCount]);
+        fputcsv($file, ["Total Kadaluarsa:", $expiredCount]);
+        fputcsv($file, ["TOTAL KESELURUHAN:", $claims->count()]);
         
-        return response()->streamDownload(function() use ($output) {
-            echo $output;
-        }, $filename, [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-        ]);
-    }
+        fclose($file);
+    };
+    
+    return response()->stream($callback, 200, $headers);
+}
     
     /**
      * Generate Excel Spreadsheet dengan styling profesional
