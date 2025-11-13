@@ -234,17 +234,18 @@ public function export(Request $request)
         'Expires' => '0'
     ];
     
-$callback = function() use ($claims, $statusLabels, $status) {
-    $file = fopen('php://output', 'w');
-    
-    // Add BOM for UTF-8
-    fwrite($file, "\xEF\xBB\xBF");
+    $callback = function() use ($claims, $statusLabels, $status) {
+        $file = fopen('php://output', 'w');
+        
+        // Add BOM for UTF-8
+        fwrite($file, "\xEF\xBB\xBF");
         
         // ========== HEADER SECTION ==========
-        fputcsv($file, ["LAPORAN DATA KLAIM VOUCHER"]); // Title
-        fputcsv($file, ["Filter Status: " . ($statusLabels[$status] ?? 'SEMUA DATA')]);
-        fputcsv($file, ["Tanggal Export: " . date('d M Y H:i:s')]);
-        fputcsv($file, ["Total Data: " . $claims->count() . " klaim"]);
+        fputcsv($file, ["🎫 LAPORAN DATA KLAIM VOUCHER 🎫"]);
+        fputcsv($file, ["=================================="]);
+        fputcsv($file, ["STATUS FILTER: " . ($statusLabels[$status] ?? 'SEMUA DATA')]);
+        fputcsv($file, ["TANGGAL EXPORT: " . date('d F Y H:i:s')]);
+        fputcsv($file, ["TOTAL DATA: " . number_format($claims->count()) . " KLAIM"]);
         fputcsv($file, [""]); // Empty line
         
         // ========== TABLE HEADER ==========
@@ -252,17 +253,17 @@ $callback = function() use ($claims, $statusLabels, $status) {
             'NO',
             'NAMA USER', 
             'DOMISILI', 
-            'NO. WHATSAPP', 
+            'NO WHATSAPP', 
             'NAMA VOUCHER',
             'KODE UNIK', 
             'TANGGAL KLAIM', 
-            'TANGGAL EXPIRED',
+            'EXPIRED DATE',
             'STATUS VOUCHER',
             'STATUS PEMAKAIAN',
             'TANGGAL TERPAKAI'
-        ], ',', ' ');
+        ]);
         
-        fputcsv($file, [""]); // Empty line
+        fputcsv($file, [""]); // Separator line
         
         // ========== DATA ROWS ==========
         $counter = 1;
@@ -271,39 +272,36 @@ $callback = function() use ($claims, $statusLabels, $status) {
             $voucherExpired = $claim->voucher && 
                             \Carbon\Carbon::now()->startOfDay()->greaterThan(\Carbon\Carbon::parse($claim->voucher->expiry_date));
             
-            // Tentukan status dan warna (untuk Excel nanti)
+            // Format status dengan emoji
             if ($isUsed) {
-                $statusPemakaian = 'TERPAKAI';
-                $statusColor = 'GRAY';
+                $statusPemakaian = '✅ TERPAKAI';
             } elseif ($voucherExpired) {
-                $statusPemakaian = 'KADALUARSA';
-                $statusColor = 'RED';
+                $statusPemakaian = '⏰ KADALUARSA';
             } else {
-                $statusPemakaian = 'BELUM TERPAKAI';
-                $statusColor = 'GREEN';
+                $statusPemakaian = '🟢 BELUM TERPAKAI';
             }
             
-            $statusVoucher = $voucherExpired ? 'EXPIRED' : 'AKTIF';
+            $statusVoucher = $voucherExpired ? '🔴 EXPIRED' : '🟢 AKTIF';
             
             fputcsv($file, [
                 $counter++,
-                $claim->user_name,
-                $claim->user_domisili ?? '-',
+                $this->cleanText($claim->user_name),
+                $this->cleanText($claim->user_domisili ?? '-'),
                 $this->formatPhoneNumber($claim->user_phone),
-                $claim->voucher->name ?? '-',
-                $claim->unique_code,
-                $claim->created_at->format('d M Y H:i'),
-                $claim->voucher ? \Carbon\Carbon::parse($claim->voucher->expiry_date)->format('d M Y') : '-',
+                $this->cleanText($claim->voucher->name ?? '-'),
+                '"' . $claim->unique_code . '"', // Quote untuk kode unik
+                $claim->created_at->format('d/m/Y H:i'),
+                $claim->voucher ? \Carbon\Carbon::parse($claim->voucher->expiry_date)->format('d/m/Y') : '-',
                 $statusVoucher,
                 $statusPemakaian,
-                $claim->scanned_at ? $claim->scanned_at->format('d M Y H:i') : '-'
-            ], ',', ' ');
+                $claim->scanned_at ? $claim->scanned_at->format('d/m/Y H:i') : '-'
+            ]);
         }
         
         // ========== SUMMARY SECTION ==========
         fputcsv($file, [""]);
-        fputcsv($file, ["RINGKASAN STATISTIK"]);
-        fputcsv($file, ["==================="]);
+        fputcsv($file, ["📊 RINGKASAN STATISTIK"]);
+        fputcsv($file, ["===================="]);
         
         $activeCount = $claims->filter(function($c) {
             $isUsed = $c->is_used || $c->scanned_at;
@@ -321,16 +319,28 @@ $callback = function() use ($claims, $statusLabels, $status) {
             return !$isUsed && $expired;
         })->count();
         
-        fputcsv($file, ["Total Belum Terpakai (Aktif):", $activeCount]);
-        fputcsv($file, ["Total Sudah Terpakai:", $usedCount]);
-        fputcsv($file, ["Total Kadaluarsa:", $expiredCount]);
-        fputcsv($file, ["TOTAL KESELURUHAN:", $claims->count()]);
+        fputcsv($file, ["🟢 Belum Terpakai (Aktif):", number_format($activeCount)]);
+        fputcsv($file, ["✅ Sudah Terpakai:", number_format($usedCount)]);
+        fputcsv($file, ["⏰ Kadaluarsa:", number_format($expiredCount)]);
+        fputcsv($file, ["🔢 TOTAL KESELURUHAN:", number_format($claims->count())]);
         
+        // ========== EXCEL FORMATTING GUIDE ==========
         fputcsv($file, [""]);
-        fputcsv($file, ["CATATAN:"]);
-        fputcsv($file, ["- File ini di-generate otomatis dari sistem"]);
-        fputcsv($file, ["- Data terupdate per: " . date('d M Y H:i:s')]);
-        fputcsv($file, ["- Format tanggal: DD MMM YYYY HH:MM"]);
+        fputcsv($file, ["🎨 PETUNJUK FORMATTING DI EXCEL:"]);
+        fputcsv($file, ["================================="]);
+        fputcsv($file, ["1. 📥 Buka file CSV di Excel"]);
+        fputcsv($file, ["2. 🗂️ Pilih semua data (Ctrl+A)"]);
+        fputcsv($file, ["3. 🎨 Format sebagai Table (Home > Format as Table)"]);
+        fputcsv($file, ["4. ❄️ Freeze pane pada baris 8 (View > Freeze Panes > Freeze Top Row)"]);
+        fputcsv($file, ["5. 📏 Auto-fit semua kolom (Select all > Double-click column border)"]);
+        fputcsv($file, ["6. 💾 Simpan sebagai Excel Workbook (.xlsx) untuk styling permanen"]);
+        fputcsv($file, [""]);
+        fputcsv($file, ["🎯 REKOMENDASI STYLING:"]);
+        fputcsv($file, ["- Header tabel: Background biru, teks putih bold"]);
+        fputcsv($file, ["- Status TERPAKAI: Background abu-abu muda"]);
+        fputcsv($file, ["- Status BELUM TERPAKAI: Background hijau muda"]);
+        fputcsv($file, ["- Status KADALUARSA: Background orange muda"]);
+        fputcsv($file, ["- Kolom tanggal: Format Date dd/mm/yyyy hh:mm"]);
         
         fclose($file);
     };
@@ -357,19 +367,24 @@ private function generateExcelTemplateInstructions()
 }
 
 // Helper method untuk format nomor telepon
+// Format nomor telepon dengan spasi
 private function formatPhoneNumber($phone)
 {
     // Hilangkan karakter non-digit
     $clean = preg_replace('/[^0-9]/', '', $phone);
     
-    // Format ke +62
-    if (substr($clean, 0, 1) === '0') {
-        return '+62' . substr($clean, 1);
-    } elseif (substr($clean, 0, 2) === '62') {
-        return '+' . $clean;
-    }
+    if (empty($clean)) return '-';
     
-    return $phone;
+    // Format ke +62 dengan spasi
+    if (substr($clean, 0, 1) === '0') {
+        $number = substr($clean, 1);
+        return '+62 ' . chunk_split($number, 4, ' ');
+    } elseif (substr($clean, 0, 2) === '62') {
+        $number = substr($clean, 2);
+        return '+62 ' . chunk_split($number, 4, ' ');
+    } else {
+        return chunk_split($clean, 4, ' ');
+    }
 }
     
     /**
@@ -557,6 +572,20 @@ private function formatPhoneNumber($phone)
             }
         });
     }
+
+    // Bersihkan text dari karakter problematik
+private function cleanText($text)
+{
+    if (empty($text)) return '-';
+    
+    // Hilangkan karakter tab, newline, carriage return
+    $cleaned = str_replace(["\t", "\r", "\n"], ' ', $text);
+    
+    // Hilangkan multiple spaces
+    $cleaned = preg_replace('/\s+/', ' ', $cleaned);
+    
+    return trim($cleaned);
+}
     
     private function generateExcelFilename($status)
     {
