@@ -3,11 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\VoucherClaim;
 use App\Models\Voucher;
+use App\Models\VoucherClaim;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ReportController extends Controller
 {
@@ -42,10 +43,12 @@ class ReportController extends Controller
                 'topVouchers',
                 'recentClaims'
             ));
+            
         } catch (\Exception $e) {
             Log::error('Error loading reports: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
             
-            // Return view with default values if error occurs
+            // Return with safe defaults
             return view('admin.reports.index', [
                 'totalVouchers' => 0,
                 'activeVouchers' => 0,
@@ -53,22 +56,31 @@ class ReportController extends Controller
                 'claimsThisMonth' => 0,
                 'topVouchers' => collect([]),
                 'recentClaims' => collect([])
-            ]);
+            ])->with('error', 'Terjadi kesalahan saat memuat data: ' . $e->getMessage());
         }
     }
     
     public function getChartData(Request $request)
     {
-        $period = $request->get('period', '30days'); // 30days, monthly, yearly
-        
-        $data = match($period) {
-            '30days' => $this->getLast30DaysData(),
-            'monthly' => $this->getMonthlyData(),
-            'yearly' => $this->getYearlyData(),
-            default => $this->getLast30DaysData()
-        };
-        
-        return response()->json($data);
+        try {
+            $period = $request->get('period', '30days');
+            
+            $data = match($period) {
+                '30days' => $this->getLast30DaysData(),
+                'monthly' => $this->getMonthlyData(),
+                'yearly' => $this->getYearlyData(),
+                default => $this->getLast30DaysData()
+            };
+            
+            return response()->json($data);
+            
+        } catch (\Exception $e) {
+            Log::error('Error loading chart data: ' . $e->getMessage());
+            return response()->json([
+                'error' => true,
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
     
     private function getLast30DaysData()
