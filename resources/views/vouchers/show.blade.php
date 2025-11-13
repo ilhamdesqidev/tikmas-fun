@@ -104,9 +104,8 @@
                         <!-- Progress Bar -->
                         <div class="w-full bg-gray-200 rounded-full h-2.5">
                             @php
-                                $claimedCount = $voucher->claims()->count();
-                                $percentage = $voucher->quota > 0 ? (($voucher->quota - $voucher->remaining_quota) / $voucher->quota) * 100 : 0;
-                                $barColor = $percentage < 50 ? 'bg-green-500' : ($percentage < 80 ? 'bg-yellow-500' : 'bg-red-500');
+                                $percentage = ($voucher->remaining_quota / $voucher->quota) * 100;
+                                $barColor = $percentage > 50 ? 'bg-green-500' : ($percentage > 20 ? 'bg-yellow-500' : 'bg-red-500');
                             @endphp
                             <div class="{{ $barColor }} h-full rounded-full transition-all" 
                                  style="width: {{ $percentage }}%"></div>
