@@ -201,16 +201,24 @@ public function export(Request $request)
     try {
         $status = $request->get('status', 'all');
         
+        Log::info('Starting export with status: ' . $status);
+        
         $claims = VoucherClaim::with('voucher')->latest()->get();
+        Log::info('Claims count: ' . $claims->count());
+        
         $filteredClaims = $this->filterClaimsByStatus($claims, $status);
+        Log::info('Filtered claims count: ' . $filteredClaims->count());
         
         if (class_exists('PhpOffice\PhpSpreadsheet\Spreadsheet')) {
+            Log::info('Using PhpSpreadsheet for export');
+            
             $spreadsheet = $this->generateExcelSpreadsheet($filteredClaims, $status);
             $filename = $this->generateExcelFilename($status);
             
+            Log::info('Filename: ' . $filename);
+            
             $writer = new Xlsx($spreadsheet);
             
-            // Stream langsung tanpa file temporary
             return response()->streamDownload(function() use ($writer) {
                 $writer->save('php://output');
             }, $filename, [
@@ -218,15 +226,16 @@ public function export(Request $request)
             ]);
             
         } else {
+            Log::info('Using CSV fallback');
             return $this->exportAsCSV($filteredClaims, $status);
         }
         
     } catch (\Exception $e) {
         Log::error('Export error: ' . $e->getMessage());
+        Log::error('Stack trace: ' . $e->getTraceAsString());
         return redirect()->back()->with('error', 'Gagal export data: ' . $e->getMessage());
     }
 }
-    
     /**
      * Export sebagai CSV (fallback method)
      */
