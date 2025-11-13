@@ -225,3 +225,7 @@ Route::prefix('api/admin')->name('api.admin.')->middleware('admin')->group(funct
     Route::post('/promo/{id}/duplicate', [AdminPromoController::class, 'duplicate'])->name('promo.duplicate');
     Route::get('/tickets/stats', [TicketController::class, 'getStats']);
 });
+
+// Di dalam group admin routes
+Route::get('/reports', [ReportController::class, 'index'])->name('admin.reports.index');
+Route::get('/reports/data', [ReportController::class, 'getChartData'])->name('admin.reports.data');
