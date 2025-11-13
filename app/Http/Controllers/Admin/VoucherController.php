@@ -204,22 +204,118 @@ class VoucherController extends Controller
             $claims = VoucherClaim::with('voucher')->latest()->get();
             $filteredClaims = $this->filterClaimsByStatus($claims, $status);
             
-            $spreadsheet = $this->generateExcelSpreadsheet($filteredClaims, $status);
-            
-            $filename = $this->generateExcelFilename($status);
-            
-            $writer = new Xlsx($spreadsheet);
-            
-            return response()->streamDownload(function() use ($writer) {
-                $writer->save('php://output');
-            }, $filename, [
-                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            ]);
+            // Cek apakah PhpSpreadsheet tersedia
+            if (class_exists('PhpOffice\PhpSpreadsheet\Spreadsheet')) {
+                $spreadsheet = $this->generateExcelSpreadsheet($filteredClaims, $status);
+                $filename = $this->generateExcelFilename($status);
+                
+                $writer = new Xlsx($spreadsheet);
+                
+                return response()->streamDownload(function() use ($writer) {
+                    $writer->save('php://output');
+                }, $filename, [
+                    'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                ]);
+            } else {
+                // Fallback ke CSV jika PhpSpreadsheet tidak tersedia
+                Log::warning('PhpSpreadsheet not found, using CSV fallback');
+                return $this->exportAsCSV($filteredClaims, $status);
+            }
             
         } catch (\Exception $e) {
             Log::error('Export voucher claims error: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Gagal export data: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
+            
+            // Fallback ke CSV jika ada error
+            try {
+                return $this->exportAsCSV($filteredClaims, $status);
+            } catch (\Exception $csvError) {
+                return redirect()->back()->with('error', 'Gagal export data: ' . $e->getMessage());
+            }
         }
+    }
+    
+    /**
+     * Export sebagai CSV (fallback method)
+     */
+    private function exportAsCSV($claims, $status)
+    {
+        $filename = str_replace('.xlsx', '.csv', $this->generateExcelFilename($status));
+        
+        $statusLabels = [
+            'all' => 'SEMUA DATA',
+            'active' => 'BELUM TERPAKAI',
+            'used' => 'SUDAH TERPAKAI',
+            'expired' => 'KADALUARSA'
+        ];
+        
+        $output = "\xEF\xBB\xBF"; // UTF-8 BOM
+        
+        // Header Info
+        $output .= "LAPORAN DATA KLAIM VOUCHER - " . ($statusLabels[$status] ?? 'SEMUA') . "\n";
+        $output .= "Tanggal Export: " . Carbon::now()->format('d M Y H:i:s') . "\n";
+        $output .= "Total Data: " . $claims->count() . " klaim\n\n";
+        
+        // Header Kolom
+        $headers = ['No', 'Nama User', 'Domisili', 'No. WhatsApp', 'Nama Voucher', 
+                    'Kode Unik', 'Tanggal Klaim', 'Tanggal Expired', 'Status Voucher', 
+                    'Status Pemakaian', 'Tanggal Terpakai'];
+        $output .= implode(";", $headers) . "\n";
+        
+        // Data Rows
+        foreach ($claims as $index => $claim) {
+            $isUsed = $claim->is_used || $claim->scanned_at;
+            $voucherExpired = $claim->voucher && 
+                            Carbon::now()->startOfDay()->greaterThan(Carbon::parse($claim->voucher->expiry_date));
+            
+            $statusPemakaian = $isUsed ? 'Terpakai' : ($voucherExpired ? 'Kadaluarsa' : 'Belum Terpakai');
+            
+            $row = [
+                $index + 1,
+                $claim->user_name,
+                $claim->user_domisili ?? '-',
+                $claim->user_phone,
+                $claim->voucher->name ?? '-',
+                $claim->unique_code,
+                $claim->created_at->format('d M Y H:i'),
+                $claim->voucher ? Carbon::parse($claim->voucher->expiry_date)->format('d M Y') : '-',
+                $voucherExpired ? 'Expired' : 'Aktif',
+                $statusPemakaian,
+                $claim->scanned_at ? $claim->scanned_at->format('d M Y H:i') : '-'
+            ];
+            
+            $output .= implode(";", $row) . "\n";
+        }
+        
+        // Summary
+        $activeCount = $claims->filter(function($c) {
+            $isUsed = $c->is_used || $c->scanned_at;
+            $expired = $c->voucher && Carbon::now()->startOfDay()->greaterThan(Carbon::parse($c->voucher->expiry_date));
+            return !$isUsed && !$expired;
+        })->count();
+        
+        $usedCount = $claims->filter(function($c) {
+            return $c->is_used || $c->scanned_at;
+        })->count();
+        
+        $expiredCount = $claims->filter(function($c) {
+            $isUsed = $c->is_used || $c->scanned_at;
+            $expired = $c->voucher && Carbon::now()->startOfDay()->greaterThan(Carbon::parse($c->voucher->expiry_date));
+            return !$isUsed && $expired;
+        })->count();
+        
+        $output .= "\nRINGKASAN:\n";
+        $output .= "Total Belum Terpakai:;" . $activeCount . "\n";
+        $output .= "Total Sudah Terpakai:;" . $usedCount . "\n";
+        $output .= "Total Kadaluarsa:;" . $expiredCount . "\n";
+        $output .= "TOTAL:;" . $claims->count() . "\n";
+        
+        return response()->streamDownload(function() use ($output) {
+            echo $output;
+        }, $filename, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
     }
     
     /**
@@ -371,7 +467,7 @@ class VoucherController extends Controller
         }
         
         // ========== COLUMN WIDTHS ==========
-        $sheet->getColumnDimension('A')->setWidth(21);
+        $sheet->getColumnDimension('A')->setWidth(6);
         $sheet->getColumnDimension('B')->setWidth(25);
         $sheet->getColumnDimension('C')->setWidth(20);
         $sheet->getColumnDimension('D')->setWidth(18);
