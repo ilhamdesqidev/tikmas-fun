@@ -335,12 +335,6 @@ public function export(Request $request)
         fputcsv($file, ["5. Auto-fit semua kolom (Select all > Double-click column border)"]);
         fputcsv($file, ["6. Simpan sebagai Excel Workbook (.xlsx) untuk styling permanen"]);
         fputcsv($file, [""]);
-        fputcsv($file, ["REKOMENDASI STYLING:"]);
-        fputcsv($file, ["- Header tabel: Background biru, teks putih bold"]);
-        fputcsv($file, ["- Status TERPAKAI: Background abu-abu muda"]);
-        fputcsv($file, ["- Status BELUM TERPAKAI: Background hijau muda"]);
-        fputcsv($file, ["- Status KADALUARSA: Background orange muda"]);
-        fputcsv($file, ["- Kolom tanggal: Format Date dd/mm/yyyy hh:mm"]);
         
         fclose($file);
     };
