@@ -220,6 +220,10 @@
                                 <p class="font-medium break-words" id="detail-customer-name">-</p>
                             </div>
                             <div>
+                                <p class="text-gray-600">Domisili</p>
+                                <p class="font-medium break-words" id="detail-domisili">-</p>
+                            </div>
+                            <div>
                                 <p class="text-gray-600">No. Telepon</p>
                                 <p class="font-medium" id="detail-phone">-</p>
                             </div>
@@ -227,7 +231,7 @@
                                 <p class="text-gray-600">Tanggal Claim</p>
                                 <p class="font-medium" id="detail-claimed-date">-</p>
                             </div>
-                            <div>
+                            <div class="col-span-2">
                                 <p class="text-gray-600">Berlaku Hingga</p>
                                 <p class="font-medium" id="detail-expiry-date">-</p>
                             </div>
@@ -524,6 +528,7 @@
             document.getElementById('detail-voucher-name').textContent = claim.voucher_name;
             document.getElementById('detail-description').textContent = claim.voucher_description || '-';
             document.getElementById('detail-customer-name').textContent = claim.user_name;
+            document.getElementById('detail-domisili').textContent = claim.user_domisili || '-';
             document.getElementById('detail-phone').textContent = claim.user_phone;
             document.getElementById('detail-claimed-date').textContent = claim.claimed_at;
             document.getElementById('detail-expiry-date').textContent = claim.expiry_date;

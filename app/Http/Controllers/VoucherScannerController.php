@@ -61,6 +61,89 @@ class VoucherScannerController extends Controller
     }
 
     // Scan voucher barcode
+    public function scanVoucher(Request $request)
+    {
+        $request->validate([
+            'barcode' => 'required|string'
+        ]);
+
+        $barcode = trim($request->barcode);
+        
+        try {
+            $claim = VoucherClaim::with('voucher')
+                ->where('unique_code', $barcode)
+                ->first();
+
+            if (!$claim) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Kode voucher tidak ditemukan dalam sistem!'
+                ]);
+            }
+
+            // Check if voucher is expired
+            if ($claim->voucher && Carbon::parse($claim->voucher->expiry_date)->isPast()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Voucher sudah kadaluarsa!',
+                    'status' => 'kadaluarsa',
+                    'claim' => [
+                        'unique_code' => $claim->unique_code,
+                        'user_name' => $claim->user_name,
+                        'user_domisili' => $claim->user_domisili,
+                        'voucher_name' => $claim->voucher->name ?? 'Unknown',
+                        'status' => 'kadaluarsa'
+                    ]
+                ]);
+            }
+
+            // Check if already used
+            if ($claim->is_used || $claim->scanned_at) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Voucher sudah pernah digunakan!',
+                    'status' => 'tergunakan',
+                    'claim' => [
+                        'unique_code' => $claim->unique_code,
+                        'user_name' => $claim->user_name,
+                        'user_domisili' => $claim->user_domisili,
+                        'user_phone' => $claim->user_phone,
+                        'voucher_name' => $claim->voucher->name ?? 'Unknown',
+                        'claimed_at' => Carbon::parse($claim->created_at)->format('d/m/Y H:i'),
+                        'scanned_at' => $claim->scanned_at ? Carbon::parse($claim->scanned_at)->format('d/m/Y H:i') : null,
+                        'status' => 'tergunakan'
+                    ]
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Voucher valid dan siap digunakan!',
+                'status' => 'valid',
+                'claim' => [
+                    'unique_code' => $claim->unique_code,
+                    'user_name' => $claim->user_name,
+                    'user_domisili' => $claim->user_domisili,
+                    'user_phone' => $claim->user_phone,
+                    'voucher_name' => $claim->voucher->name ?? 'Unknown',
+                    'voucher_description' => $claim->voucher->deskripsi ?? '',
+                    'claimed_at' => Carbon::parse($claim->created_at)->format('d/m/Y H:i'),
+                    'expiry_date' => $claim->voucher ? Carbon::parse($claim->voucher->expiry_date)->format('d/m/Y') : '-',
+                    'status' => 'valid'
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Voucher scanner error: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan sistem saat memproses voucher!'
+            ]);
+        }
+    }
+
+    // Use voucher
     public function useVoucher(Request $request)
     {
         $request->validate([
@@ -107,6 +190,7 @@ class VoucherScannerController extends Controller
                 'claim' => [
                     'unique_code' => $claim->unique_code,
                     'user_name' => $claim->user_name,
+                    'user_domisili' => $claim->user_domisili,
                     'voucher_name' => $claim->voucher->name ?? 'Unknown',
                     'scanned_at' => $claim->scanned_at->format('d/m/Y H:i:s'),
                     'status' => 'tergunakan'
@@ -119,86 +203,6 @@ class VoucherScannerController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan saat memproses voucher!'
-            ]);
-        }
-    }
-
-    // Juga update method scanVoucher untuk konsistensi
-    public function scanVoucher(Request $request)
-    {
-        $request->validate([
-            'barcode' => 'required|string'
-        ]);
-
-        $barcode = trim($request->barcode);
-        
-        try {
-            $claim = VoucherClaim::with('voucher')
-                ->where('unique_code', $barcode)
-                ->first();
-
-            if (!$claim) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Kode voucher tidak ditemukan dalam sistem!'
-                ]);
-            }
-
-            // Check if voucher is expired
-            if ($claim->voucher && Carbon::parse($claim->voucher->expiry_date)->isPast()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Voucher sudah kadaluarsa!',
-                    'status' => 'kadaluarsa',
-                    'claim' => [
-                        'unique_code' => $claim->unique_code,
-                        'user_name' => $claim->user_name,
-                        'voucher_name' => $claim->voucher->name ?? 'Unknown',
-                        'status' => 'kadaluarsa'
-                    ]
-                ]);
-            }
-
-            // Check if already used
-            if ($claim->is_used || $claim->scanned_at) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Voucher sudah pernah digunakan!',
-                    'status' => 'tergunakan',
-                    'claim' => [
-                        'unique_code' => $claim->unique_code,
-                        'user_name' => $claim->user_name,
-                        'user_phone' => $claim->user_phone,
-                        'voucher_name' => $claim->voucher->name ?? 'Unknown',
-                        'claimed_at' => Carbon::parse($claim->created_at)->format('d/m/Y H:i'),
-                        'scanned_at' => $claim->scanned_at ? Carbon::parse($claim->scanned_at)->format('d/m/Y H:i') : null,
-                        'status' => 'tergunakan'
-                    ]
-                ]);
-            }
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Voucher valid dan siap digunakan!',
-                'status' => 'valid',
-                'claim' => [
-                    'unique_code' => $claim->unique_code,
-                    'user_name' => $claim->user_name,
-                    'user_phone' => $claim->user_phone,
-                    'voucher_name' => $claim->voucher->name ?? 'Unknown',
-                    'voucher_description' => $claim->voucher->deskripsi ?? '',
-                    'claimed_at' => Carbon::parse($claim->created_at)->format('d/m/Y H:i'),
-                    'expiry_date' => $claim->voucher ? Carbon::parse($claim->voucher->expiry_date)->format('d/m/Y') : '-',
-                    'status' => 'valid'
-                ]
-            ]);
-
-        } catch (\Exception $e) {
-            \Log::error('Voucher scanner error: ' . $e->getMessage());
-            
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan sistem saat memproses voucher!'
             ]);
         }
     }
