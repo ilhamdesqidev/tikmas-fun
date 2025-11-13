@@ -15,7 +15,7 @@
         "laravel/tinker": "^2.10.1",
         "maatwebsite/excel": "*",
         "midtrans/midtrans-php": "^2.6",
-        "phpoffice/phpspreadsheet": "*",
+        "phpoffice/phpspreadsheet": "^5.1",
         "picqer/php-barcode-generator": "^3.2"
     },
     "require-dev": {
