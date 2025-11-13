@@ -197,43 +197,38 @@ class VoucherController extends Controller
      * Export data voucher claims ke Excel dengan styling profesional
      */
     public function export(Request $request)
-    {
-        try {
-            $status = $request->get('status', 'all');
+{
+    try {
+        $status = $request->get('status', 'all');
+        
+        $claims = VoucherClaim::with('voucher')->latest()->get();
+        $filteredClaims = $this->filterClaimsByStatus($claims, $status);
+        
+        if (class_exists('PhpOffice\PhpSpreadsheet\Spreadsheet')) {
+            $spreadsheet = $this->generateExcelSpreadsheet($filteredClaims, $status);
+            $filename = $this->generateExcelFilename($status);
             
-            $claims = VoucherClaim::with('voucher')->latest()->get();
-            $filteredClaims = $this->filterClaimsByStatus($claims, $status);
+            // Simpan file temporary
+            $tempPath = storage_path('app/temp/' . $filename);
+            $writer = new Xlsx($spreadsheet);
+            $writer->save($tempPath);
             
-            // Cek apakah PhpSpreadsheet tersedia
-            if (class_exists('PhpOffice\PhpSpreadsheet\Spreadsheet')) {
-                $spreadsheet = $this->generateExcelSpreadsheet($filteredClaims, $status);
-                $filename = $this->generateExcelFilename($status);
-                
-                $writer = new Xlsx($spreadsheet);
-                
-                return response()->streamDownload(function() use ($writer) {
-                    $writer->save('php://output');
-                }, $filename, [
-                    'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                ]);
-            } else {
-                // Fallback ke CSV jika PhpSpreadsheet tidak tersedia
-                Log::warning('PhpSpreadsheet not found, using CSV fallback');
-                return $this->exportAsCSV($filteredClaims, $status);
-            }
+            // Download file
+            $response = response()->download($tempPath, $filename, [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ])->deleteFileAfterSend(true);
             
-        } catch (\Exception $e) {
-            Log::error('Export voucher claims error: ' . $e->getMessage());
-            Log::error('Stack trace: ' . $e->getTraceAsString());
+            return $response;
             
-            // Fallback ke CSV jika ada error
-            try {
-                return $this->exportAsCSV($filteredClaims, $status);
-            } catch (\Exception $csvError) {
-                return redirect()->back()->with('error', 'Gagal export data: ' . $e->getMessage());
-            }
+        } else {
+            return $this->exportAsCSV($filteredClaims, $status);
         }
+        
+    } catch (\Exception $e) {
+        Log::error('Export error: ' . $e->getMessage());
+        return redirect()->back()->with('error', 'Gagal export data: ' . $e->getMessage());
     }
+}
     
     /**
      * Export sebagai CSV (fallback method)
