@@ -17,7 +17,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-blue-100 text-sm font-semibold mb-1">Total Voucher</p>
-                    <p class="text-3xl font-bold">{{ $totalVouchers ?? 0 }}</p>
+                    <p class="text-3xl font-bold">{{ $totalVouchers }}</p>
                 </div>
                 <div class="bg-white bg-opacity-20 rounded-full p-3">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -32,7 +32,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-green-100 text-sm font-semibold mb-1">Voucher Aktif</p>
-                    <p class="text-3xl font-bold">{{ $activeVouchers ?? 0 }}</p>
+                    <p class="text-3xl font-bold">{{ $activeVouchers }}</p>
                 </div>
                 <div class="bg-white bg-opacity-20 rounded-full p-3">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -47,7 +47,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-purple-100 text-sm font-semibold mb-1">Total Klaim</p>
-                    <p class="text-3xl font-bold">{{ $totalClaims ?? 0 }}</p>
+                    <p class="text-3xl font-bold">{{ $totalClaims }}</p>
                 </div>
                 <div class="bg-white bg-opacity-20 rounded-full p-3">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -62,7 +62,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-orange-100 text-sm font-semibold mb-1">Klaim Bulan Ini</p>
-                    <p class="text-3xl font-bold">{{ $claimsThisMonth ?? 0 }}</p>
+                    <p class="text-3xl font-bold">{{ $claimsThisMonth }}</p>
                 </div>
                 <div class="bg-white bg-opacity-20 rounded-full p-3">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -133,7 +133,7 @@
             </div>
             
             <div class="space-y-3">
-                @forelse($topVouchers as $index => $voucher)
+                @forelse(($topVouchers ?? []) as $index => $voucher)
                 <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
                     <div class="flex items-center space-x-3">
                         <span class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold text-sm">
@@ -170,7 +170,7 @@
             </div>
             
             <div class="space-y-3 max-h-96 overflow-y-auto">
-                @forelse($recentClaims as $claim)
+                @forelse(($recentClaims ?? []) as $claim)
                 <div class="flex items-start p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
                     <div class="flex-1">
                         <div class="flex items-center justify-between mb-1">
