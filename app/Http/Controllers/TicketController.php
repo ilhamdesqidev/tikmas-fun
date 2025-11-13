@@ -84,16 +84,17 @@ class TicketController extends Controller
     /**
      * Export data tiket berdasarkan status dan promo (CSV)
      */
-/**
- * Export data tiket berdasarkan status dan promo (Excel)
- */
 public function export(Request $request)
 {
     $status = $request->get('status', 'all');
     $promoId = $request->get('promo_id', 'all');
 
-    // Buat nama file yang valid
-    $filename = 'tickets_export_' . date('Y-m-d_His') . '.xlsx';
+    $filename = 'tickets_' . $status;
+    if ($promoId !== 'all') {
+        $promo = Promo::find($promoId);
+        $filename .= '_' . ($promo ? str_replace(' ', '_', $promo->name) : 'promo');
+    }
+    $filename .= '_' . date('Y-m-d_His') . '.xlsx';
 
     $query = Order::with('promo')->orderBy('created_at', 'desc');
 
@@ -107,20 +108,10 @@ public function export(Request $request)
 
     $orders = $query->get();
 
-    // Pastikan PhpSpreadsheet di-load dengan benar
-    $spreadsheet = new Spreadsheet();
+    // Buat spreadsheet baru
+    $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
-    
-    // Set judul sheet berdasarkan filter
-    $sheetTitle = 'Tickets';
-    if ($status !== 'all') {
-        $sheetTitle = ucfirst($status);
-    }
-    if ($promoId !== 'all') {
-        $promo = Promo::find($promoId);
-        $sheetTitle .= $promo ? ' - ' . $promo->name : '';
-    }
-    $sheet->setTitle(substr($sheetTitle, 0, 31)); // Excel sheet title max 31 chars
+    $sheet->setTitle(ucfirst($status));
 
     // Header styling
     $headerStyle = [
@@ -129,46 +120,48 @@ public function export(Request $request)
             'color' => ['rgb' => 'FFFFFF']
         ],
         'fill' => [
-            'fillType' => Fill::FILL_SOLID,
+            'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
             'startColor' => ['rgb' => '4472C4']
         ],
         'alignment' => [
-            'horizontal' => Alignment::HORIZONTAL_CENTER,
+            'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
         ]
     ];
 
     // Set headers
-    $headers = [
-        'No', 'Order Number', 'Invoice Number', 'Paket Promo', 'Category', 
-        'Customer Name', 'WhatsApp', 'Visit Date', 'Quantity', 'Total Price', 
-        'Status', 'Order Date'
-    ];
+    $headers = ['No', 'Order Number', 'Invoice Number', 'Paket Promo', 'Category', 
+               'Customer Name', 'WhatsApp', 'Visit Date', 'Quantity', 'Total Price', 
+               'Status', 'Order Date'];
 
     $sheet->fromArray($headers, null, 'A1');
     $sheet->getStyle('A1:L1')->applyFromArray($headerStyle);
 
     // Set column widths
-    $columnWidths = [
-        'A' => 5,  'B' => 18, 'C' => 25, 'D' => 25, 'E' => 12,
-        'F' => 20, 'G' => 15, 'H' => 12, 'I' => 10, 'J' => 15,
-        'K' => 12, 'L' => 18
-    ];
-
-    foreach ($columnWidths as $column => $width) {
-        $sheet->getColumnDimension($column)->setWidth($width);
-    }
+    $sheet->getColumnDimension('A')->setWidth(5);
+    $sheet->getColumnDimension('B')->setWidth(18);
+    $sheet->getColumnDimension('C')->setWidth(25);
+    $sheet->getColumnDimension('D')->setWidth(25);
+    $sheet->getColumnDimension('E')->setWidth(12);
+    $sheet->getColumnDimension('F')->setWidth(20);
+    $sheet->getColumnDimension('G')->setWidth(15);
+    $sheet->getColumnDimension('H')->setWidth(12);
+    $sheet->getColumnDimension('I')->setWidth(10);
+    $sheet->getColumnDimension('J')->setWidth(15);
+    $sheet->getColumnDimension('K')->setWidth(12);
+    $sheet->getColumnDimension('L')->setWidth(18);
 
     // Add data
     $row = 2;
-    foreach ($orders as $index => $order) {
-        $sheet->setCellValue('A' . $row, $index + 1);
+    $no = 1;
+    foreach ($orders as $order) {
+        $sheet->setCellValue('A' . $row, $no++);
         $sheet->setCellValue('B' . $row, $order->order_number);
         $sheet->setCellValue('C' . $row, $order->invoice_number ?? '-');
         $sheet->setCellValue('D' . $row, $order->promo ? $order->promo->name : '-');
         $sheet->setCellValue('E' . $row, $order->promo ? ucfirst($order->promo->category) : '-');
         $sheet->setCellValue('F' . $row, $order->customer_name);
         $sheet->setCellValue('G' . $row, $order->whatsapp_number);
-        $sheet->setCellValue('H' . $row, $order->visit_date ? \Carbon\Carbon::parse($order->visit_date)->format('d M Y') : '-');
+        $sheet->setCellValue('H' . $row, \Carbon\Carbon::parse($order->visit_date)->format('d M Y'));
         $sheet->setCellValue('I' . $row, $order->ticket_quantity);
         $sheet->setCellValue('J' . $row, $order->total_price);
         $sheet->setCellValue('K' . $row, ucfirst($order->status));
@@ -176,21 +169,11 @@ public function export(Request $request)
         $row++;
     }
 
-    // Auto-size columns for better fit
-    foreach (range('A', 'L') as $col) {
-        $sheet->getColumnDimension($col)->setAutoSize(false);
-    }
-
-    // Create writer and output
-    $writer = new Xlsx($spreadsheet);
-
-    // Clear any previous output
-    if (ob_get_length()) ob_clean();
+    $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
 
     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     header('Content-Disposition: attachment; filename="' . $filename . '"');
     header('Cache-Control: max-age=0');
-    header('Pragma: public');
 
     $writer->save('php://output');
     exit;
@@ -199,134 +182,125 @@ public function export(Request $request)
     /**
      * Export semua data dengan multiple sheets (Excel) - dengan filter promo
      */
-   /**
- * Export semua data dengan multiple sheets (Excel) - dengan filter promo
- */
-public function exportAll(Request $request)
-{
-    $promoId = $request->get('promo_id', 'all');
-    
-    $spreadsheet = new Spreadsheet();
-    
-    $statuses = [
-        'success' => 'Success',
-        'pending' => 'Pending', 
-        'challenge' => 'Challenge',
-        'denied' => 'Denied',
-        'expired' => 'Expired',
-        'canceled' => 'Canceled'
-    ];
-    
-    $sheetIndex = 0;
-    $hasData = false;
-    
-    foreach ($statuses as $statusKey => $statusLabel) {
-        $query = Order::with('promo')
-            ->where('status', $statusKey)
-            ->orderBy('created_at', 'desc');
+    public function exportAll(Request $request)
+    {
+        $promoId = $request->get('promo_id', 'all');
         
+        $spreadsheet = new Spreadsheet();
+        
+        $statuses = [
+            'success' => 'Success',
+            'pending' => 'Pending',
+            'challenge' => 'Challenge',
+            'denied' => 'Denied',
+            'expired' => 'Expired',
+            'canceled' => 'Canceled',
+            'used' => 'Used'
+        ];
+        
+        $sheetIndex = 0;
+        
+        foreach ($statuses as $statusKey => $statusLabel) {
+            $query = Order::with('promo')
+                ->where('status', $statusKey)
+                ->orderBy('created_at', 'desc');
+            
+            if ($promoId !== 'all') {
+                $query->where('promo_id', $promoId);
+            }
+            
+            $orders = $query->get();
+            
+            // Skip empty sheets
+            if ($orders->isEmpty()) {
+                continue;
+            }
+            
+            if ($sheetIndex == 0) {
+                $sheet = $spreadsheet->getActiveSheet();
+            } else {
+                $sheet = $spreadsheet->createSheet();
+            }
+            
+            $sheet->setTitle($statusLabel);
+            
+            // Header styling
+            $headerStyle = [
+                'font' => [
+                    'bold' => true,
+                    'color' => ['rgb' => 'FFFFFF']
+                ],
+                'fill' => [
+                    'fillType' => Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => '4472C4']
+                ],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                ]
+            ];
+            
+            // Set headers
+            $headers = ['No', 'Order Number', 'Invoice Number', 'Paket Promo', 'Category', 
+                       'Customer Name', 'WhatsApp', 'Visit Date', 'Quantity', 'Total Price', 
+                       'Status', 'Order Date'];
+            
+            $sheet->fromArray($headers, null, 'A1');
+            $sheet->getStyle('A1:L1')->applyFromArray($headerStyle);
+            
+            // Set column widths
+            $sheet->getColumnDimension('A')->setWidth(5);
+            $sheet->getColumnDimension('B')->setWidth(18);
+            $sheet->getColumnDimension('C')->setWidth(25);
+            $sheet->getColumnDimension('D')->setWidth(25);
+            $sheet->getColumnDimension('E')->setWidth(12);
+            $sheet->getColumnDimension('F')->setWidth(20);
+            $sheet->getColumnDimension('G')->setWidth(15);
+            $sheet->getColumnDimension('H')->setWidth(12);
+            $sheet->getColumnDimension('I')->setWidth(10);
+            $sheet->getColumnDimension('J')->setWidth(15);
+            $sheet->getColumnDimension('K')->setWidth(12);
+            $sheet->getColumnDimension('L')->setWidth(18);
+            
+            // Add data
+            $row = 2;
+            $no = 1;
+            foreach ($orders as $order) {
+                $sheet->setCellValue('A' . $row, $no++);
+                $sheet->setCellValue('B' . $row, $order->order_number);
+                $sheet->setCellValue('C' . $row, $order->invoice_number ?? '-');
+                $sheet->setCellValue('D' . $row, $order->promo ? $order->promo->name : '-');
+                $sheet->setCellValue('E' . $row, $order->promo ? ucfirst($order->promo->category) : '-');
+                $sheet->setCellValue('F' . $row, $order->customer_name);
+                $sheet->setCellValue('G' . $row, $order->whatsapp_number);
+                $sheet->setCellValue('H' . $row, \Carbon\Carbon::parse($order->visit_date)->format('d M Y'));
+                $sheet->setCellValue('I' . $row, $order->ticket_quantity);
+                $sheet->setCellValue('J' . $row, $order->total_price);
+                $sheet->setCellValue('K' . $row, ucfirst($order->status));
+                $sheet->setCellValue('L' . $row, $order->created_at->format('d M Y H:i'));
+                $row++;
+            }
+            
+            $sheetIndex++;
+        }
+        
+        $spreadsheet->setActiveSheetIndex(0);
+        
+        $filename = 'tickets_all_sheets';
         if ($promoId !== 'all') {
-            $query->where('promo_id', $promoId);
+            $promo = Promo::find($promoId);
+            $filename .= '_' . ($promo ? str_replace(' ', '_', $promo->name) : 'promo');
         }
+        $filename .= '_' . date('Y-m-d_His') . '.xlsx';
         
-        $orders = $query->get();
+        $writer = new Xlsx($spreadsheet);
         
-        // Skip jika tidak ada data
-        if ($orders->isEmpty()) {
-            continue;
-        }
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
         
-        $hasData = true;
-        
-        if ($sheetIndex == 0) {
-            $sheet = $spreadsheet->getActiveSheet();
-        } else {
-            $sheet = $spreadsheet->createSheet();
-        }
-        
-        $sheet->setTitle(substr($statusLabel, 0, 31));
-        
-        // Header styling
-        $headerStyle = [
-            'font' => [
-                'bold' => true,
-                'color' => ['rgb' => 'FFFFFF']
-            ],
-            'fill' => [
-                'fillType' => Fill::FILL_SOLID,
-                'startColor' => ['rgb' => '4472C4']
-            ],
-            'alignment' => [
-                'horizontal' => Alignment::HORIZONTAL_CENTER,
-            ]
-        ];
-        
-        // Set headers
-        $headers = [
-            'No', 'Order Number', 'Invoice Number', 'Paket Promo', 'Category',
-            'Customer Name', 'WhatsApp', 'Visit Date', 'Quantity', 'Total Price',
-            'Status', 'Order Date'
-        ];
-        
-        $sheet->fromArray($headers, null, 'A1');
-        $sheet->getStyle('A1:L1')->applyFromArray($headerStyle);
-        
-        // Set column widths
-        $columnWidths = [
-            'A' => 5,  'B' => 18, 'C' => 25, 'D' => 25, 'E' => 12,
-            'F' => 20, 'G' => 15, 'H' => 12, 'I' => 10, 'J' => 15,
-            'K' => 12, 'L' => 18
-        ];
-        
-        foreach ($columnWidths as $column => $width) {
-            $sheet->getColumnDimension($column)->setWidth($width);
-        }
-        
-        // Add data
-        $row = 2;
-        foreach ($orders as $index => $order) {
-            $sheet->setCellValue('A' . $row, $index + 1);
-            $sheet->setCellValue('B' . $row, $order->order_number);
-            $sheet->setCellValue('C' . $row, $order->invoice_number ?? '-');
-            $sheet->setCellValue('D' . $row, $order->promo ? $order->promo->name : '-');
-            $sheet->setCellValue('E' . $row, $order->promo ? ucfirst($order->promo->category) : '-');
-            $sheet->setCellValue('F' . $row, $order->customer_name);
-            $sheet->setCellValue('G' . $row, $order->whatsapp_number);
-            $sheet->setCellValue('H' . $row, $order->visit_date ? \Carbon\Carbon::parse($order->visit_date)->format('d M Y') : '-');
-            $sheet->setCellValue('I' . $row, $order->ticket_quantity);
-            $sheet->setCellValue('J' . $row, $order->total_price);
-            $sheet->setCellValue('K' . $row, ucfirst($order->status));
-            $sheet->setCellValue('L' . $row, $order->created_at->format('d M Y H:i'));
-            $row++;
-        }
-        
-        $sheetIndex++;
+        $writer->save('php://output');
+        exit;
     }
-    
-    // Jika tidak ada data sama sekali, buat sheet kosong dengan pesan
-    if (!$hasData) {
-        $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle('No Data');
-        $sheet->setCellValue('A1', 'No data available for the selected filters');
-    }
-    
-    $spreadsheet->setActiveSheetIndex(0);
-    
-    $filename = 'tickets_export_all_' . date('Y-m-d_His') . '.xlsx';
-    
-    $writer = new Xlsx($spreadsheet);
-    
-    // Clear output buffer
-    if (ob_get_length()) ob_clean();
-    
-    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    header('Content-Disposition: attachment; filename="' . $filename . '"');
-    header('Cache-Control: max-age=0');
-    header('Pragma: public');
-    
-    $writer->save('php://output');
-    exit;
-}
     
     /**
      * Get stats for API
