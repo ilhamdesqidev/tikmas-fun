@@ -104,8 +104,9 @@
                         <!-- Progress Bar -->
                         <div class="w-full bg-gray-200 rounded-full h-2.5">
                             @php
-                                $percentage = ($voucher->remaining_quota / $voucher->quota) * 100;
-                                $barColor = $percentage > 50 ? 'bg-green-500' : ($percentage > 20 ? 'bg-yellow-500' : 'bg-red-500');
+                                $claimedCount = $voucher->claims()->count();
+                                $percentage = $voucher->quota > 0 ? (($voucher->quota - $voucher->remaining_quota) / $voucher->quota) * 100 : 0;
+                                $barColor = $percentage < 50 ? 'bg-green-500' : ($percentage < 80 ? 'bg-yellow-500' : 'bg-red-500');
                             @endphp
                             <div class="{{ $barColor }} h-full rounded-full transition-all" 
                                  style="width: {{ $percentage }}%"></div>
@@ -123,7 +124,7 @@
                             <i data-feather="check-circle" class="w-5 h-5 text-gray-400"></i>
                             <div>
                                 <p class="text-sm text-gray-500">Total Diklaim</p>
-                                <p class="font-semibold">{{ $voucher->claims_count ?? 0 }} Orang</p>
+                                <p class="font-semibold" id="total-claimed">{{ $voucher->claims()->count() }} Orang</p>
                             </div>
                         </div>
                     </div>
@@ -251,20 +252,17 @@
         </div>
     </div>
 
-    <!-- Hidden Template untuk Download - HANYA GAMBAR + BARCODE -->
+    <!-- Hidden Template untuk Download -->
     <div id="voucherTemplate" style="position: absolute; left: -9999px; width: 800px; height: 600px;">
         <div style="position: relative; width: 100%; height: 100%; font-family: Arial, sans-serif;">
-            <!-- Background Image Voucher -->
             <img id="templateBgImage" src="{{ $voucher->download_image_url ?? $voucher->image_url }}" 
                  style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;">
 
-            <!-- Barcode di Tengah Bawah -->
             <div style="position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); background: rgba(255, 255, 255, 0.95); padding: 8px 15px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25); backdrop-filter: blur(10px);">
                 <p style="text-align: center; color: #1f2937; font-weight: bold; margin: 0 0 5px 0; font-size: 11px;">KODE VOUCHER</p>
                 <svg id="templateBarcode"></svg>
             </div>
 
-            <!-- Text Instruksi -->
             <div style="position: absolute; bottom: 15px; left: 0; right: 0; text-align: center;">
                 <p style="margin: 0; color: white; font-size: 11px; text-shadow: 1px 1px 2px rgba(0,0,0,0.7);">
                     Tunjukkan barcode ini saat melakukan pembayaran
@@ -275,6 +273,9 @@
 
     <script>
         feather.replace();
+
+        // Simpan current claimed count
+        let currentClaimedCount = {{ $voucher->claims()->count() }};
 
         function showClaimForm() {
             document.getElementById('claimModal').classList.remove('hidden');
@@ -337,7 +338,11 @@
                 const result = payload;
                 const uniqueCode = result.data.unique_code;
 
-                // Generate barcode - LEBIH KECIL
+                // Update total claimed count
+                currentClaimedCount++;
+                document.getElementById('total-claimed').textContent = currentClaimedCount + ' Orang';
+
+                // Generate barcode
                 JsBarcode("#templateBarcode", uniqueCode, {
                     format: "CODE128",
                     width: 1.5,

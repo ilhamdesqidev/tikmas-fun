@@ -25,21 +25,20 @@ class VoucherClaimController extends Controller
         return view('vouchers.index', compact('vouchers'));
     }
 
-    /**
-     * Show single voucher detail
-     */
-    public function show($id)
-    {
-        $voucher = Voucher::findOrFail($id);
-        
-        // Cek apakah voucher bisa diklaim
-        if (!$voucher->is_available) {
-            return redirect()->route('vouchers.index')
-                ->with('error', 'Voucher tidak tersedia untuk diklaim.');
-        }
-        
-        return view('vouchers.show', compact('voucher'));
+    
+public function show($id)
+{
+    // Load voucher dengan relasi claims untuk counting
+    $voucher = Voucher::withCount('claims')->findOrFail($id);
+    
+    // Cek apakah voucher bisa diklaim
+    if (!$voucher->is_available) {
+        return redirect()->route('vouchers.index')
+            ->with('error', 'Voucher tidak tersedia untuk diklaim.');
     }
+    
+    return view('vouchers.show', compact('voucher'));
+}
 
     /**
      * Claim voucher dengan validasi ketat
