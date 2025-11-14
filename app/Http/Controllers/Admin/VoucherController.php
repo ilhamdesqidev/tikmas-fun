@@ -208,27 +208,20 @@ class VoucherController extends Controller
             // Generate Excel dengan styling
             $spreadsheet = $this->generateProfessionalExcel($filteredClaims, $status);
             
-            // Create writer
-            $writer = new Xlsx($spreadsheet);
-            
             // Generate filename
             $filename = $this->generateExcelFilename($status);
             
-            // Set headers untuk download
-            $headers = [
-                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-                'Cache-Control' => 'max-age=0',
-            ];
+            // Create temporary file
+            $tempFile = tempnam(sys_get_temp_dir(), 'voucher_export_');
             
-            // Stream response
-            return response()->stream(
-                function() use ($writer) {
-                    $writer->save('php://output');
-                },
-                200,
-                $headers
-            );
+            // Create writer and save to temp file
+            $writer = new Xlsx($spreadsheet);
+            $writer->save($tempFile);
+            
+            // Return file download response
+            return response()->download($tempFile, $filename, [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ])->deleteFileAfterSend(true);
             
         } catch (\Exception $e) {
             Log::error('Export error: ' . $e->getMessage());
@@ -367,18 +360,18 @@ class VoucherController extends Controller
             
             $statusVoucher = $voucherExpired ? 'EXPIRED' : 'AKTIF';
             
-            // Fill data
-            $sheet->setCellValue('A' . $currentRow, $index + 1);
-            $sheet->setCellValue('B' . $currentRow, $this->cleanText($claim->user_name));
-            $sheet->setCellValue('C' . $currentRow, $this->cleanText($claim->user_domisili ?? '-'));
-            $sheet->setCellValue('D' . $currentRow, $this->formatPhoneNumber($claim->user_phone));
-            $sheet->setCellValue('E' . $currentRow, $this->cleanText($claim->voucher->name ?? '-'));
-            $sheet->setCellValue('F' . $currentRow, $claim->unique_code);
-            $sheet->setCellValue('G' . $currentRow, $claim->created_at->format('d/m/Y H:i'));
-            $sheet->setCellValue('H' . $currentRow, $claim->voucher ? Carbon::parse($claim->voucher->expiry_date)->format('d/m/Y') : '-');
-            $sheet->setCellValue('I' . $currentRow, $statusVoucher);
-            $sheet->setCellValue('J' . $currentRow, $statusPemakaian);
-            $sheet->setCellValue('K' . $currentRow, $claim->scanned_at ? $claim->scanned_at->format('d/m/Y H:i') : '-');
+            // Fill data - gunakan setCellValueExplicit untuk memastikan text
+            $sheet->setCellValueExplicit('A' . $currentRow, $index + 1, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
+            $sheet->setCellValueExplicit('B' . $currentRow, $this->cleanText($claim->user_name), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->setCellValueExplicit('C' . $currentRow, $this->cleanText($claim->user_domisili ?? '-'), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->setCellValueExplicit('D' . $currentRow, $this->formatPhoneNumber($claim->user_phone), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->setCellValueExplicit('E' . $currentRow, $this->cleanText($claim->voucher->name ?? '-'), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->setCellValueExplicit('F' . $currentRow, $claim->unique_code, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->setCellValueExplicit('G' . $currentRow, $claim->created_at->format('d/m/Y H:i'), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->setCellValueExplicit('H' . $currentRow, $claim->voucher ? Carbon::parse($claim->voucher->expiry_date)->format('d/m/Y') : '-', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->setCellValueExplicit('I' . $currentRow, $statusVoucher, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->setCellValueExplicit('J' . $currentRow, $statusPemakaian, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->setCellValueExplicit('K' . $currentRow, $claim->scanned_at ? $claim->scanned_at->format('d/m/Y H:i') : '-', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             
             // Row styling
             $sheet->getStyle('A' . $currentRow . ':K' . $currentRow)->applyFromArray([
@@ -426,7 +419,7 @@ class VoucherController extends Controller
         // ========== SUMMARY SECTION ==========
         $currentRow += 2;
         
-        $sheet->setCellValue('A' . $currentRow, 'RINGKASAN STATISTIK');
+        $sheet->setCellValueExplicit('A' . $currentRow, 'RINGKASAN STATISTIK', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
         $sheet->mergeCells('A' . $currentRow . ':B' . $currentRow);
         $sheet->getStyle('A' . $currentRow)->applyFromArray([
             'font' => [
@@ -472,8 +465,8 @@ class VoucherController extends Controller
         ];
         
         foreach ($summaryData as $data) {
-            $sheet->setCellValue('A' . $currentRow, $data[0]);
-            $sheet->setCellValue('B' . $currentRow, $data[1]);
+            $sheet->setCellValueExplicit('A' . $currentRow, $data[0], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->setCellValueExplicit('B' . $currentRow, $data[1], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             
             $sheet->getStyle('A' . $currentRow . ':B' . $currentRow)->applyFromArray([
                 'font' => [
@@ -523,7 +516,9 @@ class VoucherController extends Controller
         $sheet->freezePane('A' . ($headerRow + 1));
         
         // Auto filter
-        $sheet->setAutoFilter('A' . $headerRow . ':K' . $dataEndRow);
+        if ($dataEndRow >= $headerRow + 1) {
+            $sheet->setAutoFilter('A' . $headerRow . ':K' . $dataEndRow);
+        }
         
         return $spreadsheet;
     }
