@@ -473,7 +473,7 @@ class VoucherController extends Controller
         ]);
         
         // ========== COLUMN WIDTHS ==========
-        $sheet->getColumnDimension('A')->setWidth(8);   // No
+        $sheet->getColumnDimension('A')->setWidth(22);   // No
         $sheet->getColumnDimension('B')->setWidth(25);  // Nama User
         $sheet->getColumnDimension('C')->setWidth(20);  // Domisili
         $sheet->getColumnDimension('D')->setWidth(18);  // No WA
