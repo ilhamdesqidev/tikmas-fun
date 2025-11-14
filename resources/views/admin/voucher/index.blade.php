@@ -226,50 +226,75 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                             </svg>
                         </button>
-                    </div>
-                </div>
-
-                <!-- Export Section -->
-                <div class="mb-6 bg-gradient-to-br from-blue-50 to-indigo-50 p-5 rounded-xl border border-blue-200">
-                    <div class="flex items-center gap-2 mb-4">
-                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                        <h3 class="text-sm font-semibold text-gray-800">Export Data</h3>
-                    </div>
-                    
-                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                        <a href="{{ route('admin.voucher.export', ['status' => 'all']) }}" 
-                           class="flex items-center justify-center gap-2 px-4 py-3 bg-white hover:bg-gray-50 border border-blue-200 text-blue-700 rounded-lg transition-colors text-sm font-medium shadow-sm">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                            Semua Data
-                        </a>
                         
-                        <a href="{{ route('admin.voucher.export', ['status' => 'active']) }}" 
-                           class="flex items-center justify-center gap-2 px-4 py-3 bg-white hover:bg-gray-50 border border-green-200 text-green-700 rounded-lg transition-colors text-sm font-medium shadow-sm">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            Belum Terpakai
-                        </a>
-                        
-                        <a href="{{ route('admin.voucher.export', ['status' => 'used']) }}" 
-                           class="flex items-center justify-center gap-2 px-4 py-3 bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 rounded-lg transition-colors text-sm font-medium shadow-sm">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                            </svg>
-                            Sudah Terpakai
-                        </a>
-                        
-                        <a href="{{ route('admin.voucher.export', ['status' => 'expired']) }}" 
-                           class="flex items-center justify-center gap-2 px-4 py-3 bg-white hover:bg-gray-50 border border-red-200 text-red-700 rounded-lg transition-colors text-sm font-medium shadow-sm">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            Kadaluarsa
-                        </a>
+                        <!-- Export Dropdown -->
+                        <div class="relative" x-data="{ open: false }" @click.away="open = false">
+                            <button @click="open = !open" class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors shadow-sm">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                Export
+                                <svg class="w-4 h-4" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            
+                            <div x-show="open" 
+                                 x-transition:enter="transition ease-out duration-100"
+                                 x-transition:enter-start="transform opacity-0 scale-95"
+                                 x-transition:enter-end="transform opacity-100 scale-100"
+                                 x-transition:leave="transition ease-in duration-75"
+                                 x-transition:leave-start="transform opacity-100 scale-100"
+                                 x-transition:leave-end="transform opacity-0 scale-95"
+                                 class="absolute right-0 mt-2 w-56 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10"
+                                 style="display: none;">
+                                <div class="py-1">
+                                    <a href="{{ route('admin.voucher.export', ['status' => 'all']) }}" 
+                                       class="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+                                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                        </svg>
+                                        <div>
+                                            <div class="font-medium">Semua Data</div>
+                                            <div class="text-xs text-gray-500">Export seluruh data</div>
+                                        </div>
+                                    </a>
+                                    
+                                    <a href="{{ route('admin.voucher.export', ['status' => 'active']) }}" 
+                                       class="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+                                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        <div>
+                                            <div class="font-medium">Belum Terpakai</div>
+                                            <div class="text-xs text-gray-500">Voucher aktif</div>
+                                        </div>
+                                    </a>
+                                    
+                                    <a href="{{ route('admin.voucher.export', ['status' => 'used']) }}" 
+                                       class="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+                                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                        </svg>
+                                        <div>
+                                            <div class="font-medium">Sudah Terpakai</div>
+                                            <div class="text-xs text-gray-500">Voucher terpakai</div>
+                                        </div>
+                                    </a>
+                                    
+                                    <a href="{{ route('admin.voucher.export', ['status' => 'expired']) }}" 
+                                       class="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+                                        <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        <div>
+                                            <div class="font-medium">Kadaluarsa</div>
+                                            <div class="text-xs text-gray-500">Voucher expired</div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -936,6 +961,26 @@ function closeImageModal() {
 
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Alpine.js-like dropdown functionality
+    document.querySelectorAll('[x-data]').forEach(el => {
+        const button = el.querySelector('button');
+        const dropdown = el.querySelector('[x-show]');
+        
+        if (button && dropdown) {
+            button.addEventListener('click', function(e) {
+                e.stopPropagation();
+                dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+            });
+            
+            // Close on outside click
+            document.addEventListener('click', function(e) {
+                if (!el.contains(e.target)) {
+                    dropdown.style.display = 'none';
+                }
+            });
+        }
+    });
+    
     // Close modals on outside click
     ['createVoucherModal','editVoucherModal','descriptionModal','deleteModal'].forEach(id => {
         const el = document.getElementById(id);
