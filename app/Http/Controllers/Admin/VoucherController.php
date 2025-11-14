@@ -9,12 +9,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
-use PhpOffice\PhpSpreadsheet\Style\Border;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
-use PhpOffice\PhpSpreadsheet\Style\Font;
 
 class VoucherController extends Controller
 {
@@ -195,7 +189,7 @@ class VoucherController extends Controller
     }
 
     /**
-     * Export data voucher claims ke Excel/CSV
+     * Export data voucher claims ke CSV dengan format rapi
      */
     public function export(Request $request)
     {
@@ -205,61 +199,17 @@ class VoucherController extends Controller
             $claims = VoucherClaim::with('voucher')->latest()->get();
             $filteredClaims = $this->filterClaimsByStatus($claims, $status);
             
-            // Cek apakah PhpSpreadsheet tersedia
-            if (class_exists('\PhpOffice\PhpSpreadsheet\Spreadsheet')) {
-                return $this->exportAsExcel($filteredClaims, $status);
-            } else {
-                // Fallback ke CSV jika PhpSpreadsheet tidak tersedia
-                return $this->exportAsCSV($filteredClaims, $status);
-            }
+            return $this->exportAsCSV($filteredClaims, $status);
             
         } catch (\Exception $e) {
             Log::error('Export error: ' . $e->getMessage());
             Log::error('Stack trace: ' . $e->getTraceAsString());
-            
-            // Jika gagal, coba export sebagai CSV
-            try {
-                $claims = VoucherClaim::with('voucher')->latest()->get();
-                $filteredClaims = $this->filterClaimsByStatus($claims, $status);
-                return $this->exportAsCSV($filteredClaims, $status);
-            } catch (\Exception $csvError) {
-                return redirect()->back()->with('error', 'Gagal export data: ' . $e->getMessage());
-            }
+            return redirect()->back()->with('error', 'Gagal export data: ' . $e->getMessage());
         }
     }
 
     /**
-     * Export sebagai Excel menggunakan PhpSpreadsheet
-     */
-    private function exportAsExcel($claims, $status)
-    {
-        try {
-            $spreadsheet = $this->generateProfessionalExcel($claims, $status);
-            $filename = $this->generateExcelFilename($status);
-            
-            // Create temporary file dengan extension yang benar
-            $tempFile = tempnam(sys_get_temp_dir(), 'voucher_') . '.xlsx';
-            
-            $writer = new Xlsx($spreadsheet);
-            $writer->save($tempFile);
-            
-            // Pastikan file berhasil dibuat
-            if (!file_exists($tempFile) || filesize($tempFile) === 0) {
-                throw new \Exception('File Excel gagal dibuat');
-            }
-            
-            return response()->download($tempFile, $filename, [
-                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            ])->deleteFileAfterSend(true);
-            
-        } catch (\Exception $e) {
-            Log::error('Excel export failed: ' . $e->getMessage());
-            throw $e;
-        }
-    }
-
-    /**
-     * Export sebagai CSV (fallback method)
+     * Export sebagai CSV dengan format rapi
      */
     private function exportAsCSV($claims, $status)
     {
@@ -283,17 +233,30 @@ class VoucherController extends Controller
         $callback = function() use ($claims, $statusLabels, $status) {
             $file = fopen('php://output', 'w');
             
-            // Add BOM for UTF-8
+            // Add BOM for UTF-8 (agar karakter Indonesia terbaca dengan baik)
             fwrite($file, "\xEF\xBB\xBF");
             
-            // Header
-            fputcsv($file, ["LAPORAN DATA KLAIM VOUCHER"]);
-            fputcsv($file, ["Status Filter: " . ($statusLabels[$status] ?? 'SEMUA DATA')]);
-            fputcsv($file, ["Tanggal Export: " . Carbon::now()->format('d F Y H:i:s')]);
-            fputcsv($file, ["Total Data: " . number_format($claims->count()) . " klaim"]);
+            // ========== HEADER SECTION ==========
+            fputcsv($file, ['╔════════════════════════════════════════════════════════════════════════════════════════════════════╗']);
+            fputcsv($file, ['                           LAPORAN DATA KLAIM VOUCHER                                               ']);
+            fputcsv($file, ['╚════════════════════════════════════════════════════════════════════════════════════════════════════╝']);
             fputcsv($file, []);
             
-            // Table Header
+            // ========== INFO SECTION ==========
+            fputcsv($file, ['📊 INFORMASI EXPORT']);
+            fputcsv($file, ['═══════════════════════════════════════════════════════════════════════════════════════════════════']);
+            fputcsv($file, ['Status Filter', ':', $statusLabels[$status] ?? 'SEMUA DATA']);
+            fputcsv($file, ['Tanggal Export', ':', Carbon::now()->format('d F Y, H:i:s')]);
+            fputcsv($file, ['Total Data', ':', number_format($claims->count()) . ' klaim']);
+            fputcsv($file, []);
+            fputcsv($file, []);
+            
+            // ========== TABLE HEADER ==========
+            fputcsv($file, ['═══════════════════════════════════════════════════════════════════════════════════════════════════']);
+            fputcsv($file, ['                                      DATA KLAIM VOUCHER                                           ']);
+            fputcsv($file, ['═══════════════════════════════════════════════════════════════════════════════════════════════════']);
+            fputcsv($file, []);
+            
             fputcsv($file, [
                 'NO',
                 'NAMA USER', 
@@ -308,7 +271,9 @@ class VoucherController extends Controller
                 'TANGGAL TERPAKAI'
             ]);
             
-            // Data Rows
+            fputcsv($file, ['───────', '─────────────────────', '──────────────────', '─────────────────', '──────────────────────────────', '─────────────────', '─────────────────', '────────────────', '────────────────', '──────────────────', '─────────────────']);
+            
+            // ========== DATA ROWS ==========
             $counter = 1;
             foreach ($claims as $claim) {
                 $isUsed = $claim->is_used || $claim->scanned_at;
@@ -316,14 +281,14 @@ class VoucherController extends Controller
                                 Carbon::now()->startOfDay()->greaterThan(Carbon::parse($claim->voucher->expiry_date));
                 
                 if ($isUsed) {
-                    $statusPemakaian = 'TERPAKAI';
+                    $statusPemakaian = '✅ TERPAKAI';
                 } elseif ($voucherExpired) {
-                    $statusPemakaian = 'KADALUARSA';
+                    $statusPemakaian = '⚠️ KADALUARSA';
                 } else {
-                    $statusPemakaian = 'BELUM TERPAKAI';
+                    $statusPemakaian = '🟢 BELUM TERPAKAI';
                 }
                 
-                $statusVoucher = $voucherExpired ? 'EXPIRED' : 'AKTIF';
+                $statusVoucher = $voucherExpired ? '❌ EXPIRED' : '✅ AKTIF';
                 
                 fputcsv($file, [
                     $counter++,
@@ -340,9 +305,15 @@ class VoucherController extends Controller
                 ]);
             }
             
-            // Summary
+            fputcsv($file, ['───────', '─────────────────────', '──────────────────', '─────────────────', '──────────────────────────────', '─────────────────', '─────────────────', '────────────────', '────────────────', '──────────────────', '─────────────────']);
             fputcsv($file, []);
-            fputcsv($file, ["RINGKASAN STATISTIK"]);
+            fputcsv($file, []);
+            
+            // ========== SUMMARY SECTION ==========
+            fputcsv($file, ['═══════════════════════════════════════════════════════════════════════════════════════════════════']);
+            fputcsv($file, ['                                   RINGKASAN STATISTIK                                             ']);
+            fputcsv($file, ['═══════════════════════════════════════════════════════════════════════════════════════════════════']);
+            fputcsv($file, []);
             
             $activeCount = $claims->filter(function($c) {
                 $isUsed = $c->is_used || $c->scanned_at;
@@ -360,10 +331,31 @@ class VoucherController extends Controller
                 return !$isUsed && $expired;
             })->count();
             
-            fputcsv($file, ["Belum Terpakai:", number_format($activeCount)]);
-            fputcsv($file, ["Sudah Terpakai:", number_format($usedCount)]);
-            fputcsv($file, ["Kadaluarsa:", number_format($expiredCount)]);
-            fputcsv($file, ["TOTAL:", number_format($claims->count())]);
+            fputcsv($file, ['📊 Ringkasan Berdasarkan Status:', '']);
+            fputcsv($file, ['']);
+            fputcsv($file, ['🟢 Belum Terpakai (Aktif)', ':', number_format($activeCount) . ' voucher']);
+            fputcsv($file, ['✅ Sudah Terpakai', ':', number_format($usedCount) . ' voucher']);
+            fputcsv($file, ['⚠️ Kadaluarsa', ':', number_format($expiredCount) . ' voucher']);
+            fputcsv($file, ['']);
+            fputcsv($file, ['───────────────────────────────────────────────────────────────────────────────────────────────────']);
+            fputcsv($file, ['📈 TOTAL KESELURUHAN', ':', number_format($claims->count()) . ' voucher']);
+            fputcsv($file, ['═══════════════════════════════════════════════════════════════════════════════════════════════════']);
+            fputcsv($file, []);
+            fputcsv($file, []);
+            
+            // ========== FOOTER ==========
+            fputcsv($file, ['']);
+            fputcsv($file, ['💡 PETUNJUK PENGGUNAAN:']);
+            fputcsv($file, ['']);
+            fputcsv($file, ['1. File ini dapat dibuka langsung di Microsoft Excel atau Google Sheets']);
+            fputcsv($file, ['2. Untuk format tabel yang lebih rapi, pilih semua data dan gunakan "Format as Table"']);
+            fputcsv($file, ['3. Gunakan fitur Filter untuk menyaring data berdasarkan status']);
+            fputcsv($file, ['4. Kolom dapat di-sort dengan klik header kolom']);
+            fputcsv($file, ['']);
+            fputcsv($file, ['═══════════════════════════════════════════════════════════════════════════════════════════════════']);
+            fputcsv($file, ['Generated by: Voucher Management System']);
+            fputcsv($file, ['Copyright © ' . date('Y') . ' - All Rights Reserved']);
+            fputcsv($file, ['═══════════════════════════════════════════════════════════════════════════════════════════════════']);
             
             fclose($file);
         };
@@ -721,6 +713,6 @@ class VoucherController extends Controller
         $label = $statusLabel[$status] ?? 'Data';
         $date = Carbon::now()->format('Y-m-d_His');
         
-        return "Voucher_Claims_{$label}_{$date}.xlsx";
+        return "Voucher_Claims_{$label}_{$date}.csv";
     }
 }
