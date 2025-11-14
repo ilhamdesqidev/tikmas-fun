@@ -584,7 +584,7 @@ class TicketController extends Controller
         }
         
         // Column widths
-        $widths = ['A' => 8, 'B' => 20, 'C' => 20, 'D' => 30, 'E' => 15, 'F' => 25, 'G' => 18, 'H' => 15, 'I' => 10, 'J' => 18, 'K' => 15, 'L' => 18];
+        $widths = ['A' => 16, 'B' => 20, 'C' => 20, 'D' => 30, 'E' => 15, 'F' => 25, 'G' => 18, 'H' => 15, 'I' => 10, 'J' => 18, 'K' => 15, 'L' => 18];
         foreach ($widths as $col => $width) {
             $sheet->getColumnDimension($col)->setWidth($width);
         }
