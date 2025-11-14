@@ -9,11 +9,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
-use PhpOffice\PhpSpreadsheet\Style\Border;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
 class VoucherController extends Controller
 {
@@ -194,7 +189,7 @@ class VoucherController extends Controller
     }
 
     /**
-     * Export data voucher claims ke Excel dengan styling profesional
+     * Export data voucher claims ke CSV dengan format tabel yang rapi
      */
     public function export(Request $request)
     {
@@ -211,8 +206,9 @@ class VoucherController extends Controller
             return redirect()->back()->with('error', 'Gagal export data: ' . $e->getMessage());
         }
     }
+
     /**
-     * Export sebagai CSV (fallback method)
+     * Export sebagai CSV dengan format tabel yang rapi dan terstruktur
      */
     private function exportAsCSV($claims, $status)
     {
@@ -240,17 +236,16 @@ class VoucherController extends Controller
             fwrite($file, "\xEF\xBB\xBF");
             
             // ========== HEADER SECTION ==========
-            fputcsv($file, ['╔════════════════════════════════════════════════════════════════════════╗']);
-            fputcsv($file, ['║           LAPORAN DATA KLAIM VOUCHER                                   ║']);
-            fputcsv($file, ['╚════════════════════════════════════════════════════════════════════════╝']);
+            fputcsv($file, ['LAPORAN DATA KLAIM VOUCHER']);
+            fputcsv($file, ['==================================================']);
             fputcsv($file, []);
             
             // Info Section
-            fputcsv($file, ['STATUS FILTER', ':', $statusLabels[$status] ?? 'SEMUA DATA']);
-            fputcsv($file, ['TANGGAL EXPORT', ':', date('d F Y H:i:s')]);
-            fputcsv($file, ['TOTAL DATA', ':', number_format($claims->count()) . ' Klaim']);
+            fputcsv($file, ['STATUS FILTER', $statusLabels[$status] ?? 'SEMUA DATA']);
+            fputcsv($file, ['TANGGAL EXPORT', date('d F Y H:i:s')]);
+            fputcsv($file, ['TOTAL DATA', number_format($claims->count()) . ' Klaim']);
             fputcsv($file, []);
-            fputcsv($file, ['════════════════════════════════════════════════════════════════════════']);
+            fputcsv($file, ['==================================================']);
             fputcsv($file, []);
             
             // ========== TABLE HEADER ==========
@@ -268,7 +263,7 @@ class VoucherController extends Controller
                 'TANGGAL TERPAKAI'
             ]);
             
-            fputcsv($file, ['────────────────────────────────────────────────────────────────────────']);
+            fputcsv($file, ['--------------------------------------------------']);
             
             // ========== DATA ROWS ==========
             $counter = 1;
@@ -279,13 +274,13 @@ class VoucherController extends Controller
                 
                 // Format status
                 if ($isUsed) {
-                    $statusPemakaian = '✓ TERPAKAI';
+                    $statusPemakaian = 'TERPAKAI';
                     $statusVoucher = 'AKTIF';
                 } elseif ($voucherExpired) {
-                    $statusPemakaian = '✗ KADALUARSA';
+                    $statusPemakaian = 'KADALUARSA';
                     $statusVoucher = 'EXPIRED';
                 } else {
-                    $statusPemakaian = '○ BELUM TERPAKAI';
+                    $statusPemakaian = 'BELUM TERPAKAI';
                     $statusVoucher = 'AKTIF';
                 }
                 
@@ -306,9 +301,9 @@ class VoucherController extends Controller
             
             // ========== SUMMARY SECTION ==========
             fputcsv($file, []);
-            fputcsv($file, ['════════════════════════════════════════════════════════════════════════']);
+            fputcsv($file, ['==================================================']);
             fputcsv($file, ['RINGKASAN STATISTIK']);
-            fputcsv($file, ['════════════════════════════════════════════════════════════════════════']);
+            fputcsv($file, ['==================================================']);
             fputcsv($file, []);
             
             $activeCount = $claims->filter(function($c) {
@@ -327,13 +322,13 @@ class VoucherController extends Controller
                 return !$isUsed && $expired;
             })->count();
             
-            fputcsv($file, ['○ Belum Terpakai (Aktif)', ':', number_format($activeCount) . ' klaim']);
-            fputcsv($file, ['✓ Sudah Terpakai', ':', number_format($usedCount) . ' klaim']);
-            fputcsv($file, ['✗ Kadaluarsa', ':', number_format($expiredCount) . ' klaim']);
+            fputcsv($file, ['Belum Terpakai (Aktif)', number_format($activeCount) . ' klaim']);
+            fputcsv($file, ['Sudah Terpakai', number_format($usedCount) . ' klaim']);
+            fputcsv($file, ['Kadaluarsa', number_format($expiredCount) . ' klaim']);
             fputcsv($file, ['']);
-            fputcsv($file, ['TOTAL KESELURUHAN', ':', number_format($claims->count()) . ' klaim']);
+            fputcsv($file, ['TOTAL KESELURUHAN', number_format($claims->count()) . ' klaim']);
             fputcsv($file, []);
-            fputcsv($file, ['════════════════════════════════════════════════════════════════════════']);
+            fputcsv($file, ['==================================================']);
             
             // ========== FOOTER ==========
             fputcsv($file, []);
@@ -341,12 +336,12 @@ class VoucherController extends Controller
             fputcsv($file, ['1. Buka file CSV ini dengan Microsoft Excel atau Google Sheets']);
             fputcsv($file, ['2. Pastikan encoding UTF-8 dipilih saat membuka file']);
             fputcsv($file, ['3. Data akan tampil dalam format tabel yang rapi']);
-            fputcsv($file, ['4. Gunakan fitur "Filter" atau "Sort" untuk analisis data']);
+            fputcsv($file, ['4. Gunakan fitur Filter atau Sort untuk analisis data']);
             fputcsv($file, ['5. Simpan sebagai Excel (.xlsx) jika ingin mempertahankan formatting']);
             fputcsv($file, []);
-            fputcsv($file, ['════════════════════════════════════════════════════════════════════════']);
+            fputcsv($file, ['==================================================']);
             fputcsv($file, ['Generated by Voucher Management System - ' . date('Y')]);
-            fputcsv($file, ['════════════════════════════════════════════════════════════════════════']);
+            fputcsv($file, ['==================================================']);
             
             fclose($file);
         };
@@ -354,27 +349,10 @@ class VoucherController extends Controller
         return response()->stream($callback, 200, $headers);
     }
 
-private function generateExcelTemplateInstructions()
-{
-    return [
-        "",
-        "PETUNJUK FORMATTING DI EXCEL:",
-        "1. Buka file CSV di Excel",
-        "2. Pilih semua data (Ctrl+A)",
-        "3. Format sebagai Table (Ctrl+T)",
-        "4. Pilih style tabel yang diinginkan",
-        "5. Untuk kolom status, gunakan conditional formatting:",
-        "   - TERPAKAI: Fill color abu-abu",
-        "   - BELUM TERPAKAI: Fill color hijau muda", 
-        "   - KADALUARSA: Fill color merah muda",
-        "6. Freeze pane pada baris 6 untuk header tabel",
-        "7. Auto-fit semua kolom untuk tampilan optimal"
-    ];
-}
-
-
-// Format nomor telepon yang lebih robust
-private function formatPhoneNumber($phone)
+    /**
+     * Format nomor telepon
+     */
+    private function formatPhoneNumber($phone)
     {
         if (empty($phone)) return '-';
         
@@ -392,182 +370,21 @@ private function formatPhoneNumber($phone)
     }
     
     /**
-     * Generate Excel Spreadsheet dengan styling profesional
+     * Bersihkan text dari karakter problematik
      */
-    private function generateExcelSpreadsheet($claims, $status)
+    private function cleanText($text)
     {
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
+        if (empty($text)) return '-';
         
-        // Status labels
-        $statusLabels = [
-            'all' => 'SEMUA DATA',
-            'active' => 'BELUM TERPAKAI',
-            'used' => 'SUDAH TERPAKAI',
-            'expired' => 'KADALUARSA'
-        ];
+        $cleaned = str_replace(["\t", "\r", "\n"], ' ', $text);
+        $cleaned = preg_replace('/\s+/', ' ', $cleaned);
         
-        // ========== HEADER SECTION ==========
-        $sheet->setCellValue('A1', 'LAPORAN DATA KLAIM VOUCHER');
-        $sheet->mergeCells('A1:K1');
-        $sheet->getStyle('A1')->applyFromArray([
-            'font' => ['bold' => true, 'size' => 16, 'color' => ['rgb' => 'FFFFFF']],
-            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '4472C4']],
-            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER]
-        ]);
-        $sheet->getRowDimension(1)->setRowHeight(30);
-        
-        // Info Section
-        $sheet->setCellValue('A2', 'Status Filter:');
-        $sheet->setCellValue('B2', $statusLabels[$status] ?? 'SEMUA');
-        $sheet->setCellValue('A3', 'Tanggal Export:');
-        $sheet->setCellValue('B3', Carbon::now()->format('d M Y H:i:s'));
-        $sheet->setCellValue('A4', 'Total Data:');
-        $sheet->setCellValue('B4', $claims->count() . ' klaim');
-        
-        $sheet->getStyle('A2:A4')->applyFromArray([
-            'font' => ['bold' => true],
-            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'E7E6E6']]
-        ]);
-        
-        // ========== TABLE HEADER ==========
-        $headers = ['No', 'Nama User', 'Domisili', 'No. WhatsApp', 'Nama Voucher', 
-                    'Kode Unik', 'Tanggal Klaim', 'Tanggal Expired', 'Status Voucher', 
-                    'Status Pemakaian', 'Tanggal Terpakai'];
-        
-        $col = 'A';
-        foreach ($headers as $header) {
-            $sheet->setCellValue($col . '6', $header);
-            $col++;
-        }
-        
-        $sheet->getStyle('A6:K6')->applyFromArray([
-            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
-            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '70AD47']],
-            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
-            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
-        ]);
-        $sheet->getRowDimension(6)->setRowHeight(25);
-        
-        // ========== DATA ROWS ==========
-        $row = 7;
-        foreach ($claims as $index => $claim) {
-            $isUsed = $claim->is_used || $claim->scanned_at;
-            $voucherExpired = $claim->voucher && 
-                            Carbon::now()->startOfDay()->greaterThan(Carbon::parse($claim->voucher->expiry_date));
-            
-            if ($isUsed) {
-                $statusPemakaian = 'Terpakai';
-                $statusColor = 'D3D3D3'; // Gray
-            } elseif ($voucherExpired) {
-                $statusPemakaian = 'Kadaluarsa';
-                $statusColor = 'FFB3BA'; // Light Red
-            } else {
-                $statusPemakaian = 'Belum Terpakai';
-                $statusColor = 'BAFFC9'; // Light Green
-            }
-            
-            $sheet->setCellValue('A' . $row, $index + 1);
-            $sheet->setCellValue('B' . $row, $claim->user_name);
-            $sheet->setCellValue('C' . $row, $claim->user_domisili ?? '-');
-            $sheet->setCellValue('D' . $row, $claim->user_phone);
-            $sheet->setCellValue('E' . $row, $claim->voucher->name ?? '-');
-            $sheet->setCellValue('F' . $row, $claim->unique_code);
-            $sheet->setCellValue('G' . $row, $claim->created_at->format('d M Y H:i'));
-            $sheet->setCellValue('H' . $row, $claim->voucher ? Carbon::parse($claim->voucher->expiry_date)->format('d M Y') : '-');
-            $sheet->setCellValue('I' . $row, $voucherExpired ? 'Expired' : 'Aktif');
-            $sheet->setCellValue('J' . $row, $statusPemakaian);
-            $sheet->setCellValue('K' . $row, $claim->scanned_at ? $claim->scanned_at->format('d M Y H:i') : '-');
-            
-            // Row styling
-            $sheet->getStyle('A' . $row . ':K' . $row)->applyFromArray([
-                'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'CCCCCC']]],
-                'alignment' => ['vertical' => Alignment::VERTICAL_CENTER]
-            ]);
-            
-            // Status column color
-            $sheet->getStyle('J' . $row)->applyFromArray([
-                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $statusColor]],
-                'font' => ['bold' => true]
-            ]);
-            
-            $row++;
-        }
-        
-        // ========== SUMMARY SECTION ==========
-        $summaryRow = $row + 2;
-        $sheet->setCellValue('A' . $summaryRow, 'RINGKASAN');
-        $sheet->mergeCells('A' . $summaryRow . ':B' . $summaryRow);
-        $sheet->getStyle('A' . $summaryRow)->applyFromArray([
-            'font' => ['bold' => true, 'size' => 14],
-            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'FFC000']],
-            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
-        ]);
-        
-        $activeCount = $claims->filter(function($c) {
-            $isUsed = $c->is_used || $c->scanned_at;
-            $expired = $c->voucher && Carbon::now()->startOfDay()->greaterThan(Carbon::parse($c->voucher->expiry_date));
-            return !$isUsed && !$expired;
-        })->count();
-        
-        $usedCount = $claims->filter(function($c) {
-            return $c->is_used || $c->scanned_at;
-        })->count();
-        
-        $expiredCount = $claims->filter(function($c) {
-            $isUsed = $c->is_used || $c->scanned_at;
-            $expired = $c->voucher && Carbon::now()->startOfDay()->greaterThan(Carbon::parse($c->voucher->expiry_date));
-            return !$isUsed && $expired;
-        })->count();
-        
-        $summaryData = [
-            ['Total Belum Terpakai:', $activeCount, 'BAFFC9'],
-            ['Total Sudah Terpakai:', $usedCount, 'D3D3D3'],
-            ['Total Kadaluarsa:', $expiredCount, 'FFB3BA'],
-            ['TOTAL KESELURUHAN:', $claims->count(), 'FFD966']
-        ];
-        
-        $summaryRow++;
-        foreach ($summaryData as $data) {
-            $sheet->setCellValue('A' . $summaryRow, $data[0]);
-            $sheet->setCellValue('B' . $summaryRow, $data[1]);
-            $sheet->getStyle('A' . $summaryRow . ':B' . $summaryRow)->applyFromArray([
-                'font' => ['bold' => true],
-                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $data[2]]],
-                'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
-            ]);
-            $summaryRow++;
-        }
-        
-      // ========== COLUMN WIDTHS ==========
-$sheet->getColumnDimension('A')->setWidth(8);  // NO - lebih lebar
-$sheet->getColumnDimension('B')->setWidth(25); // NAMA USER - ok
-$sheet->getColumnDimension('C')->setWidth(20); // DOMISILI - ok
-$sheet->getColumnDimension('D')->setWidth(20); // NO WHATSAPP - lebih lebar
-$sheet->getColumnDimension('E')->setWidth(35); // NAMA VOUCHER - lebih lebar
-$sheet->getColumnDimension('F')->setWidth(20); // KODE UNIK - lebih lebar
-$sheet->getColumnDimension('G')->setWidth(20); // TANGGAL KLAIM - lebih lebar
-$sheet->getColumnDimension('H')->setWidth(18); // EXPIRED DATE - ok
-$sheet->getColumnDimension('I')->setWidth(15); // STATUS VOUCHER - ok
-$sheet->getColumnDimension('J')->setWidth(20); // STATUS PEMAKAIAN - lebih lebar
-$sheet->getColumnDimension('K')->setWidth(20); // TANGGAL TERPAKAI - lebih lebar
-
-// Auto-wrap text untuk kolom yang panjang
-$sheet->getStyle('E7:E' . ($row-1))->getAlignment()->setWrapText(true); // Nama Voucher
-$sheet->getStyle('B7:B' . ($row-1))->getAlignment()->setWrapText(true); // Nama User
-
-// Center align untuk kolom tertentu
-$sheet->getStyle('A7:A' . ($row-1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-$sheet->getStyle('I7:J' . ($row-1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-// Set row height untuk accommodate wrapped text
-for ($i = 7; $i <= $row-1; $i++) {
-    $sheet->getRowDimension($i)->setRowHeight(25);
-}
-        
-        return $spreadsheet;
+        return trim($cleaned);
     }
     
+    /**
+     * Filter claims berdasarkan status
+     */
     private function filterClaimsByStatus($claims, $status)
     {
         if ($status === 'all') return $claims;
@@ -584,31 +401,5 @@ for ($i = 7; $i <= $row-1; $i++) {
                 default: return true;
             }
         });
-    }
-
-    // Bersihkan text dari karakter problematik
-    private function cleanText($text)
-    {
-        if (empty($text)) return '-';
-        
-        $cleaned = str_replace(["\t", "\r", "\n"], ' ', $text);
-        $cleaned = preg_replace('/\s+/', ' ', $cleaned);
-        
-        return trim($cleaned);
-    }
-    
-    private function generateExcelFilename($status)
-    {
-        $statusLabel = [
-            'all' => 'Semua_Data',
-            'active' => 'Belum_Terpakai',
-            'used' => 'Sudah_Terpakai',
-            'expired' => 'Kadaluarsa'
-        ];
-        
-        $label = $statusLabel[$status] ?? 'Data';
-        $date = Carbon::now()->format('Y-m-d_His');
-        
-        return "Voucher_Claims_{$label}_{$date}.csv";
     }
 }
