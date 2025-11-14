@@ -71,95 +71,135 @@
         </div>
     </div>
 
-    <!-- Export Section -->
-    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h2 class="text-lg font-semibold text-gray-800 mb-4">📊 Export Data Tiket</h2>
-        
-        <!-- Single Status Export -->
-        <div class="mb-6">
-            <h3 class="text-md font-semibold mb-3">Export per Status</h3>
-            <div class="flex flex-wrap gap-2">
-                <a href="{{ route('admin.tickets.export', ['status' => 'all']) }}" 
-                   class="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition duration-200">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                    Export Semua CSV
-                </a>
-                
-                <a href="{{ route('admin.tickets.export', ['status' => 'success']) }}" 
-                   class="inline-flex items-center px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition duration-200">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    Export Success CSV
-                </a>
-                
-                <a href="{{ route('admin.tickets.export', ['status' => 'pending']) }}" 
-                   class="inline-flex items-center px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition duration-200">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    Export Pending CSV
-                </a>
-
-                <a href="{{ route('admin.tickets.export', ['status' => 'challenge']) }}" 
-                   class="inline-flex items-center px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition duration-200">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                    </svg>
-                    Export Challenge CSV
-                </a>
-
-                <a href="{{ route('admin.tickets.export', ['status' => 'expired']) }}" 
-                   class="inline-flex items-center px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition duration-200">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    Export Expired CSV
-                </a>
-            </div>
-        </div>
-
-        <!-- All Status Export -->
-        <div class="mb-6">
-            <h3 class="text-md font-semibold mb-3">Export Semua Status</h3>
-            <a href="{{ route('admin.tickets.exportAll') }}" 
-               class="inline-flex items-center px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition duration-200">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+    <!-- Export Section - UPGRADED! -->
+    <div class="mb-6 bg-gradient-to-br from-blue-50 via-purple-50 to-green-50 p-6 rounded-xl border border-blue-200 shadow-md">
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center">
+                <svg class="w-6 h-6 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                 </svg>
-                Export All Status (Multi-section CSV)
-            </a>
-            <p class="text-sm text-gray-600 mt-1">File CSV dengan semua status dalam satu file terpisah per section</p>
+                <h3 class="text-lg font-bold text-gray-800">📊 Export Data Tiket ke Excel</h3>
+            </div>
+            <span class="text-xs text-gray-600 bg-white px-3 py-1 rounded-full shadow-sm">✨ Professional Excel Format</span>
         </div>
-
-        <!-- Filter by Promo -->
-        @if(isset($promos) && $promos->count() > 0)
-        <div class="mb-4">
-            <h3 class="text-md font-semibold mb-3">Export by Promo</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                @foreach($promos as $promo)
-                <div class="flex justify-between items-center p-3 bg-gray-50 rounded border">
-                    <div>
-                        <span class="font-medium text-gray-800">{{ $promo->name }}</span>
-                        <span class="text-sm text-gray-500 ml-2">({{ $promo->orders_count }} orders)</span>
-                    </div>
-                    <div class="flex gap-2">
-                        <a href="{{ route('admin.tickets.export', ['status' => 'all', 'promo_id' => $promo->id]) }}" 
-                           class="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded transition duration-200">
-                            CSV
-                        </a>
-                        <a href="{{ route('admin.tickets.exportAll', ['promo_id' => $promo->id]) }}" 
-                           class="px-3 py-1 bg-purple-500 hover:bg-purple-600 text-white text-sm rounded transition duration-200">
-                            All CSV
-                        </a>
-                    </div>
-                </div>
-                @endforeach
+        
+        <!-- Filter Promo -->
+        <div class="mb-4 bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+            <label class="flex items-center text-sm font-semibold text-gray-700 mb-2">
+                <svg class="w-4 h-4 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                </svg>
+                🎯 Filter by Promo (Opsional)
+            </label>
+            <select id="exportPromoFilter" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                <option value="all">📋 Semua Promo</option>
+                @if(isset($promos))
+                    @foreach($promos as $promo)
+                        <option value="{{ $promo->id }}">
+                            {{ $promo->name }} ({{ $promo->orders_count }} tiket)
+                        </option>
+                    @endforeach
+                @endif
+            </select>
+        </div>
+        
+        <!-- Export Buttons -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+            <!-- Export All Status -->
+            <button onclick="exportTickets('all')" 
+                    class="flex flex-col items-center justify-center px-4 py-4 bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 group">
+                <svg class="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <span class="text-xs font-bold">📊 Semua</span>
+                <span class="text-xs opacity-80">{{ number_format($totalOrders) }}</span>
+            </button>
+            
+            <!-- Export Success -->
+            <button onclick="exportTickets('success')" 
+                    class="flex flex-col items-center justify-center px-4 py-4 bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 group">
+                <svg class="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span class="text-xs font-bold">✅ Success</span>
+                <span class="text-xs opacity-80">{{ number_format($statusCounts['success']) }}</span>
+            </button>
+            
+            <!-- Export Pending -->
+            <button onclick="exportTickets('pending')" 
+                    class="flex flex-col items-center justify-center px-4 py-4 bg-gradient-to-br from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 group">
+                <svg class="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span class="text-xs font-bold">⏳ Pending</span>
+                <span class="text-xs opacity-80">{{ number_format($statusCounts['pending']) }}</span>
+            </button>
+            
+            <!-- Export Challenge -->
+            <button onclick="exportTickets('challenge')" 
+                    class="flex flex-col items-center justify-center px-4 py-4 bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 group">
+                <svg class="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+                <span class="text-xs font-bold">⚠️ Challenge</span>
+                <span class="text-xs opacity-80">{{ number_format($statusCounts['challenge']) }}</span>
+            </button>
+            
+            <!-- Export Denied -->
+            <button onclick="exportTickets('denied')" 
+                    class="flex flex-col items-center justify-center px-4 py-4 bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 group">
+                <svg class="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span class="text-xs font-bold">❌ Denied</span>
+                <span class="text-xs opacity-80">{{ number_format($statusCounts['denied']) }}</span>
+            </button>
+            
+            <!-- Export Expired -->
+            <button onclick="exportTickets('expired')" 
+                    class="flex flex-col items-center justify-center px-4 py-4 bg-gradient-to-br from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 group">
+                <svg class="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span class="text-xs font-bold">⏰ Expired</span>
+                <span class="text-xs opacity-80">{{ number_format($statusCounts['expired']) }}</span>
+            </button>
+            
+            <!-- Export Canceled -->
+            <button onclick="exportTickets('canceled')" 
+                    class="flex flex-col items-center justify-center px-4 py-4 bg-gradient-to-br from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 group">
+                <svg class="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                </svg>
+                <span class="text-xs font-bold">🚫 Canceled</span>
+                <span class="text-xs opacity-80">{{ number_format($statusCounts['canceled']) }}</span>
+            </button>
+            
+            <!-- Export All with Multiple Sheets -->
+            <button onclick="exportAllStatuses()" 
+                    class="flex flex-col items-center justify-center px-4 py-4 bg-gradient-to-br from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 group">
+                <svg class="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                </svg>
+                <span class="text-xs font-bold">📑 Multi-Sheet</span>
+                <span class="text-xs opacity-80">All Status</span>
+            </button>
+        </div>
+        
+        <div class="flex items-start space-x-2 bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <div class="text-xs text-blue-800">
+                <p class="font-semibold mb-1">💡 Tips Export Excel:</p>
+                <ul class="list-disc list-inside space-y-0.5 ml-2">
+                    <li>Pilih promo untuk filter data spesifik (opsional)</li>
+                    <li>Klik status untuk export single status</li>
+                    <li>Klik "Multi-Sheet" untuk export semua status dalam 1 file</li>
+                    <li>File Excel dengan styling profesional & color-coded! 🎨</li>
+                </ul>
             </div>
         </div>
-        @endif
     </div>
 
     <!-- Filters and Search -->
@@ -205,195 +245,233 @@
         </div>
     </div>
 
-        <!-- Table -->
-        <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">#</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Paket Promo</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">WhatsApp</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Domisili</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Visit Date</th>
-                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Qty</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total</th>
-                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        @forelse($orders as $order)
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 text-sm text-gray-500">
-                                {{ $loop->iteration + ($orders->currentPage() - 1) * $orders->perPage() }}
-                            </td>
-                            <td class="px-6 py-4">
-                                @if($order->promo)
-                                    <div class="text-sm font-medium text-gray-900">{{ $order->promo->name }}</div>
-                                    <div class="text-xs text-gray-500">{{ ucfirst($order->promo->category) }}</div>
-                                @else
-                                    <span class="text-sm text-gray-400">-</span>
+    <!-- Table -->
+    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-md">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">#</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Paket Promo</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">WhatsApp</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Domisili</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Visit Date</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Qty</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @forelse($orders as $order)
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4 text-sm text-gray-500">
+                            {{ $loop->iteration + ($orders->currentPage() - 1) * $orders->perPage() }}
+                        </td>
+                        <td class="px-6 py-4">
+                            @if($order->promo)
+                                <div class="text-sm font-medium text-gray-900">{{ $order->promo->name }}</div>
+                                <div class="text-xs text-gray-500">{{ ucfirst($order->promo->category) }}</div>
+                            @else
+                                <span class="text-sm text-gray-400">-</span>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm font-medium text-gray-900">{{ $order->order_number }}</div>
+                            @if($order->invoice_number)
+                                <div class="text-xs text-blue-600">{{ $order->invoice_number }}</div>
+                            @endif
+                            <div class="text-xs text-gray-500">
+                                {{ $order->created_at->format('d M Y H:i') }}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm font-medium text-gray-900">{{ $order->customer_name }}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $order->whatsapp_number) }}" target="_blank" 
+                               class="text-sm text-green-600 hover:text-green-800 flex items-center gap-1">
+                                <i class="fab fa-whatsapp"></i>
+                                {{ $order->whatsapp_number }}
+                            </a>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm text-gray-900">{{ $order->domicile ?? '-' }}</div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-900">
+                            {{ \Carbon\Carbon::parse($order->visit_date)->format('d M Y') }}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-900 text-center">
+                            {{ $order->ticket_quantity }}
+                        </td>
+                        <td class="px-6 py-4 text-sm font-medium text-gray-900 text-right">
+                            Rp {{ number_format($order->total_price, 0, ',', '.') }}
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            @php
+                                $statusColors = [
+                                    'success' => 'text-green-700 bg-green-50 border border-green-200',
+                                    'pending' => 'text-yellow-700 bg-yellow-50 border border-yellow-200',
+                                    'canceled' => 'text-red-700 bg-red-50 border border-red-200',
+                                    'challenge' => 'text-orange-700 bg-orange-50 border border-orange-200',
+                                    'denied' => 'text-red-700 bg-red-50 border border-red-200',
+                                    'expired' => 'text-gray-700 bg-gray-50 border border-gray-200'
+                                ];
+                            @endphp
+                            <span class="px-3 py-1 text-xs rounded-full font-medium {{ $statusColors[$order->status] ?? 'text-gray-700 bg-gray-50 border border-gray-200' }}">
+                                {{ ucfirst($order->status) }}
+                            </span>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="10" class="px-6 py-12 text-center">
+                            <div class="text-gray-500">
+                                <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                                </svg>
+                                <p class="text-lg font-medium mb-2">Tidak ada data tiket</p>
+                                @if(request('search') || request('status'))
+                                    <a href="{{ route('admin.tickets.index') }}" 
+                                       class="text-blue-600 hover:text-blue-800 text-sm mt-2 inline-block">
+                                        Tampilkan semua tiket
+                                    </a>
                                 @endif
-                            </td>
-                            <td class="px-6 py-4">
-                                <div class="text-sm font-medium text-gray-900">{{ $order->order_number }}</div>
-                                @if($order->invoice_number)
-                                    <div class="text-xs text-blue-600">{{ $order->invoice_number }}</div>
-                                @endif
-                                <div class="text-xs text-gray-500">
-                                    {{ $order->created_at->format('d M Y H:i') }}
-                                </div>
-                            </td>
-                            <td class="px-6 py-4">
-                                <div class="text-sm font-medium text-gray-900">{{ $order->customer_name }}</div>
-                            </td>
-                            <td class="px-6 py-4">
-                                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $order->whatsapp_number) }}" target="_blank" 
-                                   class="text-sm text-green-600 hover:text-green-800 flex items-center gap-1">
-                                    <i class="fab fa-whatsapp"></i>
-                                    {{ $order->whatsapp_number }}
-                                </a>
-                            </td>
-                            <td class="px-6 py-4">
-                                <div class="text-sm text-gray-900">{{ $order->domicile ?? '-' }}</div>
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-900">
-                                {{ \Carbon\Carbon::parse($order->visit_date)->format('d M Y') }}
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-900 text-center">
-                                {{ $order->ticket_quantity }}
-                            </td>
-                            <td class="px-6 py-4 text-sm font-medium text-gray-900 text-right">
-                                Rp {{ number_format($order->total_price, 0, ',', '.') }}
-                            </td>
-                            <td class="px-6 py-4 text-center">
-                                @php
-                                    $statusColors = [
-                                        'success' => 'text-green-700 bg-green-50 border border-green-200',
-                                        'pending' => 'text-yellow-700 bg-yellow-50 border border-yellow-200',
-                                        'canceled' => 'text-red-700 bg-red-50 border border-red-200',
-                                        'challenge' => 'text-orange-700 bg-orange-50 border border-orange-200',
-                                        'denied' => 'text-red-700 bg-red-50 border border-red-200',
-                                        'expired' => 'text-gray-700 bg-gray-50 border border-gray-200'
-                                    ];
-                                @endphp
-                                <span class="px-3 py-1 text-xs rounded-full font-medium {{ $statusColors[$order->status] ?? 'text-gray-700 bg-gray-50 border border-gray-200' }}">
-                                    {{ ucfirst($order->status) }}
-                                </span>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="10" class="px-6 py-12 text-center">
-                                <div class="text-gray-500">
-                                    <i class="fas fa-inbox text-2xl mb-2"></i>
-                                    <p>Tidak ada data tiket</p>
-                                    @if(request('search') || request('status'))
-                                        <a href="{{ route('admin.tickets.index') }}" 
-                                           class="text-blue-600 hover:text-blue-800 text-sm mt-2 inline-block">
-                                            Tampilkan semua tiket
-                                        </a>
-                                    @endif
-                                </div>
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
-        
-        <!-- Pagination -->
-        <div class="flex items-center justify-between mt-6 text-sm text-gray-700">
-            <div>
-                Menampilkan {{ $orders->firstItem() ?? 0 }} sampai {{ $orders->lastItem() ?? 0 }} dari {{ $orders->total() }} hasil
-            </div>
-            <div>
-                {{ $orders->appends(request()->query())->links() }}
+    </div>
+    
+    <!-- Pagination -->
+    <div class="flex items-center justify-between mt-6 text-sm text-gray-700">
+        <div>
+            Menampilkan {{ $orders->firstItem() ?? 0 }} sampai {{ $orders->lastItem() ?? 0 }} dari {{ $orders->total() }} hasil
+        </div>
+        <div>
+            {{ $orders->appends(request()->query())->links() }}
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="exportLoadingOverlay" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl p-8 shadow-2xl max-w-sm mx-4">
+        <div class="flex flex-col items-center space-y-4">
+            <svg class="animate-spin h-12 w-12 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <div class="text-center">
+                <p class="text-xl font-bold text-gray-800 mb-1">📊 Generating Excel...</p>
+                <p class="text-sm text-gray-600">Mohon tunggu, proses sedang berjalan</p>
+                <div class="mt-3 flex justify-center space-x-1">
+                    <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0s"></div>
+                    <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                    <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // Export functions
-    function exportAllSheets(event) {
-        event.preventDefault();
-        const promoId = document.getElementById('exportPromoFilter').value;
-        const url = '{{ route("admin.tickets.exportAll") }}' + '?promo_id=' + promoId;
-        window.location.href = url;
-        
-        // Close dropdown after short delay
-        setTimeout(() => {
-            document.getElementById('exportDropdown').classList.add('hidden');
-            document.getElementById('exportChevron').classList.remove('rotate-180');
-        }, 300);
-    }
+/**
+ * Export tickets by status dengan promo filter
+ */
+function exportTickets(status) {
+    const promoId = document.getElementById('exportPromoFilter').value;
+    const url = `{{ route('admin.tickets.export') }}?status=${status}&promo_id=${promoId}`;
+    
+    // Show loading indicator
+    showExportLoading();
+    
+    // Trigger download
+    window.location.href = url;
+    
+    // Hide loading after delay
+    setTimeout(hideExportLoading, 2000);
+}
 
-    function exportByStatus(event, status) {
-        event.preventDefault();
-        const promoId = document.getElementById('exportPromoFilter').value;
-        const url = '{{ route("admin.tickets.export") }}' + '?status=' + status + '&promo_id=' + promoId;
-        window.location.href = url;
-        
-        // Close dropdown after short delay
-        setTimeout(() => {
-            document.getElementById('exportDropdown').classList.add('hidden');
-            document.getElementById('exportChevron').classList.remove('rotate-180');
-        }, 300);
-    }
+/**
+ * Export all statuses in multiple sheets
+ */
+function exportAllStatuses() {
+    const promoId = document.getElementById('exportPromoFilter').value;
+    const url = `{{ route('admin.tickets.exportAll') }}?promo_id=${promoId}`;
+    
+    // Show loading indicator dengan pesan khusus
+    showExportLoading('multi');
+    
+    // Trigger download
+    window.location.href = url;
+    
+    // Hide loading after delay (lebih lama untuk multi-sheet)
+    setTimeout(hideExportLoading, 3000);
+}
 
-    // Export dropdown functionality
-    function toggleExportDropdown() {
-        const dropdown = document.getElementById('exportDropdown');
-        const chevron = document.getElementById('exportChevron');
-        const filterDropdown = document.getElementById('filterDropdown');
+/**
+ * Show loading indicator
+ */
+function showExportLoading(type = 'single') {
+    const overlay = document.getElementById('exportLoadingOverlay');
+    if (overlay) {
+        overlay.classList.remove('hidden');
         
-        // Close filter dropdown if open
-        filterDropdown.classList.add('hidden');
-        document.getElementById('filterChevron').classList.remove('rotate-180');
-        
-        dropdown.classList.toggle('hidden');
-        chevron.classList.toggle('rotate-180');
-    }
-
-    // Filter dropdown functionality
-    function toggleFilterDropdown() {
-        const dropdown = document.getElementById('filterDropdown');
-        const chevron = document.getElementById('filterChevron');
-        const exportDropdown = document.getElementById('exportDropdown');
-        
-        // Close export dropdown if open
-        exportDropdown.classList.add('hidden');
-        document.getElementById('exportChevron').classList.remove('rotate-180');
-        
-        dropdown.classList.toggle('hidden');
-        chevron.classList.toggle('rotate-180');
-    }
-
-    // Close dropdowns when clicking outside
-    document.addEventListener('click', function(event) {
-        const filterButton = document.getElementById('filterDropdownButton');
-        const filterDropdown = document.getElementById('filterDropdown');
-        const filterChevron = document.getElementById('filterChevron');
-        
-        const exportButton = document.getElementById('exportDropdownButton');
-        const exportDropdown = document.getElementById('exportDropdown');
-        const exportChevron = document.getElementById('exportChevron');
-        
-        // Close filter dropdown
-        if (!filterButton.contains(event.target) && !filterDropdown.contains(event.target)) {
-            filterDropdown.classList.add('hidden');
-            filterChevron.classList.remove('rotate-180');
+        // Update message untuk multi-sheet
+        if (type === 'multi') {
+            const messageEl = overlay.querySelector('p.text-xl');
+            if (messageEl) {
+                messageEl.textContent = '📑 Generating Multi-Sheet Excel...';
+            }
+            const subMessageEl = overlay.querySelector('p.text-sm');
+            if (subMessageEl) {
+                subMessageEl.textContent = 'File lebih besar, mohon tunggu sebentar...';
+            }
         }
+    }
+}
+
+/**
+ * Hide loading indicator
+ */
+function hideExportLoading() {
+    const overlay = document.getElementById('exportLoadingOverlay');
+    if (overlay) {
+        overlay.classList.add('hidden');
         
-        // Close export dropdown
-        if (!exportButton.contains(event.target) && !exportDropdown.contains(event.target)) {
-            exportDropdown.classList.add('hidden');
-            exportChevron.classList.remove('rotate-180');
+        // Reset message
+        const messageEl = overlay.querySelector('p.text-xl');
+        if (messageEl) {
+            messageEl.textContent = '📊 Generating Excel...';
         }
-    });
+        const subMessageEl = overlay.querySelector('p.text-sm');
+        if (subMessageEl) {
+            subMessageEl.textContent = 'Mohon tunggu, proses sedang berjalan';
+        }
+    }
+}
+
+// Close loading overlay when clicking outside (optional)
+document.getElementById('exportLoadingOverlay')?.addEventListener('click', function(e) {
+    if (e.target === this) {
+        hideExportLoading();
+    }
+});
+
+// Auto-hide loading jika ada error (fallback)
+window.addEventListener('focus', function() {
+    setTimeout(function() {
+        const overlay = document.getElementById('exportLoadingOverlay');
+        if (overlay && !overlay.classList.contains('hidden')) {
+            hideExportLoading();
+        }
+    }, 1000);
+});
 </script>
+
 @endsection
