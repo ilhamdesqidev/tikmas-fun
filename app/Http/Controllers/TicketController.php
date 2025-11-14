@@ -402,7 +402,7 @@ class TicketController extends Controller
         ]);
         
         // ========== COLUMN WIDTHS ==========
-        $sheet->getColumnDimension('A')->setWidth(8);   // No
+        $sheet->getColumnDimension('A')->setWidth(16);   // No
         $sheet->getColumnDimension('B')->setWidth(20);  // Order Number
         $sheet->getColumnDimension('C')->setWidth(20);  // Invoice
         $sheet->getColumnDimension('D')->setWidth(30);  // Promo
