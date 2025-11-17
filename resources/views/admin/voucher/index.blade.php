@@ -506,7 +506,7 @@
                         <button type="button" onclick="closeCreateModal()" class="px-5 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
                             Batal
                         </button>
-                        <button type="submit" class="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm">
+                        <button type="submit" class="px-5 py-2.5 bg-primary text-white rounded-lg hover:bg-yellow-500 transition-colors font-medium shadow-sm">
                             Simpan Voucher
                         </button>
                     </div>
@@ -639,7 +639,7 @@
                         <button type="button" onclick="closeEditModal()" class="px-5 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
                             Batal
                         </button>
-                        <button type="submit" class="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm">
+                        <button type="submit" class="px-5 py-2.5 bg-primary text-white rounded-lg hover:bg-yellow-500 transition-colors font-medium shadow-sm">
                             Update Voucher
                         </button>
                     </div>
