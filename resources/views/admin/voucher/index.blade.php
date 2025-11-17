@@ -739,16 +739,16 @@ function switchTab(tab) {
     const claimsContent = document.getElementById('claimsContent');
 
     if (tab === 'vouchers') {
-        vouchersTab.classList.add('border-blue-500', 'text-blue-600', 'bg-white');
+        vouchersTab.classList.add('border-yellow-400', 'text-yellow-500', 'bg-white');
         vouchersTab.classList.remove('border-transparent', 'text-gray-600');
-        claimsTab.classList.remove('border-blue-500', 'text-blue-600', 'bg-white');
+        claimsTab.classList.remove('border-yellow-400', 'text-yellow-500', 'bg-white');
         claimsTab.classList.add('border-transparent', 'text-gray-600');
         vouchersContent.classList.remove('hidden');
         claimsContent.classList.add('hidden');
     } else {
-        claimsTab.classList.add('border-blue-500', 'text-blue-600', 'bg-white');
+        claimsTab.classList.add('border-yellow-400', 'text-yellow-500', 'bg-white');
         claimsTab.classList.remove('border-transparent', 'text-gray-600');
-        vouchersTab.classList.remove('border-blue-500', 'text-blue-600', 'bg-white');
+        vouchersTab.classList.remove('border-yellow-400', 'text-yellow-500', 'bg-white');
         vouchersTab.classList.add('border-transparent', 'text-gray-600');
         claimsContent.classList.remove('hidden');
         vouchersContent.classList.add('hidden');
