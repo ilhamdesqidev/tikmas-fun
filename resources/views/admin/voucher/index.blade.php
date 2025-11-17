@@ -85,7 +85,7 @@
                         <h2 class="text-xl font-semibold text-gray-900">Daftar Voucher</h2>
                         <p class="text-sm text-gray-500 mt-1">Total: {{ isset($vouchers) ? $vouchers->count() : 0 }} voucher</p>
                     </div>
-                    <button onclick="openCreateModal()" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg transition-colors shadow-sm">
+                    <button onclick="openCreateModal()" class="inline-flex items-center gap-2 bg-primary hover:bg-yellow-500 text-white px-5 py-2.5 rounded-lg transition-colors shadow-sm">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
