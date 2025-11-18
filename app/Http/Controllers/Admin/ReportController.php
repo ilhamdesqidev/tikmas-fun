@@ -189,12 +189,12 @@ class ReportController extends Controller
     public function getChartData(Request $request)
     {
         try {
-            $period = $request->get('period', '30days');
+            $period = $request->get('period', 'daily');
             
             $data = match($period) {
-                '30days' => $this->getLast30DaysData(),
+                'daily' => $this->getLast30DaysData(),
+                'weekly' => $this->getWeeklyData(),
                 'monthly' => $this->getMonthlyData(),
-                'yearly' => $this->getYearlyData(),
                 default => $this->getLast30DaysData()
             };
             
@@ -246,6 +246,55 @@ class ReportController extends Controller
         ];
     }
     
+    private function getWeeklyData()
+    {
+        $now = Carbon::now();
+        $startDate = $now->copy()->subWeeks(11)->startOfWeek();
+        $endDate = $now->copy()->endOfWeek();
+        
+        $claims = VoucherClaim::whereBetween('created_at', [$startDate, $endDate])
+                             ->select(
+                                 DB::raw('YEAR(created_at) as year'),
+                                 DB::raw('WEEK(created_at, 1) as week'),
+                                 DB::raw('COUNT(*) as count')
+                             )
+                             ->groupBy('year', 'week')
+                             ->orderBy('year')
+                             ->orderBy('week')
+                             ->get()
+                             ->mapWithKeys(function($item) {
+                                 return ["{$item->year}-{$item->week}" => $item->count];
+                             });
+        
+        $labels = [];
+        $data = [];
+        
+        for ($i = 11; $i >= 0; $i--) {
+            $weekStart = $now->copy()->subWeeks($i)->startOfWeek();
+            $weekNumber = $weekStart->week;
+            $year = $weekStart->year;
+            $key = "{$year}-{$weekNumber}";
+            
+            $labels[] = 'W' . $weekNumber;
+            $data[] = $claims->get($key, 0);
+        }
+        
+        return [
+            'labels' => $labels,
+            'datasets' => [
+                [
+                    'label' => 'Jumlah Klaim',
+                    'data' => $data,
+                    'borderColor' => 'rgb(139, 92, 246)',
+                    'backgroundColor' => 'rgba(139, 92, 246, 0.1)',
+                    'tension' => 0.4,
+                    'fill' => true
+                ]
+            ],
+            'total' => array_sum($data)
+        ];
+    }
+    
     private function getMonthlyData()
     {
         $startDate = Carbon::now()->subMonths(11)->startOfMonth();
@@ -282,45 +331,6 @@ class ReportController extends Controller
                     'data' => $data,
                     'borderColor' => 'rgb(16, 185, 129)',
                     'backgroundColor' => 'rgba(16, 185, 129, 0.1)',
-                    'tension' => 0.4,
-                    'fill' => true
-                ]
-            ],
-            'total' => array_sum($data)
-        ];
-    }
-    
-    private function getYearlyData()
-    {
-        $startYear = Carbon::now()->subYears(4)->year;
-        $endYear = Carbon::now()->year;
-        
-        $claims = VoucherClaim::whereYear('created_at', '>=', $startYear)
-                             ->select(
-                                 DB::raw('YEAR(created_at) as year'),
-                                 DB::raw('COUNT(*) as count')
-                             )
-                             ->groupBy('year')
-                             ->orderBy('year')
-                             ->get()
-                             ->pluck('count', 'year');
-        
-        $labels = [];
-        $data = [];
-        
-        for ($year = $startYear; $year <= $endYear; $year++) {
-            $labels[] = (string)$year;
-            $data[] = $claims->get($year, 0);
-        }
-        
-        return [
-            'labels' => $labels,
-            'datasets' => [
-                [
-                    'label' => 'Jumlah Klaim',
-                    'data' => $data,
-                    'borderColor' => 'rgb(245, 158, 11)',
-                    'backgroundColor' => 'rgba(245, 158, 11, 0.1)',
                     'tension' => 0.4,
                     'fill' => true
                 ]

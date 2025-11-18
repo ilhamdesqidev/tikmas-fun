@@ -17,7 +17,7 @@
                 <button 
                     onclick="switchTab('voucher')" 
                     id="tab-voucher"
-                    class="tab-button border-b-2 border-blue-500 py-4 px-1 text-center border-b-2 font-medium text-sm whitespace-nowrap">
+                    class="tab-button border-b-2 border-blue-500 text-blue-600 py-4 px-1 text-center font-medium text-sm whitespace-nowrap">
                     <div class="flex items-center space-x-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
@@ -118,9 +118,9 @@
                 <div class="flex items-center space-x-2 mt-4 md:mt-0">
                     <label class="text-sm font-medium text-gray-700">Periode:</label>
                     <select id="periodFilter" class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-                        <option value="30days">30 Hari Terakhir</option>
+                        <option value="daily">30 Hari Terakhir</option>
+                        <option value="weekly">12 Minggu Terakhir</option>
                         <option value="monthly">12 Bulan Terakhir</option>
-                        <option value="yearly">5 Tahun Terakhir</option>
                     </select>
                 </div>
             </div>
@@ -399,7 +399,7 @@ function switchTab(tab) {
 }
 
 // Initialize Voucher chart
-async function loadChart(period = '30days') {
+async function loadChart(period = 'daily') {
     const loading = document.getElementById('chartLoading');
     loading?.classList.remove('hidden');
     
@@ -625,7 +625,7 @@ document.getElementById('promoPeriodFilter')?.addEventListener('change', functio
 
 // Load initial chart on page load
 document.addEventListener('DOMContentLoaded', function() {
-    loadChart('30days');
+    loadChart('daily');
 });
 </script>
 @endsection
