@@ -64,6 +64,7 @@ class VoucherController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'deskripsi' => 'required|string',
+            'syarat_ketentuan' => 'required|string', // Tambahan validasi
             'status' => 'required|in:aktif,tidak_aktif,kadaluarsa,habis',
             'image' => 'required|image|mimes:jpeg,png,jpg|max:10240',
             'download_image' => 'nullable|image|mimes:jpeg,png,jpg|max:10240',
@@ -98,6 +99,7 @@ class VoucherController extends Controller
             Voucher::create([
                 'name' => $request->name,
                 'deskripsi' => $request->deskripsi,
+                'syarat_ketentuan' => $request->syarat_ketentuan, // Tambahan
                 'status' => $status,
                 'image' => $imagePath,
                 'download_image' => $downloadImagePath,
@@ -120,6 +122,7 @@ class VoucherController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'deskripsi' => 'required|string',
+            'syarat_ketentuan' => 'required|string', // Tambahan validasi
             'status' => 'required|in:aktif,tidak_aktif,kadaluarsa,habis',
             'image' => 'nullable|image|mimes:jpeg,png,jpg|max:10240',
             'download_image' => 'nullable|image|mimes:jpeg,png,jpg|max:10240',
@@ -135,6 +138,7 @@ class VoucherController extends Controller
 
             $voucher->name = $request->name;
             $voucher->deskripsi = $request->deskripsi;
+            $voucher->syarat_ketentuan = $request->syarat_ketentuan; // Tambahan
             $voucher->expiry_date = $request->expiry_date;
 
             $expiryDate = Carbon::parse($request->expiry_date);
@@ -194,14 +198,9 @@ class VoucherController extends Controller
         }
     }
 
-    /**
-     * Export data voucher claims ke Excel dengan styling profesional
-     * FIXED: Tidak corrupt lagi dengan proper memory management
-     */
     public function export(Request $request)
     {
         try {
-            // Increase memory limit untuk file besar
             ini_set('memory_limit', '512M');
             set_time_limit(300);
             
@@ -210,22 +209,17 @@ class VoucherController extends Controller
             $claims = VoucherClaim::with('voucher')->latest()->get();
             $filteredClaims = $this->filterClaimsByStatus($claims, $status);
             
-            // Generate Excel file
             $spreadsheet = $this->generateExcelSpreadsheet($filteredClaims, $status);
             
-            // Create writer dengan optimization
             $writer = new Xlsx($spreadsheet);
             $writer->setPreCalculateFormulas(false);
             
-            // Generate filename
             $filename = $this->generateExcelFilename($status);
             
-            // Clear output buffer untuk prevent corruption
             if (ob_get_length()) {
                 ob_end_clean();
             }
             
-            // Set headers untuk download
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             header('Content-Disposition: attachment;filename="' . $filename . '"');
             header('Cache-Control: max-age=0');
@@ -235,10 +229,8 @@ class VoucherController extends Controller
             header('Cache-Control: cache, must-revalidate');
             header('Pragma: public');
             
-            // Output directly ke browser
             $writer->save('php://output');
             
-            // Cleanup memory
             $spreadsheet->disconnectWorksheets();
             unset($spreadsheet);
             
@@ -251,16 +243,12 @@ class VoucherController extends Controller
         }
     }
     
-    /**
-     * Generate Excel Spreadsheet dengan styling profesional & optimized
-     */
     private function generateExcelSpreadsheet($claims, $status)
     {
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Data Klaim Voucher');
         
-        // Status labels
         $statusLabels = [
             'all' => 'SEMUA DATA',
             'active' => 'BELUM TERPAKAI',
@@ -268,7 +256,6 @@ class VoucherController extends Controller
             'expired' => 'KADALUARSA'
         ];
         
-        // ========== HEADER SECTION ==========
         $sheet->setCellValue('A1', '📊 LAPORAN DATA KLAIM VOUCHER');
         $sheet->mergeCells('A1:K1');
         $sheet->getStyle('A1')->applyFromArray([
@@ -288,7 +275,6 @@ class VoucherController extends Controller
         ]);
         $sheet->getRowDimension(1)->setRowHeight(35);
         
-        // Info Section dengan styling
         $sheet->setCellValue('A3', 'Status Filter:');
         $sheet->setCellValue('B3', $statusLabels[$status] ?? 'SEMUA');
         $sheet->setCellValue('A4', 'Tanggal Export:');
@@ -305,7 +291,6 @@ class VoucherController extends Controller
             'font' => ['bold' => true, 'size' => 11, 'color' => ['rgb' => '2E75B6']],
         ]);
         
-        // ========== TABLE HEADER ==========
         $headers = [
             'No', 'Nama User', 'Domisili', 'No. WhatsApp', 'Nama Voucher', 
             'Kode Unik', 'Tanggal Klaim', 'Expired Date', 'Status Voucher', 
@@ -341,7 +326,6 @@ class VoucherController extends Controller
         ]);
         $sheet->getRowDimension(7)->setRowHeight(30);
         
-        // ========== DATA ROWS ==========
         $row = 8;
         $counter = 1;
         
@@ -350,22 +334,20 @@ class VoucherController extends Controller
             $voucherExpired = $claim->voucher && 
                             Carbon::now()->startOfDay()->greaterThan(Carbon::parse($claim->voucher->expiry_date));
             
-            // Determine status dan color
             if ($isUsed) {
                 $statusPemakaian = '✅ Terpakai';
-                $statusColor = 'D3D3D3'; // Gray
+                $statusColor = 'D3D3D3';
                 $statusIcon = '✓';
             } elseif ($voucherExpired) {
                 $statusPemakaian = '⚠️ Kadaluarsa';
-                $statusColor = 'FFB3BA'; // Light Red
+                $statusColor = 'FFB3BA';
                 $statusIcon = '⚠';
             } else {
                 $statusPemakaian = '🟢 Belum Terpakai';
-                $statusColor = 'BAFFC9'; // Light Green
+                $statusColor = 'BAFFC9';
                 $statusIcon = '○';
             }
             
-            // Fill data
             $sheet->setCellValue('A' . $row, $counter++);
             $sheet->setCellValue('B' . $row, $this->cleanText($claim->user_name));
             $sheet->setCellValue('C' . $row, $this->cleanText($claim->user_domisili ?? '-'));
@@ -378,7 +360,6 @@ class VoucherController extends Controller
             $sheet->setCellValue('J' . $row, $statusPemakaian);
             $sheet->setCellValue('K' . $row, $claim->scanned_at ? $claim->scanned_at->format('d/m/Y H:i') : '-');
             
-            // Row styling dengan alternating colors
             $bgColor = ($counter % 2 == 0) ? 'F2F2F2' : 'FFFFFF';
             
             $sheet->getStyle('A' . $row . ':K' . $row)->applyFromArray([
@@ -395,7 +376,6 @@ class VoucherController extends Controller
                 ]
             ]);
             
-            // Status column dengan highlight color
             $sheet->getStyle('J' . $row)->applyFromArray([
                 'fill' => [
                     'fillType' => Fill::FILL_SOLID, 
@@ -404,14 +384,12 @@ class VoucherController extends Controller
                 'font' => ['bold' => true, 'size' => 10]
             ]);
             
-            // Center align untuk kolom tertentu
             $sheet->getStyle('A' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
             $sheet->getStyle('I' . $row . ':J' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
             
             $row++;
         }
         
-        // ========== SUMMARY SECTION ==========
         $summaryRow = $row + 2;
         $sheet->setCellValue('A' . $summaryRow, '📈 RINGKASAN STATISTIK');
         $sheet->mergeCells('A' . $summaryRow . ':K' . $summaryRow);
@@ -422,7 +400,6 @@ class VoucherController extends Controller
         ]);
         $sheet->getRowDimension($summaryRow)->setRowHeight(30);
         
-        // Calculate statistics
         $activeCount = $claims->filter(function($c) {
             $isUsed = $c->is_used || $c->scanned_at;
             $expired = $c->voucher && Carbon::now()->startOfDay()->greaterThan(Carbon::parse($c->voucher->expiry_date));
@@ -463,7 +440,6 @@ class VoucherController extends Controller
             $summaryRow++;
         }
         
-        // ========== FOOTER INFO ==========
         $footerRow = $summaryRow + 2;
         $sheet->setCellValue('A' . $footerRow, '💡 Tips: Gunakan Filter & Sort untuk analisis data lebih detail');
         $sheet->mergeCells('A' . $footerRow . ':K' . $footerRow);
@@ -472,24 +448,21 @@ class VoucherController extends Controller
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
         ]);
         
-        // ========== COLUMN WIDTHS ==========
-        $sheet->getColumnDimension('A')->setWidth(22);   // No
-        $sheet->getColumnDimension('B')->setWidth(25);  // Nama User
-        $sheet->getColumnDimension('C')->setWidth(20);  // Domisili
-        $sheet->getColumnDimension('D')->setWidth(18);  // No WA
-        $sheet->getColumnDimension('E')->setWidth(35);  // Nama Voucher
-        $sheet->getColumnDimension('F')->setWidth(18);  // Kode Unik
-        $sheet->getColumnDimension('G')->setWidth(18);  // Tgl Klaim
-        $sheet->getColumnDimension('H')->setWidth(15);  // Expired
-        $sheet->getColumnDimension('I')->setWidth(15);  // Status Voucher
-        $sheet->getColumnDimension('J')->setWidth(20);  // Status Pemakaian
-        $sheet->getColumnDimension('K')->setWidth(18);  // Tgl Terpakai
+        $sheet->getColumnDimension('A')->setWidth(22);
+        $sheet->getColumnDimension('B')->setWidth(25);
+        $sheet->getColumnDimension('C')->setWidth(20);
+        $sheet->getColumnDimension('D')->setWidth(18);
+        $sheet->getColumnDimension('E')->setWidth(35);
+        $sheet->getColumnDimension('F')->setWidth(18);
+        $sheet->getColumnDimension('G')->setWidth(18);
+        $sheet->getColumnDimension('H')->setWidth(15);
+        $sheet->getColumnDimension('I')->setWidth(15);
+        $sheet->getColumnDimension('J')->setWidth(20);
+        $sheet->getColumnDimension('K')->setWidth(18);
         
-        // Auto-wrap text untuk kolom yang panjang
         $sheet->getStyle('E8:E' . ($row-1))->getAlignment()->setWrapText(true);
         $sheet->getStyle('B8:B' . ($row-1))->getAlignment()->setWrapText(true);
         
-        // Freeze pane pada header
         $sheet->freezePane('A8');
         
         return $spreadsheet;
@@ -513,17 +486,14 @@ class VoucherController extends Controller
         });
     }
 
-    // Format nomor telepon yang lebih robust
     private function formatPhoneNumber($phone)
     {
         if (empty($phone)) return '-';
         
-        // Hilangkan karakter non-digit
         $clean = preg_replace('/[^0-9]/', '', $phone);
         
         if (empty($clean)) return $phone;
         
-        // Format ke +62
         if (substr($clean, 0, 1) === '0') {
             return '+62 ' . substr($clean, 1);
         } elseif (substr($clean, 0, 2) === '62') {
@@ -533,18 +503,14 @@ class VoucherController extends Controller
         return '+62 ' . $clean;
     }
     
-    // Bersihkan text dari karakter problematik
     private function cleanText($text)
     {
         if (empty($text)) return '-';
         
-        // Hilangkan karakter tab, newline, carriage return
         $cleaned = str_replace(["\t", "\r", "\n"], ' ', $text);
         
-        // Hilangkan multiple spaces
         $cleaned = preg_replace('/\s+/', ' ', $cleaned);
         
-        // Trim whitespace
         return trim($cleaned);
     }
     

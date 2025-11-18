@@ -148,13 +148,22 @@
             </div>
         </div>
 
-        <!-- Syarat & Ketentuan -->
+        <!-- Syarat & Ketentuan - UPDATED -->
         <div class="bg-white rounded-2xl shadow-lg p-8 mt-8">
             <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
                 <i data-feather="info" class="w-6 h-6 text-blue-500"></i>
                 Syarat & Ketentuan
             </h2>
             <ul class="space-y-2 text-gray-600">
+                @php
+                    $syaratArray = $voucher->syarat_ketentuan_array;
+                @endphp
+                @forelse($syaratArray as $syarat)
+                <li class="flex items-start gap-2">
+                    <i data-feather="check" class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0"></i>
+                    <span>{{ $syarat }}</span>
+                </li>
+                @empty
                 <li class="flex items-start gap-2">
                     <i data-feather="check" class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0"></i>
                     <span>Voucher hanya dapat diklaim satu kali per nomor WhatsApp</span>
@@ -175,6 +184,7 @@
                     <i data-feather="check" class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0"></i>
                     <span>Voucher tidak dapat diuangkan</span>
                 </li>
+                @endforelse
             </ul>
         </div>
     </section>

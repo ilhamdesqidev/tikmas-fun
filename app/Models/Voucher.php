@@ -14,6 +14,7 @@ class Voucher extends Model
     protected $fillable = [
         'name',
         'deskripsi',
+        'syarat_ketentuan', // Tambahan
         'status',
         'image',
         'download_image',
@@ -42,11 +43,30 @@ class Voucher extends Model
         if ($this->download_image) {
             return Storage::url($this->download_image);
         }
-        // Fallback ke image biasa jika tidak ada download_image
         return $this->image_url;
     }
 
-    // Helper method untuk cek apakah voucher expired
+    // Helper method untuk get syarat ketentuan dalam bentuk array
+    public function getSyaratKetentuanArrayAttribute()
+    {
+        if (empty($this->syarat_ketentuan)) {
+            // Default syarat ketentuan jika kosong
+            return [
+                'Voucher hanya dapat diklaim satu kali per nomor WhatsApp',
+                'Tunjukkan barcode voucher saat melakukan pembayaran',
+                'Voucher berlaku hingga tanggal yang tertera',
+                'Voucher tidak dapat digabungkan dengan promo lain',
+                'Voucher tidak dapat diuangkan'
+            ];
+        }
+        
+        // Split by newline dan filter empty
+        return array_filter(
+            array_map('trim', explode("\n", $this->syarat_ketentuan)),
+            fn($item) => !empty($item)
+        );
+    }
+
     public function isExpired()
     {
         if (!$this->expiry_date) {
@@ -56,10 +76,8 @@ class Voucher extends Model
         return Carbon::now()->startOfDay()->greaterThan(Carbon::parse($this->expiry_date));
     }
 
-    // Get effective status (termasuk auto-expiry dan kuota habis)
     public function getEffectiveStatusAttribute()
     {
-        // Prioritas: Kuota habis > Expired > Status asli
         if (!$this->is_unlimited && $this->remaining_quota <= 0) {
             return 'habis';
         }
@@ -71,7 +89,6 @@ class Voucher extends Model
         return $this->status;
     }
 
-    // Get status text dengan auto-check expiry dan kuota
     public function getStatusTextAttribute()
     {
         $effectiveStatus = $this->effective_status;
@@ -85,36 +102,31 @@ class Voucher extends Model
         };
     }
 
-    // Get is_expired attribute untuk mudah diakses di view
     public function getIsExpiredAttribute()
     {
         return $this->isExpired();
     }
 
-    // Get remaining quota
     public function getRemainingQuotaAttribute()
     {
         if ($this->is_unlimited) {
-            return null; // Unlimited
+            return null;
         }
         
         $claimedCount = $this->claims()->count();
         return max(0, $this->quota - $claimedCount);
     }
 
-    // Check if voucher is available for claiming
     public function getIsAvailableAttribute()
     {
         return $this->effective_status === 'aktif';
     }
 
-    // Check if voucher is sold out
     public function getIsSoldOutAttribute()
     {
         return !$this->is_unlimited && $this->remaining_quota <= 0;
     }
 
-    // Scope untuk voucher aktif (belum expired, status aktif, dan masih ada kuota)
     public function scopeActive($query)
     {
         return $query->where('status', 'aktif')
@@ -125,7 +137,6 @@ class Voucher extends Model
                     });
     }
 
-    // Scope untuk voucher expired
     public function scopeExpired($query)
     {
         return $query->where(function($q) {
@@ -134,13 +145,11 @@ class Voucher extends Model
         });
     }
 
-    // Scope untuk voucher yang masih valid (bisa diklaim)
     public function scopeValid($query)
     {
         return $this->scopeActive($query);
     }
 
-    // Scope untuk voucher yang habis
     public function scopeSoldOut($query)
     {
         return $query->where('status', '!=', 'kadaluarsa')
@@ -149,18 +158,15 @@ class Voucher extends Model
                     ->whereRaw('quota <= (SELECT COUNT(*) FROM voucher_claims WHERE voucher_claims.voucher_id = vouchers.id)');
     }
 
-    // Auto-update status jika expired atau habis (gunakan di controller)
     public function updateStatusIfNeeded()
     {
         $effectiveStatus = $this->effective_status;
         
-        // Cek kuota habis dulu (prioritas lebih tinggi)
         if ($effectiveStatus === 'habis' && $this->status !== 'habis') {
             $this->update(['status' => 'habis']);
             return 'sold_out';
         }
         
-        // Kemudian cek expired
         if ($effectiveStatus === 'kadaluarsa' && $this->status !== 'kadaluarsa') {
             $this->update(['status' => 'kadaluarsa']);
             return 'expired';
@@ -169,19 +175,16 @@ class Voucher extends Model
         return 'no_change';
     }
 
-    // Relationship dengan claims
     public function claims()
     {
         return $this->hasMany(VoucherClaim::class);
     }
 
-    // Cek apakah voucher masih bisa diklaim
     public function canBeClaimed()
     {
         return $this->is_available;
     }
 
-    // Format tanggal expiry untuk display
     public function getFormattedExpiryDateAttribute()
     {
         if (!$this->expiry_date) {
@@ -198,7 +201,6 @@ class Voucher extends Model
         ];
     }
 
-    // Format kuota untuk display
     public function getFormattedQuotaAttribute()
     {
         if ($this->is_unlimited) {

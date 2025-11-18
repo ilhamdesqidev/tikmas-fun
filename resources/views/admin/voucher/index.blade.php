@@ -421,6 +421,20 @@
                             placeholder="Deskripsi detail tentang voucher" required>{{ old('deskripsi') }}</textarea>
                     </div>
 
+                    <!-- Tambahkan setelah field Deskripsi di Create Modal -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Syarat & Ketentuan <span class="text-red-500">*</span>
+                        </label>
+                        <textarea name="syarat_ketentuan" rows="8"
+                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-mono text-sm" 
+                            placeholder="Masukkan satu syarat per baris, contoh:
+                    Voucher hanya dapat diklaim satu kali per nomor WhatsApp
+                    Tunjukkan barcode voucher saat melakukan pembayaran
+                    Voucher berlaku hingga tanggal yang tertera" required>{{ old('syarat_ketentuan') }}</textarea>
+                        <p class="mt-1.5 text-xs text-gray-500">💡 Masukkan satu syarat per baris (tekan Enter untuk baris baru)</p>
+                    </div>
+
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Status <span class="text-red-500">*</span></label>
                         <select name="status" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required>
@@ -544,6 +558,16 @@
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Deskripsi <span class="text-red-500">*</span></label>
                         <textarea id="edit_deskripsi" name="deskripsi" rows="4" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Syarat & Ketentuan <span class="text-red-500">*</span>
+                        </label>
+                        <textarea id="edit_syarat_ketentuan" name="syarat_ketentuan" rows="8"
+                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-mono text-sm" 
+                            required></textarea>
+                        <p class="mt-1.5 text-xs text-gray-500">💡 Masukkan satu syarat per baris (tekan Enter untuk baris baru)</p>
                     </div>
 
                     <div>
@@ -861,6 +885,7 @@ function openEditModal(voucher) {
     document.body.style.overflow = 'hidden';
     document.getElementById('edit_name').value = voucher.name;
     document.getElementById('edit_deskripsi').value = voucher.deskripsi;
+    document.getElementById('edit_syarat_ketentuan').value = voucher.syarat_ketentuan || '';
     document.getElementById('edit_status').value = voucher.status;
     document.getElementById('edit_expiry_date').value = voucher.expiry_date;
     
