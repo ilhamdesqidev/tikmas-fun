@@ -128,7 +128,7 @@
                         <div class="info-item p-4 rounded-xl hover:bg-gray-50">
                             <div class="flex items-start gap-4 mb-3">
                                 <div class="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center flex-shrink-0">
-                                    <i data-feather="users" class="w-5 h-5 text-purple-600"></i>
+                                    <i data-feather="ticket" class="w-5 h-5 text-purple-600"></i>
                                 </div>
                                 <div class="flex-1">
                                     <p class="text-sm font-medium text-gray-500 mb-1">Kuota Tersisa</p>
@@ -149,7 +149,7 @@
                         @else
                         <div class="info-item flex items-start gap-4 p-4 rounded-xl hover:bg-gray-50">
                             <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
-                                <i data-feather="infinity" class="w-5 h-5 text-blue-600"></i>
+                                <i data-feather="zap" class="w-5 h-5 text-blue-600"></i>
                             </div>
                             <div>
                                 <p class="text-sm font-medium text-gray-500 mb-1">Kuota</p>
